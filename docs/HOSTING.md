@@ -410,8 +410,25 @@ its Cloudflare origin certificate is added; until then Caddy leaves its domain a
 
 **Keeping out of each other's way.** Each site's updates run at their own time, so two are never busy at once:
 this site at 7.15am and 7.15pm (UK time), Where Councils Stand at 3.17am and Where Countries Stand at 5.41am and
-5.41pm (UTC). Their containers have memory limits, so a runaway update stops itself rather than slowing this site.
-If `check.sh` reports less than 3 GB of memory free for long, it is time for more memory or a second server.
+5.41pm (UTC), and Where Landlords Stand on Thursdays at 11.40am (UK time). Their containers have memory limits, so a
+runaway update stops itself rather than slowing this site. If `check.sh` reports less than 3 GB of memory free for
+long, it is time for more memory or a second server.
+
+**Ideas for later.** Not needed now; each is worth doing if the server gets busier or a site misbehaves. All three
+were worked out in `rj-mitchell/parentwheretheystand` (archived November 2026), an earlier plan to run every site
+from one combined setup, so its code can be copied from there.
+
+* **Jobs that wait their turn.** Updates now run at fixed, staggered times, which works while each finishes well
+  before the next starts. A long one (Where Councils Stand's first load, say) can still overlap another. A single
+  server-wide lock that every site's update and backup takes first, waiting if another job holds it, would rule
+  that out (its `scripts/run-job.sh`, using `flock`).
+* **A share of the processors for jobs.** Memory limits stop a runaway update, but an update can still keep every
+  processor busy and slow the sites while it runs. Running each update in a container limited to part of the
+  processors (`cpus:` in its compose file) keeps the sites quick. (A `Nice=` in a systemd unit does not reach the
+  work: Docker starts the container, not the unit.)
+* **A watchdog for every site.** The watchdog restarts only this site when it stops answering. Docker marks the
+  other sites unhealthy but does not restart them. Extending `deploy/watchdog.sh` to check each site in `SITES`
+  (each answers `/api/health`) and restart its container would cover them all, with the same email.
 
 ## Backups
 
