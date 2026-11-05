@@ -2,6 +2,7 @@
 Description=Where MPs Stand daily backup (saved briefings, reports, usage)
 After=docker.service
 Requires=docker.service
+OnFailure=alert@%n.service
 
 [Service]
 Type=oneshot
