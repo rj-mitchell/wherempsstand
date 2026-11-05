@@ -282,6 +282,17 @@ Cloudflare, closes any connection that does not come through Cloudflare, and sti
 **wheretheystand.org.uk** (with their `www`) are redirected to wherempsstand.com by Cloudflare itself, so no DNS record shows the server's address any more. (Old DNS records can still reveal it, so
 this protects against casual abuse and heavy load more than a determined attack on the server itself.)
 
+**Since November 2026** wheretheystand.uk is the charity's own site (the hub, on Cloudflare), and
+wheretheystand.co.uk and wheretheystand.org.uk (with their `www`) redirect to it, not to wherempsstand.com: their
+Cloudflare redirect rules now point there. Only `www.wherempsstand.com` belongs in `REDIRECT_DOMAINS` in
+`/opt/hansardgpt/deploy/.env`; with the old list, `check.sh` reports the wheretheystand names as "does not
+redirect". To change it on the server:
+
+```
+sed -i 's/^REDIRECT_DOMAINS=.*/REDIRECT_DOMAINS="www.wherempsstand.com"/' /opt/hansardgpt/deploy/.env
+bash /opt/hansardgpt/deploy/update.sh
+```
+
 1. **Install the latest version** (`bash /opt/hansardgpt/deploy/update.sh`). It fetches Cloudflare's list of
    addresses; that is harmless while nothing is proxied.
 2. **Put all the domains on Cloudflare.** For each of wherempsstand.com, wheretheystand.uk, wheretheystand.co.uk
