@@ -5,8 +5,9 @@
 #   bash mail.sh setup               ask for the account's app password (not shown) and save it
 #   bash mail.sh test                send a test message to the alerts address
 #   bash mail.sh alert SUBJECT       send the text on standard input to the alerts address
-#   bash mail.sh send FILE...        send prepared letters: each FILE starts with "To:" and "Subject:" lines, then a
-#                                    blank line, then the text. A letter already sent is skipped (add --again)
+#   bash mail.sh send FILE...        send prepared letters: each FILE starts with "To:" and "Subject:" lines (and
+#                                    "Cc:" if wanted), then a blank line, then the text. A letter already sent is
+#                                    skipped (add --again)
 #
 # The settings live in /etc/wheretheystand/mail.env, readable only by root:
 #   MAIL_FROM=wheretheystanduk@gmail.com
@@ -32,23 +33,26 @@ header() {  # a header value, encoded if it isn't plain ASCII ("Subject: Gwynedd
   if LC_ALL=C grep -q '[^ -~]' <<<"$1"; then printf '=?UTF-8?B?%s?=' "$(printf '%s' "$1" | base64 -w0)"; else printf '%s' "$1"; fi
 }
 
-deliver() {  # deliver TO SUBJECT BODYFILE
-  local to="$1" subject="$2" body="$3" msg netrc
+deliver() {  # deliver TO SUBJECT BODYFILE [CC]: TO and CC may each list several addresses, separated by commas
+  local to="$1" subject="$2" body="$3" cc="${4:-}" msg netrc rcpt=()
   msg=$(mktemp) && netrc=$(mktemp) || die "can't make a temporary file"
   chmod 600 "$msg" "$netrc"
   printf 'machine smtp.gmail.com login %s password %s\n' "$MAIL_FROM" "$MAIL_APP_PASSWORD" > "$netrc"
   {
     printf 'From: %s <%s>\n' "$FROM_NAME" "$MAIL_FROM"
     printf 'To: %s\n' "$to"
+    [[ -n "$cc" ]] && printf 'Cc: %s\n' "$cc"
     printf 'Subject: %s\n' "$(header "$subject")"
     printf 'Date: %s\n' "$(LC_ALL=C date -R)"
     printf 'Message-ID: <%s.%s@wheretheystand.uk>\n' "$(date +%s%N)" "$RANDOM"
     printf 'MIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n\n'
     cat "$body"
   } > "$msg"
+  local a
+  for a in ${to//,/ } ${cc//,/ }; do rcpt+=(--mail-rcpt "$a"); done
   # the password goes in a file only root can read, not on the command line where other processes could see it
   curl --silent --show-error --ssl-reqd --url "smtps://smtp.gmail.com:465" --netrc-file "$netrc" \
-       --mail-from "$MAIL_FROM" --mail-rcpt "$to" --upload-file "$msg" --crlf --max-time 60
+       --mail-from "$MAIL_FROM" "${rcpt[@]}" --upload-file "$msg" --crlf --max-time 60
   local rc=$?
   rm -f "$msg" "$netrc"
   return $rc
@@ -93,18 +97,23 @@ case "$cmd" in
     mkdir -p "$STATE"; touch "$STATE/sent.log"
     sent=0; skipped=0; failed=0
     for f in "$@"; do
-      to=$(sed -n '1s/^To: *//p' "$f"); subject=$(sed -n '2s/^Subject: *//p' "$f")
-      if [[ -z "$to" || -z "$subject" || -n "$(sed -n '3p' "$f")" ]]; then
-        echo "✗ $f: must start with a To: line, a Subject: line and a blank line"; failed=$((failed + 1)); continue
+      # the header lines, up to the first blank line: To: and Subject:, and Cc: if wanted
+      head_end=$(grep -n -m1 '^$' "$f" | cut -d: -f1)
+      to=$(head -n "${head_end:-0}" "$f" | sed -n 's/^To: *//p')
+      cc=$(head -n "${head_end:-0}" "$f" | sed -n 's/^Cc: *//p')
+      subject=$(head -n "${head_end:-0}" "$f" | sed -n 's/^Subject: *//p')
+      if [[ -z "$head_end" || -z "$to" || -z "$subject" ]]; then
+        echo "✗ $f: must start with To: and Subject: lines (and Cc: if wanted), then a blank line"
+        failed=$((failed + 1)); continue
       fi
       sum=$(sha1sum "$f" | cut -d' ' -f1)
       if [[ $again -eq 0 ]] && grep -qF " $(basename "$f") $to " "$STATE/sent.log"; then
         echo "- $(basename "$f"): already sent to $to"; skipped=$((skipped + 1)); continue
       fi
-      body=$(mktemp); tail -n +4 "$f" > "$body"
-      if deliver "$to" "$subject" "$body"; then
+      body=$(mktemp); tail -n +"$((head_end + 1))" "$f" > "$body"
+      if deliver "$to" "$subject" "$body" "$cc"; then
         printf '%s %s %s %s\n' "$(date -Is)" "$(basename "$f") $to" "$sum" "$subject" >> "$STATE/sent.log"
-        echo "✓ $(basename "$f") to $to"; sent=$((sent + 1))
+        echo "✓ $(basename "$f") to $to${cc:+ (copy to $cc)}"; sent=$((sent + 1))
         sleep "${MAIL_PAUSE:-5}"   # a few seconds apart, as a person sending them would
       else
         echo "✗ $(basename "$f") to $to: not sent"; failed=$((failed + 1))
@@ -115,5 +124,5 @@ case "$cmd" in
     [[ $failed -eq 0 ]]
     ;;
   *)
-    sed -n '2,13p' "$0"; exit 1 ;;
+    sed -n '2,14p' "$0"; exit 1 ;;
 esac
