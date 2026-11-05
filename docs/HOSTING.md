@@ -222,6 +222,49 @@ cd /opt/hansardgpt/deploy && read -rsp "Anthropic API key: " K && echo && sed -i
 
 Then run `bash /opt/hansardgpt/deploy/check.sh`: it should say "Anthropic accepts the API key".
 
+## Email from the server
+
+The server emails **wheretheystanduk@gmail.com** when something needs a look, for every site on it:
+
+- a scheduled job fails: an update (Where MPs Stand's sync, Where Councils Stand's and Where Countries Stand's
+  updates) or a nightly backup. Where Countries Stand's update also fails, on purpose, when briefing spending
+  reaches 80% of a cap or briefings have been failing, so that comes by email too;
+- the watchdog restarts Where MPs Stand because it stopped answering.
+
+Each email gives the job, what happened and its last lines in the system log. The same job is reported at most once
+every six hours.
+
+It sends through Gmail's own mail server with an **app password**: a separate password for one use, which can be
+revoked on its own without changing the account's password. Set it up once:
+
+1. Sign in to wheretheystanduk@gmail.com and open **myaccount.google.com → Security**. Turn on **2-Step
+   Verification** if it isn't on (Google only offers app passwords with it).
+2. Open **myaccount.google.com/apppasswords**, name it "server" and press **Create**. Google shows a 16-letter
+   password once. Keep the page open.
+3. On the server, run this. It asks for the password without showing it, and saves it where only root can read it
+   (`/etc/wheretheystand/mail.env`):
+
+   ```
+   bash /opt/hansardgpt/deploy/mail.sh setup
+   bash /opt/hansardgpt/deploy/mail.sh test
+   ```
+
+   The test message should arrive within a minute. Then run `bash /opt/hansardgpt/deploy/update.sh` (and the other
+   sites' `update.sh`) once, so the jobs know where to report.
+
+Never paste the app password anywhere else, including to Claude. To stop the server sending, delete it at
+myaccount.google.com/apppasswords.
+
+The same script sends prepared letters, such as Where Councils Stand's requests to councils for permission to read
+their sites (`outreach/` in that repository). They go from the account like any other email, so they appear in its
+Sent folder and replies come to its inbox. A letter already sent is skipped, so the command is safe to run twice:
+
+```
+bash /opt/hansardgpt/deploy/mail.sh send /opt/wherecouncilsstand/outreach/2026-11/*.txt
+```
+
+`/var/lib/wheretheystand/sent.log` lists what was sent and when.
+
 ## Cloudflare protection (optional)
 
 Cloudflare's proxy (the orange cloud) puts Cloudflare between visitors and the server, so floods of automated

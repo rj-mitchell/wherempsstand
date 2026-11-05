@@ -2,6 +2,7 @@
 Description=Where MPs Stand daily sync (member data, new Hansard, index, embeddings)
 After=docker.service
 Requires=docker.service
+OnFailure=alert@%n.service
 
 [Service]
 Type=oneshot

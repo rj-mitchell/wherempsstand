@@ -10,4 +10,6 @@ status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{
 if [[ "$status" == "unhealthy" ]]; then
   logger -t hansard-watchdog "the site stopped answering its health check; restarting it"
   docker compose restart app
+  bash "${DIR:-/opt/hansardgpt}/deploy/alert.sh" hansard-watchdog.service \
+    "Where MPs Stand stopped answering its health check, so the watchdog restarted it." || true
 fi
