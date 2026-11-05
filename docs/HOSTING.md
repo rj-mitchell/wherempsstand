@@ -263,6 +263,13 @@ Sent folder and replies come to its inbox. A letter already sent is skipped, so 
 bash /opt/hansardgpt/deploy/mail.sh send /opt/wherecouncilsstand/outreach/2026-11/*.txt
 ```
 
+To see a letter as it would arrive before sending it for real, send a test copy to yourself. Its real recipients
+get nothing, and it isn't counted as sent:
+
+```
+bash /opt/hansardgpt/deploy/mail.sh send --test-to you@example.com /opt/wherecouncilsstand/outreach/2026-11/essex.txt
+```
+
 `/var/lib/wheretheystand/sent.log` lists what was sent and when.
 
 ## Cloudflare protection (optional)
