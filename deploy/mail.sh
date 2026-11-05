@@ -8,6 +8,9 @@
 #   bash mail.sh send FILE...        send prepared letters: each FILE starts with "To:" and "Subject:" lines (and
 #                                    "Cc:" if wanted), then a blank line, then the text. A letter already sent is
 #                                    skipped (add --again)
+#   bash mail.sh send --test-to ADDRESS FILE...
+#                                    send the letters only to ADDRESS, as "TEST: …", to see them as they would arrive;
+#                                    their real recipients get nothing and they are not counted as sent
 #
 # The settings live in /etc/wheretheystand/mail.env, readable only by root:
 #   MAIL_FROM=wheretheystanduk@gmail.com
@@ -92,7 +95,14 @@ case "$cmd" in
     ;;
   send)
     load || die "not set up yet: bash $0 setup"
-    again=0; [[ "${1:-}" == "--again" ]] && { again=1; shift; }
+    again=0; test_to=""
+    while [[ "${1:-}" == --* ]]; do
+      case "$1" in
+        --again) again=1; shift ;;
+        --test-to) test_to="${2:-}"; [[ "$test_to" == *@* ]] || die "--test-to needs an email address"; shift 2 ;;
+        *) die "unknown option $1" ;;
+      esac
+    done
     [[ $# -gt 0 ]] || die "no letters given"
     mkdir -p "$STATE"; touch "$STATE/sent.log"
     sent=0; skipped=0; failed=0
@@ -107,6 +117,17 @@ case "$cmd" in
         failed=$((failed + 1)); continue
       fi
       sum=$(sha1sum "$f" | cut -d' ' -f1)
+      if [[ -n "$test_to" ]]; then
+        body=$(mktemp)
+        { printf '[Test copy. This letter would go to %s%s.]\n\n' "$to" "${cc:+, with a copy to $cc}"
+          tail -n +"$((head_end + 1))" "$f"; } > "$body"
+        if deliver "$test_to" "TEST: $subject" "$body"; then
+          echo "✓ $(basename "$f"): test copy to $test_to (not sent to $to)"; sent=$((sent + 1))
+        else
+          echo "✗ $(basename "$f"): test copy not sent"; failed=$((failed + 1))
+        fi
+        rm -f "$body"; continue
+      fi
       if [[ $again -eq 0 ]] && grep -qF " $(basename "$f") $to " "$STATE/sent.log"; then
         echo "- $(basename "$f"): already sent to $to"; skipped=$((skipped + 1)); continue
       fi
@@ -124,5 +145,5 @@ case "$cmd" in
     [[ $failed -eq 0 ]]
     ;;
   *)
-    sed -n '2,14p' "$0"; exit 1 ;;
+    sed -n '2,17p' "$0"; exit 1 ;;
 esac
