@@ -20,12 +20,20 @@ RUN groupadd --system --gid 10001 hansard \
  && useradd --system --uid 10001 --gid hansard --home-dir /home/hansard --create-home hansard \
  && mkdir -p /data /backups && chown hansard:hansard /data /backups
 WORKDIR /app
-COPY pyproject.toml uv.lock README.md LICENSE ATTRIBUTION.md ./
+# The dependencies first, in a layer of their own: it is rebuilt only when pyproject.toml or uv.lock change, so a
+# deploy that changes only the code takes seconds here. uv's download cache is a build cache mount, kept on the
+# build machine between builds and never copied into the image (so files are copied out of it, not linked).
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    UV_LINK_MODE=copy uv sync --frozen --no-dev --extra embed --no-install-project --compile-bytecode
+# then the code, and the project itself on top of the dependencies already installed (quick)
+COPY README.md LICENSE ATTRIBUTION.md ./
 COPY src ./src
 COPY config ./config
 COPY data_static ./data_static
 COPY tests/fixtures ./tests/fixtures
-RUN uv sync --frozen --no-dev --extra embed --compile-bytecode
+RUN --mount=type=cache,target=/root/.cache/uv \
+    UV_LINK_MODE=copy uv sync --frozen --no-dev --extra embed
 COPY --from=web /web/dist ./web/dist
 ENV HANSARD_DATA_DIR=/data \
     PATH="/app/.venv/bin:$PATH" \
