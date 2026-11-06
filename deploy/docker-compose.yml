@@ -21,6 +21,11 @@ services:
       # daily backups land here on the server itself (/opt/hansardgpt/deploy/backups), easy to copy off
       - ./backups:/backups
     restart: unless-stopped
+    # No memory limit yet, unlike the other sites on this server: there are no measurements to set one from. The
+    # monthly disk and memory report (deploy/disk-report.sh) gives each container's use; once a few months of it,
+    # and a sync watched with docker stats, show this site's peak, set about 1.5 times that here and remove the #
+    # (docs/HOSTING.md, "Disk space"). An update's one-off container gets the same limit again.
+    # mem_limit: <peak x 1.5>g
     expose:
       - "8000"
     healthcheck:

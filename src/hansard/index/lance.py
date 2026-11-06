@@ -17,12 +17,18 @@ data on the record's date and are refreshed per person when member data changes.
 from __future__ import annotations
 
 import logging
+import os
 import re
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
-import lancedb
+# LanceDB's own warnings (one per cluster while a vector index is trained on few rows, as the evidence index's first
+# ones are) would fill the update logs: only its errors are shown. Read once, when LanceDB is first imported, so
+# hansard/index/evidence.py sets it too. LANCEDB_LOG=warn (or info) in the environment brings them back.
+os.environ.setdefault("LANCEDB_LOG", "error")
+
+import lancedb  # noqa: E402
 import numpy as np
 import pyarrow as pa
 from lancedb.index import FTS, Bitmap, BTree, LabelList

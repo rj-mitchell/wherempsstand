@@ -4,7 +4,7 @@ How to run the site on your own computer or a server, the commands for day-to-da
 backups, and the tests. Moved here from the README on 6 November 2026.
 
 The live site runs on a server shared with the charity's other sites. Putting it online, the server's front door,
-email, alerts, disk checks and the update lock are in [HOSTING.md](HOSTING.md); what costs money is in
+email, alerts, the watchdog, disk checks and the update lock are in [HOSTING.md](HOSTING.md); what costs money is in
 [COSTS.md](COSTS.md).
 
 ## Contents

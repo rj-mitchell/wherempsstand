@@ -41,7 +41,7 @@ some parts taken directly from this one (same licence).
 
 **Where it runs.** On the charity's shared server in London, beside Where Councils Stand, Where Landlords Stand and
 Where Countries Stand. This repository's `deploy/` is the front door for every site there (Caddy, email from the
-server, alerts, disk checks and the update lock), so the other sites' deployment guides link to
+server, alerts, the watchdog, disk checks and the update lock), so the other sites' deployment guides link to
 [docs/HOSTING.md](docs/HOSTING.md).
 
 **Links to and from the sister sites.**

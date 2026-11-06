@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Email the alerts address a monthly report on where the server's disk is going, for every site on this server.
+# Email the alerts address a monthly report on where the server's disk is going, for every site on this server, with
+# the memory each site's containers are using at the time (for setting memory limits).
 # Run on the 1st of each month by wheretheystand-disk-report.timer; run it by hand at any time with
 #   bash /opt/hansardgpt/deploy/disk-report.sh
 # Changes nothing except the note of this month's figure, which next month's report compares against.
@@ -23,6 +24,11 @@ mountpoint() { docker volume inspect -f '{{.Mountpoint}}' "$1" 2>/dev/null; }
   echo "== Memory and swap"
   free -h
   swapon --show 2>/dev/null
+  # how much swap has been read and written since the server started: large and growing means memory runs short
+  grep -E '^pswp(in|out) ' /proc/vmstat 2>/dev/null | awk '{printf "%s %s pages\n", $1, $2}'
+  echo
+  echo "== Each container's memory now (and its limit), and processor use"
+  timeout 60 docker stats --no-stream --format 'table {{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.CPUPerc}}' 2>/dev/null
   echo
   echo "== Docker (images, containers, data volumes, build cache)"
   timeout 120 docker system df 2>/dev/null

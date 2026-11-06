@@ -28,18 +28,36 @@ def prices_for(prices: dict[str, Any], model: str | None) -> dict[str, Any]:
     return prices
 
 
+def token_counts(usage: dict[str, int] | None) -> dict[str, int]:
+    """One call's token counts under this site's names, whichever form they come in: ``usage_dict``'s
+    (``cache_read_tokens``, ``cache_write_tokens``, and ``input_tokens`` that includes the cache writes) or the SDK's
+    own (``cache_read_input_tokens``, ``cache_creation_input_tokens``, and ``input_tokens`` that does not)."""
+    u = usage or {}
+    reads = u.get("cache_read_tokens") or u.get("cache_read_input_tokens") or 0
+    if "cache_write_tokens" in u:
+        writes = u.get("cache_write_tokens") or 0
+        uncached = (u.get("input_tokens") or 0) - writes
+    else:
+        writes = u.get("cache_creation_input_tokens") or 0
+        uncached = u.get("input_tokens") or 0
+    return {"input_tokens": uncached + writes, "output_tokens": u.get("output_tokens") or 0,
+            "cache_read_tokens": reads, "cache_write_tokens": writes}
+
+
 def cost_usd(usage: dict[str, int] | None, prices: dict[str, Any], model: str | None = None) -> float:
-    """Cost of one call. Cache writes cost 1.25x the input price; cache reads are priced separately."""
+    """Cost of one call. Cache writes cost 1.25x the input price; cache reads are priced separately. The token counts
+    may use this site's names or the SDK's own (``token_counts``)."""
     if not usage:
         return 0.0
     prices = prices_for(prices, model)
     price_in = float(prices.get("price_input_per_mtok", 4.0))
-    writes = usage.get("cache_write_tokens", 0)
+    u = token_counts(usage)
+    writes = u["cache_write_tokens"]
     return round(
-        (usage.get("input_tokens", 0) - writes) / 1e6 * price_in
+        (u["input_tokens"] - writes) / 1e6 * price_in
         + writes / 1e6 * price_in * float(prices.get("cache_write_multiplier", 1.25))
-        + usage.get("output_tokens", 0) / 1e6 * float(prices.get("price_output_per_mtok", 20.0))
-        + usage.get("cache_read_tokens", 0) / 1e6 * float(prices.get("price_cache_read_per_mtok", 0.2)),
+        + u["output_tokens"] / 1e6 * float(prices.get("price_output_per_mtok", 20.0))
+        + u["cache_read_tokens"] / 1e6 * float(prices.get("price_cache_read_per_mtok", 0.2)),
         6,
     )
 
@@ -80,14 +98,14 @@ def visitor_key(state: StateDB, address: str | None, day: str | None = None) -> 
 def record_usage(state: StateDB, user_id: int | None, kind: str, model: str | None,
                  usage: dict[str, int] | None, prices: dict[str, Any], visitor: str | None = None) -> float:
     cost = cost_usd(usage, prices, model)
-    u = usage or {}
+    u = token_counts(usage)
     with state.connect() as con:
         con.execute(
             """INSERT INTO usage (user_id, visitor, at, kind, model, input_tokens, output_tokens,
-                                  cache_read_tokens, cost_usd)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (user_id, visitor, utcnow(), kind, model, u.get("input_tokens", 0), u.get("output_tokens", 0),
-             u.get("cache_read_tokens", 0), cost))
+                                  cache_read_tokens, cache_write_tokens, cost_usd)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (user_id, visitor, utcnow(), kind, model, u["input_tokens"], u["output_tokens"],
+             u["cache_read_tokens"], u["cache_write_tokens"], cost))
     return cost
 
 

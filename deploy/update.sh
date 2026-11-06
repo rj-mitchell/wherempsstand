@@ -3,8 +3,8 @@
 # Run on the server, as root:
 #   bash /opt/hansardgpt/deploy/update.sh
 # It fetches the new code, rebuilds and restarts the site (a few seconds of downtime), refreshes the timers (the
-# site's own, and the disk check and report that serve every site), clears out old build files, and finishes with
-# the health check.
+# site's own, and the watchdog, disk check and report that serve every site), clears out old build files, and
+# finishes with the health check.
 set -euo pipefail
 DIR="${DIR:-/opt/hansardgpt}"
 
@@ -19,14 +19,20 @@ if [[ -z "${UPDATE_RESTARTED:-}" && "$(sha1sum "$DIR/deploy/update.sh" | cut -d'
 fi
 
 cd "$DIR/deploy"
-echo "==> Refreshing the update, backup and disk timers"
-# the disk timers serve every site on this server: an hourly check that emails at 80% full, and a monthly report
-cp hansard-sync.service hansard-sync.timer hansard-backup.service hansard-backup.timer \
-   hansard-watchdog.service hansard-watchdog.timer alert@.service \
+echo "==> Refreshing the update, backup, watchdog and disk timers"
+# the watchdog and disk timers serve every site on this server: a check every two minutes that restarts a site that
+# has stopped answering, an hourly check that emails at 80% full, and a monthly report
+cp hansard-sync.service hansard-sync.timer hansard-backup.service hansard-backup.timer alert@.service \
+   wheretheystand-watchdog.service wheretheystand-watchdog.timer \
    wheretheystand-disk.service wheretheystand-disk.timer \
    wheretheystand-disk-report.service wheretheystand-disk-report.timer /etc/systemd/system/
+# the watchdog that looked after this site alone, replaced by wheretheystand-watchdog
+if [[ -e /etc/systemd/system/hansard-watchdog.timer || -e /etc/systemd/system/hansard-watchdog.service ]]; then
+  systemctl disable --now hansard-watchdog.timer >/dev/null 2>&1 || true
+  rm -f /etc/systemd/system/hansard-watchdog.timer /etc/systemd/system/hansard-watchdog.service
+fi
 systemctl daemon-reload
-systemctl enable --now hansard-sync.timer hansard-backup.timer hansard-watchdog.timer \
+systemctl enable --now hansard-sync.timer hansard-backup.timer wheretheystand-watchdog.timer \
    wheretheystand-disk.timer wheretheystand-disk-report.timer >/dev/null
 
 if [[ ! -r /etc/wheretheystand/mail.env ]]; then

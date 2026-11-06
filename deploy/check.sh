@@ -205,8 +205,8 @@ if [[ "${free_pct:-0}" -lt 80 ]]; then
 else
   bad "disk ${free_pct}% used" "free some space before it fills: docs/HOSTING.md, 'Disk space' (bash $DIR/deploy/disk-report.sh emails where it is going)"
 fi
-for t in wheretheystand-disk.timer wheretheystand-disk-report.timer; do
-  systemctl is-enabled --quiet "$t" 2>/dev/null || bad "$t is not on (the disk check and report)" "bash $DIR/deploy/update.sh"
+for t in wheretheystand-disk.timer wheretheystand-disk-report.timer wheretheystand-watchdog.timer; do
+  systemctl is-enabled --quiet "$t" 2>/dev/null || bad "$t is not on (the disk check and report, and the watchdog)" "bash $DIR/deploy/update.sh"
 done
 echo
 
