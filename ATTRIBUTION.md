@@ -26,15 +26,15 @@ committee memberships come from the `members/` data in
 the UK Parliament Members' Names Information Service (Open Parliament Licence
 v3.0). With thanks to mySociety for maintaining these datasets.
 
-## Early day motions, committees, interests and the devolved parliaments
+## Early day motions, committees and the devolved parliaments
 
 Early day motions and their signatures come from the UK Parliament
 [oral questions and motions API](https://oralquestionsandmotions-api.parliament.uk/), and committees, inquiries,
 reports, government responses and oral evidence witnesses from the UK Parliament
 [Committees API](https://committees-api.parliament.uk/), both under the Open Parliament Licence v3.0.
 
-The Register of Members' Financial Interests, the official reports of the Scottish Parliament, the Senedd and
-the Northern Ireland Assembly, and plain-English descriptions of some divisions
+The official reports of the Scottish Parliament, the Senedd and the Northern Ireland Assembly, and plain-English
+descriptions of some divisions
 ([TheyWorkForYou Votes](https://votes.theyworkforyou.com/)) come from the data published by
 [TheyWorkForYou](https://www.theyworkforyou.com/pwdata/) (mySociety). The devolved reports contain information
 licensed under the Open Parliament Licence and the equivalent licences of the Scottish Parliament, the Senedd and
@@ -108,17 +108,12 @@ Contains National Statistics data © Crown copyright and database right.
 Contains NRS data © Crown copyright and database right.
 Contains NISRA data © Crown copyright.
 
-## Typeface
-
-The web app bundles [Source Serif 4](https://github.com/adobe-fonts/source-serif) (Adobe),
-licensed under the [SIL Open Font License 1.1](https://openfontlicense.org), via Fontsource.
-No fonts are loaded from third-party servers.
-
 ## Typefaces
 
-Preview cards are drawn with Source Serif 4 and Source Sans 3 by Adobe, licensed under the SIL Open Font
-License 1.1 (`data_static/fonts/LICENSE-*.md`). The web app uses Source Serif 4 via Fontsource under the same
-licence.
+The web app bundles [Source Serif 4](https://github.com/adobe-fonts/source-serif) by Adobe, via Fontsource. Link
+preview cards are drawn with Source Serif 4 and Source Sans 3, also by Adobe (`data_static/fonts/LICENSE-*.md`).
+Both are licensed under the [SIL Open Font License 1.1](https://openfontlicense.org). No fonts are loaded from
+third-party servers.
 
 ## Briefings written by the site
 
