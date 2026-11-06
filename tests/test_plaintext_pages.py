@@ -42,3 +42,12 @@ def test_group_devolved_and_motion_text():
 def test_text_goes_into_the_page_root():
     page = '<body><div id="group-root"><p class="muted">Loading…</p></div></body>'
     assert with_text(page, "<h1>X</h1>") == '<body><div id="group-root"><h1>X</h1></div></body>'
+
+
+def test_home_fallback_gives_way_to_a_pages_own_text():
+    page = ('<body><!-- note -->\n<noscript class="home-fallback"><main>Asking needs JavaScript</main></noscript>\n'
+            '<div id="root"></div></body>')
+    out = with_text(page, "<h1>A briefing</h1>")
+    assert "home-fallback" not in out and "note" not in out
+    assert out == '<body><div id="root"><main class="thread prose"><h1>A briefing</h1></main></div></body>'
+    assert with_text(page, None) == page  # no text of its own: the home page's stays

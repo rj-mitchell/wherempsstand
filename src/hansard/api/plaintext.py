@@ -12,6 +12,8 @@ from hansard.api.briefings import fmt_date
 
 _ROOT = re.compile(r'(<div id="[\w-]+-root">)\s*<p class="muted">Loading…</p>\s*(</div>)')
 _EMPTY_ROOT = '<div id="root"></div>'
+# the home page's text for readers with scripts off (web/index.html); other pages built on it bring their own
+_HOME_FALLBACK = re.compile(r'(?:<!--[^>]*-->\s*)?<noscript class="home-fallback">.*?</noscript>\s*', re.S)
 MAX_ITEMS = 60
 
 
@@ -20,6 +22,7 @@ def with_text(page: str, fragment: str | None) -> str:
     if not fragment:
         return page
     if _EMPTY_ROOT in page:
+        page = _HOME_FALLBACK.sub("", page, count=1)
         return page.replace(_EMPTY_ROOT, f'<div id="root"><main class="thread prose">{fragment}</main></div>', 1)
     return _ROOT.sub(lambda m: m.group(1) + fragment + m.group(2), page, count=1)
 

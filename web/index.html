@@ -24,6 +24,33 @@
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
+    <!-- For readers with scripts off. The server removes it from pages that put their own text in the root. -->
+    <noscript class="home-fallback">
+      <div class="app page">
+        <!--#include header-->
+        <main id="main" tabindex="-1" class="prose">
+          <h1>Where MPs Stand</h1>
+          <p class="lede">
+            Sourced briefings on what MPs, peers and the devolved parliaments have said, with each point linked to
+            Hansard. An independent research service.
+          </p>
+          <p>
+            Asking a question needs JavaScript, which is off or not available in this browser. These pages work
+            without it:
+          </p>
+          <ul>
+            <li><a href="/this-week">In Parliament this week</a>: what was debated, asked and voted on</li>
+            <li><a href="/about">About</a>: why the site exists, who runs it and how it is funded</li>
+            <li><a href="/methodology">Methodology</a>: how a briefing is written and checked</li>
+            <li><a href="/glossary">Glossary</a>: the words Parliament uses</li>
+            <li><a href="/developers">Data and API</a>: the same records, for reuse</li>
+            <li><a href="/corrections">Corrections and problems</a>: what has been put right</li>
+          </ul>
+          <p>Saved briefings, topic briefings and each MP's and peer's page also show their text without JavaScript.</p>
+        </main>
+        <!--#include footer-->
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
