@@ -41,8 +41,12 @@ def make_client():
 
     # Never follow an ANTHROPIC_BASE_URL inherited from another tool; the app talks to the API itself.
     base_url = os.environ.get("HANSARD_ANTHROPIC_BASE_URL", "https://api.anthropic.com")
+    # The SDK's default is ten minutes per request. A briefing streams, so the read limit applies between chunks:
+    # five minutes of silence means the connection is dead, and ten seconds is long enough to connect. Two retries
+    # (the SDK's default, written out) keep a failing request to a few attempts rather than a long wait.
+    options: dict = {"base_url": base_url, "timeout": anthropic.Timeout(300.0, connect=10.0), "max_retries": 2}
     key = api_key()
-    return anthropic.Anthropic(api_key=key, base_url=base_url) if key else anthropic.Anthropic(base_url=base_url)
+    return anthropic.Anthropic(api_key=key, **options) if key else anthropic.Anthropic(**options)
 
 
 def cached_system(text: str) -> list[dict[str, Any]]:

@@ -386,3 +386,12 @@ def test_a_citation_across_two_paragraphs_is_accepted():
     assert report.citations_invalid == 0 and report.segments[0].status == "cited"
     wrong = {"text": "x", "citations": [{"search_result_index": 0, "cited_text": "the costs of—(a) implementation"}]}
     assert verify([wrong], [src]).citations_invalid == 1
+
+
+def test_client_has_an_explicit_timeout(monkeypatch):
+    from hansard.rag.answer import make_client
+
+    monkeypatch.setenv("HANSARD_ANTHROPIC_API_KEY", "test-key")
+    client = make_client()
+    assert client.timeout.connect == 10.0 and client.timeout.read == 300.0
+    assert client.max_retries == 2
