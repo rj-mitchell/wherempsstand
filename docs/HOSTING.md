@@ -515,7 +515,15 @@ watch it, for every site on the server. Both are installed by `update.sh` and em
   stays that full, it emails again at most every six hours;
 - **on the 1st of each month**, `deploy/disk-report.sh` emails where the disk is going: each site's data and its
   largest folders, the search indexes and how many old versions each keeps, Docker's images and build cache, swap,
-  the system log, and last month's figure for comparison.
+  the system log, and last month's figure for comparison. It also gives the memory each container is using at that
+  moment (`docker stats`), with its limit, and how much swap has been used since the server started.
+
+**Memory limits.** The other sites' containers have memory limits (4 GB for Where Countries Stand and Where Councils
+Stand, 1 GB for Where Landlords Stand), so a runaway update stops itself rather than slowing every site. Where MPs
+Stand has none yet, because nothing has been measured: `mem_limit` in `deploy/docker-compose.yml` is left commented
+out until it has. To measure, run `docker stats --no-stream` every so often while a sync runs, and read the monthly
+reports; then set the limit to about one and a half times the highest figure seen, remove the `#`, and run
+`update.sh`. A sync's one-off container gets the same limit as the site again, so leave room for both.
 
 `update.sh` also keeps the server's own logs and downloads in check (`deploy/housekeeping.sh`): the system log is
 capped at 500 MB, and apt deletes out-of-date downloaded packages once a week.
