@@ -524,6 +524,43 @@ not enough, the next steps are the site's own (each site's search indexes, and W
 the charity's server review, `plans/family/audits/server.md` in the `wheretheystand-charity` repository, lists them
 with the commands to measure first.
 
+**Compressing Where MPs Stand's raw Hansard files (once).** Since November 2026 the sync fetches TheyWorkForYou's
+files over HTTPS and stores each one gzipped (`<name>.xml.gz`, about a quarter of the size; decision 25 in
+[DECISIONS.md](DECISIONS.md)). The files already on the server stay as they are until this one-off command compresses
+them, which frees about 7–8 GB. It keeps each file's modification time, and the site's record of what it has read
+compares the size of the XML inside, so **nothing is read again and the search index is untouched**. The sites are
+not slowed: only the sync reads these files.
+
+Do it at a quiet hour, away from the update times above, after `update.sh` has installed the version that has the
+command. First see what it would do (this changes nothing, and needs no lock):
+
+```
+cd /opt/hansardgpt/deploy
+docker compose run --rm -T app hansard compress-raw --dry-run
+```
+
+It prints how many plain files there are, their size, and the likely size afterwards from a sample. Then run it under
+the server-wide update lock, so that no site's update runs meanwhile (it waits if one is running):
+
+```
+flock --verbose /var/lock/wheretheystand-update.lock docker compose run --rm -T app hansard compress-raw
+```
+
+It should take well under an hour (compressing runs at roughly 20 MB a second on one core), needs only a few MB
+of free space at a time, and prints the GB before and
+after. It is safe to stop (Ctrl-C) and run again: it carries on where it stopped. `--limit 5000` compresses only that
+many files, to try it first. If it lists any `conflicts` (a file stored in both forms with different contents), the
+gzipped copy is the one read; nothing else needs doing.
+
+To check the syncs are no slower, note the `fetch` and `ingest` seconds of the last sync before, and of the first two
+after (`docker compose run --rm -T app hansard status` lists the recent runs). The first sync after the switch to
+HTTPS lists each folder on TheyWorkForYou and takes each file's date from the listing (`markers_from_listing`), so it
+downloads only what is new or corrected. If `downloaded` is large instead, the files are fetched again once, but any
+that are unchanged are kept as they are (`unchanged`) and not read again.
+
+To keep a full uncompressed mirror by rsync instead (TheyWorkForYou's own method), set `compress_raw_xml = false`
+under `[sources]` in `/data/settings.local.toml`; `hansard fetch --transport rsync` does one such fetch.
+
 ## Backups
 
 Everything can be rebuilt from public sources except the saved briefings, reports from readers, feedback, usage and

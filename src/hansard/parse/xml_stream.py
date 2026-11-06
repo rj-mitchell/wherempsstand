@@ -24,7 +24,7 @@ from typing import Any
 
 from lxml import etree
 
-from hansard.sources.twfy import SOURCES, parse_name
+from hansard.sources.twfy import SOURCES, open_xml, parse_name, xml_name
 
 _WS = re.compile(r"\s+")
 _TIME = re.compile(r"(\d{1,2}):(\d{2})(?::\d{2})?$")
@@ -134,44 +134,45 @@ def parse_file(path: Path, directory: str | None = None) -> Iterator[dict[str, A
     """Yield one row per intervention in a scrapedxml file."""
     path = Path(path)
     directory = directory or path.parent.name
-    meta = parse_name(directory, path.name)
+    meta = parse_name(directory, xml_name(path.name))
     if meta is None:
         raise ValueError(f"Unrecognised file name: {path.name}")
     house, family = SOURCES[directory]
     oral = major = minor = None
     bill = session = None
     pending_question: dict[str, Any] | None = None
-    context = etree.iterparse(str(path), events=("end",), huge_tree=True, recover=True,
-                              remove_comments=True, remove_pis=True)
-    for _, el in context:
-        tag = el.tag if isinstance(el.tag, str) else ""
-        parent = el.getparent()
-        if parent is None or parent.getparent() is not None:
-            continue  # only top-level children of <publicwhip>
-        if tag in _HEADINGS:
-            text = clean("".join(el.itertext()))
-            if tag == "oral-heading":
-                oral = text
-            elif tag == "major-heading":
-                major, minor = text, None
-            else:
-                minor = text
-        elif tag == "bill":
-            bill = clean(el.get("title") or "".join(el.itertext()))
-            session = el.get("session")
-        elif tag in {"speech", "ques", "reply"}:
-            row = _row(el, tag, directory, house, family, meta, oral, major, minor, bill, session)
-            if row is not None:
-                if tag == "ques":
-                    pending_question = row
-                elif tag == "reply" and pending_question and pending_question["thread_id"] == row["thread_id"]:
-                    row["context"] = pending_question["text"]
-                    row["official_url"] = row["official_url"] or pending_question["official_url"]
-                    row["url_kind"] = pending_question["url_kind"] if not row["official_url_own"] else row["url_kind"]
-                    row["uin"] = row["uin"] or pending_question["uin"]
-                row.pop("official_url_own", None)
-                yield row
-        _free(el)
+    with open_xml(path) as fh:  # plain .xml or gzipped .xml.gz
+        context = etree.iterparse(fh, events=("end",), huge_tree=True, recover=True,
+                                  remove_comments=True, remove_pis=True)
+        for _, el in context:
+            tag = el.tag if isinstance(el.tag, str) else ""
+            parent = el.getparent()
+            if parent is None or parent.getparent() is not None:
+                continue  # only top-level children of <publicwhip>
+            if tag in _HEADINGS:
+                text = clean("".join(el.itertext()))
+                if tag == "oral-heading":
+                    oral = text
+                elif tag == "major-heading":
+                    major, minor = text, None
+                else:
+                    minor = text
+            elif tag == "bill":
+                bill = clean(el.get("title") or "".join(el.itertext()))
+                session = el.get("session")
+            elif tag in {"speech", "ques", "reply"}:
+                row = _row(el, tag, directory, house, family, meta, oral, major, minor, bill, session)
+                if row is not None:
+                    if tag == "ques":
+                        pending_question = row
+                    elif tag == "reply" and pending_question and pending_question["thread_id"] == row["thread_id"]:
+                        row["context"] = pending_question["text"]
+                        row["official_url"] = row["official_url"] or pending_question["official_url"]
+                        row["url_kind"] = pending_question["url_kind"] if not row["official_url_own"] else row["url_kind"]
+                        row["uin"] = row["uin"] or pending_question["uin"]
+                    row.pop("official_url_own", None)
+                    yield row
+            _free(el)
 
 
 def _row(el, tag, directory, house, family, meta, oral, major, minor, bill, session) -> dict[str, Any] | None:
@@ -241,65 +242,66 @@ def parse_divisions(path: Path, directory: str | None = None) -> tuple[list[dict
     """Parse a divisions-only file into (divisions, votes)."""
     path = Path(path)
     directory = directory or path.parent.name
-    meta = parse_name(directory, path.name)
+    meta = parse_name(directory, xml_name(path.name))
     if meta is None:
         raise ValueError(f"Unrecognised file name: {path.name}")
     house = SOURCES[directory][0]
     divisions: list[dict] = []
     votes: list[dict] = []
     major = minor = None
-    for _, el in etree.iterparse(str(path), events=("end",), huge_tree=True, recover=True,
-                                 remove_comments=True, remove_pis=True):
-        tag = el.tag if isinstance(el.tag, str) else ""
-        parent = el.getparent()
-        if parent is None or parent.getparent() is not None:
-            continue
-        if tag == "major-heading":
-            major, minor = clean("".join(el.itertext())), None
-        elif tag == "minor-heading":
-            minor = clean("".join(el.itertext()))
-        elif tag == "division":
-            div_id = el.get("id")
-            count = el.find("divisioncount")
-            counts = dict(count.attrib) if count is not None else {}
-            divisions.append({
-                "division_id": div_id,
-                "source_key": meta.key,
-                "house": house,
-                "date": date.fromisoformat(el.get("divdate")) if el.get("divdate") else meta.file_date,
-                "number": int(el.get("divnumber") or 0),
-                "time": norm_time(el.get("time")),
-                "colnum": el.get("colnum"),
-                "major_heading": major,
-                "minor_heading": minor,
-                "ayes": _count(counts.get("ayes", counts.get("content"))),
-                "noes": _count(counts.get("noes", counts.get("not-content"))),
-                "official_url": official_url("debates" if house == "commons" else "lordspages",
-                                             el.get("url"), meta.file_date)[0],
-                "twfy_url": twfy_url("debates" if house == "commons" else "lordspages", div_id),
-            })
-            div_votes_start = len(votes)
-            for voter in el.iter("mpname", "lord"):
-                pid = voter.get("person_id") or voter.get("id")
-                if not pid:
-                    continue
-                raw_vote = voter.get("vote") or ""
-                votes.append({
+    with open_xml(path) as fh:  # plain .xml or gzipped .xml.gz
+        for _, el in etree.iterparse(fh, events=("end",), huge_tree=True, recover=True,
+                                     remove_comments=True, remove_pis=True):
+            tag = el.tag if isinstance(el.tag, str) else ""
+            parent = el.getparent()
+            if parent is None or parent.getparent() is not None:
+                continue
+            if tag == "major-heading":
+                major, minor = clean("".join(el.itertext())), None
+            elif tag == "minor-heading":
+                minor = clean("".join(el.itertext()))
+            elif tag == "division":
+                div_id = el.get("id")
+                count = el.find("divisioncount")
+                counts = dict(count.attrib) if count is not None else {}
+                divisions.append({
                     "division_id": div_id,
-                    "date": divisions[-1]["date"],
+                    "source_key": meta.key,
                     "house": house,
-                    "xml_person_id": pid,
-                    "vote": {"content": "aye", "not-content": "no"}.get(raw_vote, raw_vote),
-                    "teller": voter.get("teller") == "yes",
-                    "proxy_person_id": voter.get("proxy"),
+                    "date": date.fromisoformat(el.get("divdate")) if el.get("divdate") else meta.file_date,
+                    "number": int(el.get("divnumber") or 0),
+                    "time": norm_time(el.get("time")),
+                    "colnum": el.get("colnum"),
+                    "major_heading": major,
+                    "minor_heading": minor,
+                    "ayes": _count(counts.get("ayes", counts.get("content"))),
+                    "noes": _count(counts.get("noes", counts.get("not-content"))),
+                    "official_url": official_url("debates" if house == "commons" else "lordspages",
+                                                 el.get("url"), meta.file_date)[0],
+                    "twfy_url": twfy_url("debates" if house == "commons" else "lordspages", div_id),
                 })
-            # A few files carry malformed counts (e.g. noes="21\n14", or two deferred
-            # divisions run together as ayes="538482"); fall back to the vote lists.
-            for side, key in (("aye", "ayes"), ("no", "noes")):
-                if divisions[-1][key] is None or divisions[-1][key] > MAX_PLAUSIBLE_VOTES:
-                    divisions[-1][key] = sum(1 for v in votes[div_votes_start:]
-                                             if v["vote"] == side and not v["teller"])
-        _free(el)
+                div_votes_start = len(votes)
+                for voter in el.iter("mpname", "lord"):
+                    pid = voter.get("person_id") or voter.get("id")
+                    if not pid:
+                        continue
+                    raw_vote = voter.get("vote") or ""
+                    votes.append({
+                        "division_id": div_id,
+                        "date": divisions[-1]["date"],
+                        "house": house,
+                        "xml_person_id": pid,
+                        "vote": {"content": "aye", "not-content": "no"}.get(raw_vote, raw_vote),
+                        "teller": voter.get("teller") == "yes",
+                        "proxy_person_id": voter.get("proxy"),
+                    })
+                # A few files carry malformed counts (e.g. noes="21\n14", or two deferred
+                # divisions run together as ayes="538482"); fall back to the vote lists.
+                for side, key in (("aye", "ayes"), ("no", "noes")):
+                    if divisions[-1][key] is None or divisions[-1][key] > MAX_PLAUSIBLE_VOTES:
+                        divisions[-1][key] = sum(1 for v in votes[div_votes_start:]
+                                                 if v["vote"] == side and not v["teller"])
+            _free(el)
     return divisions, votes
 
 

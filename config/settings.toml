@@ -16,6 +16,9 @@ record_dirs = ["debates", "westminhall", "lordspages", "wrans", "lordswrans", "w
 [sources]
 twfy_rsync = "data.theyworkforyou.com::parldata/scrapedxml"
 twfy_https = "https://www.theyworkforyou.com/pwdata/scrapedxml"
+# Store the raw Hansard files gzipped (about a quarter of the size; owner's decision 14), fetched over HTTPS. Set to
+# false for a full uncompressed mirror by rsync (TheyWorkForYou's own method), when port 873 is reachable.
+compress_raw_xml = true
 parlparse_repo = "https://github.com/mysociety/parlparse"
 parlparse_branch = "master"
 

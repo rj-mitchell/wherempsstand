@@ -106,7 +106,10 @@ def reference(pull: bool = typer.Option(True, help="git pull parlparse members/ 
 
 @app.command()
 def fetch(since: str = typer.Option(None, help="first date (default: archive start)"),
-          transport: str = typer.Option("auto", help="auto | rsync | https")):
+          transport: str = typer.Option("auto", help="auto | rsync | https. auto is HTTPS, storing each file gzipped, "
+                                                     "unless [sources] compress_raw_xml = false, when it is rsync if "
+                                                     "reachable. rsync always writes plain .xml (a full uncompressed "
+                                                     "mirror).")):
     """Mirror new and corrected scrapedxml files from TheyWorkForYou."""
     _setup_logging()
     typer.echo(json.dumps(fetch_xml(_settings(), _date(since), transport), indent=2))
@@ -114,20 +117,50 @@ def fetch(since: str = typer.Option(None, help="first date (default: archive sta
 
 def fetch_xml(settings: Settings, since: date | None = None, transport: str = "auto") -> dict:
     from hansard.ingest import DIVISION_DIRS
-    from hansard.sources.twfy import HttpsMirror, rsync_available, rsync_directories
+    from hansard.sources.twfy import (
+        HttpsMirror,
+        drop_shadowed_gzip,
+        rsync_available,
+        rsync_directories,
+    )
 
     since = since or settings.archive_start
     dirs = [*settings.record_dirs, *sorted(DIVISION_DIRS)]
     src = settings.sources
-    if transport in ("auto", "rsync") and rsync_available(src["twfy_rsync"]):
+    # Stored gzipped (owner's decision 14): rsync can only write plain files, so it is used only when asked for.
+    compress = bool(src.get("compress_raw_xml", True))
+    wants_rsync = transport == "rsync" or (transport == "auto" and not compress)
+    if wants_rsync and rsync_available(src["twfy_rsync"]):
         rsync_directories(src["twfy_rsync"], settings.raw_xml_dir, dirs, since.year)
-        return {"transport": "rsync"}
+        return {"transport": "rsync", "gzipped_copies_replaced": drop_shadowed_gzip(settings.raw_xml_dir, dirs)}
     if transport == "rsync":
         raise typer.Exit("rsync to TheyWorkForYou is not reachable")
-    mirror = HttpsMirror(src["twfy_https"], settings.raw_xml_dir)
+    mirror = HttpsMirror(src["twfy_https"], settings.raw_xml_dir, compress=compress)
     plan = mirror.plan(dirs, since)
     done = mirror.download(plan)
-    return {"transport": "https", "planned": len(plan), "downloaded": len(done)}
+    return {"transport": "https", "gzip": compress, "planned": len(plan), "downloaded": len(done),
+            "unchanged": mirror.unchanged, "markers_from_listing": mirror.adopted}
+
+
+@app.command("compress-raw")
+def compress_raw(dry_run: bool = typer.Option(False, "--dry-run", help="report what would be done, and the likely "
+                                                                       "saving from a sample, without changing "
+                                                                       "anything"),
+                 limit: int = typer.Option(None, help="compress at most this many files (run again to continue)")):
+    """One-off: gzip the raw Hansard XML in place, keeping each file's mtime, so nothing is parsed again."""
+    _setup_logging()
+    from hansard.sources.twfy import compress_mirror
+
+    settings = _settings()
+    if dry_run:
+        out = compress_mirror(settings.raw_xml_dir, dry_run=True, limit=limit)
+    else:
+        with _one_at_a_time():
+            out = compress_mirror(settings.raw_xml_dir, limit=limit)
+    typer.echo(json.dumps(out, indent=2))
+    if out.get("conflicts"):
+        typer.echo("Some files are stored in both forms with different contents; the .gz copy is the one read.",
+                   err=True)
 
 
 @app.command()
