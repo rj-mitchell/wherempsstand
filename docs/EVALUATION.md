@@ -23,7 +23,8 @@ Three things are scored:
    support, loaded words), and a blind side-by-side judgement of two models' briefings on the same sources.
 
 Run it with `hansard eval plans`, `hansard eval sources` and `hansard eval briefings` (see `hansard eval --help`).
-On the server, run them from `/opt/hansardgpt` inside the app container.
+On the server, run them from `/opt/hansardgpt` inside the app container. `hansard eval retrieval` runs the searches
+alone, for free ([Retrieval only](#retrieval-only-checking-a-change-to-the-search-index)).
 
 ## 1. Reading the question
 
@@ -118,6 +119,59 @@ About **$5.10** in all. First round about $2.10: reading the questions with each
 about $0.11; checking the grader with Sonnet about $0.15; Opus briefings about $1.30 (including about $0.10 lost to
 a bug in the scoring script). Second round about $3.00: Sonnet briefings $0.52; two side-by-side judgements $1.33
 (the first, with shortened sources, had to be redone); Opus briefings with the new instructions $1.14.
+
+## Retrieval only: checking a change to the search index
+
+`hansard eval retrieval` runs the 62 questions' searches as `eval sources` does, from question readings already
+saved in `eval/runs` (the newest made by a model, by default), but grades nothing: no model is called and it costs
+nothing. It saves each question's 24 chosen sources and its 300 nearest passages by meaning, with their
+similarities. Run again after a change with `--compare <the first run>`, it reports how many questions chose
+exactly the same sources, the overlap of the sources, and for the meaning search the share of the nearest 10
+(`overlap_at_10`) and 300 (`overlap_all`) found by both, how far the nearest 10 moved in rank, and how far a
+passage's similarity changed.
+
+On the server, before and after the change (the test set is mounted into a one-off container, and the runs kept
+in the data volume):
+
+```
+cd /opt/hansardgpt/deploy
+docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard eval retrieval --out /data/eval-runs
+# ... the change, e.g. hansard vectors-f16 (HOSTING.md, "Disk space") ...
+docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard eval retrieval --out /data/eval-runs --compare /data/eval-runs/<the first run's file>.json
+```
+
+### 16-bit search vectors (6 November 2026)
+
+Measured before decision 26, on Hansard from 1 July to 5 November 2026 (105,154 passages from 410 files, embedded
+with the site's local model, 384 numbers each), with the site's settings (300 results, each re-checked against the
+full vectors, `refine_factor` 5). The full results are in `eval/runs/20261106-retrieval-float16.json`.
+
+**The vectors themselves** (`scripts/compare_float16.py`: two 32-bit tables and one 16-bit table from the same
+embeddings, 376 searches: the 14 sample searches, the 62 questions and 300 headings from the record):
+
+| | Nearest 10 found by both | Same 10 in the same order | Nearest 300 found by both | Similarity change, mean / largest |
+|---|---|---|---|---|
+| 16-bit against 32-bit, every vector compared (no index) | 99.97% | 371 of 376 | 99.97% | 0.000013 / 0.000066 |
+| 16-bit against 32-bit, as the site searches | 99.97% | 371 of 376 | 97.4% | 0.000013 / 0.000066 |
+| For comparison: 32-bit against the same 32-bit index built again | 100% | 376 of 376 | 97.4% | 0 |
+
+Each finds the same share of the truly nearest 300 passages: 97.5% for 32-bit, 97.3% for the same rebuilt, 97.3%
+for 16-bit. The largest rounding of any stored number was 0.00012; the table took 86 MB rather than 163 MB.
+
+**The test set, before and after `hansard vectors-f16`** (`hansard eval retrieval --compare`), beside the same
+comparison after merely rebuilding the 32-bit index, which is how far results move with no change to the numbers
+at all:
+
+| | Questions with exactly the same 24 sources | Overlap of the sources | Meaning search: nearest 10 found by both | Largest similarity change |
+|---|---|---|---|---|
+| Run twice, nothing changed | 62 of 62 | 100% | 100% | 0 |
+| The 32-bit index rebuilt | 50 of 62 | 99.3% | 100% | 0 |
+| **Converted to 16-bit** | **55 of 62** | **99.4%** | **99.8%** | **0.00006** |
+
+So 16-bit vectors change what is found less than rebuilding the index does, which `hansard reindex-vectors`
+already does from time to time. A source that changes is one of two passages scored within a hair of each other.
+The conversion itself took 84 seconds for this corpus, 75 of them building the index; on the full record expect
+about an hour.
 
 ## Measured performance
 

@@ -3,6 +3,8 @@
 from datetime import date
 from pathlib import Path
 
+import pytest
+
 from hansard.api.usage import cost_usd
 from hansard.engine import Filters
 from hansard.evaluate import load_questions, parse_variant, plan_values, score_plan
@@ -86,3 +88,25 @@ def test_region_groups_are_expanded_not_dropped():
     assert expand_regions(["scotland", "London", "Atlantis"], groups) == ["London", "Scotland"]
     assert _open_end(date(2026, 10, 11), date(2026, 10, 11)) is None
     assert _open_end(date(2020, 1, 1), date(2026, 10, 11)) == date(2020, 1, 1)
+
+
+def test_retrieval_runs_are_compared_without_grading(tmp_path):
+    from hansard.evaluate import compare_retrieval, newest_plans
+
+    def rec(*ids):
+        return [{"record_id": i} for i in ids]
+
+    a = {"rows": [{"id": "q1", "records": rec("r1", "r2"), "meaning": [["p1", 0.9], ["p2", 0.8]]},
+                  {"id": "q2", "records": rec("r3"), "meaning": [["p3", 0.7]]}]}
+    b = {"rows": [{"id": "q1", "records": rec("r1", "r2"), "meaning": [["p1", 0.9001], ["p2", 0.8]]},
+                  {"id": "q2", "records": rec("r4"), "meaning": [["p3", 0.7]]}]}
+    out = compare_retrieval(a, b)
+    assert out["questions"] == 2 and out["sources_identical"] == 1
+    assert out["questions_with_different_sources"] == ["q2"] and out["sources_overlap"] == 0.5
+    assert out["meaning"]["overlap_at_10"] == 1.0
+    assert out["meaning"]["max_similarity_difference"] == pytest.approx(1e-4, abs=1e-6)
+
+    for name in ("20261011-1-plans-a.json", "20261011-2-plans-b.json", "20261011-3-plans-offline.json"):
+        (tmp_path / name).write_text("{}")
+    assert newest_plans(tmp_path).name == "20261011-2-plans-b.json"
+    assert newest_plans(tmp_path / "none") is None

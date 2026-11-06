@@ -126,8 +126,24 @@ to 4 hours.
 | `hansard reference` | Rebuild member and role tables from parlparse; the next sync refreshes the changed people in the index |
 | `hansard interests`, `devolved`, `evidence`, `edms`, `committees`, `donations`, `groups`, `whips`, `directorships` | Fetch one source now rather than waiting for the twice-daily update (each is also part of `sync`); options such as `interests --archive 500` or `devolved --files 5000` fill in the history in one go. They never run at the same time as an update |
 | `hansard compress-raw [--dry-run] [--limit N]` | Once, on a mirror made before November 2026: gzip the raw Hansard files in place, keeping their dates, so nothing is read again. Run on the server under the update lock ([HOSTING.md](HOSTING.md), "Disk space", has the exact commands) |
+| `hansard vectors-f16 [--dry-run] [--keep-old]` | Once, on an index made before November 2026: convert the meaning-search vectors (the passages' and the committee evidence's) from 32-bit to 16-bit numbers, about half their space, while the site keeps searching: a new copy is made, indexed and checked against the old (row counts, a sample of vectors, and the same searches finding the same passages), then swapped in one step. Refuses if the disk is short of space; safe to stop and run again. Run on the server under the update lock ([HOSTING.md](HOSTING.md), "Disk space", has the exact commands) |
 | `hansard backup`, `restore`, `offsite` | Back up the site's own records (saved briefings, reports, usage), restore them, or copy backups off the server |
 | `hansard eval plans`, `eval sources`, `eval briefings` | The test set of 62 questions ([EVALUATION.md](EVALUATION.md)) |
+| `hansard eval retrieval [--compare <earlier run>]` | The test set's searches alone, from saved question readings: free (no model is called and nothing is graded). Run it before and after a change to the search index, such as `vectors-f16`, and compare ([EVALUATION.md](EVALUATION.md), "Retrieval only") |
+
+**Checking a change to the search index, free.** `hansard eval retrieval` runs the test set's 62 searches from the
+question readings saved in `eval/runs` (no model reads the questions again and nothing is graded, so it costs
+nothing) and saves what each found. On the server the test set is mounted into a one-off container, and the runs are
+kept in the data volume. Before the change:
+
+```
+cd /opt/hansardgpt/deploy
+docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard eval retrieval --out /data/eval-runs
+```
+
+After it, the same with `--compare /data/eval-runs/<the first run's file>.json`, which prints how far the two
+differ. For the 16-bit vectors the whole sequence, with the conversion between, is in [HOSTING.md](HOSTING.md),
+"Disk space".
 
 **Open access and cost control.** The site is public. Searching costs nothing, but each new briefing is
 written by Claude and costs money. So, in `config/settings.toml`, `[usage]`:

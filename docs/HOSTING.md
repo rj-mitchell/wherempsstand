@@ -603,6 +603,67 @@ that are unchanged are kept as they are (`unchanged`) and not read again.
 To keep a full uncompressed mirror by rsync instead (TheyWorkForYou's own method), set `compress_raw_xml = false`
 under `[sources]` in `/data/settings.local.toml`; `hansard fetch --transport rsync` does one such fetch.
 
+**Halving the meaning-search vectors (once).** Since November 2026 new search vectors are stored as 16-bit numbers
+rather than 32-bit, half the space, with no measurable change in what is found (decision 26 in
+[DECISIONS.md](DECISIONS.md); the measurements are in [EVALUATION.md](EVALUATION.md), "Retrieval only"). The vectors
+already on the server (`index/vectors.lance`, about 13 GB, and `evidence_index/turns.lance`, about 1.7 GB) stay
+32-bit, and keep working, until this one-off command converts them, which frees about 6–7 GB. The site keeps
+working throughout and needs no restart: the command builds a new 16-bit copy beside each table, checks it, and
+swaps it in one step.
+
+Do it at a quiet hour, away from the update times above, after `update.sh` has installed the version that has the
+command. All four steps below are free (no AI model is called). In `/opt/hansardgpt/deploy`:
+
+1. See what it would do (this changes nothing, and needs no lock). It prints each table's size, the free space,
+   the space it needs while the old and new copies both exist (an estimate of the new copy, about 7.5 GB for the
+   passages, plus 5 GB it keeps free besides; it refuses, changing nothing, if there is less) and the likely saving
+   (`likely_gb_saved`, a cautious figure: the passages' table measured 0.82 KB a row after converting, which would
+   make it about 6.5 GB, half of today's 13 GB):
+
+   ```
+   cd /opt/hansardgpt/deploy
+   docker compose run --rm -T app hansard vectors-f16 --dry-run
+   ```
+
+2. Record what the test set's questions find now (a minute or two; it saves a file and prints its name, which the
+   last step needs):
+
+   ```
+   docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard eval retrieval --out /data/eval-runs
+   ```
+
+3. Convert, under the server-wide update lock, so that no site's update runs meanwhile (it waits if one is running).
+   It takes roughly an hour, most of it building the new search index, so it runs in the background and writes to
+   a log that you can follow (Ctrl-C stops only the following, not the conversion):
+
+   ```
+   nohup flock --verbose /var/lock/wheretheystand-update.lock docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard vectors-f16 < /dev/null > /root/vectors-f16.log 2>&1 &
+   tail -f /root/vectors-f16.log
+   ```
+
+   (The test set is mounted so that the conversion's own check searches for its 62 questions as well as 14 samples.)
+   It ends with a summary for each table: `"status": "converted"`, the checks (`rows_ok`, the `sample` of vectors
+   with its largest difference, and `searches`: the share of the nearest 10 passages the new table finds of the
+   old table's, `overlap_at_10`, which must be at least 0.9), and `gb_before`, `gb_after` and `gb_saved`. If a check
+   fails it says "not swapped", and the site carries on with the old table, untouched (`--force` swaps even when
+   only the searches differ: ask before using it). It is safe to stop (`docker ps --filter name=app-run` names its container; `docker stop` that name) and run
+   again: it carries on from where it stopped (the copy, then the index), and a run after a finished one only
+   tidies up.
+
+4. Run the test set's questions again and compare (use the file name step 2 printed):
+
+   ```
+   docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard eval retrieval --out /data/eval-runs --compare /data/eval-runs/<step 2's file>.json
+   ```
+
+   Expect almost the same sources (`sources_overlap` near 1) and, for the meaning search, `overlap_at_10` near 1 and
+   similarities differing in the fourth decimal place (`max_similarity_difference` under about 0.001). `docker
+   compose run --rm -T app ls /data/eval-runs` lists the saved runs.
+
+`bash /opt/hansardgpt/deploy/disk-report.sh` shows the indexes' new sizes. To keep the old 32-bit tables for a while
+(about 15 GB until deleted), add `--keep-old` to step 3; they are kept as `vectors_f32.lance` and `turns_f32.lance`
+beside the new ones, and the next run of the step 3 command deletes them.
+
 ## Backups
 
 Everything can be rebuilt from public sources except the saved briefings, reports from readers, feedback, usage and

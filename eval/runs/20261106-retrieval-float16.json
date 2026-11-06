@@ -1,0 +1,180 @@
+{
+ "note": "16-bit against 32-bit search vectors, retrieval only (no model calls). Corpus: Hansard from 1 July to 5 November 2026 (410 files, 105,154 passages), embedded with the site's local model. See docs/EVALUATION.md, 'Retrieval only'.",
+ "vectors_compared_directly": {
+  "vectors": 105154,
+  "dimensions": 384,
+  "queries": 376,
+  "query_kinds": {
+   "sample searches": 14,
+   "test set questions": 62,
+   "headings": 300
+  },
+  "settings": {
+   "nprobes": null,
+   "refine_factor": 5,
+   "limit": 300
+  },
+  "largest_rounding_of_a_stored_number": 0.0001220703125,
+  "table_mb": {
+   "f32": 163.1,
+   "f16": 85.9
+  },
+  "exact_16_vs_32": {
+   "queries": 376,
+   "overlap_at_10": 0.9997,
+   "lowest_overlap_at_10": 0.9,
+   "overlap_all": 0.9997,
+   "same_top_10_in_same_order": 371,
+   "mean_rank_change_top_10": 0.002,
+   "mean_similarity_difference": 1.3e-05,
+   "max_similarity_difference": 6.6e-05
+  },
+  "indexed_16_vs_32": {
+   "queries": 376,
+   "overlap_at_10": 0.9997,
+   "lowest_overlap_at_10": 0.9,
+   "overlap_all": 0.9736,
+   "same_top_10_in_same_order": 371,
+   "mean_rank_change_top_10": 0.002,
+   "mean_similarity_difference": 1.3e-05,
+   "max_similarity_difference": 6.6e-05
+  },
+  "indexed_32_vs_32_rebuilt": {
+   "queries": 376,
+   "overlap_at_10": 1.0,
+   "lowest_overlap_at_10": 1.0,
+   "overlap_all": 0.9742,
+   "same_top_10_in_same_order": 376,
+   "mean_rank_change_top_10": 0.0,
+   "mean_similarity_difference": 0.0,
+   "max_similarity_difference": 0.0
+  },
+  "share_of_exact_nearest_found": {
+   "32-bit": 0.9748,
+   "32-bit rebuilt": 0.9728,
+   "16-bit": 0.9733
+  },
+  "build_seconds": 183
+ },
+ "test_set_after_vectors_f16": {
+  "questions": 62,
+  "sources_identical": 55,
+  "sources_overlap": 0.9937,
+  "questions_with_different_sources": [
+   "wind",
+   "lords-rwanda",
+   "new-mps",
+   "injection",
+   "one-word",
+   "american",
+   "pre-archive"
+  ],
+  "meaning": {
+   "queries": 62,
+   "overlap_at_10": 0.9984,
+   "lowest_overlap_at_10": 0.9,
+   "overlap_all": 0.966,
+   "same_top_10_in_same_order": 61,
+   "mean_rank_change_top_10": 0.002,
+   "mean_similarity_difference": 1.3e-05,
+   "max_similarity_difference": 5.9e-05
+  }
+ },
+ "test_set_after_rebuilding_the_32_bit_index_only": {
+  "questions": 62,
+  "sources_identical": 50,
+  "sources_overlap": 0.9929,
+  "questions_with_different_sources": [
+   "wind",
+   "water",
+   "london-housing",
+   "lords-rwanda",
+   "rebels-welfare",
+   "loaded",
+   "loaded-2",
+   "injection",
+   "typo",
+   "one-word",
+   "pre-archive",
+   "follow-lords"
+  ],
+  "meaning": {
+   "queries": 62,
+   "overlap_at_10": 1.0,
+   "lowest_overlap_at_10": 1.0,
+   "overlap_all": 0.9625,
+   "same_top_10_in_same_order": 62,
+   "mean_rank_change_top_10": 0.0,
+   "mean_similarity_difference": 0.0,
+   "max_similarity_difference": 0.0
+  }
+ },
+ "test_set_run_twice_unchanged": {
+  "questions": 62,
+  "sources_identical": 62,
+  "sources_overlap": 1.0,
+  "questions_with_different_sources": [],
+  "meaning": {
+   "queries": 62,
+   "overlap_at_10": 1.0,
+   "lowest_overlap_at_10": 1.0,
+   "overlap_all": 1.0,
+   "same_top_10_in_same_order": 62,
+   "mean_rank_change_top_10": 0.0,
+   "mean_similarity_difference": 0.0,
+   "max_similarity_difference": 0.0
+  }
+ },
+ "conversion_report": {
+  "rows": 105154,
+  "gb_before": 0.16,
+  "free_gb_before": 12.88,
+  "new_table_gb_estimate": 0.09,
+  "needs_free_gb": 5.09,
+  "copy": {
+   "rows": 105154,
+   "copied_now": 105154,
+   "resumed_from": 0,
+   "restarted": false,
+   "seconds": 0
+  },
+  "index": {
+   "built": [
+    "passage_id (BTree)",
+    "vector (IvfPq)"
+   ],
+   "seconds": 75
+  },
+  "checks": {
+   "rows_old": 105154,
+   "rows_new": 105154,
+   "rows_ok": true,
+   "sample": {
+    "sampled": 2000,
+    "missing": 0,
+    "max_abs_difference": 0.0001220703125,
+    "lowest_cosine": 0.9999998,
+    "ok": true
+   },
+   "searches": {
+    "queries": 76,
+    "overlap_at_10": 1.0,
+    "lowest_overlap_at_10": 1.0,
+    "overlap_all": 0.9501,
+    "same_top_10_in_same_order": 76,
+    "mean_rank_change_top_10": 0.0,
+    "mean_similarity_difference": 1.4e-05,
+    "max_similarity_difference": 6.6e-05,
+    "ok": true
+   }
+  },
+  "swap": "exchanged in one step",
+  "removed": [
+   "vectors_f16"
+  ],
+  "status": "converted",
+  "gb_after": 0.09,
+  "free_gb_after": 12.96,
+  "gb_saved": 0.07
+ }
+}
