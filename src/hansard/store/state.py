@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS usage (
     input_tokens  INTEGER NOT NULL DEFAULT 0,
     output_tokens INTEGER NOT NULL DEFAULT 0,
     cache_read_tokens INTEGER NOT NULL DEFAULT 0,
+    cache_write_tokens INTEGER NOT NULL DEFAULT 0,
     cost_usd      REAL NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS usage_user_at ON usage(user_id, at);
@@ -189,6 +190,7 @@ CREATE TABLE IF NOT EXISTS event_totals (
 # Columns added after the first release; created on open if missing.
 MIGRATIONS = [
     ("usage", "visitor", "ALTER TABLE usage ADD COLUMN visitor TEXT"),
+    ("usage", "cache_write_tokens", "ALTER TABLE usage ADD COLUMN cache_write_tokens INTEGER NOT NULL DEFAULT 0"),
 ]
 
 

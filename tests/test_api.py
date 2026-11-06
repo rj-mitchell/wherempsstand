@@ -497,6 +497,47 @@ def test_cache_writes_and_reads_are_priced(tmp_path):
     assert cost_usd({"input_tokens": 0, "cache_read_tokens": 1_000_000}, prices) == 0.2
 
 
+def test_raw_sdk_token_names_are_priced_and_cache_writes_recorded(tmp_path):
+    from types import SimpleNamespace as NS
+
+    from hansard.rag.answer import usage_dict
+    from hansard.store.state import StateDB
+
+    prices = {"price_input_per_mtok": 4.0, "price_output_per_mtok": 20.0, "price_cache_read_per_mtok": 0.2}
+    # the SDK's own names: its input_tokens leaves out the cache writes and reads
+    raw = {"input_tokens": 1_000_000, "output_tokens": 100_000, "cache_creation_input_tokens": 1_000_000,
+           "cache_read_input_tokens": 1_000_000}
+    assert cost_usd(raw, prices) == pytest.approx(4.0 + 2.0 + 5.0 + 0.2)
+    # the same call through usage_dict costs the same
+    assert cost_usd(usage_dict(NS(**raw)), prices) == cost_usd(raw, prices)
+
+    state = StateDB(tmp_path / "state.db")
+    record_usage(state, None, "answer", "m", raw, prices)
+    record_usage(state, None, "answer", "m", usage_dict(NS(**raw)), prices)
+    with state.connect() as con:
+        rows = [tuple(r) for r in con.execute(
+            "SELECT input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd FROM usage")]
+    assert rows == [(2_000_000, 100_000, 1_000_000, 1_000_000, 11.2)] * 2
+
+
+def test_a_usage_table_from_before_cache_writes_were_recorded_gains_the_column(tmp_path):
+    import sqlite3
+
+    from hansard.store.state import StateDB
+
+    path = tmp_path / "state.db"
+    with sqlite3.connect(path) as con:
+        con.execute("CREATE TABLE usage (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, at TEXT NOT NULL, "
+                    "kind TEXT NOT NULL, model TEXT, input_tokens INTEGER NOT NULL DEFAULT 0, output_tokens INTEGER "
+                    "NOT NULL DEFAULT 0, cache_read_tokens INTEGER NOT NULL DEFAULT 0, cost_usd REAL NOT NULL "
+                    "DEFAULT 0, visitor TEXT)")
+        con.execute("INSERT INTO usage (at, kind, cost_usd) VALUES ('2026-11-01T00:00:00+00:00', 'answer', 0.5)")
+    state = StateDB(path)
+    record_usage(state, None, "answer", "m", {"input_tokens": 10, "cache_write_tokens": 4}, {})
+    with state.connect() as con:
+        assert [r[0] for r in con.execute("SELECT cache_write_tokens FROM usage ORDER BY id")] == [0, 4]
+
+
 def test_support_reminder_every_n_new_briefings(indexed_settings, tmp_path, monkeypatch):
     monkeypatch.setenv("HANSARD_DONATE_URL", "https://ko-fi.com/example")
     app, state, _ = make_app(indexed_settings, tmp_path, auth=False, support_reminder_every=2,
