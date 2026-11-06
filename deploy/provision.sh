@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Provision Where MPs Stand on a fresh Ubuntu 24.04 server (run as root).
 #
-#   curl -fsSL https://raw.githubusercontent.com/rj-mitchell/wheretheystand/main/deploy/provision.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/rj-mitchell/wherempsstand/main/deploy/provision.sh | bash
 #   (or copy this file to the server and run: sudo bash provision.sh)
 #
 # What it does:
@@ -17,7 +17,7 @@
 # generated into deploy/.env. For an invite-only site instead, see the README.
 set -euo pipefail
 
-REPO="${REPO:-https://github.com/rj-mitchell/wheretheystand.git}"
+REPO="${REPO:-https://github.com/rj-mitchell/wherempsstand.git}"
 BRANCH="${BRANCH:-main}"
 DIR=/opt/hansardgpt
 

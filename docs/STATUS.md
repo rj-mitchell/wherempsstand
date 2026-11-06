@@ -5,7 +5,7 @@ What is still to do for Where MPs Stand, as of 6 November 2026. Tick items off o
 Most of these were in two files of the pre-public repository, `rj-mitchell/hansardgpt` (`docs/ROADMAP.md` of
 11 October and `docs/FOLLOW_UP.md` of 12–19 October), which is being archived. Everything there that was done or
 overtaken has been left behind. Items that concern the whole family (uptime monitoring, the server's routine, name
-and trade mark checks, legal review) are in the charity's plan (rj-mitchell/cio, `plans/family/STATUS.md`).
+and trade mark checks, legal review) are in the charity's plan (rj-mitchell/wheretheystand-charity, `plans/family/STATUS.md`).
 
 ## Licences
 

@@ -65,7 +65,7 @@ export const FOOTER: NavLink[] = [
   { href: "/accessibility", label: "Accessibility" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
-  { href: "https://github.com/rj-mitchell/wheretheystand", label: "Source code" },
+  { href: "https://github.com/rj-mitchell/wherempsstand", label: "Source code" },
 ];
 
 /** Set by the Compare page just before it opens the comparison on the main page, which then starts it at once. */
