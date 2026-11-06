@@ -86,7 +86,7 @@ charity's other sites, and Where MPs Stand's data, about 40 GB, is the largest p
 
 | Data | Size |
 |---|---|
-| Raw XML since 2010 | 4.9 GB (roughly 4 GB more for 1997–2010) |
+| Raw XML since 1997 | about 9–10 GB as plain XML; about a quarter of that stored gzipped, as the sync now does ([HOSTING.md](HOSTING.md), "Disk space") |
 | Parquet store | 1.2 GB |
 | Keyword index | 7.9 GB (4.6 GB of passages, 3.3 GB of full-text and filter indices) |
 | Vectors | about 8 GB |
@@ -125,6 +125,7 @@ to 4 hours.
 | `hansard reindex-vectors` | Rebuild the meaning-search index for the current number of vectors, measure each setting against an exact search, keep it only if it finds as much as before, and save the fastest setting |
 | `hansard reference` | Rebuild member and role tables from parlparse; the next sync refreshes the changed people in the index |
 | `hansard interests`, `devolved`, `evidence`, `edms`, `committees`, `donations`, `groups`, `whips`, `directorships` | Fetch one source now rather than waiting for the twice-daily update (each is also part of `sync`); options such as `interests --archive 500` or `devolved --files 5000` fill in the history in one go. They never run at the same time as an update |
+| `hansard compress-raw [--dry-run] [--limit N]` | Once, on a mirror made before November 2026: gzip the raw Hansard files in place, keeping their dates, so nothing is read again. Run on the server under the update lock ([HOSTING.md](HOSTING.md), "Disk space", has the exact commands) |
 | `hansard backup`, `restore`, `offsite` | Back up the site's own records (saved briefings, reports, usage), restore them, or copy backups off the server |
 | `hansard eval plans`, `eval sources`, `eval briefings` | The test set of 62 questions ([EVALUATION.md](EVALUATION.md)) |
 

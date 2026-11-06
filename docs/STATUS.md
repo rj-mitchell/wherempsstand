@@ -81,10 +81,15 @@ The server's disk is about 70% full. Done on 6 November 2026, and installed by t
 - [x] an hourly email when the disk is 80% full, and a monthly report on where it is going (`docs/HOSTING.md`,
   "Disk space");
 - [x] the system log capped at 500 MB, and apt clearing out old downloads weekly;
-- [x] one server-wide lock, so the sync never runs at the same time as another site's update.
+- [x] one server-wide lock, so the sync never runs at the same time as another site's update;
+- [x] the raw Hansard files stored gzipped (decision 25): the sync now fetches over HTTPS and stores each new or
+  corrected file compressed, in about a quarter of the space. Nothing already read is read again.
 
 Still to do:
 
+- [ ] **Compress the raw Hansard files already on the server**, once, at a quiet hour: `hansard compress-raw
+  --dry-run`, then `hansard compress-raw` under the update lock (`docs/HOSTING.md`, "Disk space", has the commands).
+  About 7 GB freed. Note the sync's `fetch` and `ingest` times before and after.
 - [ ] **Docker's default log limit on the running server.** `provision.sh` sets it on a new server; this one needs
   it added by hand and Docker restarted, at a quiet time (`docs/HOSTING.md`, "Disk space").
 
