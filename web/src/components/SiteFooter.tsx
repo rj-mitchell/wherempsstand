@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ATTRIBUTION } from "../attribution";
 import { BRAND } from "../brand";
 import { FOOTER } from "../nav";
+import { FamilyShelf } from "./Family";
 
 /** The footer every page shows (partials/footer.html is the same for the static pages). */
 export function SiteFooter({
@@ -34,6 +35,7 @@ export function SiteFooter({
           {a.text}
         </a>
       ))}
+      <FamilyShelf />
     </footer>
   );
 }

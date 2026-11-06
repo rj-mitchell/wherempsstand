@@ -14,6 +14,7 @@ import re
 import secrets
 from datetime import date
 from typing import Any
+from urllib.parse import urlsplit
 
 from hansard.rag.interests import without_public_office
 from hansard.rag.neutral import still_loaded
@@ -182,16 +183,26 @@ def fmt_date(iso: str | None) -> str:
     return f"{d.day} {d.strftime('%B %Y')}"
 
 
+# Every page's link preview is the family kit's card for this site (web/public/family/card.png, copied in by the
+# kit's sync.mjs), unless a page has its own. The alt text is the kit's, from web/public/family/head.html; a test
+# keeps the two the same.
+SITE_CARD = "/family/card.png"
+SITE_CARD_ALT = ("Where MPs Stand. Parliament: what MPs and peers have said and done, from Hansard and the official "
+                 "registers. A Where They Stand project.")
+
 _HEAD_TAGS = re.compile(
     r'\s*<(?:meta (?:property="og:[^"]+"|name="(?:twitter:[^"]+|description|robots)")[^>]*|link rel="canonical"[^>]*|'
     r'title>[^<]*</title)>', re.I)
 
 
-def page_with_meta(index_html: str, *, title: str, description: str, url: str, image: str | None,
+def page_with_meta(index_html: str, *, title: str, description: str, url: str, image: str | None = None,
                    image_alt: str = "", noindex: bool = True, data: dict[str, Any] | None = None) -> str:
     """The app's index.html with the page title and link-preview tags for one briefing, and ``data`` (schema.org
-    structured data, for search engines) if given."""
+    structured data, for search engines) if given. Without an ``image``, the preview is the site's family card."""
     e = html.escape
+    if not image:
+        site = urlsplit(url)
+        image, image_alt = f"{site.scheme}://{site.netloc}{SITE_CARD}", SITE_CARD_ALT
     tags = [f"<title>{e(title)}</title>",
             f'<meta name="description" content="{e(description)}" />',
             f'<link rel="canonical" href="{e(url)}" />',
@@ -202,11 +213,10 @@ def page_with_meta(index_html: str, *, title: str, description: str, url: str, i
             f'<meta property="og:description" content="{e(description)}" />',
             f'<meta property="og:url" content="{e(url)}" />',
             '<meta name="twitter:card" content="summary_large_image" />']
-    if image:
-        tags += [f'<meta property="og:image" content="{e(image)}" />',
-                 '<meta property="og:image:width" content="1200" />',
-                 '<meta property="og:image:height" content="630" />',
-                 f'<meta property="og:image:alt" content="{e(image_alt)}" />']
+    tags += [f'<meta property="og:image" content="{e(image)}" />',
+             '<meta property="og:image:width" content="1200" />',
+             '<meta property="og:image:height" content="630" />',
+             f'<meta property="og:image:alt" content="{e(image_alt)}" />']
     if noindex:
         tags.append('<meta name="robots" content="noindex" />')
     if data:  # "</" is escaped so the data cannot end the script element

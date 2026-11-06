@@ -642,7 +642,6 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         description = summary_text(view["answer"]) or "A sourced briefing on the record of Parliament."
         html_page = page_with_meta(
             page, title=f"{b['question']} — Where MPs Stand", description=description, url=f"{base}/b/{bid}",
-            image=f"{base}/og-image.png", image_alt="Where MPs Stand: sourced briefings on the record of Parliament",
             noindex=not is_featured(state, bid))  # featured briefings are for search engines to find
         return Response(with_text(html_page, readable(lambda: briefing_text(view))), media_type="text/html")
 
@@ -698,8 +697,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         description = (summary_text(public_view(b)["answer"]) if b else "") or t.description or t.question
         html_page = page_with_meta(
             page, title=f"{t.title}: where MPs and peers stand — Where MPs Stand", description=description,
-            url=f"{base}/topics/{slug}", image=f"{base}/og-image.png",
-            image_alt="Where MPs Stand: sourced briefings on the record of Parliament", noindex=False)
+            url=f"{base}/topics/{slug}", noindex=False)
         text = readable(lambda: briefing_text(public_view(b), heading=t.title)) if b else None
         return Response(with_text(html_page, text), media_type="text/html")
 
@@ -1606,8 +1604,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                   **({"affiliation": {"@type": "Organization", "name": info["current"]["party"]}}
                      if (info.get("current") or {}).get("party") else {})}
         return Response(with_text(page_with_meta(html_doc, title=f"{info['name']} — Where MPs Stand", description=desc,
-                                                 url=page_url, image=f"{base}/og-image.png", image_alt="Where MPs Stand",
-                                                 noindex=False, data=person), text), media_type="text/html")
+                                                 url=page_url, noindex=False, data=person), text), media_type="text/html")
 
     @app.get("/sitemap-people.xml", include_in_schema=False)
     def sitemap_people(request: Request):

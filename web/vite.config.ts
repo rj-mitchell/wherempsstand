@@ -6,7 +6,9 @@ import react from "@vitejs/plugin-react";
 
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
-/** Static pages share one header and footer: <!--#include header--> pulls in partials/header.html. */
+/** Static pages share one header and footer: <!--#include header--> pulls in partials/header.html, and
+ * <!--#include family/shelf--> the Where They Stand family kit's public/family/shelf.html (copied in by the kit's
+ * sync.mjs; see docs/DESIGN.md, "The family binding"). */
 function partials(): Plugin {
   return {
     name: "html-partials",
@@ -15,8 +17,8 @@ function partials(): Plugin {
       handler: (html) => {
         // partials may include other partials (the header includes the seal)
         for (let depth = 0; depth < 5 && html.includes("<!--#include "); depth++) {
-          html = html.replace(/<!--#include ([\w-]+)-->/g, (_m, name: string) =>
-            readFileSync(here(`./partials/${name}.html`), "utf8"),
+          html = html.replace(/<!--#include (family\/)?([\w-]+)-->/g, (_m, family: string | undefined, name: string) =>
+            readFileSync(here(family ? `./public/family/${name}.html` : `./partials/${name}.html`), "utf8"),
           );
         }
         return html;
