@@ -3473,6 +3473,26 @@ main:focus {
   white-space: normal;
 }
 
+/* under a briefing: the same question on a sister site, with its spine from the family kit */
+.same-question {
+  margin-block: var(--space-s) 0;
+}
+
+.same-question a {
+  white-space: normal;
+}
+
+.same-question-spine {
+  display: inline-block;
+  margin-inline-end: 0.35em;
+  vertical-align: -0.2em;
+}
+
+.same-question-spine > .wts-spine {
+  block-size: 1.15em;
+  inline-size: auto;
+}
+
 /* the MPs and peers page: each House's full list folds away until opened */
 .people-group > summary {
   cursor: pointer;

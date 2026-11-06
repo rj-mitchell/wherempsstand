@@ -15,6 +15,7 @@ import { BRAND } from "./brand";
 import { Mark } from "./components/Mark";
 import { fmtDate } from "./render";
 import { FamilyEndorsement } from "./components/Family";
+import { SameQuestion } from "./components/SameQuestion";
 import { SiteFooter } from "./components/SiteFooter";
 import { followUpsFor } from "./followups";
 import { COMPARE_HANDOVER, MENUS, NAV } from "./nav";
@@ -817,6 +818,7 @@ export default function App() {
               open={t.status === "answering" || (!t.answer && t.status === "done")}
               writing={t.status === "answering"}
             />
+            {t.status === "done" && <SameQuestion question={t.question} />}
             {t.status === "done" && t.plan && (
               <ElsewhereForSearch
                 words={t.plan.search_text}
