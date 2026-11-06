@@ -67,12 +67,14 @@ charity's family kit, copied into `web/public/family/` by its `family/kit/sync.m
   Stand project" in gilt capitals, linking to wheretheystand.uk;
 - **the family shelf** at the foot of every page: the charity, its status ("applying to register as a charity in
   England and Wales"), wheretheystand.uk, the Donate page, and every project's spine with a link to each;
-- **the favicon, theme colour and link card** in the site's cloth, Commons green `#1D4535`. The kit's `head.html`
-  replaces the site's own icon links and theme colour, so there is one set; the web manifest points at the same
-  icons, and `/favicon.ico` and `/apple-touch-icon.png` are copies of the kit's. Every page without an image of its
-  own shares the kit's link card (`/family/card.png`); a briefing also has its own card for embedding
-  (`/b/<id>/card.png`, drawn by `src/hansard/api/cards.py`). The open-book mark stays as the site's own mark, on
-  the page (family decision 4);
+- **the favicon, theme colour and link card**: since kit 1.1.0 the favicon and link card show the site's own
+  open-book mark on its Commons green tile, as on the page (family decision 4, amended at the owner's request on 6
+  November 2026); at 16 and 32 px, and in the SVG favicon, a simpler drawing of it without the handwriting. The
+  theme colour is the cloth, Commons green `#1D4535`. The kit's `head.html` replaces the site's own icon links and
+  theme colour, so there is one set; the web manifest points at the same icons, and `/favicon.ico` and
+  `/apple-touch-icon.png` are copies of the kit's. Every page without an image of its own shares the kit's link card
+  (`/family/card.png`); a briefing also has its own card for embedding (`/b/<id>/card.png`, drawn by
+  `src/hansard/api/cards.py`);
 - **Source Serif 4 for headings** (family decision 1), through `class="wts-headings"` on `<body>`. The site's
   headings were already in it. The kit's styles are pointed at the site's own copy of the face (`--wts-serif` on
   `body`), so the kit's copy is never downloaded. The small capital labels set as headings for screen readers
