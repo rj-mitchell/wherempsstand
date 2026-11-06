@@ -83,13 +83,17 @@ The server's disk is about 70% full. Done on 6 November 2026, and installed by t
 - [x] the system log capped at 500 MB, and apt clearing out old downloads weekly;
 - [x] one server-wide lock, so the sync never runs at the same time as another site's update;
 - [x] the raw Hansard files stored gzipped (decision 25): the sync now fetches over HTTPS and stores each new or
-  corrected file compressed, in about a quarter of the space. Nothing already read is read again.
+  corrected file compressed, in about a quarter of the space. Nothing already read is read again;
+- [x] a watchdog for every site on the server, not only this one (`docs/HOSTING.md`, "The watchdog"); the monthly
+  report gives each container's memory; and the server image is rebuilt in seconds when only the code has changed.
 
 Still to do:
 
 - [ ] **Compress the raw Hansard files already on the server**, once, at a quiet hour: `hansard compress-raw
   --dry-run`, then `hansard compress-raw` under the update lock (`docs/HOSTING.md`, "Disk space", has the commands).
   About 7 GB freed. Note the sync's `fetch` and `ingest` times before and after.
+- [ ] **A memory limit for Where MPs Stand**, once measured: `docker stats --no-stream` during a few syncs, and the
+  monthly reports. Then `mem_limit` in `deploy/docker-compose.yml` (`docs/HOSTING.md`, "Disk space").
 - [ ] **Docker's default log limit on the running server.** `provision.sh` sets it on a new server; this one needs
   it added by hand and Docker restarted, at a quiet time (`docs/HOSTING.md`, "Disk space").
 
