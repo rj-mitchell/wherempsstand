@@ -76,7 +76,8 @@ button,
 :root {
   color-scheme: light dark;
 
-  /* paper and ink: an ivory page by day, a dark green binding by night */
+  /* paper and ink: an ivory page by day, a dark green binding by night. The paper is #faf6ec and #0e1612 in hex,
+     which the theme-color tags (partials/head.html, index.html) and public/manifest.webmanifest repeat. */
   --paper: light-dark(oklch(97.3% 0.014 88), oklch(19% 0.014 165));
   --paper-raised: light-dark(oklch(99.2% 0.007 88), oklch(23% 0.016 165));
   --paper-sunk: light-dark(oklch(94.6% 0.018 86), oklch(16.5% 0.012 165));
