@@ -7,7 +7,7 @@ Hostkey gave you. Allow about an hour, most of it waiting for the Hansard data t
 You will need:
 - the server's **IP address** and **root password**: they are in the email Hostkey sent when the server was
   ready, and in your Hostkey control panel;
-- the three domains: wherempsstand.com, wheretheystand.co.uk and wheretheystand.org.uk;
+- the domain wherempsstand.com;
 - your Anthropic API key;
 - the code on GitHub's `main` branch (step 1).
 
@@ -22,22 +22,21 @@ The repository was called `wheretheystand` until 6 November 2026. GitHub forward
 up before then should be pointed at the new one, once:
 `git -C /opt/hansardgpt remote set-url origin https://github.com/rj-mitchell/wherempsstand.git`.
 
-## 2. Point the domains at the server
+## 2. Point the domain at the server
 
-At the company where you registered the domains, open each domain's **DNS settings** and add these records,
-using your server's IP address. Remove any existing "parking" **A** records first, but leave any **MX** or **TXT**
+At the company where you registered the domain, open its **DNS settings** and add these records, using your
+server's IP address. Remove any existing "parking" **A** records first, but leave any **MX** or **TXT**
 records alone: those deliver your email to admin@wherempsstand.com.
 
 | Domain | Type | Name / host | Value |
 |---|---|---|---|
 | wherempsstand.com | A | `@` | your server's IP |
 | wherempsstand.com | A | `www` | your server's IP |
-| wheretheystand.co.uk | A | `@` | your server's IP |
-| wheretheystand.co.uk | A | `www` | your server's IP |
-| wheretheystand.org.uk | A | `@` | your server's IP |
-| wheretheystand.org.uk | A | `www` | your server's IP |
 
-**If your domains are on Cloudflare:** set every one of these records to **DNS only** (the grey cloud), not
+The charity's own domains (wheretheystand.uk, wheretheystand.co.uk and wheretheystand.org.uk) don't point at this
+server: wheretheystand.uk is the charity's site, served by Cloudflare, and the other two redirect to it there.
+
+**If your domain is on Cloudflare:** set both of these records to **DNS only** (the grey cloud), not
 **Proxied** (the orange cloud, Cloudflare's default), for now. While proxied, `nslookup` shows Cloudflare's addresses
 instead of your server's, and the site cannot get its first HTTPS certificate. Once the site is working, the main
 address can be put behind Cloudflare's proxy: see [Cloudflare protection](#cloudflare-protection-optional) below.
@@ -87,8 +86,8 @@ bash provision.sh
 
 It asks three questions:
 1. **Main domain name:** `wherempsstand.com`
-2. **Other domain names to redirect:** `wheretheystand.co.uk wheretheystand.org.uk` (the `www` versions are added
-   automatically).
+2. **Other domain names to redirect:** leave it blank and press Return. (`www.wherempsstand.com` is added
+   automatically.)
 3. **Anthropic API key:** paste it. Nothing appears as you paste; that is deliberate. Press Return.
 
 The script then:
@@ -209,10 +208,10 @@ if something was put right) and withdraw a briefing. A withdrawal reason is show
 | Set or change the Companies House API key (for company roles; free from developer.company-information.service.gov.uk) | `cd /opt/hansardgpt/deploy && read -rsp "Companies House API key: " K && echo && sed -i -e '/^HANSARD_COMPANIES_HOUSE_KEY=/d' -e '$a\' .env && printf 'HANSARD_COMPANIES_HOUSE_KEY=%s\n' "$K" >> .env && unset K && docker compose up -d` |
 | Look up every member's company roles now, rather than 400 per update (free; about 2–3 hours) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard directorships --count 4000` |
 | See the company roles found for members whose name contains some text | `cd /opt/hansardgpt/deploy && docker compose exec app hansard directorships --show "Smith"` |
-| Remove a company role wrongly matched to a member | ask Claude: it adds the Companies House record to `data_static/directorships_exclude.csv`, removed at the next update |
+| Remove a company role wrongly matched to a member | add a line for it to `data_static/directorships_exclude.csv` in the code (the file says what goes in each column), then install it as a new version; the role is removed at the next update |
 | Check that early day motions can be read from Parliament (free) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard edms --check` |
 | Collect all early day motions since 1997 in one go, in the background (free; about 8–10 hours the first time, one request at a time) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard edms --months 400 --signatures 60000` |
-| Add, change or remove a topic | edit `config/topics.toml` in the code (ask me), then install it as a new version. Never change a published topic's `slug`: it is its address |
+| Add, change or remove a topic | edit `config/topics.toml` in the code, then install it as a new version. Never change a published topic's `slug`: it is its address |
 | Withdraw a briefing (after a complaint, say) | `curl -X POST -H "Authorization: Bearer YOUR_ADMIN_TOKEN" -H "Content-Type: application/json" -d '{"reason": "complaint about attribution"}' https://wherempsstand.com/api/admin/briefings/THE_ID/withdraw` |
 
 Your admin token is in `/opt/hansardgpt/deploy/.env` (`HANSARD_ADMIN_TOKEN=`).
@@ -284,15 +283,16 @@ bash /opt/hansardgpt/deploy/mail.sh send --test-to you@example.com /opt/wherecou
 Cloudflare's proxy (the orange cloud) puts Cloudflare between visitors and the server, so floods of automated
 requests are absorbed before they reach it. For **wherempsstand.com**, the server then uses a certificate from
 Cloudflare, closes any connection that does not come through Cloudflare, and still sees each visitor's own address
-(Cloudflare passes it on), so the per-visitor daily limit keeps working. **www.wherempsstand.com**,
-**wheretheystand.uk** (the site's address until November 2026), **wheretheystand.co.uk** and
-**wheretheystand.org.uk** (with their `www`) are redirected to wherempsstand.com by Cloudflare itself, so no DNS record shows the server's address any more. (Old DNS records can still reveal it, so
-this protects against casual abuse and heavy load more than a determined attack on the server itself.)
+(Cloudflare passes it on), so the per-visitor daily limit keeps working. **www.wherempsstand.com** is redirected to
+wherempsstand.com by Cloudflare itself, so no DNS record shows the server's address any more. (Old DNS records can
+still reveal it, so this protects against casual abuse and heavy load more than a determined attack on the server
+itself.)
 
-**Since November 2026** wheretheystand.uk is the charity's own site (the hub, on Cloudflare), and
-wheretheystand.co.uk and wheretheystand.org.uk (with their `www`) redirect to it, not to wherempsstand.com: their
-Cloudflare redirect rules now point there. Only `www.wherempsstand.com` belongs in `REDIRECT_DOMAINS` in
-`/opt/hansardgpt/deploy/.env`; with the old list, `check.sh` reports the wheretheystand names as "does not
+**The charity's domains.** Until November 2026 the site's address was wheretheystand.uk, and wheretheystand.uk,
+wheretheystand.co.uk and wheretheystand.org.uk all redirected here. Now wheretheystand.uk is the charity's own site
+(the hub, on Cloudflare), and the other two redirect to it there: none of them reaches this server, and their
+Cloudflare settings belong to the hub, not to this guide. Only `www.wherempsstand.com` belongs in `REDIRECT_DOMAINS`
+in `/opt/hansardgpt/deploy/.env`; with the old list, `check.sh` reports the wheretheystand names as "does not
 redirect". To change it on the server:
 
 ```
@@ -302,9 +302,8 @@ bash /opt/hansardgpt/deploy/update.sh
 
 1. **Install the latest version** (`bash /opt/hansardgpt/deploy/update.sh`). It fetches Cloudflare's list of
    addresses; that is harmless while nothing is proxied.
-2. **Put all the domains on Cloudflare.** For each of wherempsstand.com, wheretheystand.uk, wheretheystand.co.uk
-   and wheretheystand.org.uk: at dash.cloudflare.com, choose **Add a domain**, enter it, pick the **Free** plan, and check
-   the records it found: the **A** records for `@` and `www` from step 2 (set them to **DNS only** for now) and every
+2. **Put the domain on Cloudflare.** At dash.cloudflare.com, choose **Add a domain**, enter wherempsstand.com, pick
+   the **Free** plan, and check the records it found: the **A** records for `@` and `www` from step 2 (set them to **DNS only** for now) and every
    **MX** and **TXT** record (email). Then, at the company where you registered the domain, replace its nameservers
    with the two Cloudflare gives you, and wait for Cloudflare to say the domain is **Active** (usually within an
    hour; it emails you).
@@ -328,9 +327,6 @@ bash /opt/hansardgpt/deploy/update.sh
      at *Standard* and *Respect existing headers*, and add no "Cache everything" rule: pages carry live data, and the
      site already tells Cloudflare which files can be kept for a year.
 
-   For **wheretheystand.uk**, **wheretheystand.co.uk** and **wheretheystand.org.uk**, only **SSL/TLS → Full
-   (strict)** matters: Cloudflare
-   answers them itself, so nothing else reaches the server.
 4. **Create the origin certificate** (wherempsstand.com only): **SSL/TLS → Origin Server → Create Certificate**.
    Keep *Generate private key and CSR with Cloudflare* and key type **RSA (2048)**. Under hostnames, **remove
    `*.wherempsstand.com`** so that only `wherempsstand.com` is listed. Validity: **15 years**. Press **Create** and
@@ -348,20 +344,18 @@ bash /opt/hansardgpt/deploy/update.sh
    Paste the **Origin Certificate** from the Cloudflare page and press Return, then the **Private Key** and press
    Return. It checks they belong together and are for wherempsstand.com, switches the server over, and checks the
    site through Cloudflare. If that fails, it puts everything back and says what to check.
-7. **Have Cloudflare do the redirects.** For each domain below, first open **Rules → Redirect Rules** (in some
-   accounts, **Rules → Overview → Create rule → Redirect Rule**) and create a rule:
+7. **Have Cloudflare do the redirect** from www.wherempsstand.com. In wherempsstand.com, open **Rules → Redirect
+   Rules** (in some accounts, **Rules → Overview → Create rule → Redirect Rule**) and create a rule:
    - **Rule name**: `To wherempsstand.com`.
-   - **If incoming requests match**: for **wherempsstand.com**, choose *Custom filter expression*: field
-     **Hostname**, operator **equals**, value `www.wherempsstand.com`. For **wheretheystand.uk**,
-     **wheretheystand.co.uk** and **wheretheystand.org.uk**, choose **All incoming requests**.
+   - **If incoming requests match**: choose *Custom filter expression*: field **Hostname**, operator **equals**,
+     value `www.wherempsstand.com`.
    - **Then**: type **Dynamic**, expression `concat("https://wherempsstand.com", http.request.uri.path)`, status
      code **301**, and tick **Preserve query string**.
    - Press **Deploy**.
 
-   Then, in the same domain's **DNS → Records**, edit each record the rule covers (for wherempsstand.com, just
-   `www`; for the others, `@` and `www`): set it to **Proxied**, and change its **IPv4 address** to `192.0.2.1`
-   (an address that goes nowhere: Cloudflare answers these names itself, and the server's address is no longer
-   shown). Delete any **AAAA** records for those names. Leave MX and TXT records alone.
+   Then, in **DNS → Records**, edit the `www` record: set it to **Proxied**, and change its **IPv4 address** to
+   `192.0.2.1` (an address that goes nowhere: Cloudflare answers this name itself, and the server's address is no
+   longer shown). Delete any **AAAA** record for `www`. Leave MX and TXT records alone.
 8. **Hand the redirects over.** A few minutes later, on the server, run:
 
    ```
@@ -383,8 +377,9 @@ Cloudflare asks every visitor's browser to pass a short check first.
 
 ## Other sites on this server
 
-The charity's other sites (Where Countries Stand, Where Councils Stand) run on this server too, each in its own
-folder under `/opt`, with its own containers, data, settings, AI spending caps and update timer. This site's web
+The charity's other sites (Where Countries Stand, Where Councils Stand and Where Landlords Stand) run on this
+server too, each in its own folder under `/opt`, with its own containers, data, settings, AI spending caps and update
+timer. This site's web
 server (Caddy) is the front door for all of them: it answers every domain, with the same protections as this site
 (Cloudflare's certificate, connections not through Cloudflare closed, the 1 MB request limit, the security
 headers), and passes each site's visitors to its container over a shared Docker network called `sites`.
