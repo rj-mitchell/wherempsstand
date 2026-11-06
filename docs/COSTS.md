@@ -45,15 +45,17 @@ These run on the server you already pay for, so extra use costs nothing.
 
 ## Fixed costs (whatever the use)
 
-- **The server** (Hostkey), monthly.
+- **The server** (Hostkey), monthly, shared with the charity's other sites on it (Where Councils Stand, Where
+  Landlords Stand and Where Countries Stand).
 - **The domain names**, yearly.
 - **Email** for admin@wherempsstand.com, if it is a paid service.
 
 ## How spending is controlled
 
 - The site stops writing new briefings for the day at **$10**, and for the month at **$150**. Sources are still shown.
-- Every 10 new briefings in a day, a visitor sees a short note on what the site costs, with the Ko-fi link. It is not a
-  paywall: they can carry on. If they go through to Ko-fi they are not reminded again that day.
+- Every 10 new briefings in a day, a visitor sees a short note on what the site costs, with a link to the charity's
+  Donate page (wheretheystand.uk/donate). It is not a paywall: they can carry on. If they go through to it they are
+  not reminded again that day.
 - As a backstop against automated use, one visitor can have at most **40** new briefings a day.
 - The admin page shows spending, with warnings at 50% and 80% of the monthly budget.
 - A spending limit set in the Anthropic Console is a second safety net (Settings → Limits in the Console).

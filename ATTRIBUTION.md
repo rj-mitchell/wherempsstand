@@ -112,8 +112,10 @@ Contains NISRA data © Crown copyright.
 
 The web app bundles [Source Serif 4](https://github.com/adobe-fonts/source-serif) by Adobe, via Fontsource. Link
 preview cards are drawn with Source Serif 4 and Source Sans 3, also by Adobe (`data_static/fonts/LICENSE-*.md`).
-Both are licensed under the [SIL Open Font License 1.1](https://openfontlicense.org). No fonts are loaded from
-third-party servers.
+Both are licensed under the [SIL Open Font License 1.1](https://openfontlicense.org). The Where They Stand family
+kit (`web/public/family/`) carries its own copy of Source Serif 4, with its licence (`fonts/OFL.txt`); the site
+points the kit at the bundled copy instead, so the kit's is not downloaded. No fonts are loaded from third-party
+servers.
 
 ## Briefings written by the site
 
