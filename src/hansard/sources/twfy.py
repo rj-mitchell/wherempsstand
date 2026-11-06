@@ -38,11 +38,12 @@ import os
 import re
 import shutil
 import subprocess
+import threading
 import time
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import BinaryIO
 
@@ -148,6 +149,16 @@ def write_gzip(dest: Path, data: bytes, *, mtime_ns: int | None = None) -> None:
     tmp.replace(dest)
 
 
+def listed_mtime_matches(listed: str, mtime: float) -> bool:
+    """Whether a local file's mtime is the time TheyWorkForYou's listing gives for it. The listing is to the minute
+    in UK time; rsync keeps the source's own mtime, so a file it mirrored matches to the minute, as GMT or BST."""
+    try:
+        t = int(datetime.strptime(listed, "%Y-%m-%d %H:%M").replace(tzinfo=UTC).timestamp())
+    except ValueError:
+        return False
+    return int(mtime) // 60 * 60 in (t, t - 3600)
+
+
 def parse_name(directory: str, name: str, size_hint: str = "", mtime: str = "") -> RemoteFile | None:
     m = _NAME_RE.match(name)
     if not m:
@@ -179,12 +190,16 @@ def parse_listing(directory: str, page: str) -> list[RemoteFile]:
 
 
 class HttpsMirror:
-    def __init__(self, base_url: str, dest: Path, *, concurrency: int = 4, timeout: float = 60.0,
+    def __init__(self, base_url: str, dest: Path, *, concurrency: int = 4, timeout: float = 60.0, compress: bool = True,
                  user_agent: str = "WhereMPsStand (open-source research tool; +https://github.com/rj-mitchell/wherempsstand)"):
         self.base_url = base_url.rstrip("/")
         self.dest = dest
         self.concurrency = concurrency
+        self.compress = compress
         self.client = httpx.Client(timeout=timeout, headers={"User-Agent": user_agent}, follow_redirects=True)
+        self.adopted = 0     # files mirrored by rsync whose marker was written from the listing, not downloaded
+        self.unchanged = 0   # downloaded, but the same as the copy already here (kept, with its mtime)
+        self._lock = threading.Lock()
 
     def list_directory(self, directory: str) -> list[RemoteFile]:
         resp = self._get(f"{self.base_url}/{directory}/")
@@ -198,13 +213,23 @@ class HttpsMirror:
         return wanted
 
     def needs_download(self, f: RemoteFile) -> bool:
-        local = self.dest / f.rel_path
-        if not local.exists():
+        if not stored_path(self.dest, f.rel_path).exists():
             return True
-        marker = local.with_suffix(local.suffix + ".mtime")
+        marker = marker_path(self.dest, f.rel_path)
         return not marker.exists() or marker.read_text().strip() != f.mtime
 
+    def adopt(self, f: RemoteFile) -> bool:
+        """A file mirrored by rsync has no marker, but rsync kept TheyWorkForYou's modification time on it. If that is
+        the time in the listing, write the marker instead of downloading the file again."""
+        marker = marker_path(self.dest, f.rel_path)
+        local = stored_path(self.dest, f.rel_path)
+        if marker.exists() or not local.exists() or not listed_mtime_matches(f.mtime, local.stat().st_mtime):
+            return False
+        marker.write_text(f.mtime)
+        return True
+
     def download(self, files: list[RemoteFile], progress_every: int = 500) -> list[RemoteFile]:
+        self.adopted += sum(self.adopt(f) for f in files)
         todo = [f for f in files if self.needs_download(f)]
         done: list[RemoteFile] = []
         if not todo:
@@ -218,17 +243,32 @@ class HttpsMirror:
         return done
 
     def _fetch_one(self, f: RemoteFile) -> RemoteFile | None:
-        local = self.dest / f.rel_path
-        local.parent.mkdir(parents=True, exist_ok=True)
-        tmp = local.with_suffix(".part")
+        plain = self.dest / f.rel_path
+        gz = plain.with_name(plain.name + GZ)
+        plain.parent.mkdir(parents=True, exist_ok=True)
         try:
             resp = self._get(f"{self.base_url}/{f.rel_path}")
         except httpx.HTTPError as exc:
             log.warning("failed to fetch %s: %s", f.rel_path, exc)
             return None
-        tmp.write_bytes(resp.content)
-        tmp.replace(local)
-        local.with_suffix(local.suffix + ".mtime").write_text(f.mtime)
+        data = resp.content
+        local = stored_path(self.dest, f.rel_path)
+        if local.exists() and read_xml(local) == data:
+            # The same as the copy here: keep it and its mtime, so it is not parsed again for nothing.
+            if self.compress and local == plain:
+                write_gzip(gz, data, mtime_ns=plain.stat().st_mtime_ns)
+                plain.unlink()
+            with self._lock:
+                self.unchanged += 1
+        elif self.compress:
+            write_gzip(gz, data)
+            plain.unlink(missing_ok=True)
+        else:
+            tmp = plain.with_name(plain.name + ".part")
+            tmp.write_bytes(data)
+            tmp.replace(plain)
+            gz.unlink(missing_ok=True)
+        marker_path(self.dest, f.rel_path).write_text(f.mtime)
         return f
 
     def _get(self, url: str, attempts: int = 4) -> httpx.Response:
@@ -267,6 +307,18 @@ def rsync_directories(source: str, dest: Path, directories: Iterable[str], since
                *includes, "--exclude", "*", f"{source}/{d}/", f"{target}/"]
         log.info("rsync %s", d)
         subprocess.run(cmd, check=True)
+
+
+def drop_shadowed_gzip(root: Path, directories: Iterable[str]) -> int:
+    """After an rsync (which writes plain files), remove any gzipped copy of a file rsync has just written, so the
+    plain mirror is the one read. Returns how many were removed."""
+    n = 0
+    for d in directories:
+        for gz in (root / d).glob("*.xml.gz"):
+            if gz.with_name(xml_name(gz.name)).exists():
+                gz.unlink()
+                n += 1
+    return n
 
 
 def local_files(root: Path, directories: Iterable[str], since: date) -> list[RemoteFile]:
