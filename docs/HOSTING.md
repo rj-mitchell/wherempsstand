@@ -202,7 +202,7 @@ if something was put right) and withdraw a briefing. A withdrawal reason is show
 | Load the all-party groups now, rather than at the weekly update (free; a few seconds) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard groups` |
 | See which of these background jobs are still running (no output means all have finished) | `cd /opt/hansardgpt/deploy && docker compose exec app sh -c 'for p in /proc/[0-9]*; do tr "\0" " " < $p/cmdline 2>/dev/null; echo; done \| grep "[h]ansard "'` |
 | Load the 1997–2010 records now, rather than at the next update (once, after installing the version that adds them; free; a few hours) | `sudo systemctl start --no-block hansard-sync.service`, then watch with `journalctl -u hansard-sync -f` |
-| See whether an update is running, and whether the last one finished | `systemctl status hansard-sync --no-pager` (`active` means running; `failed` with `status=137` means it ran out of memory: run `bash /opt/hansardgpt/deploy/swap.sh`, then start it again as above) |
+| See whether an update is running, and whether the last one finished | `systemctl status hansard-sync --no-pager` (`active` means running, or waiting for another site's update to finish: see [Other sites on this server](#other-sites-on-this-server); `failed` with `status=137` means it ran out of memory: run `bash /opt/hansardgpt/deploy/swap.sh`, then start it again as above) |
 | See how much is still to do | `cd /opt/hansardgpt/deploy && docker compose run --rm -T app hansard status` (`files_unembedded` falls to 0 as meaning-based search catches up, up to 4 hours of it per update) |
 | Rebuild the meaning-search index for today's number of passages: quicker searches that find more of the closest passages (once, after meaning-based search has caught up; free; about 30–60 minutes, the site works throughout and the twice-daily update waits for it) | `cd /opt/hansardgpt/deploy && docker compose exec -d app sh -c 'mkdir -p /data/logs && hansard reindex-vectors > /data/logs/reindex.log 2>&1'`, then `docker compose exec app cat /data/logs/reindex.log` when it has finished (it ends by saying to restart), then `bash /opt/hansardgpt/deploy/update.sh` |
 | Check every vote for a whip report in one go, rather than 1,500 per update (free; about 3–4 hours) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard whips --count 20000` |
@@ -415,20 +415,24 @@ its Cloudflare origin certificate is added; until then Caddy leaves its domain a
 
 4. **Check:** `bash /opt/hansardgpt/deploy/check.sh` lists each site, and the memory left.
 
-**Keeping out of each other's way.** Each site's updates run at their own time, so two are never busy at once:
+**Keeping out of each other's way.** Each site's updates run at their own time:
 this site at 7.15am and 7.15pm (UK time), Where Councils Stand at 3.17am and Where Countries Stand at 5.41am and
-5.41pm (UTC), and Where Landlords Stand on Thursdays at 11.40am (UK time). Their containers have memory limits, so a
-runaway update stops itself rather than slowing this site. If `check.sh` reports less than 3 GB of memory free for
+5.41pm (UTC), and Where Landlords Stand on Thursdays at 11.40am (UK time). A long update can still run into the
+next one (Where Councils Stand's first load, say), so each site's scheduled update also takes one server-wide lock
+first, `/var/lock/wheretheystand-update.lock`, and waits while another update holds it: two updates never run at
+once. Backups don't take the lock; they are small and quick. Their containers have memory limits, so a runaway update
+stops itself rather than slowing this site.
+
+To see whether an update is waiting for another: `systemctl status hansard-sync --no-pager` shows `flock` as the
+running command until the lock is free, and `journalctl -u hansard-sync` then says how long it waited. To see which
+update holds the lock: `fuser -v /var/lock/wheretheystand-update.lock`. Each site's update unit wraps its command in
+`flock /var/lock/wheretheystand-update.lock`, so a new site joins by doing the same. If `check.sh` reports less than 3 GB of memory free for
 long, it is time for more memory or a second server.
 
-**Ideas for later.** Not needed now; each is worth doing if the server gets busier or a site misbehaves. All three
+**Ideas for later.** Not needed now; each is worth doing if the server gets busier or a site misbehaves. Both
 were worked out in `rj-mitchell/parentwheretheystand` (archived November 2026), an earlier plan to run every site
 from one combined setup, so its code can be copied from there.
 
-* **Jobs that wait their turn.** Updates now run at fixed, staggered times, which works while each finishes well
-  before the next starts. A long one (Where Councils Stand's first load, say) can still overlap another. A single
-  server-wide lock that every site's update and backup takes first, waiting if another job holds it, would rule
-  that out (its `scripts/run-job.sh`, using `flock`).
 * **A share of the processors for jobs.** Memory limits stop a runaway update, but an update can still keep every
   processor busy and slow the sites while it runs. Running each update in a container limited to part of the
   processors (`cpus:` in its compose file) keeps the sites quick. (A `Nice=` in a systemd unit does not reach the
