@@ -142,6 +142,27 @@ def fetch_xml(settings: Settings, since: date | None = None, transport: str = "a
             "unchanged": mirror.unchanged, "markers_from_listing": mirror.adopted}
 
 
+@app.command("compress-raw")
+def compress_raw(dry_run: bool = typer.Option(False, "--dry-run", help="report what would be done, and the likely "
+                                                                       "saving from a sample, without changing "
+                                                                       "anything"),
+                 limit: int = typer.Option(None, help="compress at most this many files (run again to continue)")):
+    """One-off: gzip the raw Hansard XML in place, keeping each file's mtime, so nothing is parsed again."""
+    _setup_logging()
+    from hansard.sources.twfy import compress_mirror
+
+    settings = _settings()
+    if dry_run:
+        out = compress_mirror(settings.raw_xml_dir, dry_run=True, limit=limit)
+    else:
+        with _one_at_a_time():
+            out = compress_mirror(settings.raw_xml_dir, limit=limit)
+    typer.echo(json.dumps(out, indent=2))
+    if out.get("conflicts"):
+        typer.echo("Some files are stored in both forms with different contents; the .gz copy is the one read.",
+                   err=True)
+
+
 @app.command()
 def ingest(workers: int = typer.Option(3, help="parser processes (each streams one file)"),
            since: str = typer.Option(None), until: str = typer.Option(None)):

@@ -19,7 +19,7 @@ which the size/mtime comparison catches. Only the latest revision of each
 
 Compressed storage
 ------------------
-The HTTPS mirror stores each file gzipped, as ``<name>.xml.gz`` (about a fifth
+The HTTPS mirror stores each file gzipped, as ``<name>.xml.gz`` (about a quarter
 of the size), next to the usual ``<name>.xml.mtime`` marker. rsync can only
 write plain ``.xml``, so it is used only when ``[sources] compress_raw_xml`` is
 false. Everything that reads the mirror accepts both forms; where a file is
@@ -335,3 +335,80 @@ def local_files(root: Path, directories: Iterable[str], since: date) -> list[Rem
                 found.add(rf)
     return latest_revisions(found)
 
+
+def _gb(n: int) -> float:
+    return round(n / 1e9, 2)
+
+
+def _mirror_bytes(root: Path) -> int:
+    return sum(p.stat().st_size for pattern in ("*/*.xml", "*/*.xml.gz") for p in root.glob(pattern))
+
+
+def superseded(root: Path) -> tuple[int, int]:
+    """(files, bytes) of earlier revisions kept beside a later one (rsync mirrors every revision; only the latest is
+    read)."""
+    by_key: dict[tuple[str, str], list[tuple[str, Path]]] = {}
+    for p in [*root.glob("*/*.xml"), *root.glob("*/*.xml.gz")]:
+        rf = parse_name(p.parent.name, xml_name(p.name))
+        if rf:
+            by_key.setdefault((rf.directory, rf.key), []).append((rf.revision, p))
+    old = [p for revs in by_key.values() for rev, p in revs if rev < max(r for r, _ in revs)]
+    return len(old), sum(p.stat().st_size for p in old)
+
+
+def compress_mirror(root: Path, *, dry_run: bool = False, limit: int | None = None,
+                    sample: int = 40) -> dict[str, object]:
+    """Gzip every plain ``.xml`` in the mirror, once (``hansard compress-raw``).
+
+    Each file is compressed to a ``.part`` file, read back and checked, given the original's mtime, renamed to
+    ``<name>.xml.gz``, and only then is the plain file deleted. The ingest manifest compares the XML's own size and
+    the mtime, both unchanged, so nothing is parsed again; markers are named after the plain file, so they still
+    apply. Safe to stop at any point and run again: a leftover ``.part`` is deleted, and a file found in both forms
+    has its plain copy deleted once the ``.gz`` is checked to hold the same XML.
+    """
+    started = time.time()
+    if not dry_run:
+        for part in root.glob("*/*.xml.gz.part"):
+            part.unlink()
+    before = _mirror_bytes(root)
+    plain = sorted(root.glob("*/*.xml"))
+    plain_bytes = sum(p.stat().st_size for p in plain)
+    old_files, old_bytes = superseded(root)
+    out: dict[str, object] = {"dry_run": dry_run, "plain_files": len(plain), "plain_gb": _gb(plain_bytes),
+                              "gb_before": _gb(before), "superseded_revisions": old_files,
+                              "superseded_gb": _gb(old_bytes)}
+    if dry_run:
+        step = max(1, len(plain) // sample) if plain else 1
+        picked = plain[::step][:sample]
+        raw = sum(p.stat().st_size for p in picked)
+        packed = sum(len(gzip.compress(p.read_bytes(), compresslevel=GZIP_LEVEL)) for p in picked)
+        ratio = packed / raw if raw else 1.0
+        out.update({"sample_files": len(picked), "sample_ratio": round(ratio, 3),
+                    "estimated_gb_after": _gb(before - plain_bytes + int(plain_bytes * ratio)),
+                    "would_compress": len(plain[:limit] if limit else plain)})
+        return out
+    compressed = resolved = 0
+    conflicts: list[str] = []
+    for i, p in enumerate(plain[:limit] if limit else plain, 1):
+        gz = p.with_name(p.name + GZ)
+        data = p.read_bytes()
+        mtime_ns = p.stat().st_mtime_ns
+        if gz.exists():
+            if read_xml(gz) == data:  # an earlier run stopped between writing the .gz and deleting the plain file
+                p.unlink()
+                resolved += 1
+            else:  # not written by this command or the HTTPS mirror; left for a person to look at (the .gz is read)
+                conflicts.append(f"{p.parent.name}/{p.name}")
+            continue
+        write_gzip(gz, data, mtime_ns=mtime_ns)
+        if gz.stat().st_mtime_ns != mtime_ns:
+            raise OSError(f"{gz}: the modification time was not kept; stopping before deleting the original")
+        p.unlink()
+        compressed += 1
+        if i % 2000 == 0:
+            log.info("compressed %d of %d files", i, len(plain))
+    after = _mirror_bytes(root)
+    out.update({"compressed": compressed, "duplicates_removed": resolved, "conflicts": conflicts,
+                "plain_files_left": len(list(root.glob("*/*.xml"))), "gb_after": _gb(after),
+                "gb_freed": _gb(before - after), "seconds": round(time.time() - started, 1)})
+    return out

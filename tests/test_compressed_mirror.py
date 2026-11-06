@@ -13,6 +13,7 @@ from hansard.ingest import ingest
 from hansard.parse.xml_stream import parse_divisions, parse_file
 from hansard.sources.twfy import (
     HttpsMirror,
+    compress_mirror,
     content_stat,
     listed_mtime_matches,
     local_files,
@@ -49,6 +50,50 @@ def test_content_stat_gives_the_xml_size_and_kept_mtime(tmp_path):
     write_gzip(gz, plain.read_bytes(), mtime_ns=plain.stat().st_mtime_ns)
     assert content_stat(gz) == content_stat(plain)
     assert gz.stat().st_size < plain.stat().st_size
+
+
+def test_compressing_an_ingested_mirror_parses_nothing_again(settings, xml_mirror):
+    first = ingest(settings, workers=1, since=SINCE)
+    assert first.errors == [] and first.files_parsed == first.files_seen > 0 and first.divisions > 0
+    manifest = {k: dict(v) for k, v in StateDB(settings.state_db).manifest().items()}
+    mtimes = {p: p.stat().st_mtime_ns for p in _all_plain(xml_mirror)}
+
+    out = compress_mirror(xml_mirror)
+    assert out["compressed"] == len(mtimes) and out["plain_files_left"] == 0 and out["conflicts"] == []
+    assert out["gb_after"] <= out["gb_before"]
+    for p, mtime_ns in mtimes.items():
+        gz = p.with_name(p.name + ".gz")
+        assert not p.exists() and gz.stat().st_mtime_ns == mtime_ns
+
+    again = ingest(settings, workers=1, since=SINCE)
+    assert again.files_seen == first.files_seen
+    assert (again.files_parsed, again.files_new, again.files_revised, again.divisions) == (0, 0, 0, 0)
+    assert {k: dict(v) for k, v in StateDB(settings.state_db).manifest().items()} == manifest
+
+
+def test_compress_raw_is_resumable(settings, xml_mirror):
+    ingest(settings, workers=1, since=SINCE)
+    plain = _all_plain(xml_mirror)
+    out = compress_mirror(xml_mirror, limit=3)
+    assert out["compressed"] == 3 and out["plain_files_left"] == len(plain) - 3
+
+    # Stopped mid-way: once between writing a .gz and deleting the plain file, once while writing a .part.
+    a, b = _all_plain(xml_mirror)[:2]
+    write_gzip(a.with_name(a.name + ".gz"), a.read_bytes(), mtime_ns=a.stat().st_mtime_ns)
+    b.with_name(b.name + ".gz.part").write_bytes(b"half a file")
+    assert ingest(settings, workers=1, since=SINCE).files_parsed == 0  # a file in both forms: the .gz is read
+
+    out = compress_mirror(xml_mirror)
+    assert out["duplicates_removed"] == 1 and out["compressed"] == len(plain) - 4
+    assert out["plain_files_left"] == 0 and not list(xml_mirror.glob("*/*.part"))
+    assert ingest(settings, workers=1, since=SINCE).files_parsed == 0
+
+
+def test_dry_run_changes_nothing(xml_mirror):
+    before = {p: p.stat().st_mtime_ns for p in xml_mirror.rglob("*")}
+    out = compress_mirror(xml_mirror, dry_run=True)
+    assert out["would_compress"] == out["plain_files"] > 0 and 0 < out["sample_ratio"] < 0.5
+    assert {p: p.stat().st_mtime_ns for p in xml_mirror.rglob("*")} == before
 
 
 # --------------------------------------------------------------------------- the HTTPS mirror, stored gzipped
@@ -129,9 +174,7 @@ def test_corrections_still_arrive_after_compressing(settings, xml_mirror, twfy):
     for p in _all_plain(xml_mirror):
         os.utime(p, (listed, listed))
     ingest(settings, workers=1, since=SINCE, directories=dirs)
-    for p in _all_plain(xml_mirror):
-        write_gzip(p.with_name(p.name + ".gz"), p.read_bytes(), mtime_ns=p.stat().st_mtime_ns)
-        p.unlink()
+    compress_mirror(xml_mirror)
 
     # The first HTTPS sync takes the markers from the listing rather than downloading everything again.
     m, done, stats = _sync(settings, twfy, dirs)
