@@ -84,9 +84,11 @@ Ten varied questions, each answered by both models from the same sources.
 | …accuracy | better in 2 | better in 2 (6 ties) |
 | …coverage of the arguments | better in 5 | better in 4 |
 
-**Decision: Opus stays for briefings.** Both are equally accurate; Opus covers a little more and reads a little
-better, at twice the price. The judge was Opus itself, which may favour its own writing. If costs need cutting,
-switching is one line (`model` in `[answer]`).
+**Decision at the time (11 October): Opus stayed for briefings.** Both are equally accurate; Opus covers a little
+more and reads a little better, at twice the price. The judge was Opus itself, which may favour its own writing.
+
+**Since later in October 2026, briefings use Sonnet**, to halve their cost for the same accuracy (`model` in
+`[answer]`, `config/settings.toml`). Switching back to Opus is that one line, if costs allow.
 
 A lesson from the first attempt at judging: the judge was given shortened extracts to save money, and then
 "found" invented quotations that were really in the full speeches. The judge now sees the full sources, and,
