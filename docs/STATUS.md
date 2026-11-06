@@ -1,6 +1,7 @@
 # Open items
 
-What is still to do for Where MPs Stand, as of 6 November 2026. Tick items off or delete them when done.
+What is still to do for Where MPs Stand, as of 6 November 2026 (updated the same day). Tick items off or delete
+them when done.
 
 Most of these were in two files of the pre-public repository, `rj-mitchell/hansardgpt` (`docs/ROADMAP.md` of
 11 October and `docs/FOLLOW_UP.md` of 12–19 October), which is being archived. Everything there that was done or
@@ -60,10 +61,7 @@ and trade mark checks, legal review) are in the charity's plan (rj-mitchell/wher
 - [ ] **An AI summary for "In Parliament this week"** (optional). The page itself exists.
 - [ ] **Briefings asked about a member, shown on their page.** Needs a decision first: it would show what people
   ask about a named person. Perhaps featured briefings only.
-- **Parked:** a timeline of speeches beside declared interests and donations. The roadmap called it the highest
-  risk of implying wrongdoing; leave it unless a legal review clears it.
-- **Decided against:** a ready-made briefing for every debate (kept unstored to hold costs down, as for bill
-  stages), and labels such as "wrecking amendment" (they take a side).
+- **Parked**, and **decided against**: see [DECISIONS.md](DECISIONS.md), 21 to 23.
 
 ## Quality
 
@@ -92,9 +90,30 @@ Still to do:
 
 ## Documents and identity
 
-These are in the charity's plan (`plans/family/PLAN.md`):
+Done on 6 November 2026, from the charity's family plan (`plans/family/PLAN.md`):
 
-- split the README;
-- the family binding;
-- the pages that name a person as the operator;
-- the Ko-fi link.
+- [x] **The family binding** on every page: "A Where They Stand project" under the name, the family shelf in the
+  footer, the favicon, theme colour and link card in Commons green, and the family's headings
+  ([DESIGN.md](DESIGN.md), "The family binding");
+- [x] **the pages that named a person as the operator** (About, Privacy, Terms, Press) now say the site is a Where
+  They Stand project, run by its founder until the charity is registered; About has an "In the family" section;
+- [x] **donations** go to the charity's Donate page, not straight to Ko-fi;
+- [x] **under a briefing**, the same question on Where Councils Stand or Where Countries Stand, where their record
+  deals with the subject;
+- [x] **the README split** into [METHOD.md](METHOD.md), [OPERATIONS.md](OPERATIONS.md), [DESIGN.md](DESIGN.md) and
+  [EVALUATION.md](EVALUATION.md), with a new [DECISIONS.md](DECISIONS.md), and the README rewritten to the family's
+  template; [HOSTING.md](HOSTING.md) says at the top that it is the shared server's manual for now.
+
+Still to do:
+
+- [ ] **Check the server's donations link.** If `/opt/hansardgpt/deploy/.env` sets `HANSARD_DONATE_URL` to the Ko-fi
+  page, delete that line (the setting now points at wheretheystand.uk/donate), then `docker compose up -d` in the
+  same folder.
+- [ ] **When the family kit changes** (a status, a new project), sync it again: [DESIGN.md](DESIGN.md), "The family
+  binding". The kit isn't checked against the charity's copy in CI, since that repository is private; a test checks
+  only that the copy here hasn't been edited.
+- [ ] **An MP's page to the councils in the seat, and back** (the family plan, section 4): needs a lookup from
+  constituencies to local authorities.
+- [ ] **Move the shared server's parts** (the front door, email, alerts, disk checks, the update lock) to the family
+  repository's `server/` and OPERATIONS document once it exists (family decision 6), and leave [HOSTING.md](HOSTING.md)
+  with this site's steps only.

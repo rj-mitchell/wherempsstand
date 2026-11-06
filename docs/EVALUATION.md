@@ -1,8 +1,9 @@
-# The test set and what it showed
+# The test set, and measured performance
 
-First run 11 October 2026. The questions are in `eval/questions.toml`, the summaries and the question readings in
-`eval/runs/` (the full runs, with every source and briefing, are large and kept out of the repository: `hansard
-eval-sources` and `hansard eval-briefings` write them again), and the relevance grades in `eval/judgments.jsonl`.
+The test set and what it showed, then how fast each step runs (at the end). The test set was first run on
+11 October 2026. The questions are in `eval/questions.toml`, the summaries and the question readings in `eval/runs/`
+(the full runs, with every source and briefing, are large and kept out of the repository: `hansard
+eval sources` and `hansard eval briefings` write them again), and the relevance grades in `eval/judgments.jsonl`.
 
 ## What it is
 
@@ -117,3 +118,24 @@ About **$5.10** in all. First round about $2.10: reading the questions with each
 about $0.11; checking the grader with Sonnet about $0.15; Opus briefings about $1.30 (including about $0.10 lost to
 a bug in the scoring script). Second round about $3.00: Sonnet briefings $0.52; two side-by-side judgements $1.33
 (the first, with shortened sources, had to be redone); Opus briefings with the new instructions $1.14.
+
+## Measured performance
+
+Moved here from the README on 6 November 2026.
+
+On a 4-vCPU cloud VM, measured when the archive started in 2010 (the record now goes back to 1997):
+
+| Step | Result |
+|---|---|
+| Download (HTTPS) | 24,695 files, 4.9 GB, 14 minutes |
+| Ingest | 3.73 M records, 5,344 divisions, 2.35 M votes; 3 minutes; peak 664 MB across all processes |
+| Keyword index | 4.68 M passages in 9 minutes; peak 2.7 GB during the full-text build |
+| Daily sync (12 new day-files) | 28 s; peak 2.4 GB |
+| Member reshuffle (96 people; 225 k passages updated in place, text and vectors kept) | 21 s; peak 1.7 GB |
+| Multi-year SQL (Parquet + DuckDB) | 20–50 ms |
+| Search (filters + BM25 + vectors + ranking + full records + speaker profiles) | 0.25–0.5 s warm |
+| Embedding (`arctic-embed-xs`, CPU, batch 8) | 20–110 passages/s depending on length and CPU load; peak ~1 GB |
+
+Embedding the whole archive is a one-off backlog of roughly two days on 4 vCPUs. It runs newest first and
+resumes where it stopped. Keyword search covers everything in the meantime, and semantic matching covers
+whatever has been embedded so far.

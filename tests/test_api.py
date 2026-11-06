@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import html
 import json
 
 import pytest
@@ -315,7 +316,7 @@ def _app_with_dist(indexed_settings, tmp_path, monkeypatch=None):
     (dist / "index.html").write_text(
         '<!doctype html><html><head><title>Where MPs Stand</title>'
         '<meta property="og:title" content="Where MPs Stand" />'
-        '<meta property="og:image" content="https://wherempsstand.com/og-image.png" />'
+        '<meta property="og:image" content="https://wherempsstand.com/family/card.png">'
         '<link rel="canonical" href="https://wherempsstand.com/" /></head><body>app</body></html>')
     s = dataclasses.replace(indexed_settings, raw={
         **indexed_settings.raw, "paths": {**indexed_settings.raw.get("paths", {}), "web_dist": str(dist)}})
@@ -341,8 +342,8 @@ def test_every_briefing_gets_a_permanent_shareable_address(indexed_settings, tmp
     page = client.get(f"/b/{bid}")
     assert page.status_code == 200 and "<body>app</body>" in page.text
     assert '<meta property="og:title" content="What has been said about trial by jury? — Where MPs Stand" />' in page.text
-    # shared links show the site's own image; the briefing's card is still there for embedding
-    assert 'og-image.png" />' in page.text and 'content="noindex"' in page.text
+    # shared links show the site's family card; the briefing's own card is still there for embedding
+    assert '/family/card.png" />' in page.text and 'content="noindex"' in page.text
     assert page.text.count("<title>") == 1 and page.text.count('property="og:image"') == 1  # site-wide tags replaced
 
     card = client.get(f"/b/{bid}/card.png")
@@ -428,7 +429,7 @@ def test_reports_are_limited_per_visitor(indexed_settings, tmp_path):
 def test_donate_link_is_hidden_until_set(indexed_settings, tmp_path, monkeypatch):
     monkeypatch.delenv("HANSARD_DONATE_URL", raising=False)
     app, _, _ = make_app(indexed_settings, tmp_path, auth=False)
-    assert TestClient(app).get("/api/site").json() == {"donate_url": "https://ko-fi.com/wheretheystand"}
+    assert TestClient(app).get("/api/site").json() == {"donate_url": "https://wheretheystand.uk/donate"}
     unset = dataclasses.replace(indexed_settings, raw={**indexed_settings.raw, "site": {"donate_url": ""}})
     app, _, _ = make_app(unset, tmp_path, auth=False)
     client = TestClient(app)
@@ -573,3 +574,17 @@ def test_sign_in_attempts_are_throttled_per_address_whatever_email_is_tried(api)
     codes = [client.post("/api/auth/login", json={"email": f"guess{i}@example.org", "password": "wrong"}).status_code
              for i in range(21)]
     assert codes[:20] == [401] * 20 and codes[20] == 429
+
+
+def test_pages_without_their_own_image_share_the_family_card():
+    from pathlib import Path
+
+    from hansard.api.briefings import SITE_CARD, SITE_CARD_ALT, page_with_meta
+
+    head = (Path(__file__).resolve().parents[1] / "web" / "public" / "family" / "head.html").read_text()
+    # the alt text is the family kit's own, word for word (escaped as the kit writes it)
+    assert f'content="{html.escape(SITE_CARD_ALT)}"' in head and f'{SITE_CARD}"' in head
+    page = page_with_meta('<html><head><meta property="og:image" content="x"></head></html>', title="T",
+                          description="D", url="https://wherempsstand.com/bills/x")
+    assert page.count('property="og:image"') == 1
+    assert '<meta property="og:image" content="https://wherempsstand.com/family/card.png" />' in page

@@ -30,9 +30,13 @@ export function SupportReminder({ count, donateUrl, onClose }: { count: number; 
         There are no adverts, and no money is taken from parties, campaigns or lobbyists, so the site depends on its
         readers. If it has been useful to you, a small donation keeps it free for everyone.
       </p>
+      <p>
+        Where MPs Stand is a Where They Stand project. Donations go through Where They Stand's Donate page, which
+        explains where they go until the charity, which is applying to register, has a bank account of its own.
+      </p>
       <div className="support-actions">
         <a className="button" href={donateUrl} target="_blank" rel="noopener" onClick={donated}>
-          Support the site on Ko-fi
+          Go to the Donate page
         </a>
         <button type="button" className="secondary" ref={later} onClick={() => ref.current?.close()}>
           Not now, carry on

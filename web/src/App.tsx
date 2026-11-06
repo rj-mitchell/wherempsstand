@@ -14,6 +14,8 @@ import { ATTRIBUTION } from "./attribution";
 import { BRAND } from "./brand";
 import { Mark } from "./components/Mark";
 import { fmtDate } from "./render";
+import { FamilyEndorsement } from "./components/Family";
+import { SameQuestion } from "./components/SameQuestion";
 import { SiteFooter } from "./components/SiteFooter";
 import { followUpsFor } from "./followups";
 import { COMPARE_HANDOVER, MENUS, NAV } from "./nav";
@@ -640,11 +642,14 @@ export default function App() {
             </a>
           )}
           {/* a topic page's own title is its main heading; elsewhere the site's name is */}
-          {TOPIC.test(window.location.pathname) ? (
-            <p className="wordmark">{WORDMARK}</p>
-          ) : (
-            <h1 className="wordmark">{WORDMARK}</h1>
-          )}
+          <div className="name-block">
+            {TOPIC.test(window.location.pathname) ? (
+              <p className="wordmark">{WORDMARK}</p>
+            ) : (
+              <h1 className="wordmark">{WORDMARK}</h1>
+            )}
+            <FamilyEndorsement />
+          </div>
           <p className="tagline">{BRAND.tagline}</p>
           <p className="imprint">
             <span>Independent research service</span>
@@ -813,6 +818,7 @@ export default function App() {
               open={t.status === "answering" || (!t.answer && t.status === "done")}
               writing={t.status === "answering"}
             />
+            {t.status === "done" && <SameQuestion question={t.question} />}
             {t.status === "done" && t.plan && (
               <ElsewhereForSearch
                 words={t.plan.search_text}

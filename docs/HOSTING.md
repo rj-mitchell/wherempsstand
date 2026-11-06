@@ -1,4 +1,39 @@
-# Putting Where MPs Stand online (Hostkey, London)
+# Where MPs Stand and the shared server (Hostkey, London)
+
+## This is the front door for every site on the shared server
+
+Four of the charity's sites run on one server in London, and **this repository's `deploy/` folder is the front door
+for all of them**, in Where MPs Stand's checkout at `/opt/hansardgpt` (its original name):
+
+- **Caddy**, the web server that answers every domain and passes each site's visitors to its containers (`SITES` in
+  `deploy/.env`; [Other sites on this server](#other-sites-on-this-server));
+- **Cloudflare** set-up for each domain (`deploy/cloudflare.sh`), and the health check (`deploy/check.sh`);
+- **email from the server** (`deploy/mail.sh`) and **failure alerts** for every site's jobs (`alert@.service`;
+  [Email from the server](#email-from-the-server));
+- the **hourly disk check** and **monthly disk report** (`wheretheystand-disk.timer`,
+  `wheretheystand-disk-report.timer`; [Disk space](#disk-space));
+- the **server-wide update lock**, `/var/lock/wheretheystand-update.lock`, which each site's update takes so that two
+  never run at once.
+
+| Site | Folder on the server | Update unit (and timer) | When it runs |
+|---|---|---|---|
+| Where MPs Stand | `/opt/hansardgpt` | `hansard-sync.service` | 7.15am and 7.15pm (UK time) |
+| Where Councils Stand | `/opt/wherecouncilsstand` | `councils-update.service` | 3.17am (UTC) |
+| Where Countries Stand | `/opt/wherecountriesstand` | `wcs-update.service` | 5.41am and 5.41pm (UTC) |
+| Where Landlords Stand | `/opt/wherelandlordsstand` | `landlords-update.service` | Thursdays at 11.40am (UK time) |
+
+Each site also has its own nightly backup (`hansard-backup`, `councils-backup`, `wcs-backup`, `landlords-backup`).
+Never put the server's address in this or any other public repository, letters included: the sites sit behind
+Cloudflare, and the server turns away connections that don't come through it.
+Where Lives Stand, the charity's own site (wheretheystand.uk) and the game Understudy: Lumaya run on Cloudflare
+Workers, not on this server.
+
+This guide stays the manual for the shared server until the family's own OPERATIONS document and `server/` folder
+exist (the charity's family plan, decision 6). The other sites' `docs/DEPLOY.md` cover only their own steps and link
+here for the rest, so keep the section names below ("Other sites on this server", "Email from the server",
+"Cloudflare protection") as they are, or update those links when they change.
+
+## Putting Where MPs Stand online
 
 This guide takes you from a newly provisioned server to a live site at **wherempsstand.com**, step by step. It is
 written for your Hostkey virtual server in London, running Ubuntu 24.04, which you log in to with the root password
@@ -187,7 +222,7 @@ if something was put right) and withdraw a briefing. A withdrawal reason is show
 | Install a new version of the site | merge the latest changes into `main` on GitHub (step 1), then on the server: `bash /opt/hansardgpt/deploy/update.sh` (it finishes with the health check) |
 | Restart the site | `cd /opt/hansardgpt/deploy && docker compose restart` |
 | Change the API key | the command below |
-| Change the "Support this site" link (it points to https://ko-fi.com/wheretheystand) | add `HANSARD_DONATE_URL=https://…` to `/opt/hansardgpt/deploy/.env`, then `docker compose up -d` in the same folder |
+| Change the "Support this site" link (it points to the charity's Donate page, https://wheretheystand.uk/donate) | add `HANSARD_DONATE_URL=https://…` to `/opt/hansardgpt/deploy/.env`, then `docker compose up -d` in the same folder |
 | List recent briefings | `curl -H "Authorization: Bearer YOUR_ADMIN_TOKEN" https://wherempsstand.com/api/admin/briefings` |
 | Feature a briefing (listed on the Topics page and found by search engines) | the admin page: "Feature" next to a recent briefing, or paste its address under "Featured briefings" |
 | Write the topic briefings now, rather than waiting for the twice-daily update (about 11p each) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard topics refresh` (add `--only cost-of-living` for one) |
@@ -229,9 +264,9 @@ Then run `bash /opt/hansardgpt/deploy/check.sh`: it should say "Anthropic accept
 
 The server emails **wheretheystanduk@gmail.com** when something needs a look, for every site on it:
 
-- a scheduled job fails: an update (Where MPs Stand's sync, Where Councils Stand's and Where Countries Stand's
-  updates) or a nightly backup. Where Countries Stand's update also fails, on purpose, when briefing spending
-  reaches 80% of a cap or briefings have been failing, so that comes by email too;
+- a scheduled job fails: an update (Where MPs Stand's sync, and Where Councils Stand's, Where Countries Stand's and
+  Where Landlords Stand's updates) or a nightly backup. Where Countries Stand's update also fails, on purpose, when
+  briefing spending reaches 80% of a cap or briefings have been failing, so that comes by email too;
 - the watchdog restarts Where MPs Stand because it stopped answering;
 - the disk is 80% full or more (checked every hour; see [Disk space](#disk-space)).
 
@@ -258,7 +293,7 @@ revoked on its own without changing the account's password. Set it up once:
    The test message should arrive within a minute. Then run `bash /opt/hansardgpt/deploy/update.sh` (and the other
    sites' `update.sh`) once, so the jobs know where to report.
 
-Never paste the app password anywhere else, including to Claude. To stop the server sending, delete it at
+Never paste the app password anywhere else. To stop the server sending, delete it at
 myaccount.google.com/apppasswords.
 
 The same script sends prepared letters, such as Where Councils Stand's requests to councils for permission to read
@@ -288,7 +323,7 @@ wherempsstand.com by Cloudflare itself, so no DNS record shows the server's addr
 still reveal it, so this protects against casual abuse and heavy load more than a determined attack on the server
 itself.)
 
-**The charity's domains.** Until November 2026 the site's address was wheretheystand.uk, and wheretheystand.uk,
+**The charity's domains.** Until 31 October 2026 the site's address was wheretheystand.uk, and wheretheystand.uk,
 wheretheystand.co.uk and wheretheystand.org.uk all redirected here. Now wheretheystand.uk is the charity's own site
 (the hub, on Cloudflare), and the other two redirect to it there: none of them reaches this server, and their
 Cloudflare settings belong to the hub, not to this guide. Only `www.wherempsstand.com` belongs in `REDIRECT_DOMAINS`
@@ -540,6 +575,6 @@ docker compose start app
 
 ## Spending limits
 
-Every 10 new briefings in a day, a visitor sees a short note on what the site costs, with your Ko-fi link; if they
-go through to Ko-fi, they are not reminded again that day. As a backstop against automated use, a visitor can have
+Every 10 new briefings in a day, a visitor sees a short note on what the site costs, with a link to the charity's
+Donate page; if they go through to it, they are not reminded again that day. As a backstop against automated use, a visitor can have
 at most 40 new briefings a day. The whole site has budgets of $10 a day and $150 a month. To change any of these, edit the `[usage]` section of `config/settings.toml`, then install it as a new version (see the table).

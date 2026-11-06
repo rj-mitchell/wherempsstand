@@ -3,5 +3,5 @@ export const BRAND = {
   name: "Where MPs Stand",
   tagline: "Sourced briefings on the record of Parliament",
   independence:
-    "Where MPs Stand is an independent project. It is not affiliated with or endorsed by the UK Parliament.",
+    "Where MPs Stand is independent. It is not affiliated with or endorsed by the UK Parliament.",
 };
