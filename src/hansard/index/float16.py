@@ -101,13 +101,10 @@ def gb(n: float) -> float:
 
 
 def estimate_bytes(tbl: Any, rows: int) -> int:
-    """The new table's likely size: 2 bytes per number, the other columns as a sample of rows takes them, and the
-    meaning-search index (its compressed codes and row ids), with a tenth more for good measure."""
+    """The new table's likely size: 2 bytes per number with a margin (measured: 0.82 KB a row for 384 numbers, all
+    columns and the index included), and 64 bytes a row for the other columns and the meaning-search index."""
     dim = tbl.schema.field("vector").type.list_size
-    others = [f.name for f in tbl.schema if f.name != "vector"]
-    sample = tbl.search().select(others).limit(min(rows, 2000)).to_arrow() if others and rows else None
-    per_row = (sample.nbytes / sample.num_rows) if sample is not None and sample.num_rows else 0
-    return int(rows * (dim * 2 + per_row + max(1, dim // 8) + 16) * 1.1)
+    return int(rows * (dim * 2 * 1.15 + 64))
 
 
 # ---- the tables ----------------------------------------------------------------------------------------------------
@@ -360,13 +357,13 @@ def convert(target: Target, *, dry_run: bool = False, keep_old: bool = False, fo
     src = db.open_table(target.name)
     rows = src.count_rows()
     out["rows"] = rows
-    out["gb_before"] = gb(folder_bytes(target.path))
+    out["gb_before"] = gb(folder_bytes(target.folder(target.name)))
     out["free_gb_before"] = gb(free_bytes(target.path))
     if vector_value_type(src.schema) == pa.float16():
         out["status"] = "already 16-bit"
         if not dry_run:
             out["removed"] = remove_leftovers(target, db, keep_old)
-            out["gb_after"] = gb(folder_bytes(target.path))
+            out["gb_after"] = gb(folder_bytes(target.folder(target.name)))
         return out
 
     estimate = estimate_bytes(src, rows)
@@ -422,7 +419,7 @@ def convert(target: Target, *, dry_run: bool = False, keep_old: bool = False, fo
     live = db.open_table(target.name)
     live.optimize(cleanup_older_than=KEEP_OLD_VERSIONS)
     out["status"] = "converted" + (f"; the old table is kept as {target.kept_name}" if keep_old else "")
-    out["gb_after"] = gb(folder_bytes(target.path))
+    out["gb_after"] = gb(folder_bytes(target.folder(target.name)))
     out["free_gb_after"] = gb(free_bytes(target.path))
     out["gb_saved"] = round(out["gb_before"] - out["gb_after"], 2)
     return out
