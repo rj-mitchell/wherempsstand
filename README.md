@@ -144,7 +144,7 @@ The web app takes its look from the printed Official Report:
 
 The tone is that of a reference work:
 - a mark showing the bound record, open: handwriting and a pen on the left page, the same words found by search
-  on the right, under a magnifying glass (`web/public/icon.svg`, with phone icons
+  on the right, under a magnifying glass (`web/public/icon.svg`, with `favicon.ico` for older browsers, phone icons
   and a 1200×630 link-preview card), and the name in spaced capitals;
 - square corners, ruled lists, and example questions numbered as on the Order Paper;
 - plain, formal wording; colour only where it carries meaning (the House, a citation, a warning).
