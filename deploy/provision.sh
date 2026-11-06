@@ -12,7 +12,8 @@
 #   4. builds and starts the app behind Caddy (automatic HTTPS)
 #   5. starts the one-off bootstrap in the background (downloads ~5 GB of Hansard
 #      since 2010, ingests, indexes; embeddings continue in later syncs)
-#   6. installs the twice-daily sync timer and the nightly backup timer
+#   6. installs the twice-daily sync timer, the nightly backup timer, and the hourly disk check and monthly disk
+#      report (both email the alerts address once mail.sh is set up)
 # The site is public. An admin token (for /api/admin/usage and /api/admin/sync) is
 # generated into deploy/.env. For an invite-only site instead, see the README.
 set -euo pipefail
@@ -91,12 +92,15 @@ docker compose up -d --build
 echo "==> Starting the initial data load in the background (log: /var/log/hansard-bootstrap.log)"
 nohup docker compose run --rm -T app hansard bootstrap --embed-minutes 120 > /var/log/hansard-bootstrap.log 2>&1 &
 
-echo "==> Installing the sync and backup timers"
+echo "==> Installing the sync, backup and disk timers"
 mkdir -p backups
 cp hansard-sync.service hansard-sync.timer hansard-backup.service hansard-backup.timer \
-   hansard-watchdog.service hansard-watchdog.timer /etc/systemd/system/
+   hansard-watchdog.service hansard-watchdog.timer alert@.service \
+   wheretheystand-disk.service wheretheystand-disk.timer \
+   wheretheystand-disk-report.service wheretheystand-disk-report.timer /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable --now hansard-sync.timer hansard-backup.timer hansard-watchdog.timer
+systemctl enable --now hansard-sync.timer hansard-backup.timer hansard-watchdog.timer \
+   wheretheystand-disk.timer wheretheystand-disk-report.timer
 
 cat <<MSG
 

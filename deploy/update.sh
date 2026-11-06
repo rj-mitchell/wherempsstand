@@ -2,8 +2,9 @@
 # Install the latest version of Where MPs Stand (whatever has been merged into `main` on GitHub).
 # Run on the server, as root:
 #   bash /opt/hansardgpt/deploy/update.sh
-# It fetches the new code, rebuilds and restarts the site (a few seconds of downtime), refreshes the timers,
-# clears out old build files, and finishes with the health check.
+# It fetches the new code, rebuilds and restarts the site (a few seconds of downtime), refreshes the timers (the
+# site's own, and the disk check and report that serve every site), clears out old build files, and finishes with
+# the health check.
 set -euo pipefail
 DIR="${DIR:-/opt/hansardgpt}"
 
@@ -18,11 +19,15 @@ if [[ -z "${UPDATE_RESTARTED:-}" && "$(sha1sum "$DIR/deploy/update.sh" | cut -d'
 fi
 
 cd "$DIR/deploy"
-echo "==> Refreshing the update and backup timers"
+echo "==> Refreshing the update, backup and disk timers"
+# the disk timers serve every site on this server: an hourly check that emails at 80% full, and a monthly report
 cp hansard-sync.service hansard-sync.timer hansard-backup.service hansard-backup.timer \
-   hansard-watchdog.service hansard-watchdog.timer alert@.service /etc/systemd/system/
+   hansard-watchdog.service hansard-watchdog.timer alert@.service \
+   wheretheystand-disk.service wheretheystand-disk.timer \
+   wheretheystand-disk-report.service wheretheystand-disk-report.timer /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable --now hansard-sync.timer hansard-backup.timer hansard-watchdog.timer >/dev/null
+systemctl enable --now hansard-sync.timer hansard-backup.timer hansard-watchdog.timer \
+   wheretheystand-disk.timer wheretheystand-disk-report.timer >/dev/null
 
 if [[ ! -r /etc/wheretheystand/mail.env ]]; then
   echo "    (Alerts aren't emailed yet: set up with bash $DIR/deploy/mail.sh setup, docs/HOSTING.md)"

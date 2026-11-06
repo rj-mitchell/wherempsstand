@@ -233,7 +233,10 @@ The server emails **wheretheystanduk@gmail.com** when something needs a look, fo
 - a scheduled job fails: an update (Where MPs Stand's sync, Where Councils Stand's and Where Countries Stand's
   updates) or a nightly backup. Where Countries Stand's update also fails, on purpose, when briefing spending
   reaches 80% of a cap or briefings have been failing, so that comes by email too;
-- the watchdog restarts Where MPs Stand because it stopped answering.
+- the watchdog restarts Where MPs Stand because it stopped answering;
+- the disk is 80% full or more (checked every hour; see [Disk space](#disk-space)).
+
+On the 1st of each month it also sends a report on where the disk is going.
 
 Each email gives the job, what happened and its last lines in the system log. The same job is reported at most once
 every six hours.
@@ -433,6 +436,35 @@ from one combined setup, so its code can be copied from there.
 * **A watchdog for every site.** The watchdog restarts only this site when it stops answering. Docker marks the
   other sites unhealthy but does not restart them. Extending `deploy/watchdog.sh` to check each site in `SITES`
   (each answers `/api/health`) and restart its container would cover them all, with the same email.
+
+## Disk space
+
+The server's disk holds every site's data, and Where MPs Stand's is by far the largest (about 40 GB). Two jobs
+watch it, for every site on the server. Both are installed by `update.sh` and email the alerts address
+([Email from the server](#email-from-the-server)):
+
+- **every hour**, `deploy/disk-check.sh` emails if the disk is **80% full** or more, with what is using it. While it
+  stays that full, it emails again at most every six hours;
+- **on the 1st of each month**, `deploy/disk-report.sh` emails where the disk is going: each site's data and its
+  largest folders, the search indexes and how many old versions each keeps, Docker's images and build cache, swap,
+  the system log, and last month's figure for comparison.
+
+`check.sh` also marks the disk ✗ from 80%. To see the report now, run `bash /opt/hansardgpt/deploy/disk-report.sh`
+(it prints it, and emails it too).
+
+**If the disk is filling**, these are safe at any time and free space at once:
+
+```
+docker builder prune -f            # Docker's build cache: rebuilt as needed
+docker image prune -f              # old copies of the sites' programs that nothing uses
+journalctl --vacuum-size=500M      # the system log (it is kept under 500 MB anyway)
+apt-get clean                      # downloaded updates that are already installed
+```
+
+**Never run `docker volume prune`**: it deletes every site's data that isn't running at that moment. If those are
+not enough, the next steps are the site's own (each site's search indexes, and Where MPs Stand's raw Hansard files):
+the charity's server review, `plans/family/audits/server.md` in the `wheretheystand-charity` repository, lists them
+with the commands to measure first.
 
 ## Backups
 
