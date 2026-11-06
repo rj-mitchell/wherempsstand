@@ -449,6 +449,9 @@ watch it, for every site on the server. Both are installed by `update.sh` and em
   largest folders, the search indexes and how many old versions each keeps, Docker's images and build cache, swap,
   the system log, and last month's figure for comparison.
 
+`update.sh` also keeps the server's own logs and downloads in check (`deploy/housekeeping.sh`): the system log is
+capped at 500 MB, and apt deletes out-of-date downloaded packages once a week.
+
 `check.sh` also marks the disk ✗ from 80%. To see the report now, run `bash /opt/hansardgpt/deploy/disk-report.sh`
 (it prints it, and emails it too).
 
@@ -460,6 +463,27 @@ docker image prune -f              # old copies of the sites' programs that noth
 journalctl --vacuum-size=500M      # the system log (it is kept under 500 MB anyway)
 apt-get clean                      # downloaded updates that are already installed
 ```
+
+**Docker's log limit (once, at a quiet time).** Each site's containers keep at most 30 MB of logs, set in its
+compose file. A default for any other container belongs in `/etc/docker/daemon.json`; `provision.sh` writes it on a
+new server, but a server set up before November 2026 needs it added by hand. Applying it restarts Docker, which
+stops every site on the server for up to a minute, so do it at a quiet time and away from the update times (see
+[Other sites on this server](#other-sites-on-this-server)). On the server:
+
+```
+cat /etc/docker/daemon.json
+```
+
+If that says "No such file or directory", run:
+
+```
+printf '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"3"}}\n' > /etc/docker/daemon.json
+systemctl restart docker
+bash /opt/hansardgpt/deploy/check.sh
+```
+
+Every site's containers start again by themselves. If the file already exists, add the two settings to it by hand
+instead of replacing it.
 
 **Never run `docker volume prune`**: it deletes every site's data that isn't running at that moment. If those are
 not enough, the next steps are the site's own (each site's search indexes, and Where MPs Stand's raw Hansard files):

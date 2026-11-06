@@ -27,6 +27,20 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+echo "==> Capping the size of every container's log"
+# Docker's default for containers started outside the sites' compose files (which set the same limits themselves).
+# Written before Docker is installed, so it takes effect from the start. On a server that already runs Docker, it
+# takes effect only when Docker restarts, which stops every site for a few seconds: docs/HOSTING.md, "Disk space".
+mkdir -p /etc/docker
+if [[ ! -f /etc/docker/daemon.json ]]; then
+  printf '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"3"}}\n' > /etc/docker/daemon.json
+  if command -v docker >/dev/null; then
+    echo "    Docker is already running: the log cap applies when it next restarts (docs/HOSTING.md, \"Disk space\")."
+  fi
+elif ! grep -q '"max-size"' /etc/docker/daemon.json; then
+  echo "    /etc/docker/daemon.json exists without a log cap; left alone (docs/HOSTING.md, \"Disk space\")."
+fi
+
 echo "==> Installing Docker and git"
 apt-get update -y
 apt-get install -y ca-certificates curl git openssl
@@ -81,6 +95,9 @@ fi
 
 echo "==> Adding swap space (spare memory on disk for large updates)"
 bash "$DIR/deploy/swap.sh" || echo "WARNING: could not add swap; carrying on."
+
+echo "==> Keeping the system log and apt's downloads in check"
+bash "$DIR/deploy/housekeeping.sh" || echo "WARNING: could not apply the log and download limits; carrying on."
 
 echo "==> Writing the web server's own settings (Cloudflare's addresses, the certificate)"
 bash "$DIR/deploy/caddy-local.sh"

@@ -36,6 +36,9 @@ fi
 echo "==> Making sure the server has swap space (spare memory on disk for large updates)"
 bash "$DIR/deploy/swap.sh" || echo "WARNING: could not add swap; carrying on."
 
+echo "==> Keeping the system log and apt's downloads in check"
+bash "$DIR/deploy/housekeeping.sh" || echo "WARNING: could not apply the log and download limits; carrying on."
+
 echo "==> Refreshing the web server's own settings (Cloudflare's addresses, the certificate)"
 local_before=$(cat local/*.caddy local/sites/* 2>/dev/null | sha1sum | cut -d' ' -f1)
 bash "$DIR/deploy/caddy-local.sh"
