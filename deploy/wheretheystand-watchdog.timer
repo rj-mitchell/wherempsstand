@@ -1,5 +1,5 @@
 [Unit]
-Description=Check every two minutes that Where MPs Stand is answering
+Description=Check every two minutes that every site on this server is answering
 
 [Timer]
 OnBootSec=5min

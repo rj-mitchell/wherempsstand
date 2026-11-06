@@ -10,6 +10,8 @@ for all of them**, in Where MPs Stand's checkout at `/opt/hansardgpt` (its origi
 - **Cloudflare** set-up for each domain (`deploy/cloudflare.sh`), and the health check (`deploy/check.sh`);
 - **email from the server** (`deploy/mail.sh`) and **failure alerts** for every site's jobs (`alert@.service`;
   [Email from the server](#email-from-the-server));
+- the **watchdog**, which restarts any site that stops answering (`wheretheystand-watchdog.timer`;
+  [The watchdog](#the-watchdog));
 - the **hourly disk check** and **monthly disk report** (`wheretheystand-disk.timer`,
   `wheretheystand-disk-report.timer`; [Disk space](#disk-space));
 - the **server-wide update lock**, `/var/lock/wheretheystand-update.lock`, which each site's update takes so that two
@@ -267,7 +269,8 @@ The server emails **wheretheystanduk@gmail.com** when something needs a look, fo
 - a scheduled job fails: an update (Where MPs Stand's sync, and Where Councils Stand's, Where Countries Stand's and
   Where Landlords Stand's updates) or a nightly backup. Where Countries Stand's update also fails, on purpose, when
   briefing spending reaches 80% of a cap or briefings have been failing, so that comes by email too;
-- the watchdog restarts Where MPs Stand because it stopped answering;
+- the watchdog restarts a site because it stopped answering, cannot restart it, is waiting for an update to finish
+  first, or has given up after three restarts ([The watchdog](#the-watchdog));
 - the disk is 80% full or more (checked every hour; see [Disk space](#disk-space)).
 
 On the 1st of each month it also sends a report on where the disk is going.
@@ -459,17 +462,48 @@ update holds the lock: `fuser -v /var/lock/wheretheystand-update.lock`. Each sit
 `flock /var/lock/wheretheystand-update.lock`, so a new site joins by doing the same. If `check.sh` reports less than 3 GB of memory free for
 long, it is time for more memory or a second server.
 
-**Ideas for later.** Not needed now; each is worth doing if the server gets busier or a site misbehaves. Both
-were worked out in `rj-mitchell/parentwheretheystand` (archived November 2026), an earlier plan to run every site
-from one combined setup, so its code can be copied from there.
+**An idea for later.** Not needed now; worth doing if the server gets busier or a site misbehaves. It was worked out
+in `rj-mitchell/parentwheretheystand` (archived November 2026), an earlier plan to run every site from one combined
+setup, so its code can be copied from there.
 
 * **A share of the processors for jobs.** Memory limits stop a runaway update, but an update can still keep every
   processor busy and slow the sites while it runs. Running each update in a container limited to part of the
   processors (`cpus:` in its compose file) keeps the sites quick. (A `Nice=` in a systemd unit does not reach the
   work: Docker starts the container, not the unit.)
-* **A watchdog for every site.** The watchdog restarts only this site when it stops answering. Docker marks the
-  other sites unhealthy but does not restart them. Extending `deploy/watchdog.sh` to check each site in `SITES`
-  (each answers `/api/health`) and restart its container would cover them all, with the same email.
+
+### The watchdog
+
+Each site's app checks itself every 30 seconds (Docker runs its `/api/health` inside its container) and Docker marks
+it **unhealthy** after three failures in a row, but Docker does not restart it. `deploy/watchdog.sh` does, run every
+two minutes by `wheretheystand-watchdog.timer` for **every site on the server**: Where MPs Stand, and each site in
+`SITES` in `deploy/.env`, in its folder `/opt/<container>` (the part after `=`; a site listed but not installed yet is
+skipped). A new site is watched as soon as it is in `SITES`: it needs nothing of its own beyond the health check every
+site's compose file already has. `update.sh` and `provision.sh` install it; it replaced `hansard-watchdog`, which
+watched this site alone, and `update.sh` removes that.
+
+When a site is unhealthy it restarts that site's app (`docker compose restart app` in its `deploy` folder) and emails
+the alerts address. It is careful not to make things worse:
+
+- an app that isn't running, or is still starting, is left alone: an update is rebuilding it, say. So is an update's
+  own one-off container, which carries the same health check;
+- **while an update holds the update lock** (`/var/lock/wheretheystand-update.lock`) it restarts nothing: a site that
+  slows down during a long update is left to the update, and an email says the watchdog is waiting. Once the update
+  has finished, the next check restarts the site if it is still unhealthy. The watchdog holds the lock itself while it
+  restarts a site, so no update starts in the middle;
+- **it backs off**: after restarting a site it leaves that site alone for 10 minutes, then 20 after the next restart;
+  after **three restarts in six hours** it stops, and emails that a person needs to look. It tries again once the
+  oldest of those restarts is six hours old.
+
+Each kind of email about each site is sent at most once every six hours (`alert.sh`). The restarts it has made are
+listed in `/var/lib/wheretheystand/watchdog/` (one file per site, one time per line); deleting a site's file lets
+it restart that site again at once.
+
+| To… | Run on the server |
+|---|---|
+| See what the watchdog has done | `journalctl -t wheretheystand-watchdog --since -7d` |
+| See each site's health now | `docker ps --format '{{.Names}}: {{.Status}}'` |
+| Run it now | `systemctl start wheretheystand-watchdog` |
+| Pause it (during maintenance, say) | `systemctl stop wheretheystand-watchdog.timer`; `systemctl start wheretheystand-watchdog.timer` to resume. `update.sh` resumes it too |
 
 ## Disk space
 

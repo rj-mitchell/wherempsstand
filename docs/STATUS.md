@@ -119,6 +119,6 @@ Still to do:
   only that the copy here hasn't been edited.
 - [ ] **An MP's page to the councils in the seat, and back** (the family plan, section 4): needs a lookup from
   constituencies to local authorities.
-- [ ] **Move the shared server's parts** (the front door, email, alerts, disk checks, the update lock) to the family
-  repository's `server/` and OPERATIONS document once it exists (family decision 6), and leave [HOSTING.md](HOSTING.md)
-  with this site's steps only.
+- [ ] **Move the shared server's parts** (the front door, email, alerts, the watchdog, disk checks, the update lock)
+  to the family repository's `server/` and OPERATIONS document once it exists (family decision 6), and leave
+  [HOSTING.md](HOSTING.md) with this site's steps only.

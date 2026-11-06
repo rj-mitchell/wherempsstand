@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 # Email the alerts address when a scheduled job on this server fails: every site's update and backup units name
 # alert@%n.service in OnFailure=, which runs this with the failed unit's name. The same unit is reported at most once
-# every six hours, so a job failing on each run doesn't flood the inbox. Also run by watchdog.sh when it restarts a
-# site. Sending needs mail.sh set up (docs/HOSTING.md, "Email from the server"); until then alerts go only to the log.
+# every six hours, so a job failing on each run doesn't flood the inbox. Also run by watchdog.sh about a site that has
+# stopped answering, with ALERT_KEY set so that each site (and each kind of alert) counts on its own for those six
+# hours. Sending needs mail.sh set up (docs/HOSTING.md, "Email from the server"); until then alerts go only to the log.
 set -uo pipefail
 unit="${1:?usage: alert.sh UNIT [MESSAGE]}"
 note="${2:-}"
 DIR="$(cd "$(dirname "$0")" && pwd)"
 STATE="${MAIL_STATE:-/var/lib/wheretheystand}/alerts"
 mkdir -p "$STATE"
-stamp="$STATE/${unit//\//_}"
+key="${ALERT_KEY:-$unit}"
+stamp="$STATE/${key//\//_}"
 if [[ -f "$stamp" && $(( $(date +%s) - $(stat -c %Y "$stamp") )) -lt 21600 ]]; then
-  logger -t wheretheystand-alert "$unit: already reported in the last six hours"
+  logger -t wheretheystand-alert "$key: already reported in the last six hours"
   exit 0
 fi
 touch "$stamp"
