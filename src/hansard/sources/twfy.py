@@ -16,12 +16,25 @@ superseded (they may contain only ``<gidredirect>`` elements). Some newer
 written-answer and statement files have no letter and are rewritten in place,
 which the size/mtime comparison catches. Only the latest revision of each
 *key* (file name without the revision letter) is kept.
+
+Compressed storage
+------------------
+The HTTPS mirror stores each file gzipped, as ``<name>.xml.gz`` (about a fifth
+of the size), next to the usual ``<name>.xml.mtime`` marker. rsync can only
+write plain ``.xml``, so it is used only when ``[sources] compress_raw_xml`` is
+false. Everything that reads the mirror accepts both forms; where a file is
+present in both, the ``.gz`` is read. ``content_stat`` gives the size of the
+XML inside, so compressing a file in place (keeping its mtime) does not look
+like a change to the ingest manifest. ``hansard compress-raw`` compresses an
+existing plain mirror once.
 """
 
 from __future__ import annotations
 
+import gzip
 import html
 import logging
+import os
 import re
 import shutil
 import subprocess
@@ -31,6 +44,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
+from typing import BinaryIO
 
 import httpx
 
@@ -69,6 +83,69 @@ class RemoteFile:
     @property
     def rel_path(self) -> str:
         return f"{self.directory}/{self.name}"
+
+
+GZ = ".gz"
+GZIP_LEVEL = 6
+
+
+def xml_name(name: str) -> str:
+    """The mirrored file's own name: ``debates2025-12-18d.xml.gz`` -> ``debates2025-12-18d.xml``."""
+    return name[:-len(GZ)] if name.endswith(GZ) else name
+
+
+def stored_path(root: Path, rel_path: str) -> Path:
+    """The file on disk for a mirrored ``.xml`` name: its gzipped copy if there is one, otherwise the plain file."""
+    plain = root / rel_path
+    gz = plain.with_name(plain.name + GZ)
+    return gz if gz.exists() else plain
+
+
+def marker_path(root: Path, rel_path: str) -> Path:
+    """The ``.mtime`` marker (TheyWorkForYou's listed modification time), named after the plain file whichever form
+    is stored."""
+    plain = root / rel_path
+    return plain.with_name(plain.name + ".mtime")
+
+
+def content_stat(path: Path) -> tuple[int, int]:
+    """(size of the XML, mtime in ns). For a gzipped file the size is the uncompressed size, from the gzip trailer,
+    so a file compressed in place with its mtime kept has the same (size, mtime) as before."""
+    st = path.stat()
+    if not path.name.endswith(GZ):
+        return st.st_size, st.st_mtime_ns
+    with open(path, "rb") as fh:
+        fh.seek(-4, os.SEEK_END)
+        return int.from_bytes(fh.read(4), "little"), st.st_mtime_ns
+
+
+def open_xml(path: Path) -> BinaryIO:
+    """The XML of a mirrored file, plain or gzipped, as a binary stream."""
+    return gzip.open(path, "rb") if path.name.endswith(GZ) else open(path, "rb")  # type: ignore[return-value]
+
+
+def read_xml(path: Path) -> bytes:
+    with open_xml(path) as fh:
+        return fh.read()
+
+
+def write_gzip(dest: Path, data: bytes, *, mtime_ns: int | None = None) -> None:
+    """Write ``data`` gzipped to ``dest`` (a ``.xml.gz`` path) safely: to a ``.part`` file first, flushed to disk and
+    read back to check it decompresses to exactly ``data``, then renamed into place. With ``mtime_ns``, the file
+    keeps that modification time (the original's, when compressing a file in place)."""
+    tmp = dest.with_name(dest.name + ".part")
+    with open(tmp, "wb") as raw:
+        with gzip.GzipFile(filename=xml_name(dest.name), mode="wb", compresslevel=GZIP_LEVEL, fileobj=raw,
+                           mtime=(mtime_ns or 0) // 1_000_000_000) as gz:
+            gz.write(data)
+        raw.flush()
+        os.fsync(raw.fileno())
+    if gzip.decompress(tmp.read_bytes()) != data:
+        tmp.unlink()
+        raise OSError(f"{dest.name}: the compressed copy did not read back the same")
+    if mtime_ns is not None:
+        os.utime(tmp, ns=(mtime_ns, mtime_ns))
+    tmp.replace(dest)
 
 
 def parse_name(directory: str, name: str, size_hint: str = "", mtime: str = "") -> RemoteFile | None:
@@ -193,14 +270,16 @@ def rsync_directories(source: str, dest: Path, directories: Iterable[str], since
 
 
 def local_files(root: Path, directories: Iterable[str], since: date) -> list[RemoteFile]:
-    """Latest local revision of each key under ``root`` (a scrapedxml mirror)."""
-    found: list[RemoteFile] = []
+    """Latest local revision of each key under ``root`` (a scrapedxml mirror), stored plain or gzipped. Names are
+    always the plain ``.xml`` name; ``stored_path`` finds the file on disk."""
+    found: set[RemoteFile] = set()
     for d in directories:
         base = root / d
         if not base.exists():
             continue
-        for p in base.glob("*.xml"):
-            rf = parse_name(d, p.name)
+        for p in [*base.glob("*.xml"), *base.glob("*.xml.gz")]:
+            rf = parse_name(d, xml_name(p.name))
             if rf and rf.file_date >= since:
-                found.append(rf)
+                found.add(rf)
     return latest_revisions(found)
+

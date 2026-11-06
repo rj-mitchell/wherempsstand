@@ -1,7 +1,8 @@
 """Parse the local XML mirror into the Parquet store, incrementally.
 
 Only files whose latest revision, size or mtime differ from the manifest are
-parsed. Work is spread over a bounded process pool; each worker streams one
+parsed. The size is the XML's own (``content_stat``), so a file gzipped in place
+with its mtime kept (``hansard compress-raw``) is not parsed again. Work is spread over a bounded process pool; each worker streams one
 file at a time, and the pool is replaced after every ``TASKS_PER_WORKER`` files per
 worker, so peak memory is (workers x one file's working set), far below the 4 GB budget.
 (Recycling is done by hand: ``max_tasks_per_child`` can deadlock on some Python 3.12 releases.)
@@ -19,7 +20,7 @@ from typing import Any
 
 from hansard.config import Settings
 from hansard.parse.xml_stream import parse_divisions, parse_file
-from hansard.sources.twfy import SOURCES, RemoteFile, local_files
+from hansard.sources.twfy import SOURCES, RemoteFile, content_stat, local_files, stored_path
 from hansard.store.parquet import remove_keys_from_compacted, write_divisions, write_records
 from hansard.store.state import StateDB, utcnow
 
@@ -89,11 +90,11 @@ def divisions_from_day_files(settings: Settings, state: StateDB, files: list[Rem
         only = DAY_FILES.get(f.directory)
         if only is None or (last[only] is not None and f.file_date <= last[only]):
             continue
-        p = settings.raw_xml_dir / f.rel_path
-        st = p.stat()
+        p = stored_path(settings.raw_xml_dir, f.rel_path)
+        size, mtime_ns = content_stat(p)
         source = f"{f.directory}-divisions"
         prev = manifest.get((source, f.key))
-        if prev and prev["revision"] == f.revision and prev["size"] == st.st_size and prev["mtime_ns"] == st.st_mtime_ns:
+        if prev and prev["revision"] == f.revision and prev["size"] == size and prev["mtime_ns"] == mtime_ns:
             continue
         key = f"{DIVISION_PREFIX[only]}{f.file_date.isoformat()}"
         try:
@@ -105,7 +106,7 @@ def divisions_from_day_files(settings: Settings, state: StateDB, files: list[Rem
         for table in ("votes", "divisions"):
             remove_keys_from_compacted(settings.parquet_dir, table, house, f.file_date.year, {key})
         state.upsert_manifest({"source": source, "key": f.key, "revision": f.revision, "file_name": f.name,
-                               "size": st.st_size, "mtime_ns": st.st_mtime_ns, "rows": res["divisions"],
+                               "size": size, "mtime_ns": mtime_ns, "rows": res["divisions"],
                                "parsed_at": utcnow()})
         out["files"] += 1
         out["divisions"] += res["divisions"]
@@ -114,9 +115,9 @@ def divisions_from_day_files(settings: Settings, state: StateDB, files: list[Rem
 
 
 def local_meta(path: Path, directory: str) -> RemoteFile:
-    from hansard.sources.twfy import parse_name
+    from hansard.sources.twfy import parse_name, xml_name
 
-    meta = parse_name(directory, path.name)
+    meta = parse_name(directory, xml_name(path.name))
     if meta is None:
         raise ValueError(f"unrecognised file {path}")
     return meta
@@ -134,12 +135,12 @@ def ingest(settings: Settings, *, workers: int = 3, since=None, until=None,
     stats = IngestStats(files_seen=len(files))
     todo: list[tuple[RemoteFile, Path, int, int]] = []
     for f in files:
-        p = settings.raw_xml_dir / f.rel_path
-        st = p.stat()
+        p = stored_path(settings.raw_xml_dir, f.rel_path)
+        size, mtime_ns = content_stat(p)
         prev = manifest.get((f.directory, f.key))
-        if prev and prev["revision"] == f.revision and prev["size"] == st.st_size and prev["mtime_ns"] == st.st_mtime_ns:
+        if prev and prev["revision"] == f.revision and prev["size"] == size and prev["mtime_ns"] == mtime_ns:
             continue
-        todo.append((f, p, st.st_size, st.st_mtime_ns))
+        todo.append((f, p, size, mtime_ns))
         if prev is None:
             stats.files_new += 1
         else:
