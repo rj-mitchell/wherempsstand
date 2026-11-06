@@ -6,7 +6,10 @@ Two tables share the same filter columns:
   ``search_text``. Built straight after ingest, so keyword search is available
   immediately.
 * ``vectors``   one embedding per passage. Filled by the (slower, resumable)
-  embedding job; hybrid search uses whatever is embedded so far.
+  embedding job; hybrid search uses whatever is embedded so far. Stored as 16-bit
+  floats (half the disk of 32-bit, with no measurable change to what is found:
+  docs/DECISIONS.md); a table made before that keeps its 32-bit vectors until
+  ``hansard vectors-f16`` converts it (hansard/index/float16.py), and both work.
 
 Rows are keyed by ``source_key`` (one scrapedxml file), so a corrected
 Hansard revision is applied by deleting that key's rows and adding the new
@@ -74,8 +77,40 @@ PASSAGE_SCHEMA = pa.schema([
 ])
 
 
-def vector_schema(dim: int) -> pa.Schema:
-    return pa.schema([*FILTER_FIELDS, ("vector", pa.list_(pa.float32(), dim))])
+# New vector tables store 16-bit floats. Embeddings are computed in 32 bits and rounded when written; a query is
+# given in the table's own type.
+VECTOR_TYPE = pa.float16()
+
+
+def vector_schema(dim: int, value_type: pa.DataType = VECTOR_TYPE) -> pa.Schema:
+    return pa.schema([*FILTER_FIELDS, ("vector", pa.list_(value_type, dim))])
+
+
+def vector_value_type(schema: pa.Schema, column: str = "vector") -> pa.DataType:
+    """The number type of a table's vectors: float32 (tables made before November 2026) or float16."""
+    return schema.field(column).type.value_type
+
+
+def vector_array(vectors: np.ndarray, value_type: pa.DataType) -> pa.FixedSizeListArray:
+    """Embeddings (rows of 32-bit floats) as a vector column of the given number type."""
+    vectors = np.asarray(vectors)
+    flat = pa.array(vectors.astype(value_type.to_pandas_dtype()).reshape(-1), type=value_type)
+    return pa.FixedSizeListArray.from_arrays(flat, vectors.shape[1])
+
+
+def query_vector(vec: np.ndarray, value_type: pa.DataType) -> np.ndarray:
+    """A query embedding in the table's own number type."""
+    return np.asarray(vec, dtype=np.float32).astype(value_type.to_pandas_dtype())
+
+
+def retry_once(fn):
+    """Run a read, and once more if it fails: ``hansard vectors-f16`` swaps a table's folder for a new one, and a search
+    that had opened the old one just before reads files that are no longer there. Opened again, it reads the new one."""
+    try:
+        return fn()
+    except Exception as exc:
+        log.info("search failed (%s); trying once more", exc)
+        return fn()
 
 
 _QUERY_JUNK = re.compile(r"[\"'()\[\]{}:^~*+\-!?\\/<>=|&]")
@@ -100,10 +135,11 @@ KEEP_OLD_VERSIONS = timedelta(hours=1)
 
 
 class SearchIndex:
-    def __init__(self, path: Path, dim: int):
+    def __init__(self, path: Path, dim: int, vectors_name: str = VECTORS):
         self.path = Path(path)
         self.path.mkdir(parents=True, exist_ok=True)
         self.dim = dim
+        self.vectors_name = vectors_name  # another name only while hansard/index/float16.py builds a new table
         self.db = lancedb.connect(str(self.path))
 
     # ---- tables ---------------------------------------------------------------
@@ -117,9 +153,9 @@ class SearchIndex:
         return self.db.open_table(PASSAGES)
 
     def vectors(self):
-        if VECTORS not in self._names():
-            return self.db.create_table(VECTORS, schema=vector_schema(self.dim))
-        return self.db.open_table(VECTORS)
+        if self.vectors_name not in self._names():
+            return self.db.create_table(self.vectors_name, schema=vector_schema(self.dim))
+        return self.db.open_table(self.vectors_name)
 
     def has_data(self) -> bool:
         return PASSAGES in self._names() and self.passages().count_rows() > 0
@@ -131,7 +167,7 @@ class SearchIndex:
         if keys:
             where = f"source_key IN ({', '.join(sql_str(k) for k in keys)})"
             tbl.delete(where)
-            if VECTORS in self._names():
+            if self.vectors_name in self._names():
                 self.vectors().delete(where)
         if rows:
             tbl.add(pa.Table.from_pylist(rows, schema=PASSAGE_SCHEMA))
@@ -144,7 +180,7 @@ class SearchIndex:
             # the record_id clause can use the scalar index; the concat clause makes the match exact
             where = (f"record_id IN ({', '.join(sql_str(r) for r in sorted({r for r, _ in part}))}) "
                      f"AND concat(record_id, '|', source_key) IN ({', '.join(sql_str(f'{r}|{k}') for r, k in part)})")
-            for name in (PASSAGES, VECTORS):
+            for name in (PASSAGES, self.vectors_name):
                 if name in names:
                     self.db.open_table(name).delete(where)
         return len(pairs)
@@ -155,9 +191,11 @@ class SearchIndex:
             tbl.delete(f"source_key IN ({', '.join(sql_str(k) for k in keys)})")
         if not rows:
             return
+        # in the table's own number type: 16-bit, or 32-bit in a table not yet converted
+        value_type = vector_value_type(tbl.schema)
         cols = {name: [r[name] for r in rows] for name, _ in FILTER_FIELDS}
-        cols["vector"] = list(vectors.astype(np.float32))
-        tbl.add(pa.Table.from_pydict(cols, schema=vector_schema(self.dim)))
+        cols["vector"] = vector_array(vectors, value_type)
+        tbl.add(pa.Table.from_pydict(cols, schema=vector_schema(self.dim, value_type)))
 
     def build_indices(self) -> None:
         tbl = self.passages()
@@ -167,7 +205,7 @@ class SearchIndex:
                          replace=True)
         self.build_scalar_indices(tbl)
         self.ensure_vector_ids()
-        if VECTORS in self._names():
+        if self.vectors_name in self._names():
             vt = self.vectors()
             n = vt.count_rows()
             if n >= 10_000:
@@ -179,7 +217,7 @@ class SearchIndex:
     def ensure_vector_ids(self) -> bool:
         """An index on the vectors table's passage_id. Without it, updating speaker details on a few passages reads
         every vector into memory (gigabytes, once there are millions). Returns True if it had to be built."""
-        if VECTORS not in self._names():
+        if self.vectors_name not in self._names():
             return False
         vt = self.vectors()
         if vt.count_rows() == 0 or any("passage_id" in (ix.columns or []) for ix in vt.list_indices()):
@@ -224,7 +262,7 @@ class SearchIndex:
 
     def optimize(self) -> None:
         """Merge new rows into the indices, compact small files and drop superseded versions."""
-        for name in (PASSAGES, VECTORS):
+        for name in (PASSAGES, self.vectors_name):
             if name in self._names():
                 self.db.open_table(name).optimize(cleanup_older_than=KEEP_OLD_VERSIONS)
 
@@ -244,29 +282,37 @@ class SearchIndex:
         """Nearest passages by meaning. The index compares compressed vectors, which misses about a third of the
         truly nearest 300; ``refine_factor`` re-checks that many times ``limit`` candidates against the full vectors,
         finding nearly all of them for a few milliseconds more."""
-        if VECTORS not in self._names() or self.vectors().count_rows() == 0:
-            return []
-        search = self.vectors().search(vec.astype(np.float32), vector_column_name="vector").distance_type("cosine")
-        if exact:  # every vector compared in full: slow, for checking the index
-            search = search.bypass_vector_index()
-        else:
-            if nprobes:
-                search = search.nprobes(int(nprobes))
-            if refine_factor:
-                search = search.refine_factor(int(refine_factor))
-        if where:
-            search = search.where(where, prefilter=True)
-        # every column but the vector itself: 300 vectors as Python floats cost more than the search
-        search = search.select([*(columns or [name for name, _ in FILTER_FIELDS]), "_distance"])
-        return search.limit(limit).to_list()
+        def run() -> list[dict[str, Any]]:
+            if self.vectors_name not in self._names():
+                return []
+            vt = self.vectors()
+            if vt.count_rows() == 0:
+                return []
+            q = query_vector(vec, vector_value_type(vt.schema))
+            search = vt.search(q, vector_column_name="vector").distance_type("cosine")
+            if exact:  # every vector compared in full: slow, for checking the index
+                search = search.bypass_vector_index()
+            else:
+                if nprobes:
+                    search = search.nprobes(int(nprobes))
+                if refine_factor:
+                    search = search.refine_factor(int(refine_factor))
+            if where:
+                search = search.where(where, prefilter=True)
+            # every column but the vector itself: 300 vectors as Python floats cost more than the search
+            search = search.select([*(columns or [name for name, _ in FILTER_FIELDS]), "_distance"])
+            return search.limit(limit).to_list()
+
+        return retry_once(run)
 
     def similarities(self, vec: np.ndarray, passage_ids: list[str]) -> dict[str, float]:
         """Closeness in meaning (cosine similarity, as the search by meaning gives it) of these passages to the query,
         from their stored vectors."""
-        if not passage_ids or VECTORS not in self._names():
+        if not passage_ids or self.vectors_name not in self._names():
             return {}
-        rows = self.vectors().search().where(f"passage_id IN ({', '.join(sql_str(p) for p in passage_ids)})") \
-            .select(["passage_id", "vector"]).limit(None).to_list()
+        rows = retry_once(lambda: self.vectors().search()
+                          .where(f"passage_id IN ({', '.join(sql_str(p) for p in passage_ids)})")
+                          .select(["passage_id", "vector"]).limit(None).to_list())
         q = np.asarray(vec, dtype=np.float32)
         q = q / (np.linalg.norm(q) or 1.0)
         out = {}
@@ -308,7 +354,7 @@ class SearchIndex:
         out = {"passages": 0, "vectors": 0}
         if PASSAGES in self._names():
             out["passages"] = self.passages().count_rows()
-        if VECTORS in self._names():
+        if self.vectors_name in self._names():
             out["vectors"] = self.vectors().count_rows()
         return out
 
