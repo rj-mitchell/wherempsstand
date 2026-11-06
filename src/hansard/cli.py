@@ -27,6 +27,8 @@ app.add_typer(eval_app, name="eval")
 
 log = logging.getLogger("hansard")
 
+EVAL_DIR = Path("eval")  # the test set (relative: run from the repository, or /app in the container)
+
 
 def _settings() -> Settings:
     return load_settings()
@@ -267,6 +269,78 @@ def reindex_vectors(rows_per_partition: int = typer.Option(8192, help="vectors p
     typer.echo(json.dumps(out, indent=2))
     if out.get("kept"):
         typer.echo("\nRestart the app to search with the new index settings (bash deploy/update.sh does this).")
+
+
+def _check_queries(settings: Settings, questions: Path) -> list:
+    """The searches the conversion compares old and new tables on: the sample searches and the test set's questions,
+    embedded by the local model (free)."""
+    from hansard.embed.base import get_embedder
+    from hansard.index.retune import SAMPLE_QUERIES
+
+    texts = [q for q, _ in SAMPLE_QUERIES]
+    if questions.exists():
+        from hansard.evaluate import load_questions
+
+        texts += [q.question for q in load_questions(questions)[1]]
+    embedder = get_embedder(settings)
+    return [embedder.embed_query(t) for t in texts]
+
+
+@app.command("vectors-f16")
+def vectors_f16(dry_run: bool = typer.Option(False, "--dry-run", help="report sizes, free space and the likely "
+                                                                     "saving, and change nothing"),
+                only: str = typer.Option(None, help="'passages' or 'evidence' (default: both)"),
+                keep_old: bool = typer.Option(False, help="keep the old 32-bit table as <name>_f32 (the next run "
+                                                          "deletes it)"),
+                force: bool = typer.Option(False, help="swap even if the old and new tables' searches differ"),
+                rows_per_partition: int = typer.Option(8192, help="vectors per index partition, as reindex-vectors"),
+                questions: Path = typer.Option(EVAL_DIR / "questions.toml",
+                                               help="questions to compare searches on, as well as the samples")):
+    """Store the meaning-search vectors as 16-bit floats: about half the disk, the same passages found.
+
+    Once, on an index made before November 2026. Copies each table of vectors (the passages', then the committee
+    evidence's) to a new 16-bit one, builds its index as reindex-vectors does, checks it (row counts, a sample of
+    vectors, and the same searches on both), then swaps it in place of the old one in one step and deletes the old
+    one. The site keeps searching throughout. Safe to stop and run again: it carries on where it stopped. Run under
+    the server's update lock (docs/HOSTING.md, "Disk space")."""
+    from hansard.index.float16 import convert, evidence_target, passages_target
+    from hansard.sync import SyncRunning, evidence_index_path, update_lock
+
+    _setup_logging()
+    settings = _settings()
+    if only not in (None, "passages", "evidence"):
+        raise typer.BadParameter("--only must be 'passages' or 'evidence'")
+    r = settings.ranking
+    targets = []
+    if only in (None, "passages"):
+        targets.append(passages_target(settings.index_dir, int(settings.embedding.get("dim", 384)),
+                                       rows_per_partition, {"nprobes": r.get("vector_nprobes"),
+                                                            "refine_factor": r.get("vector_refine_factor")}))
+    if only in (None, "evidence") and evidence_index_path(settings).exists():
+        targets.append(evidence_target(evidence_index_path(settings)))
+    results = {}
+    with ExitStack() as stack:
+        if not dry_run:
+            try:
+                stack.enter_context(update_lock(settings))
+            except SyncRunning:
+                typer.echo("An update is running. Try again when it has finished.", err=True)
+                raise typer.Exit(1) from None
+        queries = None
+        for target in targets:
+            if not dry_run and queries is None and target.folder(target.name).exists():
+                try:
+                    queries = _check_queries(settings, questions)
+                except Exception as exc:  # the other checks still run
+                    log.warning("no local embedding model (%s): the searches are not compared", exc)
+                    queries = []
+            results[target.label] = convert(target, dry_run=dry_run, keep_old=keep_old, force=force,
+                                            queries=queries, progress=lambda m: typer.echo(m, err=True))
+            if results[target.label].get("refused"):
+                break  # disk space, or a failed check: leave the rest for after it is dealt with
+    typer.echo(json.dumps(results, indent=2))
+    if any(v.get("refused") for v in results.values()):
+        raise typer.Exit(1)
 
 
 @app.command()
@@ -690,7 +764,6 @@ def topics_refresh(only: list[str] = typer.Option(None, help="just these topics 
 
 # ---- the test set ------------------------------------------------------------------------------------------------
 
-EVAL_DIR = Path("eval")
 
 
 def _eval_setup(questions: Path, only: str | None):
