@@ -10,11 +10,15 @@ first, within its own time allowance; free to run (no AI service).
 from __future__ import annotations
 
 import logging
+import os
 import time
 from pathlib import Path
 from typing import Any
 
-import lancedb
+# only LanceDB's errors in the logs, as hansard/index/lance.py (which says why); set before LanceDB is first imported
+os.environ.setdefault("LANCEDB_LOG", "error")
+
+import lancedb  # noqa: E402
 import numpy as np
 import pyarrow as pa
 
