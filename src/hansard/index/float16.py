@@ -30,8 +30,10 @@ import os
 import random
 import shutil
 import time
+import warnings
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
@@ -387,6 +389,11 @@ def convert(target: Target, *, dry_run: bool = False, keep_old: bool = False, fo
     dst = db.open_table(target.new_name)
     out["index"] = index(target, src, dst, progress=progress)
     dst = db.open_table(target.new_name)
+    # Nothing else uses the new table yet: drop its earlier versions, and any files left by a run that was stopped
+    # in the middle of writing (which Lance would otherwise keep for a week)
+    with warnings.catch_warnings():  # (LanceDB warns that readers of older versions would fail: there are none)
+        warnings.simplefilter("ignore", UserWarning)
+        dst.optimize(cleanup_older_than=timedelta(0), delete_unverified=True)
     progress(f"{target.label}: checking the new table")
     checks: dict[str, Any] = {"rows_old": rows, "rows_new": dst.count_rows()}
     checks["rows_ok"] = checks["rows_old"] == checks["rows_new"]
