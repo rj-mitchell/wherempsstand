@@ -207,7 +207,9 @@ def parse_variant(text: str) -> Variant:
 
 
 def run_sources(settings: Settings, plans: dict[str, dict[str, Any]], questions: list[Question], today: date,
-                variant: Variant, progress: Callable[[str], None] = print) -> dict[str, Any]:
+                variant: Variant, progress: Callable[[str], None] = print, meaning: int = 0) -> dict[str, Any]:
+    """The sources chosen for each question. With ``meaning``, also that many nearest passages by meaning to the
+    question's search text (unfiltered, as [passage id, similarity]), to compare the meaning-search index itself."""
     s = settings
     if variant.reranker:
         s = with_model(s, "ranking", "reranker", variant.reranker)
@@ -238,10 +240,51 @@ def run_sources(settings: Settings, plans: dict[str, dict[str, Any]], questions:
                          "excerpt": (r.get("excerpt") or "")[:1500], "party": sp.get("party"),
                          "group": (speaker_group(sp) if plan.group_by == "role" else demographic_group(sp, plan.group_by))
                          if sp else "other"})
-        rows.append({"id": q.id, "seconds": round(secs, 2), "candidates": res.candidates,
-                     "no_records": res.no_records, "records": recs})
+        row = {"id": q.id, "seconds": round(secs, 2), "candidates": res.candidates,
+               "no_records": res.no_records, "records": recs}
+        if meaning and engine.has_vectors() and engine.embedder is not None:
+            hits = engine.index.vector(engine.embedder.embed_query(plan.search_text), None, meaning,
+                                       nprobes=s.ranking.get("vector_nprobes"),
+                                       refine_factor=s.ranking.get("vector_refine_factor"), columns=["passage_id"])
+            row["meaning"] = [[h["passage_id"], round(1.0 - float(h["_distance"]), 6)] for h in hits]
+        rows.append(row)
         progress(f"  {q.id:22} {len(recs):3} sources {secs:5.1f}s")
     return {"stage": "sources", "variant": variant.__dict__, "today": today, "rows": rows}
+
+
+def compare_retrieval(a: dict[str, Any], b: dict[str, Any]) -> dict[str, Any]:
+    """How far two retrieval runs (``hansard eval retrieval``) differ, question by question: the sources chosen, and
+    the nearest passages by meaning (the share of the nearest 10 found by both, how far they moved in rank, and how
+    far a passage's similarity changed). Free: no grading."""
+    from hansard.index.float16 import compare_hits
+
+    rows_b = {r["id"]: r for r in b["rows"]}
+    shared = [(r, rows_b[r["id"]]) for r in a["rows"] if r["id"] in rows_b]
+    same, overlap, changed = 0, [], []
+    for ra, rb in shared:
+        ids_a, ids_b = [x["record_id"] for x in ra["records"]], [x["record_id"] for x in rb["records"]]
+        same += ids_a == ids_b
+        if ids_a or ids_b:
+            overlap.append(len(set(ids_a) & set(ids_b)) / max(len(ids_a), len(ids_b)))
+        if ids_a != ids_b:
+            changed.append(ra["id"])
+    out: dict[str, Any] = {
+        "questions": len(shared),
+        "sources_identical": same,
+        "sources_overlap": round(sum(overlap) / len(overlap), 4) if overlap else 1.0,
+        "questions_with_different_sources": changed,
+    }
+    with_meaning = [(ra, rb) for ra, rb in shared if ra.get("meaning") is not None and rb.get("meaning") is not None]
+    if with_meaning:
+        out["meaning"] = compare_hits([[(p, sim) for p, sim in ra["meaning"]] for ra, _ in with_meaning],
+                                      [[(p, sim) for p, sim in rb["meaning"]] for _, rb in with_meaning])
+    return out
+
+
+def newest_plans(runs: Path) -> Path | None:
+    """The newest saved question readings made by a model (not the built-in rules), so a run costs nothing."""
+    found = sorted(p for p in Path(runs).glob("*-plans-*.json") if not p.name.endswith("-plans-offline.json"))
+    return found[-1] if found else None
 
 
 class Grade(BaseModel):

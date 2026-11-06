@@ -840,6 +840,33 @@ def eval_sources(plans: Path = typer.Option(..., help="a saved plans run: the fi
     save(out, "sources-summary", {"summaries": summaries, "grading": graded})
 
 
+@eval_app.command("retrieval")
+def eval_retrieval(plans: Path = typer.Option(None, help="saved question readings (default: the newest made by a "
+                                                         "model in eval/runs, so no model is called)"),
+                   compare: Path = typer.Option(None, help="an earlier retrieval run: say how far this one differs"),
+                   meaning: int = typer.Option(300, help="nearest passages by meaning to keep for each question"),
+                   questions: Path = typer.Option(EVAL_DIR / "questions.toml"), only: str = typer.Option(None),
+                   out: Path = typer.Option(EVAL_DIR / "runs")):
+    """The sources each question finds, and its nearest passages by meaning: retrieval only, free (no model calls,
+    no grading). Run before and after a change to the search index, the second time with --compare <first run>."""
+    from hansard.evaluate import Variant, compare_retrieval, newest_plans, run_sources, save
+
+    settings = _settings()
+    today, qs = _eval_setup(questions, only)
+    plans = plans or newest_plans(EVAL_DIR / "runs")
+    if plans is None:
+        raise typer.Exit("no saved question readings in eval/runs: give one with --plans")
+    typer.echo(f"question readings from {plans}")
+    run = run_sources(settings, _load_plans(plans), qs, today, Variant("baseline"), meaning=meaning)
+    run["stage"] = "retrieval"
+    path = save(out, "retrieval", run)
+    typer.echo(f"saved {path}")
+    if compare:
+        diff = compare_retrieval(json.loads(compare.read_text(encoding="utf-8")), run)
+        save(out, "retrieval-compare", {"before": str(compare), "after": str(path), **diff})
+        typer.echo(json.dumps(diff, indent=1))
+
+
 @eval_app.command("briefings")
 def eval_briefings(plans: Path = typer.Option(...), model: list[str] = typer.Option(["claude-opus-5-5"]),
                    judge: str = typer.Option("claude-opus-5-5", help="model for the side-by-side judgement"),
