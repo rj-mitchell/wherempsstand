@@ -69,16 +69,32 @@ and trade mark checks, legal review) are in the charity's plan (rj-mitchell/wher
 
 - [ ] **Accessibility testing with real users** (a screen reader user and a keyboard user). The charity's plan
   proposes one round for every site.
-- [ ] **`docs/EVALUATION.md` says "Opus stays for briefings"**, but the site has used Sonnet since October. Update it.
+- [x] **`docs/EVALUATION.md` said "Opus stays for briefings"**, though the site has used Sonnet since October.
+  Corrected on 6 November 2026.
+- [x] **The home page was blank without JavaScript.** It now has a short text version with links to the pages that
+  work without scripts (6 November 2026).
 - **Re-ranking** is built but off (`config/settings.toml`). Revisit only if the quality of what is found becomes the
   complaint.
+
+## Server
+
+The server's disk is about 70% full. Done on 6 November 2026, and installed by the next `update.sh`:
+
+- [x] an hourly email when the disk is 80% full, and a monthly report on where it is going (`docs/HOSTING.md`,
+  "Disk space");
+- [x] the system log capped at 500 MB, and apt clearing out old downloads weekly;
+- [x] one server-wide lock, so the sync never runs at the same time as another site's update.
+
+Still to do:
+
+- [ ] **Docker's default log limit on the running server.** `provision.sh` sets it on a new server; this one needs
+  it added by hand and Docker restarted, at a quiet time (`docs/HOSTING.md`, "Disk space").
 
 ## Documents and identity
 
 These are in the charity's plan (`plans/family/PLAN.md`):
 
 - split the README;
-- merge the duplicate sections in ATTRIBUTION.md;
 - the family binding;
 - the pages that name a person as the operator;
 - the Ko-fi link.
