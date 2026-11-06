@@ -395,3 +395,54 @@ def test_client_has_an_explicit_timeout(monkeypatch):
     client = make_client()
     assert client.timeout.connect == 10.0 and client.timeout.read == 300.0
     assert client.max_retries == 2
+
+
+# ---- ported from Where Countries Stand's verifier ---------------------------------------------------------------
+
+
+def test_an_honorifics_full_stop_ends_no_sentence():
+    from hansard.rag.verify import _classify_uncited
+
+    # "Mr. " no longer reads as the end of a sentence, so the whole line leads in to the quotation after it
+    segs = _classify_uncited("- Giving evidence to the Transport Committee on the northern legs, Mr. Smith said ", True)
+    assert [s.status for s in segs] == ["connective"]
+    # a claim before the lead-in is still split off and flagged, and the text kept is the original
+    segs = _classify_uncited("Witnesses doubted the figures. Dr. Jones told the committee that ", True)
+    assert [(s.status, s.text) for s in segs] == [("unsupported", "Witnesses doubted the figures. "),
+                                                   ("connective", "Dr. Jones told the committee that ")]
+
+
+def test_a_lead_in_written_in_pieces_is_not_a_claim():
+    sources = [src(1, "The line to Manchester will be delivered in full.")]
+    blocks = [{"text": "- Witnesses from the industry differed sharply on the timetable, as when its chief executive, Mr. "}, {"text": "Stephens said "},
+              {"text": '"The line to Manchester will be delivered in full."', "citations": [
+                  {"search_result_index": 0, "cited_text": "The line to Manchester will be delivered in full."}]},
+              {"text": " The project was then cancelled in 2023 because of a scandal. "}]
+    statuses = [s.status for s in verify(blocks, sources).segments]
+    assert statuses == ["connective", "connective", "cited", "unsupported"]
+    # a whole sentence in between is a claim, and the piece before it leads in to nothing
+    blocks[1] = {"text": "The company had overspent on the northern section by more than a billion pounds. "}
+    statuses = [s.status for s in verify(blocks, sources).segments]
+    assert statuses[:3] == ["unsupported", "unsupported", "cited"]
+
+
+def test_notes_that_data_was_not_supplied_are_not_claims():
+    from hansard.rag.verify import _classify_uncited
+
+    for note in ("No recorded-vote data was available for any of the debates on this subject. ",
+                 "Division lists for the debates in the Lords in this period were not supplied. ",
+                 "The votes on the second reading were not supplied, so how members voted is unknown. "):
+        assert [s.status for s in _classify_uncited(note, False)] == ["connective"], note
+
+
+def test_saved_briefings_with_a_lead_in_in_pieces_are_cleared():
+    from hansard.rag.verify import recheck_flags
+
+    answer = {"segments": [{"text": "- Witnesses from the industry differed sharply on the timetable, as when Mr. ",
+                            "status": "unsupported"},
+                           {"text": "Stephens said ", "status": "connective"},
+                           {"text": "\"it will be delivered\"", "status": "cited"}],
+              "unsupported_segments": 1, "grounded_ratio": 0.5}
+    out = recheck_flags(answer)
+    assert [s["status"] for s in out["segments"]] == ["connective", "connective", "cited"]
+    assert out["unsupported_segments"] == 0 and out["grounded_ratio"] == 1.0
