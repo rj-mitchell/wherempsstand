@@ -4,8 +4,8 @@
   "description": "Sourced briefings on what MPs, peers and the devolved parliaments have said.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f3ea",
-  "theme_color": "#1d4535",
+  "background_color": "#faf6ec",
+  "theme_color": "#faf6ec",
   "icons": [
     { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any" },
     { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },

@@ -12,7 +12,8 @@
 #   4. builds and starts the app behind Caddy (automatic HTTPS)
 #   5. starts the one-off bootstrap in the background (downloads ~5 GB of Hansard
 #      since 2010, ingests, indexes; embeddings continue in later syncs)
-#   6. installs the twice-daily sync timer and the nightly backup timer
+#   6. installs the twice-daily sync timer, the nightly backup timer, and the hourly disk check and monthly disk
+#      report (both email the alerts address once mail.sh is set up)
 # The site is public. An admin token (for /api/admin/usage and /api/admin/sync) is
 # generated into deploy/.env. For an invite-only site instead, see the README.
 set -euo pipefail
@@ -24,6 +25,20 @@ DIR=/opt/hansardgpt
 if [[ $EUID -ne 0 ]]; then
   echo "Please run as root (sudo)." >&2
   exit 1
+fi
+
+echo "==> Capping the size of every container's log"
+# Docker's default for containers started outside the sites' compose files (which set the same limits themselves).
+# Written before Docker is installed, so it takes effect from the start. On a server that already runs Docker, it
+# takes effect only when Docker restarts, which stops every site for a few seconds: docs/HOSTING.md, "Disk space".
+mkdir -p /etc/docker
+if [[ ! -f /etc/docker/daemon.json ]]; then
+  printf '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"3"}}\n' > /etc/docker/daemon.json
+  if command -v docker >/dev/null; then
+    echo "    Docker is already running: the log cap applies when it next restarts (docs/HOSTING.md, \"Disk space\")."
+  fi
+elif ! grep -q '"max-size"' /etc/docker/daemon.json; then
+  echo "    /etc/docker/daemon.json exists without a log cap; left alone (docs/HOSTING.md, \"Disk space\")."
 fi
 
 echo "==> Installing Docker and git"
@@ -68,7 +83,7 @@ cd "$DIR/deploy"
 
 if [[ ! -f .env ]]; then
   read -rp "Main domain name pointing at this server (e.g. wherempsstand.com): " DOMAIN
-  read -rp "Other domain names that should redirect to it, space-separated (e.g. www.wherempsstand.com), or blank: " OTHERS
+  read -rp "Other domain names that should redirect to it, space-separated (www. is added to each, and to the main one), or blank: " OTHERS
   REDIRECTS="www.$DOMAIN"
   for d in $OTHERS; do REDIRECTS="$REDIRECTS, $d, www.$d"; done
   read -rsp "Anthropic API key (leave blank for sources-only mode): " KEY
@@ -81,6 +96,9 @@ fi
 echo "==> Adding swap space (spare memory on disk for large updates)"
 bash "$DIR/deploy/swap.sh" || echo "WARNING: could not add swap; carrying on."
 
+echo "==> Keeping the system log and apt's downloads in check"
+bash "$DIR/deploy/housekeeping.sh" || echo "WARNING: could not apply the log and download limits; carrying on."
+
 echo "==> Writing the web server's own settings (Cloudflare's addresses, the certificate)"
 bash "$DIR/deploy/caddy-local.sh"
 docker network create sites >/dev/null 2>&1 || true  # shared with the other sites on this server
@@ -91,12 +109,15 @@ docker compose up -d --build
 echo "==> Starting the initial data load in the background (log: /var/log/hansard-bootstrap.log)"
 nohup docker compose run --rm -T app hansard bootstrap --embed-minutes 120 > /var/log/hansard-bootstrap.log 2>&1 &
 
-echo "==> Installing the sync and backup timers"
+echo "==> Installing the sync, backup and disk timers"
 mkdir -p backups
 cp hansard-sync.service hansard-sync.timer hansard-backup.service hansard-backup.timer \
-   hansard-watchdog.service hansard-watchdog.timer /etc/systemd/system/
+   hansard-watchdog.service hansard-watchdog.timer alert@.service \
+   wheretheystand-disk.service wheretheystand-disk.timer \
+   wheretheystand-disk-report.service wheretheystand-disk-report.timer /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable --now hansard-sync.timer hansard-backup.timer hansard-watchdog.timer
+systemctl enable --now hansard-sync.timer hansard-backup.timer hansard-watchdog.timer \
+   wheretheystand-disk.timer wheretheystand-disk-report.timer
 
 cat <<MSG
 

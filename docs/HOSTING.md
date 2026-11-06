@@ -7,7 +7,7 @@ Hostkey gave you. Allow about an hour, most of it waiting for the Hansard data t
 You will need:
 - the server's **IP address** and **root password**: they are in the email Hostkey sent when the server was
   ready, and in your Hostkey control panel;
-- the three domains: wherempsstand.com, wheretheystand.co.uk and wheretheystand.org.uk;
+- the domain wherempsstand.com;
 - your Anthropic API key;
 - the code on GitHub's `main` branch (step 1).
 
@@ -22,22 +22,21 @@ The repository was called `wheretheystand` until 6 November 2026. GitHub forward
 up before then should be pointed at the new one, once:
 `git -C /opt/hansardgpt remote set-url origin https://github.com/rj-mitchell/wherempsstand.git`.
 
-## 2. Point the domains at the server
+## 2. Point the domain at the server
 
-At the company where you registered the domains, open each domain's **DNS settings** and add these records,
-using your server's IP address. Remove any existing "parking" **A** records first, but leave any **MX** or **TXT**
+At the company where you registered the domain, open its **DNS settings** and add these records, using your
+server's IP address. Remove any existing "parking" **A** records first, but leave any **MX** or **TXT**
 records alone: those deliver your email to admin@wherempsstand.com.
 
 | Domain | Type | Name / host | Value |
 |---|---|---|---|
 | wherempsstand.com | A | `@` | your server's IP |
 | wherempsstand.com | A | `www` | your server's IP |
-| wheretheystand.co.uk | A | `@` | your server's IP |
-| wheretheystand.co.uk | A | `www` | your server's IP |
-| wheretheystand.org.uk | A | `@` | your server's IP |
-| wheretheystand.org.uk | A | `www` | your server's IP |
 
-**If your domains are on Cloudflare:** set every one of these records to **DNS only** (the grey cloud), not
+The charity's own domains (wheretheystand.uk, wheretheystand.co.uk and wheretheystand.org.uk) don't point at this
+server: wheretheystand.uk is the charity's site, served by Cloudflare, and the other two redirect to it there.
+
+**If your domain is on Cloudflare:** set both of these records to **DNS only** (the grey cloud), not
 **Proxied** (the orange cloud, Cloudflare's default), for now. While proxied, `nslookup` shows Cloudflare's addresses
 instead of your server's, and the site cannot get its first HTTPS certificate. Once the site is working, the main
 address can be put behind Cloudflare's proxy: see [Cloudflare protection](#cloudflare-protection-optional) below.
@@ -87,8 +86,8 @@ bash provision.sh
 
 It asks three questions:
 1. **Main domain name:** `wherempsstand.com`
-2. **Other domain names to redirect:** `wheretheystand.co.uk wheretheystand.org.uk` (the `www` versions are added
-   automatically).
+2. **Other domain names to redirect:** leave it blank and press Return. (`www.wherempsstand.com` is added
+   automatically.)
 3. **Anthropic API key:** paste it. Nothing appears as you paste; that is deliberate. Press Return.
 
 The script then:
@@ -202,17 +201,17 @@ if something was put right) and withdraw a briefing. A withdrawal reason is show
 | Load the all-party groups now, rather than at the weekly update (free; a few seconds) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard groups` |
 | See which of these background jobs are still running (no output means all have finished) | `cd /opt/hansardgpt/deploy && docker compose exec app sh -c 'for p in /proc/[0-9]*; do tr "\0" " " < $p/cmdline 2>/dev/null; echo; done \| grep "[h]ansard "'` |
 | Load the 1997–2010 records now, rather than at the next update (once, after installing the version that adds them; free; a few hours) | `sudo systemctl start --no-block hansard-sync.service`, then watch with `journalctl -u hansard-sync -f` |
-| See whether an update is running, and whether the last one finished | `systemctl status hansard-sync --no-pager` (`active` means running; `failed` with `status=137` means it ran out of memory: run `bash /opt/hansardgpt/deploy/swap.sh`, then start it again as above) |
+| See whether an update is running, and whether the last one finished | `systemctl status hansard-sync --no-pager` (`active` means running, or waiting for another site's update to finish: see [Other sites on this server](#other-sites-on-this-server); `failed` with `status=137` means it ran out of memory: run `bash /opt/hansardgpt/deploy/swap.sh`, then start it again as above) |
 | See how much is still to do | `cd /opt/hansardgpt/deploy && docker compose run --rm -T app hansard status` (`files_unembedded` falls to 0 as meaning-based search catches up, up to 4 hours of it per update) |
 | Rebuild the meaning-search index for today's number of passages: quicker searches that find more of the closest passages (once, after meaning-based search has caught up; free; about 30–60 minutes, the site works throughout and the twice-daily update waits for it) | `cd /opt/hansardgpt/deploy && docker compose exec -d app sh -c 'mkdir -p /data/logs && hansard reindex-vectors > /data/logs/reindex.log 2>&1'`, then `docker compose exec app cat /data/logs/reindex.log` when it has finished (it ends by saying to restart), then `bash /opt/hansardgpt/deploy/update.sh` |
 | Check every vote for a whip report in one go, rather than 1,500 per update (free; about 3–4 hours) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard whips --count 20000` |
 | Set or change the Companies House API key (for company roles; free from developer.company-information.service.gov.uk) | `cd /opt/hansardgpt/deploy && read -rsp "Companies House API key: " K && echo && sed -i -e '/^HANSARD_COMPANIES_HOUSE_KEY=/d' -e '$a\' .env && printf 'HANSARD_COMPANIES_HOUSE_KEY=%s\n' "$K" >> .env && unset K && docker compose up -d` |
 | Look up every member's company roles now, rather than 400 per update (free; about 2–3 hours) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard directorships --count 4000` |
 | See the company roles found for members whose name contains some text | `cd /opt/hansardgpt/deploy && docker compose exec app hansard directorships --show "Smith"` |
-| Remove a company role wrongly matched to a member | ask Claude: it adds the Companies House record to `data_static/directorships_exclude.csv`, removed at the next update |
+| Remove a company role wrongly matched to a member | add a line for it to `data_static/directorships_exclude.csv` in the code (the file says what goes in each column), then install it as a new version; the role is removed at the next update |
 | Check that early day motions can be read from Parliament (free) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard edms --check` |
 | Collect all early day motions since 1997 in one go, in the background (free; about 8–10 hours the first time, one request at a time) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard edms --months 400 --signatures 60000` |
-| Add, change or remove a topic | edit `config/topics.toml` in the code (ask me), then install it as a new version. Never change a published topic's `slug`: it is its address |
+| Add, change or remove a topic | edit `config/topics.toml` in the code, then install it as a new version. Never change a published topic's `slug`: it is its address |
 | Withdraw a briefing (after a complaint, say) | `curl -X POST -H "Authorization: Bearer YOUR_ADMIN_TOKEN" -H "Content-Type: application/json" -d '{"reason": "complaint about attribution"}' https://wherempsstand.com/api/admin/briefings/THE_ID/withdraw` |
 
 Your admin token is in `/opt/hansardgpt/deploy/.env` (`HANSARD_ADMIN_TOKEN=`).
@@ -233,7 +232,10 @@ The server emails **wheretheystanduk@gmail.com** when something needs a look, fo
 - a scheduled job fails: an update (Where MPs Stand's sync, Where Councils Stand's and Where Countries Stand's
   updates) or a nightly backup. Where Countries Stand's update also fails, on purpose, when briefing spending
   reaches 80% of a cap or briefings have been failing, so that comes by email too;
-- the watchdog restarts Where MPs Stand because it stopped answering.
+- the watchdog restarts Where MPs Stand because it stopped answering;
+- the disk is 80% full or more (checked every hour; see [Disk space](#disk-space)).
+
+On the 1st of each month it also sends a report on where the disk is going.
 
 Each email gives the job, what happened and its last lines in the system log. The same job is reported at most once
 every six hours.
@@ -281,15 +283,16 @@ bash /opt/hansardgpt/deploy/mail.sh send --test-to you@example.com /opt/wherecou
 Cloudflare's proxy (the orange cloud) puts Cloudflare between visitors and the server, so floods of automated
 requests are absorbed before they reach it. For **wherempsstand.com**, the server then uses a certificate from
 Cloudflare, closes any connection that does not come through Cloudflare, and still sees each visitor's own address
-(Cloudflare passes it on), so the per-visitor daily limit keeps working. **www.wherempsstand.com**,
-**wheretheystand.uk** (the site's address until November 2026), **wheretheystand.co.uk** and
-**wheretheystand.org.uk** (with their `www`) are redirected to wherempsstand.com by Cloudflare itself, so no DNS record shows the server's address any more. (Old DNS records can still reveal it, so
-this protects against casual abuse and heavy load more than a determined attack on the server itself.)
+(Cloudflare passes it on), so the per-visitor daily limit keeps working. **www.wherempsstand.com** is redirected to
+wherempsstand.com by Cloudflare itself, so no DNS record shows the server's address any more. (Old DNS records can
+still reveal it, so this protects against casual abuse and heavy load more than a determined attack on the server
+itself.)
 
-**Since November 2026** wheretheystand.uk is the charity's own site (the hub, on Cloudflare), and
-wheretheystand.co.uk and wheretheystand.org.uk (with their `www`) redirect to it, not to wherempsstand.com: their
-Cloudflare redirect rules now point there. Only `www.wherempsstand.com` belongs in `REDIRECT_DOMAINS` in
-`/opt/hansardgpt/deploy/.env`; with the old list, `check.sh` reports the wheretheystand names as "does not
+**The charity's domains.** Until November 2026 the site's address was wheretheystand.uk, and wheretheystand.uk,
+wheretheystand.co.uk and wheretheystand.org.uk all redirected here. Now wheretheystand.uk is the charity's own site
+(the hub, on Cloudflare), and the other two redirect to it there: none of them reaches this server, and their
+Cloudflare settings belong to the hub, not to this guide. Only `www.wherempsstand.com` belongs in `REDIRECT_DOMAINS`
+in `/opt/hansardgpt/deploy/.env`; with the old list, `check.sh` reports the wheretheystand names as "does not
 redirect". To change it on the server:
 
 ```
@@ -299,9 +302,8 @@ bash /opt/hansardgpt/deploy/update.sh
 
 1. **Install the latest version** (`bash /opt/hansardgpt/deploy/update.sh`). It fetches Cloudflare's list of
    addresses; that is harmless while nothing is proxied.
-2. **Put all the domains on Cloudflare.** For each of wherempsstand.com, wheretheystand.uk, wheretheystand.co.uk
-   and wheretheystand.org.uk: at dash.cloudflare.com, choose **Add a domain**, enter it, pick the **Free** plan, and check
-   the records it found: the **A** records for `@` and `www` from step 2 (set them to **DNS only** for now) and every
+2. **Put the domain on Cloudflare.** At dash.cloudflare.com, choose **Add a domain**, enter wherempsstand.com, pick
+   the **Free** plan, and check the records it found: the **A** records for `@` and `www` from step 2 (set them to **DNS only** for now) and every
    **MX** and **TXT** record (email). Then, at the company where you registered the domain, replace its nameservers
    with the two Cloudflare gives you, and wait for Cloudflare to say the domain is **Active** (usually within an
    hour; it emails you).
@@ -325,9 +327,6 @@ bash /opt/hansardgpt/deploy/update.sh
      at *Standard* and *Respect existing headers*, and add no "Cache everything" rule: pages carry live data, and the
      site already tells Cloudflare which files can be kept for a year.
 
-   For **wheretheystand.uk**, **wheretheystand.co.uk** and **wheretheystand.org.uk**, only **SSL/TLS → Full
-   (strict)** matters: Cloudflare
-   answers them itself, so nothing else reaches the server.
 4. **Create the origin certificate** (wherempsstand.com only): **SSL/TLS → Origin Server → Create Certificate**.
    Keep *Generate private key and CSR with Cloudflare* and key type **RSA (2048)**. Under hostnames, **remove
    `*.wherempsstand.com`** so that only `wherempsstand.com` is listed. Validity: **15 years**. Press **Create** and
@@ -345,20 +344,18 @@ bash /opt/hansardgpt/deploy/update.sh
    Paste the **Origin Certificate** from the Cloudflare page and press Return, then the **Private Key** and press
    Return. It checks they belong together and are for wherempsstand.com, switches the server over, and checks the
    site through Cloudflare. If that fails, it puts everything back and says what to check.
-7. **Have Cloudflare do the redirects.** For each domain below, first open **Rules → Redirect Rules** (in some
-   accounts, **Rules → Overview → Create rule → Redirect Rule**) and create a rule:
+7. **Have Cloudflare do the redirect** from www.wherempsstand.com. In wherempsstand.com, open **Rules → Redirect
+   Rules** (in some accounts, **Rules → Overview → Create rule → Redirect Rule**) and create a rule:
    - **Rule name**: `To wherempsstand.com`.
-   - **If incoming requests match**: for **wherempsstand.com**, choose *Custom filter expression*: field
-     **Hostname**, operator **equals**, value `www.wherempsstand.com`. For **wheretheystand.uk**,
-     **wheretheystand.co.uk** and **wheretheystand.org.uk**, choose **All incoming requests**.
+   - **If incoming requests match**: choose *Custom filter expression*: field **Hostname**, operator **equals**,
+     value `www.wherempsstand.com`.
    - **Then**: type **Dynamic**, expression `concat("https://wherempsstand.com", http.request.uri.path)`, status
      code **301**, and tick **Preserve query string**.
    - Press **Deploy**.
 
-   Then, in the same domain's **DNS → Records**, edit each record the rule covers (for wherempsstand.com, just
-   `www`; for the others, `@` and `www`): set it to **Proxied**, and change its **IPv4 address** to `192.0.2.1`
-   (an address that goes nowhere: Cloudflare answers these names itself, and the server's address is no longer
-   shown). Delete any **AAAA** records for those names. Leave MX and TXT records alone.
+   Then, in **DNS → Records**, edit the `www` record: set it to **Proxied**, and change its **IPv4 address** to
+   `192.0.2.1` (an address that goes nowhere: Cloudflare answers this name itself, and the server's address is no
+   longer shown). Delete any **AAAA** record for `www`. Leave MX and TXT records alone.
 8. **Hand the redirects over.** A few minutes later, on the server, run:
 
    ```
@@ -380,8 +377,9 @@ Cloudflare asks every visitor's browser to pass a short check first.
 
 ## Other sites on this server
 
-The charity's other sites (Where Countries Stand, Where Councils Stand) run on this server too, each in its own
-folder under `/opt`, with its own containers, data, settings, AI spending caps and update timer. This site's web
+The charity's other sites (Where Countries Stand, Where Councils Stand and Where Landlords Stand) run on this
+server too, each in its own folder under `/opt`, with its own containers, data, settings, AI spending caps and update
+timer. This site's web
 server (Caddy) is the front door for all of them: it answers every domain, with the same protections as this site
 (Cloudflare's certificate, connections not through Cloudflare closed, the 1 MB request limit, the security
 headers), and passes each site's visitors to its container over a shared Docker network called `sites`.
@@ -412,20 +410,24 @@ its Cloudflare origin certificate is added; until then Caddy leaves its domain a
 
 4. **Check:** `bash /opt/hansardgpt/deploy/check.sh` lists each site, and the memory left.
 
-**Keeping out of each other's way.** Each site's updates run at their own time, so two are never busy at once:
+**Keeping out of each other's way.** Each site's updates run at their own time:
 this site at 7.15am and 7.15pm (UK time), Where Councils Stand at 3.17am and Where Countries Stand at 5.41am and
-5.41pm (UTC), and Where Landlords Stand on Thursdays at 11.40am (UK time). Their containers have memory limits, so a
-runaway update stops itself rather than slowing this site. If `check.sh` reports less than 3 GB of memory free for
+5.41pm (UTC), and Where Landlords Stand on Thursdays at 11.40am (UK time). A long update can still run into the
+next one (Where Councils Stand's first load, say), so each site's scheduled update also takes one server-wide lock
+first, `/var/lock/wheretheystand-update.lock`, and waits while another update holds it: two updates never run at
+once. Backups don't take the lock; they are small and quick. Their containers have memory limits, so a runaway update
+stops itself rather than slowing this site.
+
+To see whether an update is waiting for another: `systemctl status hansard-sync --no-pager` shows `flock` as the
+running command until the lock is free, and `journalctl -u hansard-sync` then says how long it waited. To see which
+update holds the lock: `fuser -v /var/lock/wheretheystand-update.lock`. Each site's update unit wraps its command in
+`flock /var/lock/wheretheystand-update.lock`, so a new site joins by doing the same. If `check.sh` reports less than 3 GB of memory free for
 long, it is time for more memory or a second server.
 
-**Ideas for later.** Not needed now; each is worth doing if the server gets busier or a site misbehaves. All three
+**Ideas for later.** Not needed now; each is worth doing if the server gets busier or a site misbehaves. Both
 were worked out in `rj-mitchell/parentwheretheystand` (archived November 2026), an earlier plan to run every site
 from one combined setup, so its code can be copied from there.
 
-* **Jobs that wait their turn.** Updates now run at fixed, staggered times, which works while each finishes well
-  before the next starts. A long one (Where Councils Stand's first load, say) can still overlap another. A single
-  server-wide lock that every site's update and backup takes first, waiting if another job holds it, would rule
-  that out (its `scripts/run-job.sh`, using `flock`).
 * **A share of the processors for jobs.** Memory limits stop a runaway update, but an update can still keep every
   processor busy and slow the sites while it runs. Running each update in a container limited to part of the
   processors (`cpus:` in its compose file) keeps the sites quick. (A `Nice=` in a systemd unit does not reach the
@@ -433,6 +435,59 @@ from one combined setup, so its code can be copied from there.
 * **A watchdog for every site.** The watchdog restarts only this site when it stops answering. Docker marks the
   other sites unhealthy but does not restart them. Extending `deploy/watchdog.sh` to check each site in `SITES`
   (each answers `/api/health`) and restart its container would cover them all, with the same email.
+
+## Disk space
+
+The server's disk holds every site's data, and Where MPs Stand's is by far the largest (about 40 GB). Two jobs
+watch it, for every site on the server. Both are installed by `update.sh` and email the alerts address
+([Email from the server](#email-from-the-server)):
+
+- **every hour**, `deploy/disk-check.sh` emails if the disk is **80% full** or more, with what is using it. While it
+  stays that full, it emails again at most every six hours;
+- **on the 1st of each month**, `deploy/disk-report.sh` emails where the disk is going: each site's data and its
+  largest folders, the search indexes and how many old versions each keeps, Docker's images and build cache, swap,
+  the system log, and last month's figure for comparison.
+
+`update.sh` also keeps the server's own logs and downloads in check (`deploy/housekeeping.sh`): the system log is
+capped at 500 MB, and apt deletes out-of-date downloaded packages once a week.
+
+`check.sh` also marks the disk ✗ from 80%. To see the report now, run `bash /opt/hansardgpt/deploy/disk-report.sh`
+(it prints it, and emails it too).
+
+**If the disk is filling**, these are safe at any time and free space at once:
+
+```
+docker builder prune -f            # Docker's build cache: rebuilt as needed
+docker image prune -f              # old copies of the sites' programs that nothing uses
+journalctl --vacuum-size=500M      # the system log (it is kept under 500 MB anyway)
+apt-get clean                      # downloaded updates that are already installed
+```
+
+**Docker's log limit (once, at a quiet time).** Each site's containers keep at most 30 MB of logs, set in its
+compose file. A default for any other container belongs in `/etc/docker/daemon.json`; `provision.sh` writes it on a
+new server, but a server set up before November 2026 needs it added by hand. Applying it restarts Docker, which
+stops every site on the server for up to a minute, so do it at a quiet time and away from the update times (see
+[Other sites on this server](#other-sites-on-this-server)). On the server:
+
+```
+cat /etc/docker/daemon.json
+```
+
+If that says "No such file or directory", run:
+
+```
+printf '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"3"}}\n' > /etc/docker/daemon.json
+systemctl restart docker
+bash /opt/hansardgpt/deploy/check.sh
+```
+
+Every site's containers start again by themselves. If the file already exists, add the two settings to it by hand
+instead of replacing it.
+
+**Never run `docker volume prune`**: it deletes every site's data that isn't running at that moment. If those are
+not enough, the next steps are the site's own (each site's search indexes, and Where MPs Stand's raw Hansard files):
+the charity's server review, `plans/family/audits/server.md` in the `wheretheystand-charity` repository, lists them
+with the commands to measure first.
 
 ## Backups
 

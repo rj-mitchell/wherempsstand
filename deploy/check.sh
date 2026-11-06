@@ -199,7 +199,15 @@ else
   bad "memory: only ${avail_gb} GB free" "check what is using it (docker stats --no-stream); if it stays this low, the sites need more memory or a second server"
 fi
 free_pct="$(df --output=pcent / | tail -1 | tr -dc '0-9')"
-[[ "${free_pct:-0}" -lt 85 ]] && ok "disk ${free_pct}% used" || bad "disk ${free_pct}% used" "ask for help freeing space before it fills"
+# the same threshold as the hourly disk check (disk-check.sh), which emails when it is crossed
+if [[ "${free_pct:-0}" -lt 80 ]]; then
+  ok "disk ${free_pct}% used"
+else
+  bad "disk ${free_pct}% used" "free some space before it fills: docs/HOSTING.md, 'Disk space' (bash $DIR/deploy/disk-report.sh emails where it is going)"
+fi
+for t in wheretheystand-disk.timer wheretheystand-disk-report.timer; do
+  systemctl is-enabled --quiet "$t" 2>/dev/null || bad "$t is not on (the disk check and report)" "bash $DIR/deploy/update.sh"
+done
 echo
 
 if [[ $problems -eq 0 ]]; then

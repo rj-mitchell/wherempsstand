@@ -4,8 +4,8 @@
  * The look borrows from the printed Official Report: ivory paper and black serif
  * type, small-capital headings between rules, column numbers in the margin, and
  * the bound volumes' cloth — green for the Commons, red for the Lords — with gilt
- * lettering. The tone is that of a reference work: the bound record, open, with a ribbon
- * marking the place as the mark, the name in spaced capitals, square corners, ruled lists and no decoration
+ * lettering. The tone is that of a reference work: the bound record, open, as the mark (a pen on the left page,
+ * a magnifying glass on the right), the name in spaced capitals, square corners, ruled lists and no decoration
  * that does not carry meaning.
  * Techniques follow good-css (github.com/vojtaholik/good-css): logical
  * properties, OKLCH tokens that hold both light and dark values, one fluid type
@@ -76,7 +76,8 @@ button,
 :root {
   color-scheme: light dark;
 
-  /* paper and ink: an ivory page by day, a dark green binding by night */
+  /* paper and ink: an ivory page by day, a dark green binding by night. The paper is #faf6ec and #0e1612 in hex,
+     which the theme-color tags (partials/head.html, index.html) and public/manifest.webmanifest repeat. */
   --paper: light-dark(oklch(97.3% 0.014 88), oklch(19% 0.014 165));
   --paper-raised: light-dark(oklch(99.2% 0.007 88), oklch(23% 0.016 165));
   --paper-sunk: light-dark(oklch(94.6% 0.018 86), oklch(16.5% 0.012 165));

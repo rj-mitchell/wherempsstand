@@ -1,6 +1,6 @@
 # What costs money on Where MPs Stand
 
-Last updated 11 October 2026. AI prices are Anthropic's, per call, measured on this site; £1 ≈ $1.27.
+Last updated 6 November 2026. AI prices are Anthropic's, per call, measured on this site; £1 ≈ $1.27.
 
 ## Free (no AI, no charge per use)
 
@@ -15,8 +15,9 @@ These run on the server you already pay for, so extra use costs nothing.
 - **MP and peer pages**, **Find your MP** by postcode, election results and majorities, voting records and rebellions.
 - **Re-ranking**, if turned on: a small model that runs on the server, not a paid AI service.
 - **The twice-daily data update**, the search index, the backups, the status, admin and information pages.
-- **Future features that need no AI**: charts, bill and debate pages without briefings, timelines, glossary, RSS feeds,
-  Early Day Motions, the Register of Interests, committee pages and witness lists.
+- **Pages that need no AI**: **In Parliament this week** (what each sitting week debated, asked and voted on, drawn
+  straight from the record), charts, bill and debate pages, timelines, the glossary, RSS feeds, early day motions,
+  the Register of Interests, committee pages and witness lists.
 
 ## Cheap (well under 1p each)
 
@@ -37,7 +38,8 @@ These run on the server you already pay for, so extra use costs nothing.
   sources found have changed (checking that is nearly free). At most 4 are rewritten per update, and none once a
   daily or monthly budget is reached.
 - **Featured briefings**: free (they are briefings already written).
-- **A weekly "In Parliament this week" page** (a future item): a briefing a week, about 50p a month.
+- **An AI summary for "In Parliament this week"** (an optional future item; the page itself is free): a briefing a
+  week, about 50p a month.
 - **Plain-English summaries of committee evidence** (a future item): about 4p to 15p per session, written once.
 - **Running a full briefing comparison in the test set**: about £2 for 10 questions with two models.
 

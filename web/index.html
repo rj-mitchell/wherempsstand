@@ -4,11 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#16201b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#faf6ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1612" media="(prefers-color-scheme: dark)" />
     <meta name="description" content="Where MPs Stand: sourced briefings on what MPs, peers and the devolved parliaments have said, with each point linked to Hansard. An independent research service." />
     <title>Where MPs Stand</title>
     <link rel="canonical" href="https://wherempsstand.com/" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -24,6 +25,33 @@
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
+    <!-- For readers with scripts off. The server removes it from pages that put their own text in the root. -->
+    <noscript class="home-fallback">
+      <div class="app page">
+        <!--#include header-->
+        <main id="main" tabindex="-1" class="prose">
+          <h1>Where MPs Stand</h1>
+          <p class="lede">
+            Sourced briefings on what MPs, peers and the devolved parliaments have said, with each point linked to
+            Hansard. An independent research service.
+          </p>
+          <p>
+            Asking a question needs JavaScript, which is off or not available in this browser. These pages work
+            without it:
+          </p>
+          <ul>
+            <li><a href="/this-week">In Parliament this week</a>: what was debated, asked and voted on</li>
+            <li><a href="/about">About</a>: why the site exists, who runs it and how it is funded</li>
+            <li><a href="/methodology">Methodology</a>: how a briefing is written and checked</li>
+            <li><a href="/glossary">Glossary</a>: the words Parliament uses</li>
+            <li><a href="/developers">Data and API</a>: the same records, for reuse</li>
+            <li><a href="/corrections">Corrections and problems</a>: what has been put right</li>
+          </ul>
+          <p>Saved briefings, topic briefings and each MP's and peer's page also show their text without JavaScript.</p>
+        </main>
+        <!--#include footer-->
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -72,8 +72,8 @@
         <h2 id="endpoints">Other endpoints</h2>
         <p>These return JSON and are what the site's own pages use.</p>
         <dl class="defs">
-          <dt><code>/api/people?q=</code>, <code>/api/people/{number}</code></dt>
-          <dd>MPs and peers: memberships, roles, recent contributions, voting record, registered interests, early day motions.</dd>
+          <dt><code>/api/people?q=&amp;everyone=</code>, <code>/api/people/{number}</code></dt>
+          <dd>MPs and peers: memberships, roles, recent contributions, voting record, registered interests, early day motions. The search finds current members only; add <code>everyone=true</code> to include former MPs and peers since 1997.</dd>
           <dt><code>/api/debates/{date}/{chamber}/{slug}</code></dt>
           <dd>A whole debate in order. <code>chamber</code> is <code>commons</code>, <code>lords</code>, <code>westminster-hall</code> or <code>public-bill-committee</code>; the address is the same as the debate's page on this site.</dd>
           <dt><code>/api/week?start=YYYY-MM-DD</code></dt>
