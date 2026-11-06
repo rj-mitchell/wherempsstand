@@ -15,10 +15,12 @@ You will need:
 
 ## 1. Put the latest code on `main` (on GitHub, two clicks)
 
-The server installs whatever is on the `main` branch of <https://github.com/rj-mitchell/wherempsstand>. (The repository was called `wheretheystand` until 6 November 2026. GitHub forwards the old address, but a server set
-up before then should be pointed at the new one, once: `git -C /opt/hansardgpt remote set-url origin
-https://github.com/rj-mitchell/wherempsstand.git`.) When a
+The server installs whatever is on the `main` branch of <https://github.com/rj-mitchell/wherempsstand>. When a
 change is ready it comes as a pull request: open it, press **Squash and merge**, then **Confirm squash and merge**.
+
+The repository was called `wheretheystand` until 6 November 2026. GitHub forwards the old address, but a server set
+up before then should be pointed at the new one, once:
+`git -C /opt/hansardgpt remote set-url origin https://github.com/rj-mitchell/wherempsstand.git`.
 
 ## 2. Point the domains at the server
 
