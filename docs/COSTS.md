@@ -38,6 +38,8 @@ These run on the server you already pay for, so extra use costs nothing.
   sources found have changed (checking that is nearly free). At most 4 are rewritten per update, and none once a
   daily or monthly budget is reached.
 - **Featured briefings**: free (they are briefings already written).
+- **An AI summary for "In Parliament this week"** (an optional future item; the page itself is free): a briefing a
+  week, about 50p a month.
 - **Plain-English summaries of committee evidence** (a future item): about 4p to 15p per session, written once.
 - **Running a full briefing comparison in the test set**: about £2 for 10 questions with two models.
 
