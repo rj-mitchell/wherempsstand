@@ -15,7 +15,7 @@
 #   6. installs the twice-daily sync timer, the nightly backup timer, and the hourly disk check and monthly disk
 #      report (both email the alerts address once mail.sh is set up)
 # The site is public. An admin token (for /api/admin/usage and /api/admin/sync) is
-# generated into deploy/.env. For an invite-only site instead, see the README.
+# generated into deploy/.env. For an invite-only site instead, see docs/OPERATIONS.md.
 set -euo pipefail
 
 REPO="${REPO:-https://github.com/rj-mitchell/wherempsstand.git}"

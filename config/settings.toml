@@ -105,7 +105,7 @@ use_fallbacks = true
 # or "hashing" (deterministic, offline; for tests and the sample demo only).
 backend = "fastembed"
 # snowflake-arctic-embed-xs: 384 dims, ~2.6x faster than bge-small on CPU with similar
-# retrieval quality (benchmarked on this project; see README).
+# retrieval quality (benchmarked on this project).
 model = "snowflake/snowflake-arctic-embed-xs"
 dim = 384
 passage_words = 250
