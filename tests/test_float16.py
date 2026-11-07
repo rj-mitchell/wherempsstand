@@ -220,3 +220,69 @@ def test_the_command_converts_both_tables_under_the_update_lock(settings, monkey
     assert out["passages"]["checks"]["searches"]["overlap_at_10"] == 1.0  # (the hashing embedder, no index)
     assert vector_value_type(idx.vectors().schema) == pa.float16()
     assert vector_value_type(ev._table().schema) == pa.float16()
+
+
+class _Embedder:
+    def embed_query(self, text: str) -> np.ndarray:
+        v = np.random.default_rng(abs(hash(text)) % 2**32).standard_normal(DIM)
+        return v / np.linalg.norm(v)
+
+
+def test_the_conversion_measures_its_new_index_and_records_it(tmp_path):
+    from hansard.index.retune import read_record
+
+    _old_index(tmp_path)
+    target = float16.passages_target(tmp_path, DIM, 1024, {"refine_factor": 5}, embedder=_Embedder())
+    out = float16.convert(target, queries=list(_vectors(10, seed=1)), commit_rows=5000)
+    assert out["status"] == "converted", out
+    tuning = out["tuning"]
+    assert tuning["vectors"] == ROWS and tuning["partitions"] == 11
+    assert tuning["before"] == {**tuning["before"], "nprobes": None, "refine_factor": 5}
+    assert [(t["nprobes"], t["refine_factor"]) for t in tuning["trials"]][:3] == [(20, None), (20, 5), (20, 10)]
+    rec = tuning["recommended"]
+    assert rec["recall"] >= tuning["before"]["recall"] - 0.02
+    assert out["checks"]["searches"]["overlap_at_10"] >= 0.9  # the new table searched with its recommended settings
+    record = read_record(tmp_path)
+    assert out["record"] == str(tmp_path / "vector-index.json")
+    assert record["by"] == "vectors-f16" and record["vectors"] == ROWS and record["rows_per_partition"] == 1024
+    assert (record["nprobes"], record["refine_factor"], record["recall"]) == (rec["nprobes"], rec["refine_factor"],
+                                                                              rec["recall"])
+
+
+def test_a_new_index_that_finds_fewer_is_not_swapped(tmp_path):
+    from hansard.index.retune import read_record
+
+    _old_index(tmp_path)
+    target = float16.passages_target(tmp_path, DIM, 1024, {"refine_factor": 5}, embedder=_Embedder(),
+                                     tolerance=-1.0)  # nothing can beat the old index by more than everything
+    out = float16.convert(target, commit_rows=5000)
+    assert out["refused"] and "the index check failed" in out["status"] and "recommended" not in out["tuning"]
+    assert vector_value_type(SearchIndex(tmp_path, DIM).vectors().schema) == pa.float32()
+    assert read_record(tmp_path) is None
+
+
+def test_the_command_saves_the_measured_settings(settings, monkeypatch):
+    import json
+
+    from typer.testing import CliRunner
+
+    from hansard import cli
+    from hansard.config import load_settings
+
+    monkeypatch.setattr(cli, "_settings", lambda: settings)
+    dim = int(settings.embedding["dim"])
+    idx = SearchIndex(settings.index_dir, dim)
+    idx.db.create_table("vectors", schema=vector_schema(dim, pa.float32()))
+    vecs = np.random.default_rng(6).standard_normal((3000, dim)).astype(np.float32)
+    idx.add_vectors([], _rows(3000), vecs)
+    idx.rebuild_vector_index(256)
+    res = CliRunner().invoke(cli.app, ["vectors-f16", "--only", "passages", "--rows-per-partition", "256"])
+    assert res.exit_code == 0, res.output
+    out, end = json.JSONDecoder().raw_decode(res.stdout[res.stdout.index("{"):])
+    passages = out["passages"]
+    assert passages["status"] == "converted" and passages["record"]
+    rec = passages["tuning"]["recommended"]
+    assert "Restart the app" in res.stdout[res.stdout.index("{") + end:]
+    ranking = load_settings(**{"embedding.backend": "hashing", "embedding.dim": 64}).ranking
+    assert ranking["vector_nprobes"] == rec["nprobes"]
+    assert ranking["vector_refine_factor"] == (rec["refine_factor"] or 0)

@@ -173,6 +173,39 @@ already does from time to time. A source that changes is one of two passages sco
 The conversion itself took 84 seconds for this corpus, 75 of them building the index; on the full record expect
 about an hour.
 
+### The conversion on the server, and the probes it needed (7 November 2026)
+
+`hansard vectors-f16` converted the server's tables on 7 November 2026: 7,887,156 passages' vectors (5.65 GB
+saved) and the committee evidence's (0.74 GB saved). For the passages it built a new meaning-search index with
+8,192 vectors to a partition (962 partitions), the shape `hansard reindex-vectors` builds, but searched it with the
+old setting of 20 partitions (`vector_nprobes`, the default). Its own check found only 90.8% of the old table's
+nearest 10 (`overlap_at_10` 0.908, just over the 0.9 it requires), and the committee evidence 92.9%.
+
+The test set's `hansard eval retrieval --compare`, before and after: 18 of 62 questions chose exactly the same 24
+sources, the sources overlapped by 93.1%, and the meaning search found 96.45% of the same nearest 10 (lowest 60%).
+The largest change in a passage's similarity was 0.000055. This comparison is muddied: the twice-daily update added
+new Hansard between the two runs.
+
+`hansard reindex-vectors` then rebuilt the index the same way (463 seconds) and measured each setting against a
+search that compares every vector (2.5 seconds a search). The share of the true nearest 300 passages found, and the
+median time of a search:
+
+| Partitions searched (`nprobes`) | No re-check | Re-check 5 times as many (`refine_factor` 5) | Re-check 10 times |
+|---|---|---|---|
+| 20 | 63.2%, 15.5 ms | 81.5%, 30.7 ms | 82.4%, 41.7 ms |
+| 40 | 65.5%, 21.2 ms | 87.6%, 33.8 ms | 88.6%, 38.4 ms |
+| 80 | 68.2%, 35.1 ms | **94.0%, 42.1 ms** | 95.1%, 53.6 ms |
+
+Before the rebuild, the converted table's index with the site's settings then (20 partitions, re-check 5) found
+85.2%, in 26.3 ms. 80 partitions with re-check 5 was recommended and saved to `/data/settings.local.toml`.
+
+So the conversion's lower overlap came from the new index searched with too few partitions, not from the 16-bit
+numbers. Searching 80 of its 962 partitions rather than 20, it finds 94% of the nearest passages, against 85.2%; the
+largest change in a similarity on the test set, 0.000055, is the size of 16-bit rounding, as measured above. Since
+then `hansard vectors-f16` measures the new index and saves its settings itself,
+and every rebuild is recorded beside the index (`index/vector-index.json`) for the monthly report's reminder
+([HOSTING.md](HOSTING.md), "Disk space").
+
 ## Measured performance
 
 Moved here from the README on 6 November 2026.

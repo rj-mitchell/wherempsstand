@@ -94,10 +94,9 @@ Still to do:
 - [ ] **Compress the raw Hansard files already on the server**, once, at a quiet hour: `hansard compress-raw
   --dry-run`, then `hansard compress-raw` under the update lock (`docs/HOSTING.md`, "Disk space", has the commands).
   About 7 GB freed. Note the sync's `fetch` and `ingest` times before and after.
-- [ ] **Convert the search vectors on the server to 16-bit**, once, at a quiet hour: `hansard vectors-f16
-  --dry-run`, the test set's retrieval (`hansard eval retrieval`, free), `hansard vectors-f16` under the update lock
-  (about an hour; the site keeps working), then the retrieval again with `--compare` (`docs/HOSTING.md`, "Disk
-  space", has the commands). About 6–7 GB freed. Then the sister sites, if their indexes are worth it.
+- [x] **Convert the search vectors on the server to 16-bit.** Done on 7 November 2026: 6.4 GB freed. The
+  meaning-search index was then rebuilt and measured with `hansard reindex-vectors` (80 partitions searched rather
+  than 20; [EVALUATION.md](EVALUATION.md)). The sister sites can follow, if their indexes are worth it.
 - [ ] **A memory limit for Where MPs Stand**, once measured: `docker stats --no-stream` during a few syncs, and the
   monthly reports. Then `mem_limit` in `deploy/docker-compose.yml` (`docs/HOSTING.md`, "Disk space").
 - [ ] **Docker's default log limit on the running server.** `provision.sh` sets it on a new server; this one needs

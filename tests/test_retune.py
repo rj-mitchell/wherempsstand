@@ -52,3 +52,60 @@ def test_rebuild_puts_the_old_index_back_when_results_differ(idx):
     assert not out["kept"] and "put back" in out["note"]
     assert idx.vectors().version > version  # restoring writes a new version equal to the old one
     assert len(idx.vector(FakeEmbedder().embed_query("x"), None, 10)) == 10
+
+
+def test_a_kept_rebuild_is_recorded_and_one_put_back_is_not(idx):
+    from hansard.index.retune import read_record
+
+    assert read_record(idx.path) is None
+    out = rebuild(idx, FakeEmbedder(), rows_per_partition=1000, probes=(20,), refines=(5,), limit=50, tolerance=1.0)
+    record = read_record(idx.path)
+    assert out["record"] == str(idx.path / "vector-index.json")
+    assert record["by"] == "reindex-vectors" and record["vectors"] == 12_000
+    assert record["partitions"] == 12 and record["rows_per_partition"] == 1000
+    assert (record["nprobes"], record["refine_factor"]) == (20, 5)
+    assert record["recall"] == out["trials"][0]["recall"] and record["recall_before"] == out["before"]["recall"]
+    assert record["built"][:4].isdigit()
+
+    rebuild(idx, FakeEmbedder(), rows_per_partition=2000, probes=(1,), refines=(None,), limit=50, tolerance=-1.0)
+    assert read_record(idx.path) == record  # the old index was put back: still the one recorded
+
+
+def test_index_status_says_when_to_rebuild(tmp_path):
+    from hansard.index.retune import record_path, status
+
+    none = status(tmp_path, 1000)
+    assert none["rebuild_due"] is None and "no record" in none["reminder"]
+    assert "hansard reindex-vectors once meaning-based search has caught up" in none["reminder"]
+    record_path(tmp_path).write_text('{"built": "2026-11-07T12:00:00+00:00", "vectors": 7887156}')
+    small = status(tmp_path, 8_100_000)
+    assert small["rebuild_due"] is False and small["growth"] == 0.027
+    assert small["reminder"] == ("Meaning-search index: 8,100,000 passages now, 7,887,156 when it was last rebuilt "
+                                 "(7 November 2026), 3% more. Rebuild it at 20% more (9,464,587 passages).")
+    due = status(tmp_path, 9_500_000)
+    assert due["rebuild_due"] is True and "rebuild it with hansard reindex-vectors" in due["reminder"]
+    assert "no passages" in status(tmp_path, 0)["reminder"]
+
+
+def test_the_index_status_command(settings, monkeypatch):
+    import json
+
+    from typer.testing import CliRunner
+
+    from hansard import cli
+    from hansard.index.retune import record_path
+
+    monkeypatch.setattr(cli, "_settings", lambda: settings)
+    empty = CliRunner().invoke(cli.app, ["index-status", "--text"])
+    assert empty.exit_code == 0 and "no passages" in empty.output
+    idx = SearchIndex(settings.index_dir, 64)
+    rows = [{"passage_id": f"p{i}", "record_id": f"r{i}", "source": "debates", "source_key": "k",
+             "record_type": "speech", "house": "commons", "date": date(2021, 1, 1), "year": 2021, "person_id": None,
+             "party_id": None, "region": None, "is_gov": False, "is_shadow": False, "is_chair": False,
+             "gov_portfolios": [], "shadow_portfolios": [], "chair_portfolios": []} for i in range(30)]
+    idx.add_vectors([], rows, np.ones((30, 64)))
+    record_path(settings.index_dir).write_text('{"built": "2026-11-07T12:00:00+00:00", "vectors": 20}')
+    res = CliRunner().invoke(cli.app, ["index-status"])
+    out = json.loads(res.output)
+    assert out["vectors"] == 30 and out["growth"] == 0.5 and out["rebuild_due"] is True
+    assert out["last_rebuild"]["vectors"] == 20
