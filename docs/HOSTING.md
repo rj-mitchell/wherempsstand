@@ -240,7 +240,8 @@ if something was put right) and withdraw a briefing. A withdrawal reason is show
 | Load the 1997–2010 records now, rather than at the next update (once, after installing the version that adds them; free; a few hours) | `sudo systemctl start --no-block hansard-sync.service`, then watch with `journalctl -u hansard-sync -f` |
 | See whether an update is running, and whether the last one finished | `systemctl status hansard-sync --no-pager` (`active` means running, or waiting for another site's update to finish: see [Other sites on this server](#other-sites-on-this-server); `failed` with `status=137` means it ran out of memory: run `bash /opt/hansardgpt/deploy/swap.sh`, then start it again as above) |
 | See how much is still to do | `cd /opt/hansardgpt/deploy && docker compose run --rm -T app hansard status` (`files_unembedded` falls to 0 as meaning-based search catches up, up to 4 hours of it per update) |
-| Rebuild the meaning-search index for today's number of passages: quicker searches that find more of the closest passages (once, after meaning-based search has caught up; free; about 30–60 minutes, the site works throughout and the twice-daily update waits for it) | `cd /opt/hansardgpt/deploy && docker compose exec -d app sh -c 'mkdir -p /data/logs && hansard reindex-vectors > /data/logs/reindex.log 2>&1'`, then `docker compose exec app cat /data/logs/reindex.log` when it has finished (it ends by saying to restart), then `bash /opt/hansardgpt/deploy/update.sh` |
+| Rebuild the meaning-search index for today's number of passages: quicker searches that find more of the closest passages (after meaning-based search has caught up, and again when the monthly disk report says so; free; about 30–60 minutes, the site works throughout and the twice-daily update waits for it). It measures each setting, saves the best to `/data/settings.local.toml` and records the rebuild in `/data/index/vector-index.json` | `cd /opt/hansardgpt/deploy && docker compose exec -d app sh -c 'mkdir -p /data/logs && hansard reindex-vectors > /data/logs/reindex.log 2>&1'`, then `docker compose exec app cat /data/logs/reindex.log` when it has finished (it ends by saying to restart), then `docker compose restart app` |
+| See how many passages the meaning-search index has now, against the number at its last rebuild | `cd /opt/hansardgpt/deploy && docker compose run --rm -T app hansard index-status` |
 | Check every vote for a whip report in one go, rather than 1,500 per update (free; about 3–4 hours) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard whips --count 20000` |
 | Set or change the Companies House API key (for company roles; free from developer.company-information.service.gov.uk) | `cd /opt/hansardgpt/deploy && read -rsp "Companies House API key: " K && echo && sed -i -e '/^HANSARD_COMPANIES_HOUSE_KEY=/d' -e '$a\' .env && printf 'HANSARD_COMPANIES_HOUSE_KEY=%s\n' "$K" >> .env && unset K && docker compose up -d` |
 | Look up every member's company roles now, rather than 400 per update (free; about 2–3 hours) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard directorships --count 4000` |
@@ -516,7 +517,12 @@ watch it, for every site on the server. Both are installed by `update.sh` and em
 - **on the 1st of each month**, `deploy/disk-report.sh` emails where the disk is going: each site's data and its
   largest folders, the search indexes and how many old versions each keeps, Docker's images and build cache, swap,
   the system log, and last month's figure for comparison. It also gives the memory each container is using at that
-  moment (`docker stats`), with its limit, and how much swap has been used since the server started.
+  moment (`docker stats`), with its limit, and how much swap has been used since the server started. And it gives
+  the number of passages searched by meaning now, against the number when that index was last rebuilt, with the
+  growth (`hansard index-status`). New passages join the index's existing partitions, so each search reads more as
+  the record grows: at 20% more, the line says to run `hansard reindex-vectors` ([Day to day](#day-to-day) has the
+  command). If no rebuild has been recorded (`/data/index/vector-index.json`, written by `reindex-vectors` and
+  `vectors-f16` since 7 November 2026), it says to run one once meaning-based search has caught up.
 
 **Memory limits.** The other sites' containers have memory limits (4 GB for Where Countries Stand and Where Councils
 Stand, 1 GB for Where Landlords Stand), so a runaway update stops itself rather than slowing every site. Where MPs
@@ -642,11 +648,18 @@ command. All four steps below are free (no AI model is called). In `/opt/hansard
    ```
 
    (The test set is mounted so that the conversion's own check searches for its 62 questions as well as 14 samples.)
-   It ends with a summary for each table: `"status": "converted"`, the checks (`rows_ok`, the `sample` of vectors
-   with its largest difference, and `searches`: the share of the nearest 10 passages the new table finds of the
-   old table's, `overlap_at_10`, which must be at least 0.9), and `gb_before`, `gb_after` and `gb_saved`. If a check
-   fails it says "not swapped", and the site carries on with the old table, untouched (`--force` swaps even when
-   only the searches differ: ask before using it). It is safe to stop (`docker ps --filter name=app-run` names its container; `docker stop` that name) and run
+   For the passages, once the new table's search index is built, it measures that index as `hansard
+   reindex-vectors` does: how many of the truly nearest passages it finds at 20, 40 and 80 partitions searched
+   (`nprobes`), with and without re-checking, and recommends the fastest setting that finds the most (`tuning`). A
+   new index searched with the old settings can find fewer: on 7 November 2026, 85% at 20 partitions against 94% at
+   80 ([EVALUATION.md](EVALUATION.md)). It ends with a summary for each table: `"status": "converted"`, the checks
+   (`rows_ok`, the `sample` of vectors with its largest difference, and `searches`: the share of the nearest 10
+   passages the new table, searched with its recommended settings, finds of the old table's, `overlap_at_10`, which
+   must be at least 0.9), and `gb_before`, `gb_after` and `gb_saved`. The recommended settings are saved to
+   `/data/settings.local.toml` and the rebuild recorded (`record`), and it ends by saying to restart the app
+   (`docker compose restart app`), which then searches with them. If a check fails it says "not swapped", and the
+   site carries on with the old table, untouched (`--force` swaps even when only the searches differ, or when no
+   setting of the new index finds as many as the old: ask before using it). It is safe to stop (`docker ps --filter name=app-run` names its container; `docker stop` that name) and run
    again: it carries on from where it stopped (the copy, then the index), and a run after a finished one only
    tidies up.
 

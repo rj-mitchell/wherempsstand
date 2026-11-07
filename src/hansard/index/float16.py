@@ -8,13 +8,19 @@ committee evidence (``evidence_index/turns``), while the site keeps searching th
               rounded to 16 bits and every other column as it was, committed about a million rows at a time. A
               stopped copy carries on where it stopped, unless the old table has changed since, when it starts again.
 2. **index**  the new table gets the indices the old one has: the meaning-search index built as
-              ``hansard reindex-vectors`` builds it, and the same scalar indices.
+              ``hansard reindex-vectors`` builds it, and the same scalar indices. For the passages, the new index is
+              then measured as ``reindex-vectors`` measures it (hansard/index/retune.py): the share of the true
+              nearest passages it finds at each number of probes, and the settings to search it with. A new index
+              searched with the old settings can find fewer (on 7 November 2026: 0.852 at 20 probes, 0.94 at 80).
 3. **check**  the same number of rows; a sample of vectors, looked up by key in both, differing by no more than
-              16-bit rounding; and the same searches (the sample searches and the test set's questions) run on both
-              tables, finding the same passages. Nothing is swapped if any check fails.
+              16-bit rounding; some setting of the new index finding as many of the nearest passages as the old one
+              does; and the same searches (the sample searches and the test set's questions) run on both tables,
+              the new one with its recommended settings, finding the same passages. Nothing is swapped if any check
+              fails.
 4. **swap**   the two tables' folders are exchanged in one step (a single rename), so the next search opens the new
               table; a search that had opened the old one just before is run again (``retry_once`` in lance.py).
-5. **clean**  the old table is deleted, or kept as ``<name>_f32`` with ``keep_old``; the next run deletes it.
+5. **clean**  the old table is deleted, or kept as ``<name>_f32`` with ``keep_old``; the next run deletes it. The
+              new index is recorded beside it (``retune.write_record``), and the command saves its settings.
 
 The caller holds the update lock, so nothing writes to either table meanwhile.
 """
@@ -63,6 +69,7 @@ class Target:
     key: tuple[str, ...]                        # columns that identify a row
     build_index: Callable[[Any], None]          # builds the new table's meaning-search index
     search_options: dict[str, Any] = field(default_factory=dict)  # nprobes and refine_factor, as the site searches
+    tune: Callable[[Any], dict[str, Any]] | None = None  # measures the new table's index (retune.measure)
 
     @property
     def new_name(self) -> str:
@@ -275,10 +282,12 @@ def compare_hits(old: list[list[tuple[tuple, float]]], new: list[list[tuple[tupl
             "max_similarity_difference": round(max(dsim), 6) if dsim else 0.0}
 
 
-def check_searches(target: Target, src, dst, queries: list[np.ndarray], limit: int = 300) -> dict[str, Any]:
-    """The same searches on the old table and the new, as the site makes them."""
+def check_searches(target: Target, src, dst, queries: list[np.ndarray], limit: int = 300,
+                   new_options: dict[str, Any] | None = None) -> dict[str, Any]:
+    """The same searches on the old table and the new, as the site makes them: the old table with the site's settings,
+    the new one with ``new_options`` (its recommended settings) if given."""
     old = [nearest(src, q, target.key, limit, **target.search_options) for q in queries]
-    new = [nearest(dst, q, target.key, limit, **target.search_options) for q in queries]
+    new = [nearest(dst, q, target.key, limit, **(new_options or target.search_options)) for q in queries]
     out = compare_hits(old, new)
     out["ok"] = out["overlap_at_10"] >= MIN_OVERLAP_10
     return out
@@ -391,18 +400,28 @@ def convert(target: Target, *, dry_run: bool = False, keep_old: bool = False, fo
     with warnings.catch_warnings():  # (LanceDB warns that readers of older versions would fail: there are none)
         warnings.simplefilter("ignore", UserWarning)
         dst.optimize(cleanup_older_than=timedelta(0), delete_unverified=True)
+    new_options = None
+    if target.tune and any("vector" in (ix.columns or []) for ix in dst.list_indices()):
+        progress(f"{target.label}: measuring the new index at each number of probes (as reindex-vectors does)")
+        out["tuning"] = target.tune(dst)
+        rec = out["tuning"].get("recommended")
+        new_options = {"nprobes": rec["nprobes"], "refine_factor": rec["refine_factor"]} if rec else None
     progress(f"{target.label}: checking the new table")
     checks: dict[str, Any] = {"rows_old": rows, "rows_new": dst.count_rows()}
     checks["rows_ok"] = checks["rows_old"] == checks["rows_new"]
     checks["sample"] = check_sample(target, src, dst)
     if queries:
-        checks["searches"] = check_searches(target, src, dst, queries)
+        checks["searches"] = check_searches(target, src, dst, queries, new_options=new_options)
     out["checks"] = checks
     failed = [name for name, ok in (("rows", checks["rows_ok"]), ("sample", checks["sample"]["ok"]),
+                                    ("index", "tuning" not in out or new_options is not None),
                                     ("searches", checks.get("searches", {}).get("ok", True))) if not ok]
-    if failed and not (force and failed == ["searches"]):
+    if failed and not (force and set(failed) <= {"index", "searches"}):
         out["status"] = (f"not swapped: the {' and '.join(failed)} check failed. The site still uses the old table; "
                          f"the new one is kept, so a second run does not copy it again.")
+        if "index" in failed:
+            out["status"] += (" The new index found fewer of the nearest passages than the old one at every setting "
+                              "('tuning').")
         out["refused"] = True
         return out
     # nothing may have been written to the old table since the copy began (the update lock sees to that)
@@ -418,6 +437,10 @@ def convert(target: Target, *, dry_run: bool = False, keep_old: bool = False, fo
     out["removed"] = remove_leftovers(target, db, keep_old)
     live = db.open_table(target.name)
     live.optimize(cleanup_older_than=KEEP_OLD_VERSIONS)
+    if new_options:
+        from hansard.index.retune import write_record
+
+        out["record"] = str(write_record(target.path, "vectors-f16", out["tuning"]))
     out["status"] = "converted" + (f"; the old table is kept as {target.kept_name}" if keep_old else "")
     out["gb_after"] = gb(folder_bytes(target.folder(target.name)))
     out["free_gb_after"] = gb(free_bytes(target.path))
@@ -426,13 +449,23 @@ def convert(target: Target, *, dry_run: bool = False, keep_old: bool = False, fo
 
 
 def passages_target(index_dir: Path, dim: int, rows_per_partition: int = 8192,
-                    search_options: dict[str, Any] | None = None) -> Target:
+                    search_options: dict[str, Any] | None = None, embedder=None,
+                    tolerance: float = 0.02) -> Target:
+    """The passages' vectors. With an ``embedder`` (for the sample searches), the new index is measured and its
+    settings recommended as ``hansard reindex-vectors`` does."""
     from hansard.index.lance import VECTORS, SearchIndex
 
     def build(dst) -> None:  # as hansard reindex-vectors builds it
         SearchIndex(index_dir, dim, vectors_name=dst.name).rebuild_vector_index(rows_per_partition)
 
-    return Target("passages", Path(index_dir), VECTORS, ("passage_id",), build, search_options or {})
+    def tune(dst) -> dict[str, Any]:  # as hansard reindex-vectors measures it
+        from hansard.index.retune import measure
+
+        return measure(SearchIndex(index_dir, dim), SearchIndex(index_dir, dim, vectors_name=dst.name), embedder,
+                       rows_per_partition, current=search_options, tolerance=tolerance)
+
+    return Target("passages", Path(index_dir), VECTORS, ("passage_id",), build, search_options or {},
+                  tune if embedder is not None else None)
 
 
 def evidence_target(path: Path) -> Target:

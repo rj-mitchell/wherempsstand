@@ -261,20 +261,44 @@ def reindex_vectors(rows_per_partition: int = typer.Option(8192, help="vectors p
         out = rebuild(idx, get_embedder(settings), rows_per_partition, current=current, tolerance=tolerance,
                       force=force)
     if out.get("recommended"):
-        from hansard.config import save_local_settings
-
-        rec = out["recommended"]
-        out["settings_file"] = str(save_local_settings(settings.data_dir, {"ranking": {
-            "vector_nprobes": rec["nprobes"], "vector_refine_factor": rec["refine_factor"] or 0}}))
+        out["settings_file"] = _save_vector_settings(settings, out["recommended"])
     typer.echo(json.dumps(out, indent=2))
     if out.get("kept"):
-        typer.echo("\nRestart the app to search with the new index settings (bash deploy/update.sh does this).")
+        typer.echo(RESTART_NOTE)
 
 
-def _check_queries(settings: Settings, questions: Path) -> list:
+# the app reads its settings when it starts; update.sh restarts it only when there is new code to install
+RESTART_NOTE = ("\nRestart the app to search with the new index settings: in /opt/hansardgpt/deploy, "
+                "docker compose restart app")
+
+
+def _save_vector_settings(settings: Settings, rec: dict) -> str:
+    """Save the recommended nprobes and refine_factor to settings.local.toml, for the site and the updates."""
+    from hansard.config import save_local_settings
+
+    return str(save_local_settings(settings.data_dir, {"ranking": {
+        "vector_nprobes": rec["nprobes"], "vector_refine_factor": rec["refine_factor"] or 0}}))
+
+
+@app.command("index-status")
+def index_status(text: bool = typer.Option(False, "--text", help="print only the sentence for the monthly report")):
+    """How many passages are searched by meaning now, against the number when the index was last rebuilt
+    (index/vector-index.json), and whether it is time to rebuild it (20% more). Reads no vectors: quick at any time."""
+    from hansard.index.lance import SearchIndex
+    from hansard.index.retune import status as index_status_of
+
+    settings = _settings()
+    if not settings.index_dir.exists():
+        out = index_status_of(settings.index_dir, 0)
+    else:
+        idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+        out = index_status_of(settings.index_dir, idx.stats()["vectors"])
+    typer.echo(out["reminder"] if text else json.dumps(out, indent=2))
+
+
+def _check_queries(embedder, questions: Path) -> list:
     """The searches the conversion compares old and new tables on: the sample searches and the test set's questions,
     embedded by the local model (free)."""
-    from hansard.embed.base import get_embedder
     from hansard.index.retune import SAMPLE_QUERIES
 
     texts = [q for q, _ in SAMPLE_QUERIES]
@@ -282,7 +306,6 @@ def _check_queries(settings: Settings, questions: Path) -> list:
         from hansard.evaluate import load_questions
 
         texts += [q.question for q in load_questions(questions)[1]]
-    embedder = get_embedder(settings)
     return [embedder.embed_query(t) for t in texts]
 
 
@@ -299,10 +322,12 @@ def vectors_f16(dry_run: bool = typer.Option(False, "--dry-run", help="report si
     """Store the meaning-search vectors as 16-bit floats: about half the disk, the same passages found.
 
     Once, on an index made before November 2026. Copies each table of vectors (the passages', then the committee
-    evidence's) to a new 16-bit one, builds its index as reindex-vectors does, checks it (row counts, a sample of
-    vectors, and the same searches on both), then swaps it in place of the old one in one step and deletes the old
-    one. The site keeps searching throughout. Safe to stop and run again: it carries on where it stopped. Run under
-    the server's update lock (docs/HOSTING.md, "Disk space")."""
+    evidence's) to a new 16-bit one, builds its index as reindex-vectors does, measures the passages' new index and
+    chooses its settings as reindex-vectors does, checks it (row counts, a sample of vectors, and the same searches
+    on both), then swaps it in place of the old one in one step and deletes the old one. The site keeps searching
+    throughout. Safe to stop and run again: it carries on where it stopped. Run under the server's update lock
+    (docs/HOSTING.md, "Disk space"); restart the app afterwards if it says so."""
+    from hansard.embed.base import get_embedder
     from hansard.index.float16 import convert, evidence_target, passages_target
     from hansard.sync import SyncRunning, evidence_index_path, update_lock
 
@@ -310,12 +335,20 @@ def vectors_f16(dry_run: bool = typer.Option(False, "--dry-run", help="report si
     settings = _settings()
     if only not in (None, "passages", "evidence"):
         raise typer.BadParameter("--only must be 'passages' or 'evidence'")
+    embedder = None
+    if not dry_run:
+        try:
+            embedder = get_embedder(settings)
+        except Exception as exc:  # the other checks still run
+            log.warning("no local embedding model (%s): the searches are not compared, nor the new index measured",
+                        exc)
     r = settings.ranking
     targets = []
     if only in (None, "passages"):
         targets.append(passages_target(settings.index_dir, int(settings.embedding.get("dim", 384)),
                                        rows_per_partition, {"nprobes": r.get("vector_nprobes"),
-                                                            "refine_factor": r.get("vector_refine_factor")}))
+                                                            "refine_factor": r.get("vector_refine_factor")},
+                                       embedder=embedder))
     if only in (None, "evidence") and evidence_index_path(settings).exists():
         targets.append(evidence_target(evidence_index_path(settings)))
     results = {}
@@ -329,18 +362,20 @@ def vectors_f16(dry_run: bool = typer.Option(False, "--dry-run", help="report si
         queries = None
         for target in targets:
             if not dry_run and queries is None and target.folder(target.name).exists():
-                try:
-                    queries = _check_queries(settings, questions)
-                except Exception as exc:  # the other checks still run
-                    log.warning("no local embedding model (%s): the searches are not compared", exc)
-                    queries = []
+                queries = _check_queries(embedder, questions) if embedder is not None else []
             results[target.label] = convert(target, dry_run=dry_run, keep_old=keep_old, force=force,
                                             queries=queries, progress=lambda m: typer.echo(m, err=True))
             if results[target.label].get("refused"):
                 break  # disk space, or a failed check: leave the rest for after it is dealt with
+    passages = results.get("passages", {})
+    rec = passages.get("tuning", {}).get("recommended")
+    if rec and passages.get("record"):  # converted, with the settings measured for its new index
+        passages["settings_file"] = _save_vector_settings(settings, rec)
     typer.echo(json.dumps(results, indent=2))
     if any(v.get("refused") for v in results.values()):
         raise typer.Exit(1)
+    if passages.get("settings_file"):
+        typer.echo(RESTART_NOTE)
 
 
 @app.command()
