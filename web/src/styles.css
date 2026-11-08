@@ -389,6 +389,9 @@ legend,
   --gutter: 1rem;
   --content: 46rem;
   --breakout: 64rem;
+  /* the family shelf in the footer lines up with the masthead's column (the kit's tokens, family kit 1.3.1) */
+  --wts-gutter: var(--gutter);
+  --wts-shelf-width: var(--breakout);
 
   display: grid;
   grid-template-columns:
