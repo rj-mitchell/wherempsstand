@@ -51,7 +51,7 @@ describe("the Where They Stand family binding", () => {
     const kit = document.createElement("div");
     kit.innerHTML = FAMILY.shelf;
     expect(container.querySelector(".family-shelf")?.innerHTML).toBe(kit.innerHTML);
-    expect(container.querySelectorAll(".family-shelf .wts-book")).toHaveLength(5);
+    expect(container.querySelectorAll(".family-shelf .wts-book")).toHaveLength(6);  // five sites and Understudy: Lumaya
     expect(container.querySelector(".independence")?.textContent).toBe(BRAND.independence);
     expect(read("partials/footer.html")).toContain(`<p class="independence">${BRAND.independence}</p>`);
     expect(BRAND.independence).toBe(
