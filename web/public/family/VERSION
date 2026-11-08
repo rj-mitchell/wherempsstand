@@ -1,6 +1,6 @@
 Where They Stand family kit
-kit 1.3.1
+kit 1.4.0
 site mps
 base /family/
-sha256 4dabb359ef2107363cd89db3c0b5540201b644775deaa588bf1c188a6287dba3
+sha256 b0a22f42eb00fdcdef20c581304765a9db0db3ad64ebfca976f700bd5e4b948c
 Written by family/kit/sync.mjs. Don't edit these files: change the kit and sync again.
