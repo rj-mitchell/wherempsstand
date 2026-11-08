@@ -123,45 +123,54 @@ function Witnesses() {
           {d.organisations.length === 0 ? (
             <p className="muted">No witnesses match.</p>
           ) : (
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th scope="col">Organisation</th>
-                  <th scope="col">Sessions</th>
-                  <th scope="col">Between</th>
-                </tr>
-              </thead>
-              <tbody>
-                {d.organisations.map((o) => (
-                  <tr key={(o.organisation ?? "") + o.first}>
-                    <td>
-                      {d.query ? (
-                        o.organisation ?? "(no organisation given)"
-                      ) : (
-                        <button type="button" className="secondary small-button" onClick={() => setQ(o.organisation ?? "")}>
-                          {o.organisation}
-                        </button>
-                      )}
-                      {o.also_written && o.also_written.length > 0 && (
-                        <span className="muted small">
-                          {" "}
-                          (counted together with {o.also_written.slice(0, 3).join("; ")}
-                          {o.also_written.length > 3 ? " and others" : ""})
-                        </span>
-                      )}
-                      {o.committees && o.committees.length > 0 && (
-                        <span className="muted small"> · {o.committees.slice(0, 4).join("; ")}{o.committees.length > 4 ? "…" : ""}</span>
-                      )}
-                    </td>
-                    <td>{o.sessions}</td>
-                    <td className="small">
-                      {o.first ? fmtDate(o.first) : ""}
-                      {o.last && o.last !== o.first ? ` – ${fmtDate(o.last)}` : ""}
-                    </td>
+            <div className="table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Organisation</th>
+                    <th scope="col">Sessions</th>
+                    <th scope="col">Between</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {d.organisations.map((o) => (
+                    <tr key={(o.organisation ?? "") + o.first}>
+                      <td>
+                        {d.query ? (
+                          o.organisation ?? "(no organisation given)"
+                        ) : (
+                          <button type="button" className="secondary small-button" onClick={() => setQ(o.organisation ?? "")}>
+                            {o.organisation}
+                          </button>
+                        )}
+                        {o.also_written && o.also_written.length > 0 && (
+                          <span className="muted small">
+                            {" "}
+                            (counted together with {o.also_written.slice(0, 3).join("; ")}
+                            {o.also_written.length > 3 ? " and others" : ""})
+                          </span>
+                        )}
+                        {o.committees && o.committees.length > 0 && (
+                          <span className="muted small"> · {o.committees.slice(0, 4).join("; ")}{o.committees.length > 4 ? "…" : ""}</span>
+                        )}
+                      </td>
+                      <td>{o.sessions}</td>
+                      <td className="small">
+                        {o.first ? <span className="nowrap">{fmtDate(o.first)}</span> : ""}
+                        {o.last && o.last !== o.first ? (
+                          <>
+                            {" – "}
+                            <span className="nowrap">{fmtDate(o.last)}</span>
+                          </>
+                        ) : (
+                          ""
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
           {d.sessions.length > 0 && (
             <>

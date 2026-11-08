@@ -63,7 +63,7 @@ function Lighter() {
       .then(setD, () => setError(true));
   }, []);
   if (error) return <p role="alert">This page could not be loaded. Please try again later.</p>;
-  if (!d) return <p className="muted">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Loading…</p>;
   return (
     <>
       <section aria-labelledby="h-laughter">

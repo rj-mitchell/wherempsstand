@@ -83,7 +83,7 @@ function Page({ parliament, slug }: { parliament: string; slug: string }) {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "The group could not be loaded."));
   }, [parliament, slug]);
   if (error) return <p role="alert">{error} <a href="/groups">All groups</a></p>;
-  if (!g) return <p className="muted">Loading…</p>;
+  if (!g) return <p className="muted" role="status">Loading…</p>;
   const officers = g.members.filter((m) => m.is_officer);
   const members = g.members.filter((m) => !m.is_officer);
   const linked = members.filter((m) => m.member);

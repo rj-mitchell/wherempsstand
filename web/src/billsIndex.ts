@@ -1,6 +1,6 @@
 /** The bills page: every bill debated since 1997, newest first, filtered as you type. */
 import "./pages";
-import { fmtDate } from "./render";
+import { fmtDate, keepTogether } from "./render";
 
 interface BillRow {
   slug: string;
@@ -24,7 +24,7 @@ function row(b: BillRow): HTMLLIElement {
   const meta = document.createElement("p");
   meta.className = "muted small";
   const years = b.first.slice(0, 4) === b.last.slice(0, 4) ? b.first.slice(0, 4) : `${b.first.slice(0, 4)}–${b.last.slice(0, 4)}`;
-  meta.textContent = `${years} · ${b.sittings} sitting${b.sittings === 1 ? "" : "s"} · ${b.divisions} vote${b.divisions === 1 ? "" : "s"} · latest: ${b.latest}, ${fmtDate(b.last)}`;
+  meta.textContent = `${years} · ${b.sittings} sitting${b.sittings === 1 ? "" : "s"} · ${b.divisions} vote${b.divisions === 1 ? "" : "s"} · latest: ${b.latest}, ${keepTogether(fmtDate(b.last))}`;
   li.append(a, meta);
   return li;
 }

@@ -98,7 +98,7 @@ function Debate({ path }: { path: string }) {
         {error} <a href="/">Ask a question</a>
       </p>
     );
-  if (!d) return <p className="muted">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Loading…</p>;
   const headings = d.items.filter((i) => i.kind === "heading");
   const statement = d.kind === "statement";
   const question = statement
@@ -118,18 +118,24 @@ function Debate({ path }: { path: string }) {
         </p>
       ) : (
         <p className="lede">
-          {d.contributions} contribution{d.contributions === 1 ? "" : "s"} from {d.speakers} member
-          {d.speakers === 1 ? "" : "s"}, as recorded in Hansard. Each speaker is shown with their party, seat and role
-          on the day.
+          {d.contributions > 0 ? (
+            <>
+              {d.contributions} contribution{d.contributions === 1 ? "" : "s"} from {d.speakers} member
+              {d.speakers === 1 ? "" : "s"}, as recorded in Hansard. Each speaker is shown with their party, seat and
+              role on the day.
+            </>
+          ) : (
+            "No member spoke under this heading: Hansard records only the proceedings."
+          )}
         </p>
       )}
-      <p className="small">
-        {d.official_url && (
+      {d.official_url && (
+        <p className="small">
           <a href={d.official_url} target="_blank" rel="noreferrer">
             {statement ? "The statement on Parliament's website" : "The official record for this day"}
           </a>
-        )}
-      </p>
+        </p>
+      )}
 
       <form className="ask-about" action="/" method="get">
         <label htmlFor="debate-q">Ask about this {statement ? "statement" : "debate"}</label>

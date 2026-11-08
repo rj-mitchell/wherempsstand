@@ -57,7 +57,7 @@ function Bill({ slug }: { slug: string }) {
   }, [slug]);
 
   if (error) return <p role="alert">{error} <a href="/bills">All bills</a></p>;
-  if (!b) return <p className="muted">Loading…</p>;
+  if (!b) return <p className="muted" role="status">Loading…</p>;
   const range = `between ${fmtDate(b.first)} and ${fmtDate(b.last)}`;
   const question = `What arguments were made for and against the ${b.name} ${range}?`;
   return (

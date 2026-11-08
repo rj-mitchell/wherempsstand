@@ -91,7 +91,7 @@ function OneDonor({ name }: { name: string }) {
       .catch(() => setRows([]));
     document.title = `${name}: donations to MPs — Where MPs Stand`;
   }, [name]);
-  if (!rows) return <p className="muted">Loading…</p>;
+  if (!rows) return <p className="muted" role="status">Loading…</p>;
   const total = rows.reduce((t, d) => t + (d.value ?? 0), 0);
   const personal = rows.filter((d) => d.kind !== "local_party");
   const local = rows.filter((d) => d.kind === "local_party");
@@ -175,7 +175,7 @@ function Page() {
       .catch(() => setD({ available: false }));
   }, [donor]);
   if (donor) return <OneDonor name={donor} />;
-  if (!d) return <p className="muted">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Loading…</p>;
   if (!d.available) return <p>The register of donations has not been loaded yet. It is added at the next weekly update.</p>;
   return (
     <>

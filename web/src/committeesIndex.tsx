@@ -26,7 +26,7 @@ function Index() {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not load."));
   }, []);
   if (error) return <p role="alert">{error}</p>;
-  if (!rows) return <p className="muted">Loading…</p>;
+  if (!rows) return <p className="muted" role="status">Loading…</p>;
   const houses = ["Commons", "Lords", "Joint"].filter((h) => rows.some((r) => r.house === h));
   return (
     <>

@@ -60,7 +60,7 @@ function Edm({ id }: { id: string }) {
         {error} <a href="/edms">All early day motions</a>
       </p>
     );
-  if (!e) return <p className="muted">Loading…</p>;
+  if (!e) return <p className="muted" role="status">Loading…</p>;
   const supporters = e.sponsors.filter((s) => !s.withdrawn);
   const withdrawn = e.sponsors.filter((s) => s.withdrawn);
   const question = `What have MPs said in Parliament about ${e.title.replace(/\.$/, "")}?`;
@@ -127,7 +127,7 @@ function Edm({ id }: { id: string }) {
               <li key={`${s.name}-${s.signed}`}>
                 <Member m={s} />
                 {s.sponsoring_order ? <span className="week-kind"> Sponsor</span> : null}
-                {s.signed && <span className="muted small"> {fmtDate(s.signed)}</span>}
+                {s.signed && <span className="muted small nowrap"> {fmtDate(s.signed)}</span>}
               </li>
             ))}
           </ul>
@@ -139,7 +139,7 @@ function Edm({ id }: { id: string }) {
               <ul>
                 {withdrawn.map((s) => (
                   <li key={`${s.name}-${s.withdrawn}`}>
-                    <Member m={s} /> <span className="muted small">withdrawn {fmtDate(s.withdrawn!)}</span>
+                    <Member m={s} /> <span className="muted small">withdrawn <span className="nowrap">{fmtDate(s.withdrawn!)}</span></span>
                   </li>
                 ))}
               </ul>

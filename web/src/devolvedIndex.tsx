@@ -133,7 +133,7 @@ function Index() {
   useEffect(() => {
     if (bodies && window.location.hash) document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
   }, [bodies]);
-  if (!bodies) return <p className="muted">Loading…</p>;
+  if (!bodies) return <p className="muted" role="status">Loading…</p>;
   const empty = bodies.every((b) => !b.speeches);
   return (
     <>

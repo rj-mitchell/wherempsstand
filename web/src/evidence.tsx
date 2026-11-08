@@ -44,7 +44,7 @@ function Page({ id }: { id: string }) {
         {error} <a href="/committees">Committees</a>
       </p>
     );
-  if (!t) return <p className="muted">Loading…</p>;
+  if (!t) return <p className="muted" role="status">Loading…</p>;
   const witnessNames = new Set((t.witnesses ?? []).map((w) => w.name));
   return (
     <article className="debate">
