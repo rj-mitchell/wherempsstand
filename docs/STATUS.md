@@ -10,12 +10,14 @@ and trade mark checks, legal review) are in the charity's plan (rj-mitchell/wher
 
 ## Licences
 
-- [ ] **Companies House: confirm the terms for company roles.** The site looks up MPs' and peers' company roles
-  through the Companies House public data API. It shows only company names, roles and dates, with no addresses,
-  nationality or dates of birth. It credits Companies House, links each entry to its record and stays well under
-  the rate limit (600 requests in five minutes). Read the terms accepted with the key. If they say anything about
-  attribution wording, limits on showing officers' details, or combining the data with other sources, change the
-  `/directorships` pages to match. Otherwise delete this item.
+- [x] **Companies House: the terms for company roles** (checked 8 November 2026). The developer guidelines that
+  come with the key say nothing about attribution wording, showing officers' details or combining the data with
+  other sources, so the `/directorships` pages stay as they are. What they do ask, the site already does: it stays
+  under 600 requests in five minutes (a 0.6-second pause between requests, about 500 in five minutes), waits when
+  it gets "429 Too Many Requests", uses TLS, and keeps the key out of the code and out of git (in the server's
+  `deploy/.env`, which git ignores). Optional, in the Companies House developer hub: restrict the key to the
+  server's IP address, and regenerate it now and then (then update `HANSARD_COMPANIES_HOUSE_KEY` and run
+  `docker compose up -d`).
 - [ ] **mySociety: licence for the TheyWorkForYou Votes descriptions.**
   - **What it covers.** The "Voting aye: …" sentences under about 1,600 votes, which briefings also use. They come
     from `theyworkforyou.com/pwdata/votes/divisions.parquet`.
