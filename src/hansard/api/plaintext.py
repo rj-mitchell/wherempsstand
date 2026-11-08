@@ -10,7 +10,8 @@ from typing import Any
 
 from hansard.api.briefings import fmt_date
 
-_ROOT = re.compile(r'(<div id="[\w-]+-root">)\s*<p class="muted">Loading…</p>\s*(</div>)')
+# the page's "Loading…" placeholder, with any attributes it carries (role="status" in web/*.html)
+_ROOT = re.compile(r'(<div id="[\w-]+-root">)\s*<p class="muted"[^>]*>Loading…</p>\s*(</div>)')
 _EMPTY_ROOT = '<div id="root"></div>'
 # the home page's text for readers with scripts off (web/index.html); other pages built on it bring their own
 _HOME_FALLBACK = re.compile(r'(?:<!--[^>]*-->\s*)?<noscript class="home-fallback">.*?</noscript>\s*', re.S)

@@ -108,7 +108,7 @@ button,
 
   --serif: "Source Serif 4 Variable", "Iowan Old Style", Charter, Georgia, serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --radius: 0.18rem;
+  --radius: 0; /* square corners, as on the other Where They Stand sites (docs/DESIGN.md); pills keep --radius-pill */
   --radius-pill: 999px;
   --shadow: 0 1px 2px oklch(0.2 0.02 160 / 0.08), 0 8px 28px oklch(0.2 0.02 160 / 0.1);
 
@@ -257,6 +257,36 @@ button:disabled {
 summary {
   min-block-size: 1.5rem;
   cursor: pointer;
+  list-style: none;
+}
+
+/* one marker for every fold-out: the browser's own triangle is hidden, and a gilt one, as on a volume's spine,
+   turns down when the fold-out is open. The header's menus and the export menu are menus, and keep their ▾ */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+:where(details:not(.nav-more, .export-menu)) > summary::before {
+  content: "▸" / "";
+  display: inline-block;
+  flex: none;
+  inline-size: 1em;
+  margin-inline-end: 0.3em;
+  text-align: center;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-style: normal;
+  color: var(--gilt);
+}
+
+:where(details[open]:not(.nav-more, .export-menu)) > summary::before {
+  rotate: 90deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :where(details:not(.nav-more, .export-menu)) > summary::before {
+    transition: rotate 200ms var(--ease-out);
+  }
 }
 
 button.primary,
@@ -440,9 +470,24 @@ legend,
   position: relative;
 }
 
+/* the title block comes before the menu in the markup, so Tab reaches the home link first; each part is placed on
+   its own row here, so the page is drawn as before: the banner, the menu, then the name and the rule */
+.masthead > .phase-banner {
+  grid-row: 1;
+}
+
+.masthead > .running-head {
+  grid-row: 2;
+}
+
+.masthead > .title-block {
+  grid-row: 3;
+}
+
 .masthead::after {
   /* thick-and-thin rule under the title, as on the printed report */
   content: "";
+  grid-row: 4;
   grid-column: breakout;
   block-size: 6px;
   margin-block-start: var(--space-s);
@@ -454,10 +499,6 @@ legend,
    top of the screen (the full title page is for the front door only) */
 .masthead.compact {
   padding-block-end: 0;
-}
-
-.masthead.compact > .phase-banner {
-  grid-row: 1;
 }
 
 .masthead.compact > .running-head {
@@ -652,6 +693,50 @@ legend,
 
   .imprint > span + span::before {
     content: none;
+  }
+}
+
+/* a phone's title page: the same parts in the same order, with a smaller mark and closer together, so the page's own
+   content starts on the first screen. Independence and sourcing are said again in the introduction and the footer,
+   so only the date of the last update stays in the imprint */
+@media (width < 30rem) {
+  .masthead:not(.compact) > .phase-banner {
+    padding-block-end: var(--space-2xs);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .masthead:not(.compact) {
+    padding-block-end: 0;
+  }
+
+  .masthead:not(.compact) > .running-head {
+    padding-block-end: var(--space-2xs);
+  }
+
+  .masthead:not(.compact) > .title-block {
+    gap: 0.15rem;
+    padding-block-start: var(--space-2xs);
+  }
+
+  .masthead:not(.compact) > .title-block > .mark {
+    block-size: 2.5rem; /* the size it is beside the name on every other page */
+    margin-block-end: 0.15rem;
+  }
+
+  .masthead:not(.compact) .name-block {
+    gap: 0.15rem;
+  }
+
+  .masthead:not(.compact) .imprint {
+    margin-block-start: 0;
+  }
+
+  .masthead:not(.compact) .imprint-claim {
+    display: none;
+  }
+
+  .masthead:not(.compact)::after {
+    margin-block-start: var(--space-xs);
   }
 }
 
@@ -1611,6 +1696,13 @@ legend,
   color: var(--danger);
 }
 
+/* what a form still needs while its button can't be used (Charts, Compare, Timelines), linked to the button */
+.form-hint {
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
 .admin-alert {
   margin-block: var(--space-2xs);
   padding: var(--space-xs) var(--space-s);
@@ -1826,26 +1918,6 @@ legend,
   padding-block: var(--space-2xs);
 }
 
-.sources > summary::-webkit-details-marker {
-  display: none;
-}
-
-.sources > summary::before {
-  content: "▸" / "";
-  color: var(--gilt);
-  display: inline-block;
-}
-
-.sources[open] > summary::before {
-  rotate: 90deg;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .sources > summary::before {
-    transition: rotate 200ms var(--ease-out);
-  }
-}
-
 .sources::details-content {
   block-size: 0;
   overflow: clip;
@@ -1949,7 +2021,7 @@ legend,
   min-inline-size: 1.9em;
   block-size: 1.9em;
   padding-inline: 0.3em;
-  border-radius: 0.2rem;
+  border-radius: var(--radius);
   background: var(--cloth, var(--cloth-commons));
   color: var(--gilt-on-cloth);
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--gilt-on-cloth) 45%, transparent);
@@ -2564,7 +2636,7 @@ html:has(.login) body {
   background: var(--paper);
   color: var(--ink);
   padding: var(--space-m);
-  border-radius: 0.15rem;
+  border-radius: var(--radius);
   outline: 1px solid color-mix(in oklch, var(--gilt-on-cloth) 70%, transparent);
   outline-offset: 0.4rem;
   box-shadow: 0 10px 40px oklch(0 0 none / 0.35);
@@ -2658,6 +2730,12 @@ html:has(.login) body {
 
 .prose li + li {
   margin-block-start: 0.5em;
+}
+
+/* the lists of topics, bills and members sit indented under their heading (or their fold-out's marker), as plain
+   lists do: the rule above was lowered for chips and tags, not for these */
+.prose :is(.topic-list, .people-list) {
+  padding-inline-start: 1.3em;
 }
 
 .lede {
@@ -3657,7 +3735,7 @@ main:focus {
   display: grid;
   gap: var(--space-2xs);
   margin-block: 0; /* the page's own gap spaces it from its heading, as for the examples above it */
-  padding-inline-start: 1.2em;
+  padding-inline-start: 1.3em; /* the indent of a plain list in running text (.prose ul) */
 }
 
 /* "MPs" in the capitalised name: "MPS" would read as a different word */
@@ -3855,25 +3933,6 @@ main:focus {
 
 .page-more[open] > summary {
   margin-block-end: var(--space-xs);
-}
-
-.page-more > summary {
-  list-style: none;
-}
-
-.page-more > summary::-webkit-details-marker {
-  display: none;
-}
-
-.page-more > summary::before {
-  content: "▸" / "";
-  flex: none;
-  inline-size: 1.2em;
-  color: var(--gilt);
-}
-
-.page-more[open] > summary::before {
-  content: "▾" / "";
 }
 
 /* on a phone each group's row stacks: who and how many sources on one line, the position under it */

@@ -601,6 +601,32 @@ export default function App() {
             This is a new service and it is still being tested. <a href="/corrections#report">Tell us about a problem</a>.
           </span>
         </p>
+        {/* the name comes first, so Tab reaches the home link before the menu; styles.css still draws the menu above it */}
+        <div className="title-block">
+          {front ? (
+            <Mark />
+          ) : (
+            <a href="/" className="home-link" aria-label={`${BRAND.name}: home`}>
+              <Mark />
+            </a>
+          )}
+          {/* a topic page's own title is its main heading; elsewhere the site's name is */}
+          <div className="name-block">
+            {TOPIC.test(window.location.pathname) ? (
+              <p className="wordmark">{WORDMARK}</p>
+            ) : (
+              <h1 className="wordmark">{WORDMARK}</h1>
+            )}
+            <FamilyEndorsement />
+          </div>
+          <p className="tagline">{BRAND.tagline}</p>
+          <p className="imprint">
+            {/* said again in the footer and the introduction, so a phone leaves these two out (styles.css) */}
+            <span className="imprint-claim">Independent research service</span>
+            <span className="imprint-claim">Sourced to Hansard</span>
+            {meta?.last_sync?.finished_at && <span>Updated {fmtDate(meta.last_sync.finished_at.slice(0, 10))}</span>}
+          </p>
+        </div>
         <div className="running-head">
           <span>
             Parliament's record{meta ? ` since ${meta.archive_start.slice(0, 4)}` : ""}: debates, questions, statements,
@@ -632,30 +658,6 @@ export default function App() {
               </button>
             )}
           </span>
-        </div>
-        <div className="title-block">
-          {front ? (
-            <Mark />
-          ) : (
-            <a href="/" className="home-link" aria-label={`${BRAND.name}: home`}>
-              <Mark />
-            </a>
-          )}
-          {/* a topic page's own title is its main heading; elsewhere the site's name is */}
-          <div className="name-block">
-            {TOPIC.test(window.location.pathname) ? (
-              <p className="wordmark">{WORDMARK}</p>
-            ) : (
-              <h1 className="wordmark">{WORDMARK}</h1>
-            )}
-            <FamilyEndorsement />
-          </div>
-          <p className="tagline">{BRAND.tagline}</p>
-          <p className="imprint">
-            <span>Independent research service</span>
-            <span>Sourced to Hansard</span>
-            {meta?.last_sync?.finished_at && <span>Updated {fmtDate(meta.last_sync.finished_at.slice(0, 10))}</span>}
-          </p>
         </div>
       </header>
 
