@@ -57,6 +57,8 @@ function Charts() {
   }, [query]);
 
   const several = words.includes(",");
+  // while the button can't be used, say what it needs (a disabled button gives no reason of its own)
+  const need = words.trim() ? null : "Type a word or phrase to draw a chart.";
   const unit = mode === "rate" ? "per 10,000 contributions" : "contributions";
   const first = data?.phrases[0] ?? "";
   return (
@@ -71,10 +73,11 @@ function Charts() {
         <label htmlFor="words">Words or a phrase</label>
         <div className="ask-row">
           <input id="words" value={words} onChange={(e) => setWords(e.target.value)} placeholder="for example food banks" required />
-          <button type="submit" className="primary" disabled={!words.trim()}>
+          <button type="submit" className="primary" disabled={!!need} aria-describedby={need ? "words-need" : undefined}>
             Draw chart
           </button>
         </div>
+        {need && <p id="words-need" className="form-hint">{need}</p>}
         <p className="muted small">To compare up to three, separate them with commas: cost of living, energy bills.</p>
         <fieldset className="chart-options" disabled={several}>
           <legend>Split the count</legend>

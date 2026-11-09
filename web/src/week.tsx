@@ -108,7 +108,7 @@ function Week({ start }: { start: string | null }) {
         {error} <a href="/this-week">The latest week</a>
       </p>
     );
-  if (!w) return <p className="muted">Loading…</p>;
+  if (!w) return <p className="muted" role="status">Loading…</p>;
   const debates = w.days.reduce((n, d) => n + d.chambers.reduce((m, c) => m + c.debates.length, 0), 0);
   return (
     <article className="week">

@@ -41,7 +41,7 @@ function Page() {
       .then(setD)
       .catch(() => setD({ available: false }));
   }, [parliament, q]);
-  if (!d) return <p className="muted">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Loading…</p>;
   if (!d.available) return <p>The groups have not been loaded yet. They are added at the next weekly update.</p>;
   const groups = d.groups ?? [];
   const byCategory = new Map<string, Group[]>();
@@ -130,7 +130,7 @@ function Funder({ name }: { name: string }) {
       .catch(() => setRows([]));
     document.title = `${name}: funding of all-party groups — Where MPs Stand`;
   }, [name]);
-  if (!rows) return <p className="muted">Loading…</p>;
+  if (!rows) return <p className="muted" role="status">Loading…</p>;
   return (
     <section aria-labelledby="h-funder">
       <p className="eyebrow">

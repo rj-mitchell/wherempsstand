@@ -131,5 +131,11 @@ export function fmtDate(iso: string | null | undefined): string {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 }
 
+/** Words that read wrongly split across two lines, such as a date ("4 / November 2026"), joined by no-break spaces.
+ * For text set straight into the page only: questions and copied text keep ordinary spaces. */
+export function keepTogether(s: string): string {
+  return s.replace(/ /g, "\u00a0");
+}
+
 /** Lists on member pages are shown open; one longer than this starts folded, with its count in the heading. */
 export const LONG = 25;

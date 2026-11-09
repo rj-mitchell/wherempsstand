@@ -91,6 +91,19 @@ function Compare() {
   const set = (i: number, o: Option | null) => setPicks((ps) => ps.map((p, k) => (k === i ? o : p)));
   const options = kind === "party" ? parties : NATIONS;
   const name = (o: Option) => o.label.replace(/ \(.*\)$/, "");
+  // while the button can't be used, say what it needs (a disabled button gives no reason of its own); two of the
+  // same side already has its own message
+  const what = kind === "party" ? "parties" : kind === "person" ? "MPs or peers from the suggestions" : "nations";
+  const short = topic.trim().length < 3;
+  const need = !distinct
+    ? null
+    : chosen.length < 2 && short
+      ? `Choose two ${what} and type a topic to compare them.`
+      : chosen.length < 2
+        ? `Choose two ${what} to compare.`
+        : short
+          ? "Type a topic, three letters or more, to compare them on."
+          : null;
 
   return (
     <form
@@ -137,11 +150,12 @@ function Compare() {
       <label htmlFor="compare-topic">On</label>
       <div className="ask-row">
         <input id="compare-topic" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="a topic, such as immigration" />
-        <button type="submit" className="primary" disabled={!ready}>
+        <button type="submit" className="primary" disabled={!ready} aria-describedby={ready ? undefined : "compare-need"}>
           Compare
         </button>
       </div>
-      {!distinct && <p className="form-error">Choose different sides.</p>}
+      {!distinct && <p id="compare-need" className="form-error">Choose different sides.</p>}
+      {need && <p id="compare-need" className="form-hint">{need}</p>}
       <p className="muted small">
         The comparison is written straight away on the main page (it costs the site about the same as any other
         briefing).

@@ -83,14 +83,20 @@ export function LineChart({
             </text>
           </g>
         ))}
-        {years.map((yr, i) => (
-          <text key={yr} className="axis" x={x(i)} y={H - PAD.bottom + 18}
-            textAnchor={i === years.length - 1 ? "end" : i === 0 ? "start" : "middle"}>
-            {years.length > 8 && i % LABEL_EVERY !== 0 && i !== years.length - 1
-              ? ""
-              : `${partial.includes(yr) ? "(" : ""}${yr}${partial.includes(yr) ? ")" : ""}`}
-          </text>
-        ))}
+        {years.map((yr, i) => {
+          const last = years.length - 1;
+          // every few years, and always the last; a label too close to the last one is left out so the two don't
+          // overlap, and the first is centred on its year (the axis labels leave room on the left), so a bracketed
+          // part-year does not run into the next label
+          const shown =
+            years.length <= 8 || i === last || (i % LABEL_EVERY === 0 && last - i >= LABEL_EVERY);
+          return (
+            <text key={yr} className="axis" x={x(i)} y={H - PAD.bottom + 18}
+              textAnchor={i === last && years.length > 1 ? "end" : "middle"}>
+              {shown ? `${partial.includes(yr) ? "(" : ""}${yr}${partial.includes(yr) ? ")" : ""}` : ""}
+            </text>
+          );
+        })}
         {series.map((s, k) => (
           <g key={s.key} className={`series s${k} g-${s.group}`}>
             <polyline

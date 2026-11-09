@@ -1,3 +1,6 @@
+import re
+from pathlib import Path
+
 from hansard.api.plaintext import (
     committee_text,
     devolved_day_text,
@@ -42,6 +45,17 @@ def test_group_devolved_and_motion_text():
 def test_text_goes_into_the_page_root():
     page = '<body><div id="group-root"><p class="muted">Loading…</p></div></body>'
     assert with_text(page, "<h1>X</h1>") == '<body><div id="group-root"><h1>X</h1></div></body>'
+    status = '<body><div id="group-root"><p class="muted" role="status">Loading…</p></div></body>'
+    assert with_text(status, "<h1>X</h1>") == '<body><div id="group-root"><h1>X</h1></div></body>'
+
+
+def test_every_page_template_takes_its_text():
+    """Each web/*.html with an app root still matches, so a change to its placeholder can't silently drop the text."""
+    web = Path(__file__).resolve().parents[1] / "web"
+    pages = [p for p in sorted(web.glob("*.html")) if re.search(r'<div id="[\w-]+-root">', p.read_text())]
+    assert pages
+    for p in pages:
+        assert "<h1>X</h1>" in with_text(p.read_text(), "<h1>X</h1>"), p.name
 
 
 def test_home_fallback_gives_way_to_a_pages_own_text():

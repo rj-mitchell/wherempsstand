@@ -32,6 +32,15 @@ function Page() {
       .catch(() => setParties([]));
   }, []);
 
+  // while the button can't be used, say what it needs (a disabled button gives no reason of its own)
+  const need = !party && !topic.trim()
+    ? "Choose a party and type a topic to show a timeline."
+    : !party
+      ? "Choose a party to show its timeline."
+      : !topic.trim()
+        ? "Type a topic to show the timeline."
+        : null;
+
   return (
     <>
       <form
@@ -56,10 +65,11 @@ function Page() {
         <label htmlFor="topic">Topic</label>
         <div className="ask-row">
           <input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="for example tuition fees" required />
-          <button type="submit" className="primary" disabled={!party || !topic.trim()}>
+          <button type="submit" className="primary" disabled={!!need} aria-describedby={need ? "timeline-need" : undefined}>
             Show timeline
           </button>
         </div>
+        {need && <p id="timeline-need" className="form-hint">{need}</p>}
       </form>
       {shown && (
         <>

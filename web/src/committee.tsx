@@ -38,7 +38,7 @@ function Page({ id }: { id: string }) {
         {error} <a href="/committees">All committees</a>
       </p>
     );
-  if (!c) return <p className="muted">Loading…</p>;
+  if (!c) return <p className="muted" role="status">Loading…</p>;
   const current = c.inquiries.filter((i) => !i.close);
   const past = c.inquiries.filter((i) => i.close);
   const list = (items: Committee["inquiries"]) => (

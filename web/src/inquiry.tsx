@@ -39,7 +39,7 @@ function Page({ id }: { id: string }) {
         {error} <a href="/committees">All committees</a>
       </p>
     );
-  if (!d) return <p className="muted">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Loading…</p>;
   const question = `What have MPs and peers said about ${d.title.replace(/\.$/, "")}?`;
   return (
     <article>

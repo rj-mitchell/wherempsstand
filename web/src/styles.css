@@ -108,7 +108,7 @@ button,
 
   --serif: "Source Serif 4 Variable", "Iowan Old Style", Charter, Georgia, serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --radius: 0.18rem;
+  --radius: 0; /* square corners, as on the other Where They Stand sites (docs/DESIGN.md); pills keep --radius-pill */
   --radius-pill: 999px;
   --shadow: 0 1px 2px oklch(0.2 0.02 160 / 0.08), 0 8px 28px oklch(0.2 0.02 160 / 0.1);
 
@@ -210,9 +210,16 @@ a {
   }
 }
 
+/* the family's focus ring (the kit's shared conventions: 3px, 3px clear of the control), in this site's green; the
+   footer shelf and the endorsement wear the same ring through --wts-focus. The fallbacks hold if the kit's stylesheet
+   fails to load. */
+:root {
+  --wts-focus: var(--accent);
+}
+
 :focus-visible {
-  outline: max(2px, 0.08em) solid var(--accent);
-  outline-offset: 0.2em;
+  outline: max(var(--wts-focus-width, 2px), 0.08em) solid var(--accent);
+  outline-offset: var(--wts-focus-offset, 0.2em);
 }
 
 mark {
@@ -243,6 +250,43 @@ button {
 button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+/* every fold-out ("Earlier versions", "Also in the House of Commons on…") is a control: at least 24px tall to tap
+   (WCAG 2.2), with the pointer of one */
+summary {
+  min-block-size: 1.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+/* one marker for every fold-out: the browser's own triangle is hidden, and a gilt one, as on a volume's spine,
+   turns down when the fold-out is open. The header's menus and the export menu are menus, and keep their ▾ */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+:where(details:not(.nav-more, .export-menu)) > summary::before {
+  content: "▸" / "";
+  display: inline-block;
+  flex: none;
+  inline-size: 1em;
+  margin-inline-end: 0.3em;
+  text-align: center;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-style: normal;
+  color: var(--gilt);
+}
+
+:where(details[open]:not(.nav-more, .export-menu)) > summary::before {
+  rotate: 90deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :where(details:not(.nav-more, .export-menu)) > summary::before {
+    transition: rotate 200ms var(--ease-out);
+  }
 }
 
 button.primary,
@@ -298,7 +342,7 @@ button.link {
   }
 }
 
-:is(button.primary, button.secondary, .example, .chip button, .close):not(:disabled):active {
+:is(button.primary, button.secondary, .example, .chip button, .close, .chip-button, .follow-up):not(:disabled):active {
   transform: scale(0.97);
 }
 
@@ -307,7 +351,7 @@ button.link {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :is(button.primary, button.secondary, .example, .chip button, .close) {
+  :is(button.primary, button.secondary, .example, .chip button, .close, .chip-button, .follow-up) {
     transition:
       transform 160ms var(--ease-out),
       background-color 160ms var(--ease-out),
@@ -375,6 +419,9 @@ legend,
   --gutter: 1rem;
   --content: 46rem;
   --breakout: 64rem;
+  /* the family shelf in the footer lines up with the masthead's column (the kit's tokens, family kit 1.3.1) */
+  --wts-gutter: var(--gutter);
+  --wts-shelf-width: var(--breakout);
 
   display: grid;
   grid-template-columns:
@@ -423,9 +470,24 @@ legend,
   position: relative;
 }
 
+/* the title block comes before the menu in the markup, so Tab reaches the home link first; each part is placed on
+   its own row here, so the page is drawn as before: the banner, the menu, then the name and the rule */
+.masthead > .phase-banner {
+  grid-row: 1;
+}
+
+.masthead > .running-head {
+  grid-row: 2;
+}
+
+.masthead > .title-block {
+  grid-row: 3;
+}
+
 .masthead::after {
   /* thick-and-thin rule under the title, as on the printed report */
   content: "";
+  grid-row: 4;
   grid-column: breakout;
   block-size: 6px;
   margin-block-start: var(--space-s);
@@ -437,10 +499,6 @@ legend,
    top of the screen (the full title page is for the front door only) */
 .masthead.compact {
   padding-block-end: 0;
-}
-
-.masthead.compact > .phase-banner {
-  grid-row: 1;
 }
 
 .masthead.compact > .running-head {
@@ -638,6 +696,50 @@ legend,
   }
 }
 
+/* a phone's title page: the same parts in the same order, with a smaller mark and closer together, so the page's own
+   content starts on the first screen. Independence and sourcing are said again in the introduction and the footer,
+   so only the date of the last update stays in the imprint */
+@media (width < 30rem) {
+  .masthead:not(.compact) > .phase-banner {
+    padding-block-end: var(--space-2xs);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .masthead:not(.compact) {
+    padding-block-end: 0;
+  }
+
+  .masthead:not(.compact) > .running-head {
+    padding-block-end: var(--space-2xs);
+  }
+
+  .masthead:not(.compact) > .title-block {
+    gap: 0.15rem;
+    padding-block-start: var(--space-2xs);
+  }
+
+  .masthead:not(.compact) > .title-block > .mark {
+    block-size: 2.5rem; /* the size it is beside the name on every other page */
+    margin-block-end: 0.15rem;
+  }
+
+  .masthead:not(.compact) .name-block {
+    gap: 0.15rem;
+  }
+
+  .masthead:not(.compact) .imprint {
+    margin-block-start: 0;
+  }
+
+  .masthead:not(.compact) .imprint-claim {
+    display: none;
+  }
+
+  .masthead:not(.compact)::after {
+    margin-block-start: var(--space-xs);
+  }
+}
+
 .banner {
   font-family: var(--sans);
   font-size: var(--step--1);
@@ -737,6 +839,11 @@ legend,
   gap: var(--space-2xs) var(--space-s);
   font-family: var(--sans);
   font-size: var(--step--1);
+}
+
+/* the links stand alone in a row: a little padding (which moves nothing, as they are inline) makes each 24px tall */
+.start-from a {
+  padding-block: 0.15em;
 }
 
 .start-from > .examples-head {
@@ -1165,6 +1272,11 @@ legend,
   font-size: var(--step--2);
 }
 
+/* a tag that is also a link: the link's own padding makes it tall enough to tap (24px) without moving the tag */
+.evidence-groups a {
+  padding-block: 0.4em;
+}
+
 .evidence-groups .count {
   font-weight: 700;
   color: var(--accent);
@@ -1349,6 +1461,23 @@ legend,
   min-block-size: 2.75rem;
 }
 
+/* on a phone the menu spans the row of actions it opens from, as the header's menus do, so it stays on screen
+   wherever its button has wrapped to */
+@media (width < 30rem) {
+  .answer-actions {
+    position: relative;
+  }
+
+  .answer-actions .export-menu {
+    position: static;
+  }
+
+  .answer-actions .export-list {
+    inset-inline: 0;
+    min-inline-size: 0;
+  }
+}
+
 .answer-body {
   line-height: 1.62;
   hyphens: auto;
@@ -1418,6 +1547,21 @@ legend,
 
 .cite + .cite {
   margin-inline-start: 0.1em;
+}
+
+/* on a touch screen the small number keeps its look but takes a taller tap area (about 28px), reaching into the
+   space between the lines rather than over the words beside it */
+@media (pointer: coarse) {
+  .cite {
+    position: relative;
+  }
+
+  .cite::after {
+    content: "";
+    position: absolute;
+    inset-block: -0.55em;
+    inset-inline: -0.1em;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1552,6 +1696,13 @@ legend,
   color: var(--danger);
 }
 
+/* what a form still needs while its button can't be used (Charts, Compare, Timelines), linked to the button */
+.form-hint {
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
 .admin-alert {
   margin-block: var(--space-2xs);
   padding: var(--space-xs) var(--space-s);
@@ -1625,11 +1776,13 @@ legend,
 
 .ask-row {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-xs);
 }
 
+/* the box takes the line; on a phone with two buttons beside it, the buttons go under it rather than squeeze it */
 .ask-row input {
-  flex: 1;
+  flex: 1 1 12rem;
   min-inline-size: 0;
 }
 
@@ -1658,6 +1811,21 @@ legend,
 .person section h3 {
   margin-block: var(--space-s) var(--space-2xs);
   font-size: var(--step-0);
+}
+
+.person .seat {
+  font-size: inherit;
+  color: inherit;
+}
+
+/* a note under a list keeps a little room from it */
+.person section > :is(ul, ol) + p {
+  margin-block-start: var(--space-xs);
+}
+
+/* the lighter side: each moment's words flush with its attribution, not indented as a browser's default quotation */
+.moments blockquote {
+  margin: 0;
 }
 
 .person .roles,
@@ -1748,26 +1916,6 @@ legend,
   font-weight: 600;
   color: var(--ink-soft);
   padding-block: var(--space-2xs);
-}
-
-.sources > summary::-webkit-details-marker {
-  display: none;
-}
-
-.sources > summary::before {
-  content: "▸" / "";
-  color: var(--gilt);
-  display: inline-block;
-}
-
-.sources[open] > summary::before {
-  rotate: 90deg;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .sources > summary::before {
-    transition: rotate 200ms var(--ease-out);
-  }
 }
 
 .sources::details-content {
@@ -1873,7 +2021,7 @@ legend,
   min-inline-size: 1.9em;
   block-size: 1.9em;
   padding-inline: 0.3em;
-  border-radius: 0.2rem;
+  border-radius: var(--radius);
   background: var(--cloth, var(--cloth-commons));
   color: var(--gilt-on-cloth);
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--gilt-on-cloth) 45%, transparent);
@@ -2011,6 +2159,7 @@ legend,
 .composer-buttons .link {
   white-space: nowrap;
   text-align: center;
+  min-block-size: 1.5rem; /* "Settings" stands on its own, so it gets the 24px target WCAG 2.2 asks for */
 }
 
 /* what to show: an executive summary, a chronological briefing or the sources only, as a plain choice under the box
@@ -2376,6 +2525,10 @@ legend,
   text-align: center;
 }
 
+.footer > :is(p, a) {
+  text-wrap: balance; /* centred lines of even length, with no word left alone on the last */
+}
+
 .footer > a,
 .login .footer > a {
   display: block;
@@ -2483,7 +2636,7 @@ html:has(.login) body {
   background: var(--paper);
   color: var(--ink);
   padding: var(--space-m);
-  border-radius: 0.15rem;
+  border-radius: var(--radius);
   outline: 1px solid color-mix(in oklch, var(--gilt-on-cloth) 70%, transparent);
   outline-offset: 0.4rem;
   box-shadow: 0 10px 40px oklch(0 0 none / 0.35);
@@ -2568,13 +2721,21 @@ html:has(.login) body {
   scroll-margin-block-start: var(--space-m);
 }
 
-.prose :is(ul, ol) {
+/* plain lists in running text; a list with a class of its own (ruled lists, chips, the lists of members and bills)
+   keeps its own margin and padding, so this rule carries no weight beyond the element's */
+:where(.prose) :is(ul, ol) {
   margin: 0;
   padding-inline-start: 1.3em;
 }
 
 .prose li + li {
   margin-block-start: 0.5em;
+}
+
+/* the lists of topics, bills and members sit indented under their heading (or their fold-out's marker), as plain
+   lists do: the rule above was lowered for chips and tags, not for these */
+.prose :is(.topic-list, .people-list) {
+  padding-inline-start: 1.3em;
 }
 
 .lede {
@@ -2594,15 +2755,27 @@ html:has(.login) body {
   columns: 2 14rem;
 }
 
+/* the devolved parliaments number their own headings ("1. Questions to…"), so the list adds no second number */
+.toc.plain ol {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
 .defs {
   display: grid;
-  grid-template-columns: max-content 1fr;
+  /* the terms take what they need, up to 40%: a long API address (Data and API) breaks rather than pushing the
+     page wider than a tablet's screen */
+  grid-template-columns: fit-content(40%) 1fr;
   gap: var(--space-xs) var(--space-m);
   margin: 0;
 }
 
 .defs dd {
   margin: 0;
+}
+
+.defs dt code {
+  overflow-wrap: anywhere;
 }
 
 @media (width < 40rem) {
@@ -2682,6 +2855,11 @@ html:has(.login) body {
 
 .muted {
   color: var(--ink-soft);
+}
+
+/* a date or a short phrase that reads wrongly when split across two lines ("4 / November") */
+.nowrap {
+  white-space: nowrap;
 }
 
 .small {
@@ -2845,6 +3023,13 @@ main:focus {
   .cite {
     border: 1px solid;
   }
+
+  /* the pinned question box fades the page behind it with a gradient, which forced colours drop: give it a solid
+     ground and an edge, so the briefing does not show through the box and its choices */
+  .composer:not(.composer-inline) {
+    background: Canvas;
+    border-block-start: 1px solid CanvasText;
+  }
 }
 
 /* ---- other resources: a site, then what it is best for ------------------------------- */
@@ -2927,6 +3112,10 @@ main:focus {
 .topic-list > li {
   border-block-start: 1px solid var(--rule);
   padding-block-start: var(--space-s);
+}
+
+.prose .topic-list > li + li {
+  margin-block-start: 0;
 }
 
 .topic-link {
@@ -3162,6 +3351,14 @@ main:focus {
   font-size: var(--step--1);
 }
 
+.chart-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-block-size: 2rem;
+  cursor: pointer;
+}
+
 .chart-options legend {
   font-weight: 600;
   margin-block-end: var(--space-2xs);
@@ -3308,6 +3505,18 @@ main:focus {
   flex-wrap: wrap;
   font-family: var(--sans);
   font-size: var(--step--1);
+}
+
+/* the week's note and its links to other weeks each keep a little room from the summary above them */
+.week > .lede + p,
+.week > .week-nav {
+  margin-block-start: var(--space-xs);
+}
+
+/* the links to the weeks either side stand alone, so each is at least 24px tall to tap (WCAG 2.2) */
+.week-nav a {
+  display: inline-block;
+  padding-block: 0.2em;
 }
 
 .week-day {
@@ -3496,6 +3705,11 @@ main:focus {
 /* the MPs and peers page: each House's full list folds away until opened */
 .people-group > summary {
   cursor: pointer;
+  padding-block: var(--space-2xs);
+}
+
+.people-group + .people-group {
+  margin-block-start: var(--space-xs);
 }
 
 .people-group > summary > h3 {
@@ -3520,7 +3734,8 @@ main:focus {
 .ask-why {
   display: grid;
   gap: var(--space-2xs);
-  padding-inline-start: 1.2em;
+  margin-block: 0; /* the page's own gap spaces it from its heading, as for the examples above it */
+  padding-inline-start: 1.3em; /* the indent of a plain list in running text (.prose ul) */
 }
 
 /* "MPs" in the capitalised name: "MPS" would read as a different word */
@@ -3559,13 +3774,18 @@ main:focus {
 }
 
 .nav-more > summary::after {
-  content: " ▾";
+  content: "▾" / "";
+  margin-inline-start: 0.25em;
 }
 
 .nav-more.current > summary {
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 0.3em;
+}
+
+.nav-more-list a {
+  padding-block: 0.15em; /* each item 24px tall or more with a mouse; touch screens get 32px below */
 }
 
 .nav-more-list {
@@ -3619,9 +3839,35 @@ main:focus {
 @media (max-width: 24rem) {
   .masthead-actions.page-nav,
   .masthead-actions > .page-nav {
-    gap: var(--space-xs) 0.4rem;
+    gap: var(--space-xs) 0.3rem; /* fits a 320px screen even beside a desktop browser's scrollbar */
     font-size: 0.72rem;
   }
+
+  .nav-more > summary::after {
+    margin-inline-start: 0.05em;
+  }
+
+  /* each item keeps its own width, so a menu's name never runs under the next one */
+  .masthead-actions.page-nav > * {
+    flex: none;
+  }
+}
+
+/* 320px, the width a page must reflow to (WCAG 1.4.10), as on a desktop browser zoomed to 400% beside its
+   scrollbar: where the menu no longer fits on one line it takes two, rather than running off the screen */
+@media (max-width: 20rem) {
+  .masthead-actions.page-nav,
+  .masthead-actions > .page-nav {
+    flex-wrap: wrap;
+  }
+}
+
+/* the header's links and menu names: 24px tall with a mouse, each centred on the line so they sit level */
+.page-nav > a,
+.nav-more > summary {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 1.5rem;
 }
 
 /* on touch screens, menu and footer links get a comfortable tap area (32px tall) */
@@ -3658,8 +3904,10 @@ main:focus {
   min-block-size: 2.75rem;
 }
 
-.follow-up:hover {
-  border-color: var(--ink-faint);
+@media (hover: hover) and (pointer: fine) {
+  .follow-up:hover {
+    border-color: var(--ink-faint);
+  }
 }
 
 .follows {
@@ -3685,25 +3933,6 @@ main:focus {
 
 .page-more[open] > summary {
   margin-block-end: var(--space-xs);
-}
-
-.page-more > summary {
-  list-style: none;
-}
-
-.page-more > summary::-webkit-details-marker {
-  display: none;
-}
-
-.page-more > summary::before {
-  content: "▸" / "";
-  flex: none;
-  inline-size: 1.2em;
-  color: var(--gilt);
-}
-
-.page-more[open] > summary::before {
-  content: "▾" / "";
 }
 
 /* on a phone each group's row stacks: who and how many sources on one line, the position under it */

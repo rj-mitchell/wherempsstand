@@ -20,8 +20,15 @@ The tone is that of a reference work:
   on the right, under a magnifying glass. It is drawn in `web/public/icon.svg`, `web/partials/seal.html` and
   `web/src/components/Mark.tsx`, which are kept the same by hand;
 - the name in spaced capitals; on the home page a full title page, and on every other page the name and mark on one
-  line beside the menu;
-- square corners, ruled lists, and example questions numbered as on the Order Paper;
+  line beside the menu. On a phone (under 30rem) the home page's title page is closer set, with a smaller mark, and
+  its imprint keeps only the date of the last update: independence and sourcing are said again in the introduction
+  and the footer. In the markup the name and home link come before the menu, so Tab reaches them first; the grid
+  still draws the menu above the name on the home page and on phones;
+- square corners (`--radius` is 0; only pill-shaped chips and tags are round), ruled lists, and example questions
+  numbered as on the Order Paper;
+- one marker for every fold-out (`<details>`): a gilt triangle, as on a volume's spine, that turns down when it is
+  open (the turn is animated only for people who have not asked for reduced motion). The header's menus and the
+  Export menu are menus, and keep their ▾;
 - plain, formal wording; colour only where it carries meaning (the House, a citation, a warning).
 
 ## Colour and type

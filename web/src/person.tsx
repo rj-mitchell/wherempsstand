@@ -126,7 +126,7 @@ function Person({ number }: { number: string }) {
   }, [number]);
 
   if (error) return <p role="alert">{error}</p>;
-  if (!core) return <p className="muted">Loading…</p>;
+  if (!core) return <p className="muted" role="status">Loading…</p>;
   const p: PersonData = {
     ...core,
     ...(activity && activity !== "error" ? activity : {}),
@@ -458,9 +458,14 @@ function Glance({
               <span className="muted small">
                 {" "}
                 Days they spoke or asked about each
-                {p.topics?.since && p.topics.until
-                  ? `, ${fmtDate(p.topics.since)} to ${fmtDate(p.topics.until)}`
-                  : ""}
+                {p.topics?.since && p.topics.until ? (
+                  <>
+                    , <span className="nowrap">{fmtDate(p.topics.since)}</span> to{" "}
+                    <span className="nowrap">{fmtDate(p.topics.until)}</span>
+                  </>
+                ) : (
+                  ""
+                )}
                 ; choose one for a timeline.
               </span>
             </>
@@ -474,7 +479,15 @@ function Glance({
           <dt>Votes</dt>
           <dd>
             {p.voting.votes.toLocaleString("en-GB")} recorded, {p.voting.rebellions.toLocaleString("en-GB")} against
-            most of their party{p.voting.until ? ` (votes loaded to ${fmtDate(p.voting.until)})` : ""}{" "}
+            most of their party
+            {p.voting.until ? (
+              <>
+                {" "}
+                (votes loaded to <span className="nowrap">{fmtDate(p.voting.until)}</span>)
+              </>
+            ) : (
+              ""
+            )}{" "}
             <a href="#h-votes" className="small">
               Voting record
             </a>

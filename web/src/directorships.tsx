@@ -86,7 +86,7 @@ function Page() {
         </div>
       </form>
       {!d ? (
-        <p className="muted">Loading…</p>
+        <p className="muted" role="status">Loading…</p>
       ) : d.members_checked === 0 ? (
         <p>
           Company roles have not been collected yet. They are added a few

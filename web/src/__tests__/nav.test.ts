@@ -17,6 +17,15 @@ describe("site navigation", () => {
     expect(NAV[0]).toEqual({ href: "/", label: "Ask" });
   });
 
+  it("the header's name and home link come before its menu, so Tab reaches them first", () => {
+    const html = readFileSync(resolve(__dirname, "../../partials/header.html"), "utf8");
+    const app = readFileSync(resolve(__dirname, "../App.tsx"), "utf8");
+    expect(html.indexOf('class="title-block"')).toBeGreaterThan(-1);
+    expect(html.indexOf('class="title-block"')).toBeLessThan(html.indexOf('class="running-head"'));
+    expect(app.indexOf('className="title-block"')).toBeGreaterThan(-1);
+    expect(app.indexOf('className="title-block"')).toBeLessThan(app.indexOf('className="running-head"'));
+  });
+
   it("the footer is the same everywhere and holds only pages about the site", () => {
     expect(links("footer.html")).toEqual(FOOTER);
     const header = new Set(HEADER_LINKS.map((l) => l.href));

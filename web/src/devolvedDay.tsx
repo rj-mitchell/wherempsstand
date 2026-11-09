@@ -56,7 +56,7 @@ function Sitting({ path }: { path: string }) {
         {error} <a href="/devolved">Devolved parliaments</a>
       </p>
     );
-  if (!d) return <p className="muted">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Loading…</p>;
   const headings = d.items.filter((i) => i.kind === "heading");
   let minor: string | null = null;
   return (
@@ -77,7 +77,7 @@ function Sitting({ path }: { path: string }) {
         </p>
       )}
       {headings.length > 1 && (
-        <nav className="toc" aria-label="In this sitting">
+        <nav className="toc plain" aria-label="In this sitting">
           <ol>
             {headings.map((h) => (
               <li key={h.id}>

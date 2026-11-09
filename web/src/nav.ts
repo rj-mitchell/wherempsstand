@@ -53,18 +53,20 @@ export const MENUS: NavMenu[] = [
 /** Every header link, in order (for the test that keeps the static pages' header in step). */
 export const HEADER_LINKS: NavLink[] = [...NAV, ...MENUS.flatMap((m) => m.items)];
 
+/** The footer's links, in the family's order (the charity's family/GLOSSARY.md, "Footer links"), with this site's
+ *  own pages (Glossary, Other resources) after Methodology, its How it works. partials/footer.html is the same. */
 export const FOOTER: NavLink[] = [
   { href: "/about", label: "About" },
   { href: "/methodology", label: "Methodology" },
   { href: "/glossary", label: "Glossary" },
   { href: "/resources", label: "Other resources" },
-  { href: "/developers", label: "Data and API" },
-  { href: "/press", label: "Press and contact" },
-  { href: "/status", label: "Status" },
   { href: "/corrections", label: "Corrections and problems" },
   { href: "/accessibility", label: "Accessibility" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
+  { href: "/developers", label: "Data and API" },
+  { href: "/press", label: "Press and contact" },
+  { href: "/status", label: "Status" },
   { href: "https://github.com/rj-mitchell/wherempsstand", label: "Source code" },
 ];
 
