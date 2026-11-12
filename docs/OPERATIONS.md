@@ -128,6 +128,8 @@ to 4 hours.
 | `hansard interests`, `devolved`, `evidence`, `edms`, `committees`, `donations`, `groups`, `whips`, `directorships` | Fetch one source now rather than waiting for the twice-daily update (each is also part of `sync`); options such as `interests --archive 500` or `devolved --files 5000` fill in the history in one go. They never run at the same time as an update |
 | `hansard compress-raw [--dry-run] [--limit N]` | Once, on a mirror made before November 2026: gzip the raw Hansard files in place, keeping their dates, so nothing is read again. Run on the server under the update lock ([HOSTING.md](HOSTING.md), "Disk space", has the exact commands) |
 | `hansard vectors-f16 [--dry-run] [--keep-old]` | Once, on an index made before November 2026: convert the meaning-search vectors (the passages' and the committee evidence's) from 32-bit to 16-bit numbers, about half their space, while the site keeps searching: a new copy is made, indexed and checked against the old (row counts, a sample of vectors, and the same searches finding the same passages), then swapped in one step. The passages' new index is measured and its settings saved as `reindex-vectors` does. Refuses if the disk is short of space; safe to stop and run again. Run on the server under the update lock ([HOSTING.md](HOSTING.md), "Disk space", has the exact commands) |
+| `hansard statements list [--status pending\|published\|declined\|withdrawn\|all]` | Statements beside items (the right of reply), with the email address to confirm who sent each |
+| `hansard statements publish ID --checked "…" [--person N]`, `decline ID --reason "…"`, `update ID [--text-file F] [--name] [--role] [--link]`, `withdraw ID` | Publish a statement as written once its sender is confirmed (`--person`: the member, when its address isn't their page), decline or take one down with the reason for the author, replace it with the author's new words, or withdraw it at their request. Also on the admin page |
 | `hansard backup`, `restore`, `offsite` | Back up the site's own records (saved briefings, reports, usage), restore them, or copy backups off the server |
 | `hansard eval plans`, `eval sources`, `eval briefings` | The test set of 62 questions ([EVALUATION.md](EVALUATION.md)) |
 | `hansard eval retrieval [--compare <earlier run>]` | The test set's searches alone, from saved question readings: free (no model is called and nothing is graded). Run it before and after a change to the search index, such as `vectors-f16`, and compare ([EVALUATION.md](EVALUATION.md), "Retrieval only") |
@@ -170,8 +172,20 @@ description and a 1200×630 preview card (`/b/<id>/card.png`, drawn with Pillow 
 marked `noindex`. A briefing can be withdrawn with `POST /api/admin/briefings/<id>/withdraw` (admin token); its
 page, data and card then return 410 Gone. `GET /api/admin/briefings` lists recent ones.
 
+**Reports and statements.** The corrections and right-of-reply policy (the charity's impartiality policy, section
+7; decision 31) is explained to the people it concerns on `/if-youre-named`. Reports from the form on `/corrections`
+(or under a briefing) are listed on the admin page and at `GET /api/admin/reports`, and closed with
+`POST /api/admin/reports/<id>/close`; a public note goes to the corrections log. Statements sent from
+`/if-youre-named` wait as pending: confirm who sent each (usually by writing to their parliament.uk, parliament.scot,
+senedd.wales or niassembly.gov.uk address), then publish it as written or decline it with reasons, never editing it,
+with `hansard statements` or the admin page (`/api/admin/statements`, `…/<id>/publish`, `decline`, `update`,
+`withdraw`). Reply within 5 working days and decide within 20. A published statement shows at once beside its item
+and on the member's page. Its email address is deleted three months after it is withdrawn or declined, by the
+twice-daily update and whenever statements are written or listed. Statements live only in `data/state.sqlite`, so
+backups include them; nothing that searches the record or writes briefings reads them.
+
 **Backups.** Everything can be rebuilt from public sources except `data/state.sqlite`, which holds the saved
-briefings, reports, usage, the answer cache, feedback, visit counts, the sync log and any accounts.
+briefings, reports, statements, usage, the answer cache, feedback, visit counts, the sync log and any accounts.
 `hansard backup` makes a checked copy (with `settings.local.toml`) as `data/backups/where-they-stand-DATE.tar.gz`,
 keeping the last 14; `hansard restore FILE` puts one back. On a server set up by `provision.sh`, a timer runs it
 nightly into `deploy/backups/` (see [HOSTING.md](HOSTING.md#backups)).
