@@ -529,7 +529,7 @@ def party_key(name: str | None) -> str | None:
         if pattern.search(text):
             return pid
     text = unicodedata.normalize("NFKD", text)
-    text = "".join(c for c in text if not unicodedata.combining(c))
+    text = "".join(c for c in text if not unicodedata.combining(c)).replace("'", "").replace("’", "")
     return "-".join(re.findall(r"[a-z0-9]+", re.sub(r"^the ", "", text))) or None
 
 

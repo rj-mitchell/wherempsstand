@@ -164,6 +164,14 @@ GROUP_BY_INSTRUCTIONS = {
         "time they spoke, as given in each result title: marginal (under 10% of votes cast), 10% to 20%, and safe "
         "(over 20%). Leave out groups with no supplied records, and say plainly where the groups said similar things."
     ),
+    "runner_up": (
+        "The question asks how MPs differ according to which party came second in their seat at the most recent "
+        "election before the day they spoke, as given in each result title. Group the MPs by that party (the Brexit "
+        "Party and Reform UK are the same party, renamed in 2021). This is the result of the last election, not a "
+        "prediction: describe the groups only by that fact (for example 'MPs in seats where Reform UK came second'), "
+        "never as seats that are threatened, at risk or targets, and never suggest that it explains what anyone said. "
+        "Leave out groups with no supplied records, and say plainly where the groups said similar things."
+    ),
     "gender": (
         "The question asks how women and men differ. Group the speakers by the gender given in each result title "
         "(women, men) rather than by role, and say plainly where the two groups said similar things. Gender is as "

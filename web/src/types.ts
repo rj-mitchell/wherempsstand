@@ -29,6 +29,19 @@ export interface Speaker {
   majority_band?: string | null;
   majority_then?: Majority | null;     // from the last election in their seat before the date
   majority_now?: (Majority & { constituency: string }) | null;
+  /** the site's party id of the party that came second in their seat at the last election before the date */
+  runner_up?: string | null;
+  runner_up_then?: RunnerUp | null;
+}
+
+/** The party that came second at an election: its name then, the site's id for it, its votes, the winner's majority over it. */
+export interface RunnerUp {
+  party: string;
+  party_id: string | null;
+  votes: number | null;
+  majority: number | null;
+  election: string;
+  date: string;
 }
 
 export interface Majority {
@@ -141,6 +154,8 @@ export interface Filters {
   tenure?: string[];
   majority_bands?: string[];
   seat_types?: string[];
+  /** MPs in seats where one of these parties came second at the last election before the day they spoke */
+  runner_up_parties?: string[];
 }
 
 export interface Plan {
@@ -153,7 +168,7 @@ export interface Plan {
   unresolved_speakers: string[];
   interpretation: string;
   parser: string;
-  group_by?: "role" | "gender" | "age" | "tenure" | "majority";
+  group_by?: "role" | "gender" | "age" | "tenure" | "majority" | "runner_up";
   /** sides compared, each searched separately */
   compare?: CompareSide[];
 }
@@ -224,6 +239,8 @@ export interface Evidence {
   committee_evidence?: number;
   tenure?: Record<string, number>;
   majority_bands?: Record<string, number>;
+  /** MPs' contributions by the party second in their seat at the time, by name ("unknown" when not known) */
+  runner_ups?: Record<string, number>;
 }
 
 export type TurnStatus = "planning" | "searching" | "answering" | "verifying" | "done" | "error";

@@ -19,9 +19,10 @@ from pydantic import BaseModel, Field
 from hansard.engine import Filters
 from hansard.reference.portfolios import PORTFOLIOS, portfolios_for_query
 from hansard.sources.demographics import AGE_BANDS
+from hansard.sources.elections import RUNNER_UP_NAME
 
 AGE_BAND_KEYS = [k for k, *_ in AGE_BANDS]
-GROUP_BY_KEYS = ("role", "gender", "age", "tenure", "majority")
+GROUP_BY_KEYS = ("role", "gender", "age", "tenure", "majority", "runner_up")
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ Office = Literal["gov", "shadow", "chair", "backbench"]
 House = Literal["commons", "lords"]
 Gender = Literal["F", "M"]
 AgeBand = Literal["under-40", "40-54", "55-69", "70-plus"]
-GroupBy = Literal["role", "gender", "age", "tenure", "majority"]
+GroupBy = Literal["role", "gender", "age", "tenure", "majority", "runner_up"]
 Tenure = Literal["first-term", "returning"]
 MajorityBand = Literal["marginal", "middle", "safe"]
 SeatType = Literal["city", "town", "rural"]
@@ -58,6 +59,8 @@ class ParsedQuery(BaseModel):
     tenure: list[Tenure]
     majority_bands: list[MajorityBand]
     seat_types: list[SeatType] = Field(default_factory=list)
+    runner_up_parties: list[str] = Field(default_factory=list,
+                                         description="Party ids that came second in the MP's seat at the last election")
     group_by: GroupBy
     portfolios: list[str]
     wants_votes: bool
@@ -113,6 +116,7 @@ class QueryPlan:
             tenure=[t for t in f.get("tenure") or [] if t in ("first-term", "returning")],
             majority_bands=[b for b in f.get("majority_bands") or [] if b in ("marginal", "middle", "safe")],
             seat_types=[t for t in f.get("seat_types") or [] if t in SEAT_TYPES],
+            runner_up_parties=[x for x in few(f.get("runner_up_parties"), 20) if _PARTY_ID.fullmatch(x)],
         )
         speakers = [{k: str(v)[:200] for k, v in x.items()} for x in (d.get("speakers") or [])[:10]
                     if isinstance(x, dict)]
@@ -124,6 +128,9 @@ class QueryPlan:
                    group_by=d.get("group_by") if d.get("group_by") in GROUP_BY_KEYS else "role",
                    compare=[{k: str(x.get(k, ""))[:200] for k in ("kind", "id", "label")}
                             for x in d.get("compare") or [] if isinstance(x, dict)][:3])
+
+
+_PARTY_ID = re.compile(r"[a-z0-9][a-z0-9-]{0,59}")
 
 
 def _iso(v: Any) -> date | None:
@@ -230,6 +237,56 @@ def seat_type_rules(ql: str) -> list[str]:
     return [k for k in SEAT_TYPES if k in kinds]
 
 
+# Parties as named when saying who came second in a seat (lower-cased question)
+_SECOND_PARTIES = [
+    ("reform", r"reform(?: uk)?|(?:the )?brexit party"),
+    ("conservative", r"(?:the )?(?:conservatives?|tor(?:y|ies))"),
+    ("labour", r"labour"),
+    ("liberal-democrat", r"(?:the )?lib(?:eral)? ?dem(?:ocrat)?s?"),
+    ("scottish-national-party", r"(?:the )?(?:snp|scottish national(?: party)?)"),
+    ("green", r"(?:the )?greens?(?: party)?"),
+    ("plaid-cymru", r"plaid(?: cymru)?"),
+    ("ukip", r"ukip"),
+    ("independent", r"(?:an )?independents?(?: candidates?)?"),
+]
+_OTHERS = r"(?:others?|other part(?:y|ies)|other challengers|another party|a different party|anyone else|someone else)"
+_SEATS = r"(?:(?:mps )?(?:in |for |with |holding )?(?:(?:the|their) )?(?:seats?|constituenc(?:y|ies)) )?"
+
+
+def _second_phrases(party: str) -> list[str]:
+    """Ways of saying that ``party`` came second (or is "the challenger", or "threatens" a seat): all of them read as the
+    fact that it came second at the last election, never as a judgement about the next one."""
+    return [rf"{_SEATS}(?:where|in which|that) (?:the )?(?:{party}) (?:came|come|comes|were|was|is|are|finished|"
+            rf"placed|ran) (?:a |the )?(?:close )?(?:second|runners?[- ]up|main challengers?|challengers?)",
+            rf"{_SEATS}(?:threatened|challenged|under threat|at risk|targeted) (?:by|from) (?:the )?(?:{party})",
+            rf"(?:{party})[- ](?:facing|threatened|targeted|target|challenged|second[- ]place) "
+            rf"(?:seats?|constituenc(?:y|ies)|mps)",
+            rf"{_SEATS}(?:with|where) (?:the )?(?:{party}) (?:in|as) (?:a |the )?(?:close )?(?:second(?: place)?|"
+            rf"runners?[- ]up|main challengers?)",
+            rf"(?:seats?|constituenc(?:y|ies)|mps) facing (?:a |the )?(?:{party})(?: challenge)?"]
+
+
+_SECOND_RULES = [(pid, re.compile(r"\b(?:" + "|".join(_second_phrases(pat)) + r")\b")) for pid, pat in _SECOND_PARTIES]
+_SECOND_OTHERS = re.compile(r"\b(?:" + "|".join(_second_phrases(_OTHERS)) + r")\b")
+_BY_RUNNER_UP = r"\bby (?:the )?(?:runners?[- ]up|second[- ]placed? party|challengers?|party (?:that|which|who) came second)\b"
+_SECOND_ANY = re.compile(r"\b(?:" + "|".join(_second_phrases("|".join(p for _, p in _SECOND_PARTIES) + "|" + _OTHERS))
+                         + r")\b|" + _BY_RUNNER_UP, re.I)
+
+
+def runner_up_rules(ql: str) -> tuple[list[str], bool]:
+    """Seats where a named party came second at the last election ("where Reform came second", "Reform-facing seats",
+    "seats threatened by Reform"): those parties, or, when the question sets them against others or against each other,
+    grouping by runner-up instead (True). Wording about threats is read as the fact of second place only."""
+    parties = [pid for pid, rule in _SECOND_RULES if rule.search(ql)]
+    by_runner_up = bool(re.search(_BY_RUNNER_UP, ql))
+    if parties and (_SECOND_OTHERS.search(ql) or (len(parties) > 1 and re.search(
+            r"\b(differ\w*|compar\w*|versus|vs|than|between|contrast\w*)\b", ql))):
+        by_runner_up = True
+    if by_runner_up:
+        return [], True
+    return parties, False
+
+
 _DEMOGRAPHIC_PHRASES = re.compile(
     rf"\b(?:(?:women|female|men|male|younger|young|older|oldest|new|newly[- ]elected|first[- ]term)"
     rf"(?: and (?:women|female|men|male|older|younger|long[- ]serving|experienced|returning))? "
@@ -276,16 +333,23 @@ def parse_offline(question: str, region_groups: dict[str, list[str]], today: dat
     tenure, majority_bands, seat_group = seat_rules(ql)
     group_by = seat_group or group_by
     seat_types = seat_type_rules(ql)
-    if tenure or majority_bands or seat_group or seat_types:
+    runner_up_parties, by_runner_up = runner_up_rules(ql)
+    if by_runner_up:
+        group_by = "runner_up"
+    if tenure or majority_bands or seat_group or seat_types or runner_up_parties or by_runner_up:
         houses.append("commons")
-    parties = [pid for pid, pattern in _PARTY_WORDS if re.search(pattern, ql)]
+    # the party that came second is not the speakers' party: "Labour MPs where Reform came second" is about Labour MPs
+    speaking = _SECOND_ANY.sub(" ", ql)
+    parties = [pid for pid, pattern in _PARTY_WORDS if re.search(pattern, speaking)]
+    topic = _SECOND_ANY.sub(" ", _DEMOGRAPHIC_PHRASES.sub(" ", question))
     return QueryPlan(
         question=question,
-        search_text=topic_words(_DEMOGRAPHIC_PHRASES.sub(" ", question)) or question,
+        search_text=topic_words(topic) or question,
         filters=Filters(date_from=date_from, date_to=date_to, houses=sorted(set(houses)) if len(set(houses)) == 1 else [],
                         regions=regions, offices=offices, parties=parties, genders=genders, age_bands=age_bands,
-                        tenure=tenure, majority_bands=majority_bands, seat_types=seat_types),
-        portfolios=list(portfolios_for_query(_DEMOGRAPHIC_PHRASES.sub(" ", question))),
+                        tenure=tenure, majority_bands=majority_bands, seat_types=seat_types,
+                        runner_up_parties=runner_up_parties),
+        portfolios=list(portfolios_for_query(topic)),
         wants_votes=wants_votes,
         interpretation="Interpreted with offline rules (no language model).",
         parser="offline",
@@ -337,10 +401,22 @@ Rules:
   10,000+). Only when the question restricts speakers to one or two kinds ("MPs for town seats" -> ["town"],
   "rural MPs" -> ["rural"], "urban MPs" -> ["city", "town"]); it also implies houses ["commons"]. When the question
   compares kinds of seat ("where do rural and city MPs differ"), leave it empty so every kind is searched.
+- runner_up_parties: party ids (from the parties list; "independent" for independent candidates) of the party that
+  came second in the MP's seat at the most recent election before the day they spoke. Set it when the question limits
+  speakers to seats where a party came second or is the main challenger, however it is put: "seats where Reform came
+  second", "Reform-facing seats", "seats threatened by Reform", "Reform target seats", "where the Lib Dems are the
+  challengers" -> ["reform"] or ["liberal-democrat"]. The Brexit Party is Reform UK under its earlier name: "reform".
+  This is only the fact of second place at the last election: never judge which seats are threatened, at risk or
+  targets, never use polls or projections, and never add majority_bands unless the question also asks about marginal
+  or safe seats or the size of majorities. It also implies houses ["commons"]. In the interpretation, describe it as
+  the fact ("MPs in seats where Reform UK came second at the last election"), never as a threat.
 - group_by: "gender" if the question asks how women and men differ, "age" if it asks how views differ by age,
-  "tenure" if it compares new and long-serving MPs, "majority" if it compares MPs in marginal and safe seats;
+  "tenure" if it compares new and long-serving MPs, "majority" if it compares MPs in marginal and safe seats,
+  "runner_up" if it compares MPs by which party came second in their seats ("Labour MPs where Reform came second
+  compared with those where others came second", "seats threatened by Reform versus by the Conservatives");
   otherwise "role" (the default: ministers, opposition, backbenchers by seat type). When grouping by one of these,
-  leave the matching filter empty so every group is searched.
+  leave the matching filter empty so every group is searched. The party that came second is never a parties filter:
+  "Labour MPs where Reform came second" sets parties ["labour"] and runner_up_parties ["reform"].
 - portfolios: the policy areas the question is about (used to boost relevant ministers, not to filter):
 {ports}
 - wants_votes: true if the question is about how members voted, rebellions, dissent or divisions.
@@ -417,6 +493,8 @@ def parse_with_model(client, settings, question: str, history: list[dict[str, st
             majority_bands=[b for b in ("marginal", "middle", "safe") if b in p.majority_bands]
             if p.group_by != "majority" else [],
             seat_types=[t for t in SEAT_TYPES if t in p.seat_types],
+            runner_up_parties=[x for x in dict.fromkeys(p.runner_up_parties)
+                               if x in known_parties or x in RUNNER_UP_NAME] if p.group_by != "runner_up" else [],
         ),
         portfolios=[x for x in p.portfolios if x in known_ports],
         wants_votes=p.wants_votes,

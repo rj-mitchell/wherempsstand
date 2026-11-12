@@ -1,4 +1,4 @@
-import type { SourceCard, Speaker } from "./types";
+import type { RunnerUp, SourceCard, Speaker } from "./types";
 
 /** Party abbreviations as printed after a member's name in Hansard, e.g. "(Lab)". */
 const PARTY_ABBR: Record<string, string> = {
@@ -65,6 +65,41 @@ export const MAJORITY_LABEL: Record<string, string> = {
 export function majorityText(m: { majority: number; pct: number | null; election: string } | null | undefined): string | null {
   if (!m) return null;
   return `${m.majority.toLocaleString("en-GB")}${m.pct != null ? ` (${m.pct}% of votes cast)` : ""} at the ${m.election}`;
+}
+
+/** How the party that came second in a seat is named, as on the server (RUNNER_UP_NAME in sources/elections.py). */
+export const RUNNER_UP_NAME: Record<string, string> = {
+  conservative: "the Conservatives",
+  labour: "Labour",
+  "liberal-democrat": "the Liberal Democrats",
+  "scottish-national-party": "the SNP",
+  "plaid-cymru": "Plaid Cymru",
+  green: "the Greens",
+  reform: "Reform UK (formerly the Brexit Party)",
+  ukip: "UKIP",
+  dup: "the DUP",
+  "sinn-fein": "Sinn Féin",
+  "social-democratic-and-labour-party": "the SDLP",
+  uup: "the UUP",
+  alliance: "the Alliance Party",
+  "traditional-unionist-voice": "the TUV",
+  ukup: "the UK Unionist Party",
+  respect: "Respect",
+  "workers-party": "the Workers Party",
+  alba: "Alba",
+  independent: "an independent candidate",
+};
+
+export function runnerUpName(id: string, fallback?: string | null): string {
+  return RUNNER_UP_NAME[id] ?? fallback ?? id;
+}
+
+/** e.g. "The Brexit Party, now Reform UK (majority over them: 3,571 votes)": the party by its name at that election. */
+export function runnerUpText(r: RunnerUp | null | undefined): string | null {
+  if (!r) return null;
+  const now = r.party_id === "reform" && !/reform/i.test(r.party) ? ", now Reform UK" : "";
+  const over = r.majority != null ? ` (majority over them: ${r.majority.toLocaleString("en-GB")} votes)` : "";
+  return `${r.party}${now}${over}`;
 }
 
 /** Age on the date of the record: "54", or "about 54" when only the year of birth is known. */

@@ -20,6 +20,8 @@ interface Result {
   pct: number | null;
   band: string | null;
   party: string | null;
+  runner_up?: string | null; // the party that came second, by its name at that election
+  runner_up_votes?: number | null;
 }
 interface Contribution {
   record_id: string;
@@ -266,6 +268,7 @@ function Person({ number }: { number: string }) {
                         : "won (majority not known: the source counts smaller parties and independents together)"}
                       {r.pct != null && `, ${r.pct}% of votes cast`}
                       {r.band && <span className="muted"> · {BAND[r.band]}</span>}
+                      {r.runner_up && <span className="muted"> · second: {r.runner_up}</span>}
                     </li>
                   ))}
                 </ul>
@@ -416,6 +419,7 @@ function Glance({
                 : majority {result.majority.toLocaleString("en-GB")}
                 {result.pct != null && ` (${result.pct}%)`} at the {result.election}
                 {result.band && <span className="muted"> · {BAND[result.band]}</span>}
+                {result.runner_up && <span className="muted"> · second: {result.runner_up}</span>}
               </>
             )}{" "}
             <a href="#h-seats" className="small">

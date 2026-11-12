@@ -106,15 +106,17 @@ from hansard.rag import prompts
 from hansard.rag.interests import without_public_office
 from hansard.rag.pipeline import AskRequest, Pipeline
 from hansard.rag.query_parse import ITL1_REGIONS, QueryPlan, parse_model
+from hansard.rag.query_parse import system_prompt as query_parse_instructions
 from hansard.reference.portfolios import PORTFOLIOS
 from hansard.store.state import StateDB
 
 log = logging.getLogger(__name__)
 
-# a cached briefing is only reused while the instructions that wrote it are unchanged
+# a cached briefing is only reused while the instructions that wrote it, and those that read the question, are unchanged
 INSTRUCTIONS_VERSION = __import__("hashlib").sha256(
     (prompts.ANSWER_SYSTEM + json.dumps([prompts.MODE_INSTRUCTIONS, prompts.GROUP_BY_INSTRUCTIONS],
-                                        sort_keys=True)).encode()).hexdigest()[:12]
+                                        sort_keys=True)
+     + query_parse_instructions({}, [], date(2000, 1, 1))).encode()).hexdigest()[:12]
 
 ATTRIBUTION = [
     {"text": "Contains Parliamentary information licensed under the Open Parliament Licence v3.0.",

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { aboutRecord } from "../procedure";
 import { VoteKind } from "./VoteKind";
-import { ageLabel, attribution, houseOf, majorityText, reference, roleTitles, seatTypeLabel } from "../people";
+import { ageLabel, attribution, houseOf, majorityText, reference, roleTitles, runnerUpText, seatTypeLabel } from "../people";
 import { fmtDate, highlightParts } from "../render";
 import type { Highlight, InterestFlag, SourceCard, Speaker } from "../types";
 
@@ -247,6 +247,12 @@ export function SourceDrawer({
                 <>
                   <dt>Majority then</dt>
                   <dd>{majorityText(sp.majority_then)}</dd>
+                </>
+              )}
+              {sp?.house === "commons" && sp.runner_up_then && (
+                <>
+                  <dt>Second at the {sp.runner_up_then.election}</dt>
+                  <dd>{runnerUpText(sp.runner_up_then)}</dd>
                 </>
               )}
               {sp?.majority_now && sp.majority_now.date !== sp.majority_then?.date && (

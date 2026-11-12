@@ -488,9 +488,10 @@ export default function App() {
         }
         seats={
           !!t.plan &&
-          (["tenure", "majority"].includes(t.plan.group_by ?? "role") ||
+          (["tenure", "majority", "runner_up"].includes(t.plan.group_by ?? "role") ||
             !!t.plan.filters.tenure?.length ||
-            !!t.plan.filters.majority_bands?.length)
+            !!t.plan.filters.majority_bands?.length ||
+            !!t.plan.filters.runner_up_parties?.length)
         }
       />
     </>

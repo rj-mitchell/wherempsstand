@@ -34,7 +34,7 @@ from hansard.rag.query_parse import (
 from hansard.rag.sources import build_sources
 from hansard.rag.verify import check_quotes, drop_preambles, verify
 from hansard.sources.demographics import AGE_BAND_LABEL, GENDER_LABEL
-from hansard.sources.elections import MAJORITY_BAND_LABEL, TENURE_LABEL
+from hansard.sources.elections import MAJORITY_BAND_LABEL, TENURE_LABEL, runner_up_name
 from hansard.votes import VoteFinder
 
 log = logging.getLogger(__name__)
@@ -81,6 +81,9 @@ def plan_note(plan: QueryPlan, scope: Scope) -> str:
                     + " at the time")
     if f.seat_types:
         bits.append("MPs for " + " and ".join(f.seat_types) + " seats (on the day they spoke)")
+    if f.runner_up_parties:
+        bits.append("MPs in seats where " + " or ".join(runner_up_name(p) for p in f.runner_up_parties)
+                    + " came second at the most recent election before the day they spoke")
     if not scope.written:
         bits.append("written answers/statements excluded")
     if not scope.pbc:
@@ -91,11 +94,12 @@ def plan_note(plan: QueryPlan, scope: Scope) -> str:
 
 
 def plan_facets(plan: QueryPlan) -> set[str]:
-    """Speaker facts the question is about (gender, age, first term, majority): only these are given to the model."""
+    """Speaker facts the question is about (gender, age, first term, majority, runner-up): only these are given to the
+    model."""
     f = plan.filters
     out = {plan.group_by} - {"role"}
     for facet, active in (("gender", f.genders), ("age", f.age_bands), ("tenure", f.tenure),
-                          ("majority", f.majority_bands)):
+                          ("majority", f.majority_bands), ("runner_up", f.runner_up_parties)):
         if active:
             out.add(facet)
     return out

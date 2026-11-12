@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AGE_BAND_LABEL, GENDER_LABEL, MAJORITY_LABEL, TENURE_LABEL } from "../people";
+import { AGE_BAND_LABEL, GENDER_LABEL, MAJORITY_LABEL, runnerUpName, TENURE_LABEL } from "../people";
 import { fmtDate } from "../render";
 import type { Meta, Plan } from "../types";
 
@@ -24,6 +24,7 @@ const GROUP_LABEL: Record<string, string> = {
   age: "Age on the day",
   tenure: "First term or re-elected",
   majority: "Majority (marginal or safe)",
+  runner_up: "Party that came second in their seat",
 };
 const MAJORITY_BANDS = ["marginal", "middle", "safe"];
 const SEAT_TYPES = ["city", "town", "rural"];
@@ -56,6 +57,14 @@ export function chipsFor(plan: Plan, meta: Meta | null): ChipDef[] {
   );
   (f.seat_types ?? []).forEach((t) =>
     chips.push({ key: `st-${t}`, label: `MPs for ${(SEAT_TYPE_LABEL[t] ?? t).toLowerCase()}`, remove: without("seat_types", t) }),
+  );
+  // the fact only: which party came second at the election before they spoke, never a judgement about the next one
+  (f.runner_up_parties ?? []).forEach((x) =>
+    chips.push({
+      key: `ru-${x}`,
+      label: `Seats where ${runnerUpName(x, meta?.parties.find((p) => p.id === x)?.name)} came second (last election before they spoke)`,
+      remove: without("runner_up_parties", x),
+    }),
   );
   if (plan.group_by && plan.group_by !== "role")
     chips.push({ key: "group", label: `Grouped by ${GROUP_LABEL[plan.group_by].toLowerCase()}`, remove: (p) => ({ ...p, group_by: "role" }) });
@@ -209,6 +218,20 @@ function PlanEditor({ draft, meta, onChange }: { draft: Plan; meta: Meta | null;
           </label>
         ))}
       </fieldset>
+      <label>
+        Party that came second in the MP's seat (at the last election before they spoke)
+        <select
+          multiple
+          value={f.runner_up_parties ?? []}
+          onChange={(e) => setF({ runner_up_parties: Array.from(e.target.selectedOptions).map((o) => o.value) })}
+        >
+          {(meta?.parties ?? []).map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      </label>
       <fieldset>
         <legend>Group speakers by</legend>
         {Object.entries(GROUP_LABEL).map(([k, v]) => (

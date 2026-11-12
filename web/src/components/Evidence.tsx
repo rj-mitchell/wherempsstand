@@ -114,6 +114,10 @@ export function EvidenceBar({
             label="Majority then"
             counts={relabel(evidence.majority_bands, MAJORITY_LABEL, Object.keys(MAJORITY_LABEL))}
           />
+          <EvidenceRow
+            label="Second in their seat then"
+            counts={relabel(evidence.runner_ups, { unknown: "Not known" })}
+          />
         </>
       )}
       {demographics && (

@@ -40,6 +40,17 @@ describe("filter chips", () => {
     ]);
   });
 
+  it("states the runner-up filter as the fact it is, and the grouping", () => {
+    const labels = chipsFor(
+      { ...plan, filters: { ...plan.filters, runner_up_parties: ["reform", "independent"] }, group_by: "runner_up" },
+      null,
+    ).map((c) => c.label);
+    expect(labels).toContain("Seats where Reform UK (formerly the Brexit Party) came second (last election before they spoke)");
+    expect(labels).toContain("Seats where an independent candidate came second (last election before they spoke)");
+    expect(labels).toContain("Grouped by party that came second in their seat");
+    expect(labels.join(" ")).not.toMatch(/threat|risk|target/i);
+  });
+
   it("re-runs with a removed chip", () => {
     const onRerun = vi.fn();
     render(<PlanChips plan={plan} meta={null} onRerun={onRerun} busy={false} />);
@@ -177,6 +188,19 @@ describe("source drawer", () => {
     render(<SourceDrawer source={q} quotes={[]} onClose={() => {}} />);
     expect(screen.getByText("Answer:")).toBeInTheDocument();
     expect(screen.getByText("Information on the costs is published by HMRC.")).toBeInTheDocument();
+  });
+
+  it("shows who came second in the seat at the time, by the party's name then", () => {
+    const sp = {
+      ...source.speaker!,
+      date: "2021-03-01",
+      majority_then: { majority: 3571, pct: 10.1, band: "middle", election: "2019 general election", date: "2019-12-12" },
+      runner_up: "reform",
+      runner_up_then: { party: "The Brexit Party", party_id: "reform", votes: 11233, majority: 3571, election: "2019 general election", date: "2019-12-12" },
+    };
+    render(<SourceDrawer source={{ ...source, speaker: sp }} quotes={[]} onClose={() => {}} />);
+    expect(screen.getByText("Second at the 2019 general election")).toBeInTheDocument();
+    expect(screen.getByText("The Brexit Party, now Reform UK (majority over them: 3,571 votes)")).toBeInTheDocument();
   });
 
   it("shows a speaker's own declaration of an interest", () => {

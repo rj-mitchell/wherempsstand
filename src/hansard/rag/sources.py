@@ -8,7 +8,13 @@ from datetime import date
 from typing import Any
 
 from hansard.debates import debate_path
-from hansard.rank.evidence import GROUPS, demographic_group, seat_type_label, speaker_group
+from hansard.rank.evidence import (
+    GROUPS,
+    demographic_group,
+    runner_up_label,
+    seat_type_label,
+    speaker_group,
+)
 from hansard.sources.demographics import AGE_BAND_LABEL
 from hansard.sources.elections import MAJORITY_BAND_LABEL
 from hansard.votes import division_text
@@ -60,11 +66,23 @@ def majority_label(m: dict[str, Any] | None) -> str | None:
     return f"majority {m['majority']:,}{pct} at the {m['election']}"
 
 
+def second_label(r: dict[str, Any] | None) -> str | None:
+    """e.g. 'second at the 2019 general election: The Brexit Party (now Reform UK), majority over them 3,571'."""
+    if not r or not r.get("party"):
+        return None
+    name = r["party"]
+    if r.get("party_id") == "reform" and "reform" not in name.lower():
+        name += " (now Reform UK)"
+    over = f", majority over them {r['majority']:,}" if r.get("majority") is not None else ""
+    return f"second at the {r['election']}: {name}{over}"
+
+
 def speaker_label(r: dict[str, Any], facets: set[str] | bool = False) -> str:
     """e.g. 'Hilary Benn (Labour; MP for Leeds Central, city seat (West Yorkshire urban area, 1.9m people),
     Yorkshire and The Humber; role on this date: Chair, Exiting the European Union Committee)'.
 
-    ``facets`` adds, only when the question is about them: gender, age on the date, first term, majority then.
+    ``facets`` adds, only when the question is about them: gender, age on the date, first term, majority then, the
+    party that came second then.
     """
     facets = _facets(facets)
     sp = r.get("speaker") or {}
@@ -80,6 +98,8 @@ def speaker_label(r: dict[str, Any], facets: set[str] | bool = False) -> str:
                                                                             "first election not known"))
         if "majority" in facets and sp.get("house") == "commons":
             bits.append(majority_label(sp.get("majority_then")) or "majority not known")
+        if "runner_up" in facets and sp.get("house") == "commons":
+            bits.append(second_label(sp.get("runner_up_then")) or "party second at the last election not known")
     if sp.get("party"):
         bits.append(sp["party"])
     if sp.get("constituency"):
@@ -98,7 +118,8 @@ def speaker_label(r: dict[str, Any], facets: set[str] | bool = False) -> str:
 
 
 def group_label(speaker: dict[str, Any] | None, group_by: str = "role") -> str:
-    """The heading a source is listed under: the speaker's role group, or their gender, age, tenure or majority."""
+    """The heading a source is listed under: the speaker's role group, or their gender, age, tenure, majority or the
+    party that came second in their seat."""
     if group_by == "tenure":
         return {"first-term": "First-term MPs", "returning": "Re-elected MPs"}.get(
             demographic_group(speaker, "tenure"), "Peers and others")
@@ -106,6 +127,9 @@ def group_label(speaker: dict[str, Any] | None, group_by: str = "role") -> str:
         band = demographic_group(speaker, "majority")
         return (MAJORITY_BAND_LABEL[band][0].upper() + MAJORITY_BAND_LABEL[band][1:] if band in MAJORITY_BAND_LABEL
                 else "Majority not known")
+    if group_by == "runner_up":
+        name = runner_up_label(speaker, heading=True)
+        return f"Where {name} came second" if name else "Runner-up not known"
     if group_by == "gender":
         return {"F": "Women", "M": "Men"}.get(demographic_group(speaker, "gender"), "Gender not known")
     if group_by == "age":

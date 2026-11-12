@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 WRITTEN_SOURCES = {"wrans", "lordswrans", "wms", "lordswms"}
 PBC_SOURCES = {"standing"}
 ORAL_SOURCES = {"debates", "westminhall", "lordspages"}
-GROUP_BY = ("role", "gender", "age", "tenure", "majority")
+GROUP_BY = ("role", "gender", "age", "tenure", "majority", "runner_up")
 
 
 @dataclass
@@ -49,6 +49,8 @@ class Filters:
     age_bands: list[str] = field(default_factory=list)       # see sources.demographics.AGE_BANDS; age on the day
     tenure: list[str] = field(default_factory=list)          # "first-term", "returning" (MPs, on the day)
     majority_bands: list[str] = field(default_factory=list)  # "marginal", "middle", "safe" (MPs, on the day)
+    # party ids: MPs in seats where that party came second at the last election before the day they spoke
+    runner_up_parties: list[str] = field(default_factory=list)
     seat_types: list[str] = field(default_factory=list)      # "city", "town", "rural" (MPs' seats, on the day)
 
     def as_dict(self) -> dict[str, Any]:
@@ -188,11 +190,12 @@ class Engine:
         people who were in an age band at some point in the date range, and each record is then checked against
         the speaker's age on the day it was spoken.
         """
-        if not (filters.genders or filters.age_bands or filters.tenure or filters.majority_bands):
+        seat = filters.tenure or filters.majority_bands or filters.runner_up_parties
+        if not (filters.genders or filters.age_bands or seat):
             return None, {}
         clauses, params = ["m.\"end\" >= ?"], [filters.date_from or self.settings.archive_start]
-        if filters.tenure or filters.majority_bands:
-            clauses.append("m.house = 'commons'")  # first terms and majorities apply to MPs
+        if seat:
+            clauses.append("m.house = 'commons'")  # first terms, majorities and runner-ups apply to MPs
         if filters.date_to:
             clauses.append("m.start <= ?")
             params.append(filters.date_to)
@@ -251,10 +254,11 @@ class Engine:
         r = self.settings.ranking
         if filters.parties:
             filters = Filters(**{**filters.__dict__, "parties": self.expand_parties(filters.parties)})
-        post_filters = bool(filters.age_bands or filters.tenure or filters.majority_bands or filters.seat_types)
-        if (filters.tenure or filters.majority_bands) and not (filters.genders or filters.age_bands):
-            # First terms and majorities depend on the day, so each candidate is checked below; listing every MP
-            # in the search itself would only slow it down. Limiting it to the Commons is enough.
+        by_seat = bool(filters.tenure or filters.majority_bands or filters.runner_up_parties)
+        post_filters = bool(filters.age_bands or by_seat or filters.seat_types)
+        if by_seat and not (filters.genders or filters.age_bands):
+            # First terms, majorities and runner-ups depend on the day, so each candidate is checked below; listing
+            # every MP in the search itself would only slow it down. Limiting it to the Commons is enough.
             people, births = None, {}
             if not filters.houses:
                 filters = Filters(**{**filters.__dict__, "houses": ["commons"]})
@@ -274,7 +278,7 @@ class Engine:
             # an impossible id keeps the search empty when nobody matches
             filters = Filters(**{**filters.__dict__, "person_ids": people or ["-none-"]})
         bands = set(filters.age_bands)
-        tenure, majority = set(filters.tenure), set(filters.majority_bands)
+        tenure, majority, second = set(filters.tenure), set(filters.majority_bands), set(filters.runner_up_parties)
         facts: dict[tuple[str, date], dict[str, Any]] = {}
 
         def seat(pid: str, on: date) -> dict[str, Any]:
@@ -283,7 +287,7 @@ class Engine:
             return facts[(pid, on)]
 
         def age_ok(hit: dict[str, Any]) -> bool:
-            """The checks that depend on the date of the record: age, first term, majority at the time."""
+            """The checks that depend on the date of the record: age, first term, majority and runner-up at the time."""
             pid = hit.get("person_id")
             if bands:
                 birth = births.get(pid)
@@ -293,11 +297,13 @@ class Engine:
                 on = hit["date"]
                 if not any(a <= on <= b for a, b, _ in seat_spans.get(pid, [])):
                     return False
-            if tenure or majority:
+            if tenure or majority or second:
                 f = seat(pid, hit["date"]) if pid else {}
                 if tenure and {True: "first-term", False: "returning"}.get(f.get("first_term")) not in tenure:
                     return False
                 if majority and f.get("majority_band") not in majority:
+                    return False
+                if second and f.get("runner_up") not in second:
                     return False
             return True
 
