@@ -1,7 +1,8 @@
 """Daily backup of the one thing that cannot be rebuilt from public sources: the state database.
 
-It holds the saved briefings, reports from readers, feedback, usage and spending, and visit counts. Everything else
-(Hansard, member data, the search index) is downloaded or rebuilt by ``hansard bootstrap``.
+It holds the saved briefings, reports from readers, statements under the right of reply, feedback, usage and
+spending, and visit counts. Everything else (Hansard, member data, the search index) is downloaded or rebuilt by
+``hansard bootstrap``.
 
 A backup is a consistent copy made with SQLite's online backup (safe while the site is running), checked, then
 packed with the local settings into ``where-they-stand-YYYY-MM-DD.tar.gz``. The newest ``keep`` are kept.

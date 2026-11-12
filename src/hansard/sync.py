@@ -250,6 +250,9 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
     stopped = state.close_unfinished_runs()
     if stopped:
         log.warning("%d earlier update(s) stopped before finishing (the server may have run out of memory)", stopped)
+    from hansard.api.statements import forget_old_emails
+
+    forget_old_emails(state)  # statements' email addresses, three months after they are withdrawn or declined
     run_id = state.start_run("sync")
     started = time.time()
     stats: dict[str, Any] = {}

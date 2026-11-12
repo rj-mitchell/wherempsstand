@@ -1,7 +1,9 @@
 """Report a problem, and the public corrections log.
 
-Anyone can report an error in a briefing, a complaint about how someone is represented, or anything else. Reports
-are private. When one is closed, the operator can add a short public note; notes, and every withdrawn briefing,
+Anyone can report something wrong (in a briefing, or in a label, grouping, connection or summary the site shows), an
+unfair characterisation, a private person's name that should not be shown, or anything else: the routes of the
+charity's impartiality policy, section 7.1. A third route, a statement in someone's own words, is in statements.py.
+Reports are private. When one is closed, the operator can add a short public note; notes, and every withdrawn briefing,
 appear on the corrections page, so readers can see what has been put right.
 
 Contact details are optional, used only to reply, and deleted when the report is closed.
@@ -14,8 +16,9 @@ from typing import Any
 
 from hansard.store.state import StateDB, utcnow
 
-KINDS = {"correction": "An error in a briefing", "complaint": "A complaint about how someone is represented",
-         "general": "Something else"}
+# The values are kept as they were (old links and saved reports use them); the labels are the policy's routes.
+KINDS = {"correction": "Something is wrong", "complaint": "You've been characterised unfairly",
+         "takedown": "A private person's name or details to remove", "general": "Something else"}
 CLOSED = ("resolved", "dismissed")
 DAILY_LIMIT = 10  # reports per visitor per day
 
@@ -29,15 +32,17 @@ def recent_count(state: StateDB, visitor: str | None) -> int:
 
 
 def add_report(state: StateDB, kind: str, message: str, briefing_id: str | None, contact: str | None,
-               visitor: str | None) -> int:
+               visitor: str | None, page: str | None = None) -> int:
     with state.connect() as con:
-        cur = con.execute("INSERT INTO reports (at, kind, briefing_id, message, contact, visitor) VALUES (?, ?, ?, ?, ?, ?)",
-                          (utcnow(), kind, briefing_id, message, contact or None, visitor))
+        cur = con.execute("INSERT INTO reports (at, kind, briefing_id, page, message, contact, visitor) "
+                          "VALUES (?, ?, ?, ?, ?, ?, ?)", (utcnow(), kind, briefing_id, page, message, contact or None,
+                                                           visitor))
         return int(cur.lastrowid)
 
 
 def list_reports(state: StateDB, status: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
-    sql = "SELECT id, at, kind, briefing_id, message, contact, status, closed_at, resolution, public_note FROM reports"
+    sql = ("SELECT id, at, kind, briefing_id, page, message, contact, status, closed_at, resolution, public_note "
+           "FROM reports")
     args: tuple = ()
     if status:
         sql += " WHERE status = ?"

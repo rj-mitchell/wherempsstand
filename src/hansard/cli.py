@@ -24,6 +24,9 @@ topics_app = typer.Typer(no_args_is_help=True, help="Topic briefings (config/top
 app.add_typer(topics_app, name="topics")
 eval_app = typer.Typer(no_args_is_help=True, help="Score the site against the test set (eval/questions.toml).")
 app.add_typer(eval_app, name="eval")
+statements_app = typer.Typer(no_args_is_help=True, help="Statements beside items (the right of reply): list, publish, "
+                             "decline, update and withdraw them.")
+app.add_typer(statements_app, name="statements")
 
 log = logging.getLogger("hansard")
 
@@ -779,6 +782,92 @@ def user_disable(email: str):
         con.execute("UPDATE users SET disabled = 1 WHERE email = ?", (email,))
         con.execute("DELETE FROM sessions WHERE user_id IN (SELECT user_id FROM users WHERE email = ?)", (email,))
     typer.echo(f"disabled {email}")
+
+
+# ---- statements beside items (the right of reply) -------------------------------------------------------------------
+
+
+def _statements_state():
+    from hansard.store.state import StateDB
+
+    return StateDB(_settings().state_db)
+
+
+def _statement_done(done: bool, what: str) -> None:
+    if not done:
+        typer.echo("No such statement, or it can't be changed in that way now (see `hansard statements list`).", err=True)
+        raise typer.Exit(1)
+    typer.echo(what)
+
+
+@statements_app.command("list")
+def statements_list(status: str = typer.Option("pending", help="pending, published, declined, withdrawn or all")):
+    """Statements and their state, with the email address to confirm who sent each (pending first by default)."""
+    from hansard.api.statements import list_statements
+
+    for s in list_statements(_statements_state(), None if status == "all" else status):
+        typer.echo(f"#{s['id']}  {s['status']}  received {s['at'][:10]}"
+                   + (f"  published {s['published_at'][:10]}" if s["published_at"] else "")
+                   + (f"  closed {s['closed_at'][:10]}" if s["closed_at"] else ""))
+        typer.echo(f"  From: {s['name']}, {s['role']}  <{s['email'] or 'email deleted'}>")
+        typer.echo(f"  About: {s['item_path']}" + (f"  (member {s['person']})" if s["person"] else "  (no member set)"))
+        if s["link"]:
+            typer.echo(f"  Link: {s['link']}")
+        if s["checked"]:
+            typer.echo(f"  Checked: {s['checked']}")
+        if s["reason"]:
+            typer.echo(f"  Reason: {s['reason']}")
+        typer.echo("  " + s["text"].replace("\n", "\n  ") + "\n")
+
+
+@statements_app.command("publish")
+def statements_publish(sid: int = typer.Argument(..., help="the statement's number, from `list`"),
+                       checked: str = typer.Option(..., help="how you confirmed who sent it, e.g. \"replied from their "
+                                                             "parliament.uk address\" (kept privately)"),
+                       person: int = typer.Option(None, help="the member it is about (their number, as in "
+                                                             "/people/<number>), when its address isn't their page")):
+    """Publish a pending statement as written, once you have confirmed who sent it."""
+    from hansard.api.statements import publish_statement
+
+    _statement_done(publish_statement(_statements_state(), sid, person=person, checked=checked),
+                    f"published #{sid}")
+
+
+@statements_app.command("decline")
+def statements_decline(sid: int, reason: str = typer.Option(..., help="why: sent to the author, never shown")):
+    """Decline a pending statement, or take down a published one that breaks the rules, with the reason."""
+    from hansard.api.statements import decline_statement
+
+    _statement_done(decline_statement(_statements_state(), sid, reason),
+                    f"declined #{sid}: tell the author why; their email address is deleted in three months")
+
+
+@statements_app.command("update")
+def statements_update(sid: int,
+                      text_file: Path = typer.Option(None, exists=True, dir_okay=False,
+                                                     help="a file holding the author's new words, exactly as sent"),
+                      name: str = typer.Option(None), role: str = typer.Option(None),
+                      link: str = typer.Option(None, help="a new link to the record; \"\" removes it")):
+    """Replace a statement at its author's request (published ones are shown with the new date)."""
+    from hansard.api.statements import StatementError, update_statement
+
+    text = text_file.read_text(encoding="utf-8") if text_file else None
+    try:
+        done = update_statement(_statements_state(), sid, text=text, name=name, role=role, link=link or None,
+                                clear_link=link == "")
+    except StatementError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from None
+    _statement_done(done, f"updated #{sid}")
+
+
+@statements_app.command("withdraw")
+def statements_withdraw(sid: int, note: str = typer.Option(None, help="a private note, e.g. the date they asked")):
+    """Take a statement down at its author's request."""
+    from hansard.api.statements import withdraw_statement
+
+    _statement_done(withdraw_statement(_statements_state(), sid, note),
+                    f"withdrawn #{sid}; the email address is deleted in three months")
 
 
 # ---- topic briefings ----------------------------------------------------------------------------------------------
