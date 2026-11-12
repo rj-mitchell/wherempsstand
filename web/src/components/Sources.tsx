@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { aboutRecord } from "../procedure";
 import { VoteKind } from "./VoteKind";
+import { besideAnchor, besideCards, StatementBox } from "./Statements";
+import type { Statement } from "../statements";
 import { GROUPS_CAVEAT, PartyGroupList } from "./PartyGroups";
 import { ageLabel, attribution, houseOf, majorityText, reference, roleTitles, runnerUpText, seatTypeLabel } from "../people";
 import { fmtDate, highlightParts } from "../render";
@@ -29,13 +31,17 @@ export function SourceList({
   onOpen,
   open,
   writing = false,
+  statements = [],
 }: {
   sources: SourceCard[];
   onOpen: (h: Highlight) => void;
   open: boolean;
   writing?: boolean;
+  /** statements about this briefing (the right of reply), each shown beside the first card from its member */
+  statements?: Statement[];
 }) {
   if (!sources.length) return null;
+  const beside = besideCards(sources, statements);
   const groups: [string, SourceCard[]][] = [];
   for (const s of sources) {
     const g = s.kind === "division" ? "Votes (divisions)" : s.group ?? "Other";
@@ -58,6 +64,7 @@ export function SourceList({
               {items.map((s) => (
                 <li key={s.n}>
                   <SourceItem source={s} onOpen={onOpen} />
+                  {beside.get(s.n)?.map((st) => <StatementBox key={st.id} s={st} level={4} anchor={besideAnchor(st)} />)}
                 </li>
               ))}
             </ol>

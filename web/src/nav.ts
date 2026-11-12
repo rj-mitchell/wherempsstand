@@ -61,6 +61,7 @@ export const FOOTER: NavLink[] = [
   { href: "/glossary", label: "Glossary" },
   { href: "/resources", label: "Other resources" },
   { href: "/corrections", label: "Corrections and problems" },
+  { href: "/if-youre-named", label: "If you're named" }, // the family's page for people named (GLOSSARY.md)
   { href: "/accessibility", label: "Accessibility" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },

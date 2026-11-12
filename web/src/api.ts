@@ -57,9 +57,10 @@ export const api = {
 };
 
 export interface ReportInput {
-  kind: "correction" | "complaint" | "general";
+  kind: "correction" | "complaint" | "takedown" | "general";
   message: string;
   briefing_id?: string | null;
+  page?: string | null; // the page on this site it is about, if not a briefing
   contact?: string | null;
   website?: string; // must stay empty: a trap for spam bots
 }

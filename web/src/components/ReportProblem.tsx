@@ -1,9 +1,10 @@
 import { useId, useState } from "react";
 import { api, ApiError, type ReportInput } from "../api";
 
+// the routes of the charity's impartiality policy, section 7.1, by their names in the family glossary
 const KINDS: { value: ReportInput["kind"]; label: string }[] = [
-  { value: "correction", label: "An error in this briefing" },
-  { value: "complaint", label: "Someone is represented unfairly" },
+  { value: "correction", label: "Something is wrong: a fact, quotation, label or grouping in this briefing" },
+  { value: "complaint", label: "You've been characterised unfairly: the record is right, but the briefing isn't fair" },
   { value: "general", label: "Something else" },
 ];
 
@@ -61,6 +62,12 @@ export function ReportProblem({ briefingId }: { briefingId?: string }) {
           </label>
         ))}
       </fieldset>
+      <p className="muted small">
+        Named in this briefing? You can also <a href={`/if-youre-named${briefingId ? `?item=/b/${briefingId}` : ""}#statement-form`}>
+          add a statement in your own words
+        </a>{" "}
+        beside it.
+      </p>
       <label>
         Details
         <textarea

@@ -5,6 +5,7 @@ import "./styles.css";
 import { api } from "./api";
 import { setUpNavMore } from "./navMore";
 import { fmtDate } from "./render";
+import { KIND_ALIASES, MAX_WORDS, NAMED_PAGE, showStatementsForPage, statementProblem, wordCount } from "./statements";
 
 void api.hit(window.location.pathname, document.referrer);
 
@@ -108,7 +109,7 @@ if (live) void showStatus(live);
 
 interface Correction {
   date: string;
-  kind: "withdrawn" | "correction" | "complaint" | "general";
+  kind: "withdrawn" | "correction" | "complaint" | "takedown" | "general";
   briefing_id: string | null;
   question: string | null;
   note: string;
@@ -149,6 +150,24 @@ const correctionsEl = document.getElementById("corrections-live");
 if (correctionsEl) void showCorrections(correctionsEl);
 
 const reportForm = document.getElementById("report-form") as HTMLFormElement | null;
+
+function presetReport(form: HTMLFormElement, search: string) {
+  const params = new URLSearchParams(search);
+  const asked = (params.get("kind") ?? "").toLowerCase();
+  if (asked === "statement") {
+    window.location.replace(`${NAMED_PAGE}#statement-form`);
+    return;
+  }
+  const kind = KIND_ALIASES[asked];
+  const radio = kind ? form.querySelector<HTMLInputElement>(`input[name=kind][value="${kind}"]`) : null;
+  if (radio) radio.checked = true;
+  const page = params.get("page");
+  const address = form.querySelector<HTMLInputElement>("input[name=briefing]");
+  if (page && address && !address.value && /^(\/|https:\/\/(www\.)?wherempsstand\.com\/)/.test(page))
+    address.value = page.startsWith("/") ? `https://wherempsstand.com${page}` : page;
+}
+if (reportForm) presetReport(reportForm, window.location.search);
+
 reportForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = new FormData(reportForm);
@@ -159,7 +178,8 @@ reportForm?.addEventListener("submit", async (e) => {
     errorEl.hidden = false;
     return;
   }
-  const briefing = String(data.get("briefing") ?? "").match(/\/b\/([a-km-z2-9]{10})/)?.[1] ?? null;
+  const address = String(data.get("briefing") ?? "").trim();
+  const briefing = address.match(/\/b\/([a-km-z2-9]{10})/)?.[1] ?? null;
   const button = reportForm.querySelector("button[type=submit]") as HTMLButtonElement;
   button.disabled = true;
   try {
@@ -170,6 +190,7 @@ reportForm?.addEventListener("submit", async (e) => {
         kind: data.get("kind"),
         message,
         briefing_id: briefing,
+        page: briefing ? null : address || null,
         contact: String(data.get("contact") ?? "").trim() || null,
         website: String(data.get("website") ?? ""),
       }),
@@ -189,3 +210,71 @@ reportForm?.addEventListener("submit", async (e) => {
     button.disabled = false;
   }
 });
+
+// ---- If you're named: a statement in someone's own words ---------------------------------------------------------
+
+const statementForm = document.getElementById("statement-form") as HTMLFormElement | null;
+
+if (statementForm) {
+  const text = statementForm.querySelector<HTMLTextAreaElement>("textarea[name=text]")!;
+  const count = document.getElementById("statement-count")!;
+  const showCount = () => {
+    const n = wordCount(text.value);
+    count.textContent = n > MAX_WORDS ? `${n} words: ${n - MAX_WORDS} over the limit of ${MAX_WORDS}` : `${n} of ${MAX_WORDS} words`;
+    count.classList.toggle("over", n > MAX_WORDS);
+  };
+  text.addEventListener("input", showCount);
+  showCount();
+  const item = new URLSearchParams(window.location.search).get("item");
+  const itemInput = statementForm.querySelector<HTMLInputElement>("input[name=item]")!;
+  if (item && /^\/[\w/-]+$/.test(item)) itemInput.value = `https://wherempsstand.com${item}`;
+
+  statementForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = new FormData(statementForm);
+    const field = (name: string) => String(data.get(name) ?? "");
+    const errorEl = document.getElementById("statement-error")!;
+    const body = {
+      name: field("name").trim(),
+      role: field("role").trim(),
+      item: field("item").trim(),
+      text: field("text"),
+      link: field("link").trim(),
+      email: field("email").trim(),
+    };
+    const problem = statementProblem(body);
+    if (problem) {
+      errorEl.textContent = problem;
+      errorEl.hidden = false;
+      return;
+    }
+    errorEl.hidden = true;
+    const button = statementForm.querySelector("button[type=submit]") as HTMLButtonElement;
+    button.disabled = true;
+    try {
+      const resp = await fetch("/api/statements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...body, link: body.link || null, website: field("website") }),
+      });
+      if (!resp.ok) {
+        const detail = (await resp.json().catch(() => ({}))).detail;
+        throw new Error(typeof detail === "string" ? detail : "failed");
+      }
+      statementForm.hidden = true;
+      const sent = document.getElementById("statement-sent")!;
+      sent.hidden = false;
+      sent.focus();
+    } catch (err) {
+      errorEl.textContent =
+        err instanceof Error && err.message !== "failed"
+          ? err.message
+          : "The statement could not be sent. Please try again, or email admin@wherempsstand.com.";
+      errorEl.hidden = false;
+      button.disabled = false;
+    }
+  });
+}
+
+// statements about the item a page shows (a debate, a bill, a group), at the end of its main content
+void showStatementsForPage(document.getElementById("main"));

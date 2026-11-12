@@ -8,6 +8,7 @@ import { Progress } from "./components/Progress";
 import { ElsewhereForSearch } from "./elsewhere";
 import { EvidenceBar } from "./components/Evidence";
 import { SourceDrawer, SourceList } from "./components/Sources";
+import { BriefingStatements, useStatements } from "./components/Statements";
 import { SupportReminder } from "./components/SupportReminder";
 import { TopicHeader } from "./components/TopicHeader";
 import { ATTRIBUTION } from "./attribution";
@@ -800,6 +801,7 @@ export default function App() {
                 onCite={(h) => setDrawer({ turn: t.id, h })}
               />
             )}
+            {t.briefingId && t.status === "done" && <BriefingStatements paths={statementPaths(t)} sources={t.sources} />}
             {t.note && <p className="muted small">{t.note}</p>}
             {answerFirst(t) && (
               <details className="page-more how-found">
@@ -824,7 +826,8 @@ export default function App() {
                 {t.error}
               </p>
             )}
-            <SourceList
+            <SourcesWithStatements
+              paths={t.briefingId && t.status === "done" ? statementPaths(t) : null}
               sources={t.sources}
               onOpen={(h) => setDrawer({ turn: t.id, h })}
               open={t.status === "answering" || (!t.answer && t.status === "done")}
@@ -875,4 +878,15 @@ function InterestsNote({ sources }: { sources: SourceCard[] }) {
       Matched by AI; a link to check, not a finding of wrongdoing.
     </p>
   );
+}
+
+/** The addresses statements about a briefing may be filed under: its own, and the topic address it is shown at. */
+function statementPaths(t: Turn): string[] {
+  return [`/b/${t.briefingId}`, ...(t.topic ? [`/topics/${t.topic.slug}`] : [])];
+}
+
+/** The source list, with any statements about the briefing beside the cards of the members they are from. */
+function SourcesWithStatements({ paths, ...props }: { paths: string[] | null } & Parameters<typeof SourceList>[0]) {
+  const statements = useStatements(paths ? { paths } : null);
+  return <SourceList {...props} statements={statements} />;
 }

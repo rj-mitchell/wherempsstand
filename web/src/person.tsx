@@ -10,6 +10,7 @@ import { GroupsSection, type MemberGroup } from "./components/Groups";
 import { GROUPS_CAVEAT, PartyGroupList } from "./components/PartyGroups";
 import { ELSEWHERE, Elsewhere, type Link } from "./elsewhere";
 import { type Interests, InterestsSection } from "./components/Interests";
+import { StatementBox, useStatements } from "./components/Statements";
 import { hasVoteKind, VoteKind } from "./components/VoteKind";
 import { fmtDate } from "./render";
 import type { PartyGroup, VoteType } from "./types";
@@ -102,6 +103,8 @@ function Person({ number }: { number: string }) {
   const [extras, setExtras] = useState<Partial<PersonData> | "error" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [topic, setTopic] = useState("");
+  // statements in their own words (the right of reply): fetched on their own, never part of the record
+  const statements = useStatements({ person: number });
   useEffect(() => {
     const once = (name: string) =>
       fetch(`/api/people/${number}?part=${name}`).then(async (r) => {
@@ -385,6 +388,19 @@ function Person({ number }: { number: string }) {
         </section>
       )}
 
+      {statements.length > 0 && (
+        <section aria-labelledby="h-statements" className="statements">
+          <h2 id="h-statements">{statements.length === 1 ? "A statement" : "Statements"} in their own words</h2>
+          <p className="muted small">
+            Added by {p.name} or someone acting for them, beside what this site says about them.{" "}
+            <a href="/if-youre-named">If you're named on this site</a>.
+          </p>
+          {statements.map((s) => (
+            <StatementBox key={s.id} s={s} about={s.item !== `/people/${p.number}`} />
+          ))}
+        </section>
+      )}
+
       <section aria-labelledby="h-elsewhere">
         <h2 id="h-elsewhere">Elsewhere</h2>
         <Elsewhere label={`More on ${p.name}`} links={elsewhereFor(p)} />
@@ -394,7 +410,8 @@ function Person({ number }: { number: string }) {
       </p>
       <p className="muted small">
         From Hansard, mySociety's member records and the UK Parliament's Members data. See the{" "}
-        <a href="/methodology">methodology</a>.
+        <a href="/methodology">methodology</a>. If you are {p.name} or act for them, see{" "}
+        <a href="/if-youre-named">If you're named on this site</a> to correct something or add a statement.
       </p>
     </article>
   );

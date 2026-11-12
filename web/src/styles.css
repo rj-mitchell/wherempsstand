@@ -1867,6 +1867,103 @@ legend,
   margin-block-start: var(--space-xs);
 }
 
+/* ---- statements in someone's own words (the right of reply) ---------------------------------------------------
+   Set apart from the site's own words, which are serif on ivory between solid rules: a statement is in the sans,
+   on the sunk paper, inside a dashed rule, and always ends with the line saying it is theirs, not the site's. The
+   heading and that line say so in words too, so nothing rests on colour or style alone. */
+.statement {
+  margin-block: var(--space-xs) 0;
+  padding: var(--space-xs) var(--space-s);
+  max-inline-size: 42rem;
+  background: var(--paper-sunk);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: var(--step--1);
+  color: var(--ink);
+}
+
+.statement:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.statement .statement-head,
+.wts-headings .statement .statement-head {
+  margin: 0;
+  font-size: var(--step-0);
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.statement p {
+  margin-block: var(--space-2xs) 0;
+}
+
+.statement .statement-role {
+  color: var(--ink-soft);
+}
+
+.statement-text {
+  margin: var(--space-xs) 0 0;
+  padding-inline-start: var(--space-s);
+  border-inline-start: 3px solid var(--rule-strong);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.statement-text p:first-child {
+  margin-block-start: 0;
+}
+
+.statement .statement-note {
+  margin-block-start: var(--space-xs);
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.statements > .statement + .statement {
+  margin-block-start: var(--space-s);
+}
+
+/* beside a source card in a briefing's list of sources */
+.source-group li > .statement {
+  margin-inline-start: var(--space-m);
+}
+
+.statement-pointers {
+  margin-block: var(--space-2xs);
+  padding-inline-start: 1.3em;
+  font-family: var(--sans);
+  font-size: var(--step--1);
+}
+
+.briefing-statements {
+  margin-block: var(--space-m);
+}
+
+.statement-example .statement-head,
+.statement-example .statement-role,
+.statement-example .statement-text,
+.statement-example .statement-link {
+  color: var(--ink-soft);
+}
+
+.statement-count.over {
+  color: var(--danger);
+}
+
+.named-times {
+  padding: var(--space-xs) var(--space-s);
+  border-inline-start: 4px solid var(--accent);
+  background: var(--accent-subtle);
+}
+
+.named-start {
+  font-family: var(--sans);
+  font-weight: 650;
+}
+
 /* statements without a citation are only marked when the reader asks to see them */
 .show-uncited .unsupported {
   background: var(--warn-subtle);
