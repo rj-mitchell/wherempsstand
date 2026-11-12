@@ -4,7 +4,7 @@ import { AnswerView } from "../components/AnswerView";
 import { Controls, recencyLabel } from "../components/Controls";
 import { chipsFor, PlanChips } from "../components/PlanChips";
 import { SourceDrawer } from "../components/Sources";
-import type { Answer, Plan, SourceCard } from "../types";
+import type { Answer, Meta, Plan, SourceCard } from "../types";
 
 const plan: Plan = {
   question: "q",
@@ -40,6 +40,24 @@ describe("filter chips", () => {
     ]);
   });
 
+  it("states the runner-up filter as the fact it is, and the grouping", () => {
+    const labels = chipsFor(
+      { ...plan, filters: { ...plan.filters, runner_up_parties: ["reform", "independent"] }, group_by: "runner_up" },
+      null,
+    ).map((c) => c.label);
+    expect(labels).toContain("Seats where Reform UK (formerly the Brexit Party) came second (last election before they spoke)");
+    expect(labels).toContain("Seats where an independent candidate came second (last election before they spoke)");
+    expect(labels).toContain("Grouped by party that came second in their seat");
+    expect(labels.join(" ")).not.toMatch(/threat|risk|target/i);
+  });
+
+  it("names party groups as membership on published evidence", () => {
+    const meta = { parties: [], portfolios: {}, party_groups: [{ id: "mainstream", name: "Mainstream", named: "Mainstream", party: "Labour" }] } as unknown as Meta;
+    const labels = chipsFor({ ...plan, filters: { ...plan.filters, groups: ["mainstream"] }, group_by: "group" }, meta).map((c) => c.label);
+    expect(labels).toContain("Members of Mainstream (on published evidence)");
+    expect(labels).toContain("Grouped by party group or caucus");
+  });
+
   it("re-runs with a removed chip", () => {
     const onRerun = vi.fn();
     render(<PlanChips plan={plan} meta={null} onRerun={onRerun} busy={false} />);
@@ -52,7 +70,10 @@ describe("filter chips", () => {
 describe("controls", () => {
   it("describes the recency slider in plain words", () => {
     expect(recencyLabel(0)).toMatch(/Off/);
-    expect(recencyLabel(1)).toBe("Half-life 2.0 years");
+    expect(recencyLabel(1)).toBe("Half-life 6 months");
+    expect(recencyLabel(0.25)).toBe("Half-life 2.0 years");
+    expect(recencyLabel(0.5)).toBe("Half-life 1.0 year");
+    expect(recencyLabel(1, 2)).toBe("Half-life 2.0 years");
   });
 
   it("changes the role weighting", () => {
@@ -162,6 +183,56 @@ describe("source drawer", () => {
     expect(screen.getByRole("link", { name: /Official Hansard/ })).toHaveAttribute("href", source.official_url);
     expect(screen.getByRole("link", { name: /TheyWorkForYou/ })).toHaveAttribute("href", source.twfy_url);
     expect(screen.getByText(/Open Parliament Licence/)).toBeInTheDocument();
+  });
+
+  it("shows a written question's answer under it", () => {
+    const q: SourceCard = {
+      ...source,
+      record_type: "question",
+      text: "To ask the Chancellor what assessment he has made of capital allowances.",
+      replies: [{ record_id: "x.r0", date: source.date, text: "Information on the costs is published by HMRC.", speaker_name_raw: "David Gauke" }],
+    };
+    render(<SourceDrawer source={q} quotes={[]} onClose={() => {}} />);
+    expect(screen.getByText("Answer:")).toBeInTheDocument();
+    expect(screen.getByText("Information on the costs is published by HMRC.")).toBeInTheDocument();
+  });
+
+  it("shows who came second in the seat at the time, by the party's name then", () => {
+    const sp = {
+      ...source.speaker!,
+      date: "2021-03-01",
+      majority_then: { majority: 3571, pct: 10.1, band: "middle", election: "2019 general election", date: "2019-12-12" },
+      runner_up: "reform",
+      runner_up_then: { party: "The Brexit Party", party_id: "reform", votes: 11233, majority: 3571, election: "2019 general election", date: "2019-12-12" },
+    };
+    render(<SourceDrawer source={{ ...source, speaker: sp }} quotes={[]} onClose={() => {}} />);
+    expect(screen.getByText("Second at the 2019 general election")).toBeInTheDocument();
+    expect(screen.getByText("The Brexit Party, now Reform UK (majority over them: 3,571 votes)")).toBeInTheDocument();
+  });
+
+  it("shows a speaker's party groups with the evidence, linked", () => {
+    const sp = {
+      ...source.speaker!,
+      party_groups: [
+        {
+          id: "tribune-group",
+          name: "Tribune Group of Labour MPs",
+          evidence: [
+            {
+              kind: "declared" as const,
+              date: "2022-02-02",
+              parliament: "2019–24",
+              label: "Said in the Commons on 2 February 2022: “I am privileged to chair the Tribune group of Labour MPs.”",
+              url: "https://hansard.parliament.uk/x",
+            },
+          ],
+        },
+      ],
+    };
+    render(<SourceDrawer source={{ ...source, speaker: sp }} quotes={[]} onClose={() => {}} />);
+    expect(screen.getByText("Party groups (2019–24 Parliament)")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /I am privileged to chair/ })).toHaveAttribute("href", "https://hansard.parliament.uk/x");
+    expect(screen.getByText(/no evidence is not evidence of not belonging/)).toBeInTheDocument();
   });
 
   it("shows a speaker's own declaration of an interest", () => {

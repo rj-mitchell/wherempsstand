@@ -1,4 +1,5 @@
-/** The operator's page: spending, reports, feedback, visits, briefings and updates. Needs the admin token. */
+/** The operator's page: spending, reports, statements, feedback, visits, briefings and updates. Needs the admin
+ * token. */
 import "@fontsource-variable/source-serif-4/opsz.css";
 import "./styles.css";
 import { fmtDate } from "./render";
@@ -57,6 +58,7 @@ interface Report {
   at: string;
   kind: string;
   briefing_id: string | null;
+  page: string | null;
   message: string;
   contact: string | null;
 }
@@ -67,6 +69,12 @@ function reportCard(r: Report): HTMLElement {
   if (r.briefing_id) {
     const a = el("a", `Briefing /b/${r.briefing_id}`);
     a.href = `/b/${r.briefing_id}`;
+    a.target = "_blank";
+    box.append(a);
+  }
+  if (r.page) {
+    const a = el("a", `Page ${r.page}`);
+    a.href = r.page;
     a.target = "_blank";
     box.append(a);
   }
@@ -96,6 +104,83 @@ function reportCard(r: Report): HTMLElement {
     }
   });
   box.append(form);
+  return box;
+}
+
+interface AdminStatement {
+  id: number;
+  at: string;
+  name: string;
+  role: string;
+  item_path: string;
+  person: number | null;
+  text: string;
+  link: string | null;
+  email: string | null;
+  status: "pending" | "published" | "declined" | "withdrawn";
+  published_at: string | null;
+  checked: string | null;
+}
+
+async function act(path: string, body: unknown, what: string) {
+  try {
+    await call(path, body);
+    await load();
+  } catch (err) {
+    alert(err instanceof Error ? err.message : `Could not ${what}.`);
+  }
+}
+
+/** A statement to publish, decline, update or withdraw. Its words are shown as text, never as HTML. */
+function statementCard(s: AdminStatement): HTMLElement {
+  const box = el("article", undefined, "report-form");
+  box.append(el("h3", `#${s.id} ${s.status} · ${s.name}, ${s.role} · received ${when(s.at)}`));
+  const about = el("a", `About ${s.item_path}`);
+  about.href = s.item_path;
+  about.target = "_blank";
+  box.append(about);
+  box.append(el("p", s.person ? `Member ${s.person}` : "No member set: give their number when publishing, unless it is about a group", "muted small"));
+  box.append(el("p", s.text, "report-message"));
+  box.append(el("p", `${s.text.trim().split(/\s+/).length} words`, "muted small"));
+  if (s.link) box.append(el("p", `Link: ${s.link}`, "muted small"));
+  box.append(el("p", `Confirm with: ${s.email ?? "(email deleted)"}`, "muted small"));
+  if (s.checked) box.append(el("p", `Checked: ${s.checked}`, "muted small"));
+  const base = `/api/admin/statements/${s.id}`;
+  if (s.status === "pending") {
+    const form = el("form");
+    form.innerHTML = `
+      <label>How you confirmed who sent it (private)<input name="checked" required minlength="3" /></label>
+      <label>Member number, if the address isn't their page (as in /people/&lt;number&gt;)<input name="person" inputmode="numeric" /></label>
+      <div class="form-actions"><button type="submit" class="secondary">Publish as written</button></div>`;
+    const person = form.querySelector<HTMLInputElement>("input[name=person]")!;
+    if (s.person) person.value = String(s.person);
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const n = Number(String(data.get("person") ?? "").trim());
+      void act(`${base}/publish`, { checked: String(data.get("checked") ?? ""), person: n > 0 ? n : null }, "publish it");
+    });
+    box.append(form);
+  }
+  const buttons = el("div", undefined, "form-actions");
+  const button = (label: string, onClick: () => void) => {
+    const b = el("button", label, "link small");
+    b.type = "button";
+    b.addEventListener("click", onClick);
+    buttons.append(b);
+  };
+  button(s.status === "pending" ? "Decline" : "Take down", () => {
+    const reason = prompt("Why? This is for the author (tell them by email); it is never shown on the site.");
+    if (reason && reason.trim().length >= 3) void act(`${base}/decline`, { reason: reason.trim() }, "decline it");
+  });
+  button("Update the words", () => {
+    const text = prompt("The author's new words, exactly as they sent them:", s.text);
+    if (text && text.trim() !== s.text.trim()) void act(`${base}/update`, { text }, "update it");
+  });
+  button("Withdraw (author's request)", () => {
+    if (confirm("Withdraw this statement at its author's request?")) void act(`${base}/withdraw`, {}, "withdraw it");
+  });
+  box.append(buttons);
   return box;
 }
 
@@ -149,9 +234,10 @@ function unfeatureButton(id: string): Node {
 }
 
 async function load() {
-  const [usage, reports, briefings, sync, topics] = await Promise.all([
+  const [usage, reports, statements, briefings, sync, topics] = await Promise.all([
     call<any>("/api/admin/usage"),
     call<{ reports: Report[] }>("/api/admin/reports?status=open"),
+    call<{ statements: AdminStatement[] }>("/api/admin/statements"),
     call<{ briefings: Briefing[] }>("/api/admin/briefings?limit=30"),
     call<{ runs: any[] }>("/api/admin/sync"),
     call<{ topics: any[]; featured: any[] }>("/api/admin/topics"),
@@ -196,6 +282,12 @@ async function load() {
   );
   const open = reports.reports;
   $("admin-reports").replaceChildren(...(open.length ? open.map(reportCard) : [el("p", "No open reports.", "muted")]));
+  const current = statements.statements.filter((st) => st.status === "pending" || st.status === "published");
+  $("admin-statements").replaceChildren(
+    ...(current.length
+      ? [...current].sort((x, y) => (x.status === y.status ? 0 : x.status === "pending" ? -1 : 1)).map(statementCard)
+      : [el("p", "No statements waiting or shown.", "muted")]),
+  );
   const fb = usage.visits.feedback;
   $("admin-feedback").replaceChildren(
     el("p", `${fb.useful} of ${fb.total} said a briefing was useful.`),

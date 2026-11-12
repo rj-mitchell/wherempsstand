@@ -75,6 +75,42 @@ the README on 6 November 2026.
   Each source's own lookups link small areas to both sets of seats. That gives about 315 city, 225 town and 110 rural seats in each set. Each source label names the urban area and its size. The rules and source URLs are in
   `scripts/build_geo_lookups.py`.
 
+* **Seats on the day.** Each MP's source carries the result of the most recent election in their seat before the
+  day they spoke (a general election or a by-election): their majority (as votes and as a share of votes cast,
+  banded marginal under 10%, 10% to 20%, safe over 20%), the party that **came second** with its votes, and
+  whether they were still in their first Parliament. Questions can be limited to, or grouped by, any of these
+  (`majority_bands`, `runner_up_parties`, `tenure`; `group_by` "majority", "runner_up", "tenure"), checked against
+  each record's own date. Who came second is that election's result, not a prediction: no polls or projections are
+  used, and a question about seats "threatened by" or "facing" a party is read as seats where it came second, and
+  shown as such ([DECISIONS.md](DECISIONS.md), 29). Results from 2010 come from the Members API: the list of a
+  seat's results gives no candidates, so each result's own page is read once for its runner-up, within the same
+  polite, budgeted refresh, and the copy saved with the code (`data_static/elections/results_snapshot.json`, made
+  by `scripts/snapshot_election_results.py`) supplies any the server has not fetched yet. The general elections of
+  1997–2005 and the by-elections of 1997–2010 come from the Commons Library and Information Office files, which give
+  the runner-up too, except where the Library adds smaller parties together as "Other". Party names are mapped to
+  the site's party ids: the Brexit Party is Reform UK under its earlier name. Where who came second cannot be known
+  (a tie for second, a single candidate, "Other"), it is shown as not known, never guessed or taken from an earlier
+  election.
+
+* **Party groups and caucuses.** Groups within a party (the Socialist Campaign Group, the Labour Growth Group, the
+  Conservative Environment Network...) are not recorded by Parliament and mostly publish no lists. A member counts
+  as in one only on published evidence, kept with its source and shown with it (`src/hansard/groups.py`): the
+  group's own list, a letter or statement they signed that the group published with names, or their own words in
+  Parliament. The lists are in `data_static/groups/groups.json`, made from the research file by
+  `scripts/groups_from_research.py`, which applies the owner's decisions ([DECISIONS.md](DECISIONS.md), 30) and can be
+  run again as lists are found. Self-declarations are found by rule in each update's new and corrected records (and
+  the whole record with `hansard groups-scan --all`; `--report` writes them out for checking): first person only
+  ("I am a member of", "of which I am the chair", "we in the ERG", "I declare that I am part of"), and not negations,
+  questions, hypotheses, quotations, statements about others, ministers answering a group, a member of another party,
+  or names that are also everyday phrases unless written as the group's name. Evidence counts for the Parliament it
+  belongs to (from one general election to the next); a declaration for the whole of its Parliament. Questions can be
+  limited to, or grouped by, groups there is evidence for (`groups`; `group_by` "group": two named groups compared are
+  both searched and grouped; one compared with other members groups everyone). IPSA's records of MPs paying for a
+  group's pooled research service are their own kind, used when `[groups] show_ipsa` is on (it is, from 12 November
+  2026): labelled "paid for the group's research service (IPSA records, years)", never membership, with no amounts.
+  A claim whose IPSA service and own description name different groups is left out as unclear (twelve claims of
+  March 2022 filed under the Common Sense Group's service but described as the European Research Group's).
+
 ## Ranking: recency and role weighting
 
 Ranking is soft. Nothing is excluded unless you set a filter.
@@ -83,7 +119,7 @@ Ranking is soft. Nothing is excluded unless you set a filter.
 score = relevance × recency × authority
 
 relevance = ½ · BM25/max(BM25)  +  ½ · calibrated cosine similarity
-recency   = 0.35 + 0.65 · 0.5^(age / half-life)           (slider: off … half-life 2 years)
+recency   = 0.35 + 0.65 · 0.5^(age / half-life)           (slider: off … half-life 6 months; default 2 years)
 authority = 1 + (W − 1) · m                               (slider W: 1.0× … 2.0×)
 ```
 

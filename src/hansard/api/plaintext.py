@@ -96,9 +96,16 @@ def person_text(core: dict[str, Any], activity: dict[str, Any] | None) -> str:
         parts.append("</ul>")
     for s in core.get("seats") or []:
         results = "; ".join(f"{r['election']}: majority {r['majority']:,}" + (f" ({r['pct']}%)" if r.get("pct") else "")
+                            + (f", second: {r['runner_up']}" if r.get("runner_up") else "")
                             for r in s.get("results") or [] if r.get("majority") is not None)
         if results:
             parts.append(f"<p>{e(s['constituency'])}: {e(results)}.</p>")
+    if core.get("party_groups"):
+        parts.append("<h2>Party groups and caucuses</h2><ul>")
+        for g in core["party_groups"]:
+            items = "; ".join(f"{ev['label']} ({ev['parliament']} Parliament)" for ev in g["evidence"])
+            parts.append(f"<li>{e(g['name'])}: {e(items)}</li>")
+        parts.append("</ul><p>On published evidence only: most groups publish no lists.</p>")
     contributions = (activity or {}).get("contributions") or []
     if contributions:
         parts.append("<h2>Recent contributions</h2><ol>")

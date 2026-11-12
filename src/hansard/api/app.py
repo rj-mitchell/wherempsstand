@@ -18,7 +18,7 @@ from collections import OrderedDict
 from collections.abc import Callable, Iterator
 from datetime import date
 from pathlib import Path
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 from urllib.parse import urlparse
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
@@ -75,6 +75,20 @@ from hansard.api.reports import (
     list_reports,
     recent_count,
 )
+from hansard.api.statements import DAILY_LIMIT as STATEMENT_DAILY_LIMIT
+from hansard.api.statements import (
+    SITE_HOSTS,
+    StatementError,
+    add_statement,
+    decline_statement,
+    list_statements,
+    publish_statement,
+    published,
+    update_statement,
+    withdraw_statement,
+)
+from hansard.api.statements import STATUSES as STATEMENT_STATUSES
+from hansard.api.statements import recent_count as statement_count
 from hansard.api.usage import (
     InFlight,
     RateLimiter,
@@ -106,15 +120,17 @@ from hansard.rag import prompts
 from hansard.rag.interests import without_public_office
 from hansard.rag.pipeline import AskRequest, Pipeline
 from hansard.rag.query_parse import ITL1_REGIONS, QueryPlan, parse_model
+from hansard.rag.query_parse import system_prompt as query_parse_instructions
 from hansard.reference.portfolios import PORTFOLIOS
 from hansard.store.state import StateDB
 
 log = logging.getLogger(__name__)
 
-# a cached briefing is only reused while the instructions that wrote it are unchanged
+# a cached briefing is only reused while the instructions that wrote it, and those that read the question, are unchanged
 INSTRUCTIONS_VERSION = __import__("hashlib").sha256(
     (prompts.ANSWER_SYSTEM + json.dumps([prompts.MODE_INSTRUCTIONS, prompts.GROUP_BY_INSTRUCTIONS],
-                                        sort_keys=True)).encode()).hexdigest()[:12]
+                                        sort_keys=True)
+     + query_parse_instructions({}, [], date(2000, 1, 1))).encode()).hexdigest()[:12]
 
 ATTRIBUTION = [
     {"text": "Contains Parliamentary information licensed under the Open Parliament Licence v3.0.",
@@ -148,9 +164,12 @@ class FeedbackBody(BaseModel):
 
 
 class ReportBody(BaseModel):
-    kind: Literal["correction", "complaint", "general"]
+    # correction: "Something is wrong"; complaint: "You've been characterised unfairly" (the policy's routes; the
+    # values are kept so old links and saved reports still work); takedown: a private person's name to remove
+    kind: Literal["correction", "complaint", "takedown", "general"]
     message: str = Field(min_length=10, max_length=4000)
     briefing_id: str | None = Field(default=None, max_length=20)
+    page: str | None = Field(default=None, max_length=300)  # the page on this site it is about, if not a briefing
     contact: str | None = Field(default=None, max_length=200)
     website: str | None = Field(default=None, max_length=200)  # left empty by people; filled in by spam bots
 
@@ -159,6 +178,36 @@ class CloseReportBody(BaseModel):
     status: Literal["resolved", "dismissed"]
     resolution: str = Field(min_length=3, max_length=2000)       # private
     public_note: str | None = Field(default=None, max_length=1000)  # shown on the corrections page
+
+
+class StatementBody(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    role: str = Field(min_length=2, max_length=200)
+    item: str = Field(min_length=1, max_length=300)  # the address on this site it sits beside
+    text: str = Field(min_length=1, max_length=2000)  # up to 150 words, checked in statements.py
+    link: str | None = Field(default=None, max_length=500)
+    email: str = Field(min_length=3, max_length=200)
+    website: str | None = Field(default=None, max_length=200)  # left empty by people; filled in by spam bots
+
+
+class PublishStatementBody(BaseModel):
+    person: int | None = None  # the member it is about, when its address isn't their page
+    checked: str | None = Field(default=None, max_length=500)  # how the sender was confirmed (private)
+
+
+class DeclineStatementBody(BaseModel):
+    reason: str = Field(min_length=3, max_length=2000)  # sent to the author; never shown on the site
+
+
+class UpdateStatementBody(BaseModel):
+    text: str | None = Field(default=None, max_length=2000)
+    name: str | None = Field(default=None, max_length=120)
+    role: str | None = Field(default=None, max_length=200)
+    link: str | None = Field(default=None, max_length=500)  # an empty string removes the link
+
+
+class WithdrawStatementBody(BaseModel):
+    note: str | None = Field(default=None, max_length=500)
 
 
 class WithdrawBody(BaseModel):
@@ -414,13 +463,16 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             "region_groups": settings.regions,
             "portfolios": PORTFOLIOS,
             "parties": [{"id": i, "name": n} for i, n in p.party_choices()],
+            # party groups there is published evidence for (a group with none is not offered)
+            "party_groups": p.engine.groups().offered(),
             "answers_enabled": p.has_model(),
             "model": settings.answer.get("model"),
             "archive_start": settings.archive_start.isoformat(),
             "index": idx,
             "last_sync": _public_run(runs[0]) if runs else None,
-            "defaults": {"recency": settings.ranking.get("default_recency", 0.5),
-                         "role_weight": settings.ranking.get("default_role_weight", 1.5)},
+            "defaults": {"recency": settings.ranking.get("default_recency", 0.25),
+                         "role_weight": settings.ranking.get("default_role_weight", 1.5),
+                         "min_half_life_years": settings.ranking.get("min_half_life_years", 0.5)},
             "attribution": ATTRIBUTION,
             "donate_url": donate_url(settings),
         }
@@ -571,7 +623,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         else:
             from hansard.rag.query_parse import parse_offline
 
-            plan = parse_offline(body.question, settings.regions, p.today)
+            plan = parse_offline(body.question, settings.regions, p.today, p.group_aliases())
             p._set_comparison(plan, AskRequest(question=body.question, compare=body.compare))
         req = AskRequest(question=body.question, mode=body.mode, recency=body.recency, role_weight=body.role_weight,
                          scope=Scope(**body.scope.model_dump()))
@@ -1515,6 +1567,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                           + (f", {m['party']}" if m["party"] else "")}
         except (OSError, ValueError):
             pass
+        # party groups and caucuses, with the evidence for each, by Parliament
+        page = {**page, "party_groups": get_pipeline().engine.groups().all_for(pid)}
         return page
 
     def person_activity(number: int) -> dict[str, Any]:
@@ -1777,8 +1831,62 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         if recent_count(state, visitor) >= DAILY_LIMIT:
             raise HTTPException(429, "Thank you, we have your reports. Please email us if there is more to add.")
         bid = body.briefing_id if body.briefing_id and ID_PATTERN.match(body.briefing_id) else None
-        add_report(state, body.kind, body.message.strip(), bid, (body.contact or "").strip() or None, visitor)
+        page = None
+        if body.page and not bid:  # only a path on this site is kept
+            parsed = urlparse(body.page.strip())
+            if parsed.hostname in (None, *SITE_HOSTS) and parsed.path.startswith("/"):
+                page = parsed.path[:200]
+        add_report(state, body.kind, body.message.strip(), bid, (body.contact or "").strip() or None, visitor, page)
         return {"ok": True}
+
+    # ---- statements beside items (the right of reply). Kept apart from the record: the briefing pipeline, search
+    # and the pages' readable text never read them; the site fetches them on their own, to show beside the item.
+    @app.post("/api/statements")
+    def statement_add(body: StatementBody, request: Request, user=Depends(current_user)):
+        visitor, _ = requester(request, user)
+        if body.website:  # a bot: say thanks, keep nothing
+            return {"ok": True}
+        if statement_count(state, visitor) >= STATEMENT_DAILY_LIMIT:
+            raise HTTPException(429, "Thank you, we have your statements. Please email us if there is more to add.")
+        try:
+            add_statement(state, name=body.name, role=body.role, item=body.item, text=body.text, link=body.link,
+                          email=body.email, visitor=visitor)
+        except StatementError as exc:
+            raise HTTPException(400, str(exc)) from None
+        return {"ok": True}
+
+    @app.get("/api/statements")
+    def statements_shown(path: Annotated[list[str] | None, Query()] = None, person: int | None = None):
+        return {"statements": published(state, paths=[p[:300] for p in path or []], person=person)}
+
+    @app.get("/api/admin/statements")
+    def statements_list(status: str | None = None, user=Depends(admin_user)):
+        return {"statements": list_statements(state, status if status in STATEMENT_STATUSES else None)}
+
+    def statement_action(done: bool) -> dict[str, bool]:
+        if not done:
+            raise HTTPException(404, "No such statement, or it can't be changed in that way now.")
+        return {"ok": True}
+
+    @app.post("/api/admin/statements/{sid}/publish")
+    def statement_publish(sid: int, body: PublishStatementBody, user=Depends(admin_user)):
+        return statement_action(publish_statement(state, sid, person=body.person, checked=body.checked))
+
+    @app.post("/api/admin/statements/{sid}/decline")
+    def statement_decline(sid: int, body: DeclineStatementBody, user=Depends(admin_user)):
+        return statement_action(decline_statement(state, sid, body.reason))
+
+    @app.post("/api/admin/statements/{sid}/update")
+    def statement_update(sid: int, body: UpdateStatementBody, user=Depends(admin_user)):
+        try:
+            return statement_action(update_statement(state, sid, text=body.text, name=body.name, role=body.role,
+                                                     link=body.link or None, clear_link=body.link == ""))
+        except StatementError as exc:
+            raise HTTPException(400, str(exc)) from None
+
+    @app.post("/api/admin/statements/{sid}/withdraw")
+    def statement_withdraw(sid: int, body: WithdrawStatementBody, user=Depends(admin_user)):
+        return statement_action(withdraw_statement(state, sid, body.note))
 
     @app.get("/api/corrections")
     def corrections_log():

@@ -81,3 +81,23 @@ def test_the_frontbench_for_the_subject_is_searched_on_its_own(indexed_settings)
     assert len(frontbench(found)) > len(frontbench(without))
     # their closeness in meaning is read from their stored vectors, though the search by meaning did not reach them
     assert all(r["ranking"]["semantic"] is not None for r in frontbench(found))
+
+
+def test_a_written_question_comes_with_its_answer(indexed_settings):
+    # 12 November 2026: a written question chosen as a source shows its answer under it, for the reader. The model's
+    # blocks for the question are unchanged, so the minister's words can't be cited as the questioner's.
+    from hansard.rag.sources import record_source
+
+    e = Engine(indexed_settings)
+    records = e.search("question", Filters(), limit=50).records
+    questions = [r for r in records if r["record_type"] == "question"]
+    assert questions, "the fixtures hold written questions"
+    with_reply = [q for q in questions if q.get("replies")]
+    assert with_reply
+    q = with_reply[0]
+    reply = q["replies"][0]
+    assert reply["record_id"].rsplit(".", 1)[0] == q["record_id"].rsplit(".", 1)[0]
+    assert reply["record_id"].endswith(".r0") and reply["text"]
+    src = record_source(1, q)
+    assert src.meta["replies"] == q["replies"]
+    assert not any(reply["text"][:40] in b for b in src.blocks)

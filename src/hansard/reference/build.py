@@ -166,7 +166,8 @@ def election_tables(persons: list[dict[str, Any]], elections: dict[str, Any]) ->
             results.append({"constituency_id": int(cid), "election_date": date.fromisoformat(r["date"]),
                             "title": r.get("title"), "is_general": bool(r.get("general")),
                             "majority": r.get("majority"), "votes": r.get("votes"), "electorate": r.get("electorate"),
-                            "result": r.get("result"), "party": r.get("party")})
+                            "result": r.get("result"), "party": r.get("party"), "runner_up": r.get("runner_up"),
+                            "runner_up_votes": r.get("runner_up_votes")})
     return reps, results
 
 
@@ -200,7 +201,7 @@ def load_overrides(path: Path | None) -> dict[str, str]:
 
 
 # Raised whenever the way the reference is built changes, so the next sync rebuilds it even if the member data has not.
-REFERENCE_VERSION = "2026-10-19d"  # by-elections of 1997-2001
+REFERENCE_VERSION = "2026-11-12a"  # the runner-up in each election result
 EARLIEST_SEATS = date(1997, 5, 1)  # seats are resolved for memberships from the 1997 general election on
 PRE2010_CSV = STATIC_DIR / "geo" / "pre2010_regions.csv"
 PARLIAMENT_IDS = STATIC_DIR / "parliament_ids.json"
@@ -434,6 +435,7 @@ def build_reference(
         "with_birth_date_since_2010": sum(1 for p in recent_persons if p["birth_date"]),
         "mps_with_election_results": len({r["person_id"] for r in ref.representations}),
         "election_results": len(ref.election_results),
+        "election_results_with_runner_up": sum(1 for r in ref.election_results if r["runner_up"]),
         "memberships": len(ref.memberships),
         "names": len(ref.names),
         "unmatched_seats": sorted(unmatched_seats),
@@ -649,7 +651,8 @@ _SCHEMAS = {
     "election_results": pa.schema([("constituency_id", pa.int32()), ("election_date", pa.date32()),
                                    ("title", pa.string()), ("is_general", pa.bool_()), ("majority", pa.int32()),
                                    ("votes", pa.int32()), ("electorate", pa.int32()), ("result", pa.string()),
-                                   ("party", pa.string())]),
+                                   ("party", pa.string()), ("runner_up", pa.string()),
+                                   ("runner_up_votes", pa.int32())]),
 }
 
 

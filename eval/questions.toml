@@ -307,6 +307,30 @@ question = "Do MPs with safe seats and marginal seats talk differently about imm
 category = "demographic"
 expect = { group_by = "majority", houses = ["commons"], portfolios = ["home_office"] }
 
+[[q]]
+id = "runner-up-reform"
+question = "What have Labour MPs in seats where Reform came second said about the two-child benefit cap?"
+category = "demographic"
+expect = { parties = ["labour"], runner_up_parties = ["reform"], houses = ["commons"], portfolios = ["work_pensions"] }
+
+[[q]]
+id = "group-scg"
+question = "What have members of the Socialist Campaign Group said about the two-child benefit cap?"
+category = "demographic"
+expect = { groups = ["socialist-campaign-group"], houses_any = [[], ["commons"]], portfolios = ["work_pensions"] }
+
+[[q]]
+id = "group-compare"
+question = "How do the Labour Growth Group and Mainstream differ on planning reform?"
+category = "demographic"
+expect = { groups = ["labour-growth-group", "mainstream"], group_by = "group", houses_any = [[], ["commons"]], portfolios_any = [["housing_communities"], []] }
+
+[[q]]
+id = "runner-up-threatened"
+question = "Do Labour MPs in seats threatened by Reform have a different opinion on cuts than Labour MPs in seats threatened by others?"
+category = "demographic"
+expect = { parties = ["labour"], group_by = "runner_up", houses = ["commons"], portfolios_any = [[], ["treasury"], ["work_pensions"], ["treasury", "work_pensions"]] }
+
 # ---- votes --------------------------------------------------------------------------------------------------------
 
 [[q]]

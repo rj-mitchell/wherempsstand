@@ -7,11 +7,13 @@ import { EdmList, type EdmRow } from "./components/EdmList";
 import { DirectorshipsSection, type MemberDirectorships } from "./components/Directorships";
 import { DonationsSection, type MemberDonations } from "./components/Donations";
 import { GroupsSection, type MemberGroup } from "./components/Groups";
+import { GROUPS_CAVEAT, PartyGroupList } from "./components/PartyGroups";
 import { ELSEWHERE, Elsewhere, type Link } from "./elsewhere";
 import { type Interests, InterestsSection } from "./components/Interests";
+import { StatementBox, useStatements } from "./components/Statements";
 import { hasVoteKind, VoteKind } from "./components/VoteKind";
 import { fmtDate } from "./render";
-import type { VoteType } from "./types";
+import type { PartyGroup, VoteType } from "./types";
 
 interface Result {
   election: string;
@@ -20,6 +22,8 @@ interface Result {
   pct: number | null;
   band: string | null;
   party: string | null;
+  runner_up?: string | null; // the party that came second, by its name at that election
+  runner_up_votes?: number | null;
 }
 interface Contribution {
   record_id: string;
@@ -47,6 +51,7 @@ interface PersonData {
   memberships: { house: string; constituency: string | null; party: string | null; start: string; end: string | null }[];
   offices: { kind: string; title: string; start: string; end: string | null }[];
   seats: { constituency: string; start: string; end: string | null; results: Result[] }[];
+  party_groups?: PartyGroup[]; // party groups and caucuses, with the evidence for each, by Parliament
   contributions?: Contribution[];
   contributions_more?: boolean;
   voting?: {
@@ -98,6 +103,8 @@ function Person({ number }: { number: string }) {
   const [extras, setExtras] = useState<Partial<PersonData> | "error" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [topic, setTopic] = useState("");
+  // statements in their own words (the right of reply): fetched on their own, never part of the record
+  const statements = useStatements({ person: number });
   useEffect(() => {
     const once = (name: string) =>
       fetch(`/api/people/${number}?part=${name}`).then(async (r) => {
@@ -266,6 +273,7 @@ function Person({ number }: { number: string }) {
                         : "won (majority not known: the source counts smaller parties and independents together)"}
                       {r.pct != null && `, ${r.pct}% of votes cast`}
                       {r.band && <span className="muted"> · {BAND[r.band]}</span>}
+                      {r.runner_up && <span className="muted"> · second: {r.runner_up}</span>}
                     </li>
                   ))}
                 </ul>
@@ -274,6 +282,16 @@ function Person({ number }: { number: string }) {
               )}
             </div>
           ))}
+        </section>
+      )}
+
+      {(p.party_groups ?? []).length > 0 && (
+        <section aria-labelledby="h-party-groups">
+          <h2 id="h-party-groups">Party groups and caucuses</h2>
+          <PartyGroupList groups={p.party_groups ?? []} parliaments />
+          <p className="muted small">
+            {GROUPS_CAVEAT} Evidence counts for the Parliament it belongs to. <a href="/methodology#party-groups">How groups are shown</a>
+          </p>
         </section>
       )}
 
@@ -370,6 +388,19 @@ function Person({ number }: { number: string }) {
         </section>
       )}
 
+      {statements.length > 0 && (
+        <section aria-labelledby="h-statements" className="statements">
+          <h2 id="h-statements">{statements.length === 1 ? "A statement" : "Statements"} in their own words</h2>
+          <p className="muted small">
+            Added by {p.name} or someone acting for them, beside what this site says about them.{" "}
+            <a href="/named">If you're named on this site</a>.
+          </p>
+          {statements.map((s) => (
+            <StatementBox key={s.id} s={s} about={s.item !== `/people/${p.number}`} />
+          ))}
+        </section>
+      )}
+
       <section aria-labelledby="h-elsewhere">
         <h2 id="h-elsewhere">Elsewhere</h2>
         <Elsewhere label={`More on ${p.name}`} links={elsewhereFor(p)} />
@@ -379,7 +410,8 @@ function Person({ number }: { number: string }) {
       </p>
       <p className="muted small">
         From Hansard, mySociety's member records and the UK Parliament's Members data. See the{" "}
-        <a href="/methodology">methodology</a>.
+        <a href="/methodology">methodology</a>. If you are {p.name} or act for them, see{" "}
+        <a href="/named">If you're named on this site</a> to correct something or add a statement.
       </p>
     </article>
   );
@@ -416,6 +448,7 @@ function Glance({
                 : majority {result.majority.toLocaleString("en-GB")}
                 {result.pct != null && ` (${result.pct}%)`} at the {result.election}
                 {result.band && <span className="muted"> · {BAND[result.band]}</span>}
+                {result.runner_up && <span className="muted"> · second: {result.runner_up}</span>}
               </>
             )}{" "}
             <a href="#h-seats" className="small">

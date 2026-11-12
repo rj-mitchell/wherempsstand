@@ -88,6 +88,9 @@ def run_bootstrap(settings: Settings, *, sample: bool = False, since: date | Non
     stats["reference"].pop("unmatched_seats", None)
     stats["ingest"] = ingest(dataclasses.replace(settings), workers=workers, since=since).as_dict()
     stats["index"] = index_pending(settings, rebuild_fts=True)
+    from hansard.groups import scan_declarations
+
+    stats["group_declarations"] = scan_declarations(settings, everything=True)
     if settings.embedding.get("enabled", True):
         stats["embed"] = embed_pending_cmd(settings, max_minutes=embed_minutes)
     else:

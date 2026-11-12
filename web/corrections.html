@@ -4,7 +4,7 @@
     <!--#include head-->
     <link rel="alternate" type="application/rss+xml" title="Where MPs Stand: corrections" href="/feeds/corrections.xml" />
     <title>Corrections and problems — Where MPs Stand</title>
-    <meta name="description" content="Errors found in Where MPs Stand briefings, briefings that have been withdrawn, and how to report a problem." />
+    <meta name="description" content="Errors found on Where MPs Stand, in briefings and in the labels and groupings it shows, briefings that have been withdrawn, and how to report a problem." />
     <link rel="canonical" href="https://wherempsstand.com/corrections" />
   </head>
   <body class="wts-headings">
@@ -13,8 +13,13 @@
       <main id="main" tabindex="-1" class="prose">
         <h1>Corrections and problems</h1>
         <p class="lede">
-          Tell us about a problem, and see errors found in briefings and briefings that have been withdrawn. Every
-          report is read, and anything put right is listed here. <a href="#report">Report a problem</a>.
+          Tell us about a problem, and see what has been put right: errors in briefings, labels and groupings, and
+          briefings that have been withdrawn. Every report is read. <a href="#report">Report a problem</a>.
+        </p>
+        <p class="named-times">
+          <strong>We reply within 5 working days, and decide within 20 working days.</strong>
+          If the site describes you, see <a href="/named">If you're named on this site</a>: it explains each
+          route, and how to add a statement in your own words beside what the site says.
         </p>
 
         <h2>Corrections log</h2>
@@ -22,26 +27,33 @@
 
         <h2 id="report">Report a problem</h2>
         <p>
-          If a briefing gets something wrong, misrepresents what someone said, or you have any other concern, please
-          tell us. The quickest way is the "Report a problem" link under the briefing itself, which tells us which
-          briefing you mean. You can also use this form, or email
-          <a href="mailto:admin@wherempsstand.com">admin@wherempsstand.com</a>.
+          Anything the site says about a person or a group can be reported, not only briefings: a member's role or
+          office on the day, their majority and its band, the party that came second in their seat, a connection to a
+          party group (including payments recorded by IPSA), a registered interest flagged beside what they said, a
+          grouping by age, gender or seat, or the summary on a member's page. For a briefing, the quickest way is the
+          "Report a problem" link under it, which tells us which briefing you mean. You can also use this form, or
+          email <a href="mailto:admin@wherempsstand.com">admin@wherempsstand.com</a>.
         </p>
         <p>
-          Briefings are written by AI from the official record. Where a briefing is wrong, it is withdrawn and listed
-          above. The record itself is Parliament's: to correct Hansard, contact the
+          Briefings are written by AI from the official record. Where something is wrong, it is corrected, or the
+          briefing withdrawn, and listed above. The record itself is Parliament's: to correct Hansard, contact the
           <a href="https://hansard.parliament.uk/about">Hansard editors</a>.
         </p>
         <form class="report-form" id="report-form" novalidate>
           <fieldset>
             <legend>What is wrong?</legend>
-            <label><input type="radio" name="kind" value="correction" checked /> An error in a briefing</label>
-            <label><input type="radio" name="kind" value="complaint" /> Someone is represented unfairly</label>
+            <label><input type="radio" name="kind" value="correction" checked /> Something is wrong: a fact, quotation, date, label or connection</label>
+            <label><input type="radio" name="kind" value="complaint" /> You've been characterised unfairly: the record is right, but the site's words, labels or groupings aren't fair</label>
+            <label><input type="radio" name="kind" value="takedown" /> A private person's name or details should be removed</label>
             <label><input type="radio" name="kind" value="general" /> Something else</label>
           </fieldset>
+          <p class="muted small">
+            To add a statement in your own words beside what the site says about you, use the
+            <a href="/named#statement-form">statement form</a>.
+          </p>
           <label>
-            Address of the briefing, if there is one
-            <input name="briefing" type="url" inputmode="url" placeholder="https://wherempsstand.com/b/…" maxlength="200" />
+            Address of the briefing or page, if there is one
+            <input name="briefing" type="url" inputmode="url" placeholder="https://wherempsstand.com/…" maxlength="300" />
           </label>
           <label>
             Details

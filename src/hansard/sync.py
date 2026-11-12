@@ -250,6 +250,9 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
     stopped = state.close_unfinished_runs()
     if stopped:
         log.warning("%d earlier update(s) stopped before finishing (the server may have run out of memory)", stopped)
+    from hansard.api.statements import forget_old_emails
+
+    forget_old_emails(state)  # statements' email addresses, three months after they are withdrawn or declined
     run_id = state.start_run("sync")
     started = time.time()
     stats: dict[str, Any] = {}
@@ -305,6 +308,15 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
         state.set(PENDING_PEOPLE, "[]")
         stats["index"] = {"passages_written": passages, "passages_reenriched": reenriched,
                           "people_reenriched": len(people), "seconds": round(time.time() - t, 1), **idx.stats()}
+
+        t = time.time()
+        try:  # members' own statements that they belong to a party group, in the new and corrected records
+            from hansard.groups import scan_declarations
+
+            stats["group_declarations"] = {**scan_declarations(settings), "seconds": round(time.time() - t, 1)}
+        except Exception as exc:  # never let this stop the sync
+            log.warning("party group declarations not scanned: %s", exc)
+            stats["group_declarations"] = {"error": str(exc)[:200]}
 
         t = time.time()
         if fetch and settings.section("interests").get("enabled", True):

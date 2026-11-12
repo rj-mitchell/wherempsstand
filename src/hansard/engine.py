@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 WRITTEN_SOURCES = {"wrans", "lordswrans", "wms", "lordswms"}
 PBC_SOURCES = {"standing"}
 ORAL_SOURCES = {"debates", "westminhall", "lordspages"}
-GROUP_BY = ("role", "gender", "age", "tenure", "majority")
+GROUP_BY = ("role", "gender", "age", "tenure", "majority", "runner_up", "group")
 
 
 @dataclass
@@ -49,6 +49,10 @@ class Filters:
     age_bands: list[str] = field(default_factory=list)       # see sources.demographics.AGE_BANDS; age on the day
     tenure: list[str] = field(default_factory=list)          # "first-term", "returning" (MPs, on the day)
     majority_bands: list[str] = field(default_factory=list)  # "marginal", "middle", "safe" (MPs, on the day)
+    # party ids: MPs in seats where that party came second at the last election before the day they spoke
+    runner_up_parties: list[str] = field(default_factory=list)
+    # party groups and caucuses (hansard.groups): members with published evidence for the Parliament they spoke in
+    groups: list[str] = field(default_factory=list)
     seat_types: list[str] = field(default_factory=list)      # "city", "town", "rural" (MPs' seats, on the day)
 
     def as_dict(self) -> dict[str, Any]:
@@ -144,6 +148,23 @@ class Engine:
         self.con = shared()
         self.con.execute("SET enable_object_cache = true")  # cache Parquet footers between queries
         self._has_vectors = False
+        self._groups_stamp: float | None = None
+        self.groups()
+
+    def groups(self):
+        """Party groups and their evidence (hansard.groups), read again when the update has found new
+        self-declarations."""
+        from hansard.groups import Groups, declarations_path
+
+        path = declarations_path(self.settings.data_dir)
+        try:
+            stamp = path.stat().st_mtime
+        except OSError:
+            stamp = 0.0
+        if stamp != self._groups_stamp:
+            self.resolver.groups = Groups.for_settings(self.settings, self.resolver.con)
+            self._groups_stamp = stamp
+        return self.resolver.groups
 
     def has_vectors(self) -> bool:
         """Whether meaning-based search has anything to search yet (once true, it stays true: vectors only grow)."""
@@ -188,11 +209,12 @@ class Engine:
         people who were in an age band at some point in the date range, and each record is then checked against
         the speaker's age on the day it was spoken.
         """
-        if not (filters.genders or filters.age_bands or filters.tenure or filters.majority_bands):
+        seat = filters.tenure or filters.majority_bands or filters.runner_up_parties
+        if not (filters.genders or filters.age_bands or seat):
             return None, {}
         clauses, params = ["m.\"end\" >= ?"], [filters.date_from or self.settings.archive_start]
-        if filters.tenure or filters.majority_bands:
-            clauses.append("m.house = 'commons'")  # first terms and majorities apply to MPs
+        if seat:
+            clauses.append("m.house = 'commons'")  # first terms, majorities and runner-ups apply to MPs
         if filters.date_to:
             clauses.append("m.start <= ?")
             params.append(filters.date_to)
@@ -245,16 +267,18 @@ class Engine:
         """``local_question``: whether the question is about a place, so local contributions are not
         down-weighted (by default: when the search words name a place, or regions or members are filtered)."""
         filters, scope = filters or Filters(), scope or Scope()
+        groups = self.groups()
         places = places_for(self.settings.reference_dir)
         if local_question is None:
             local_question = bool(filters.regions or filters.person_ids or places.mentioned(query))
         r = self.settings.ranking
         if filters.parties:
             filters = Filters(**{**filters.__dict__, "parties": self.expand_parties(filters.parties)})
-        post_filters = bool(filters.age_bands or filters.tenure or filters.majority_bands or filters.seat_types)
-        if (filters.tenure or filters.majority_bands) and not (filters.genders or filters.age_bands):
-            # First terms and majorities depend on the day, so each candidate is checked below; listing every MP
-            # in the search itself would only slow it down. Limiting it to the Commons is enough.
+        by_seat = bool(filters.tenure or filters.majority_bands or filters.runner_up_parties)
+        post_filters = bool(filters.age_bands or by_seat or filters.seat_types or filters.groups)
+        if by_seat and not (filters.genders or filters.age_bands):
+            # First terms, majorities and runner-ups depend on the day, so each candidate is checked below; listing
+            # every MP in the search itself would only slow it down. Limiting it to the Commons is enough.
             people, births = None, {}
             if not filters.houses:
                 filters = Filters(**{**filters.__dict__, "houses": ["commons"]})
@@ -270,11 +294,19 @@ class Engine:
                 people = [p for p in people if p in set(filters.person_ids)]
             if not filters.houses:
                 filters = Filters(**{**filters.__dict__, "houses": ["commons"]})
+        wanted_groups = set(filters.groups)
+        if wanted_groups:
+            # members with evidence for these groups in a Parliament within the dates; each record is then checked
+            # against the evidence for the Parliament it was said in
+            members = groups.people(filters.groups, filters.date_from, filters.date_to)
+            people = sorted(members & set(people)) if people is not None else sorted(members)
+            if filters.person_ids:
+                people = [p for p in people if p in set(filters.person_ids)]
         if people is not None:
             # an impossible id keeps the search empty when nobody matches
             filters = Filters(**{**filters.__dict__, "person_ids": people or ["-none-"]})
         bands = set(filters.age_bands)
-        tenure, majority = set(filters.tenure), set(filters.majority_bands)
+        tenure, majority, second = set(filters.tenure), set(filters.majority_bands), set(filters.runner_up_parties)
         facts: dict[tuple[str, date], dict[str, Any]] = {}
 
         def seat(pid: str, on: date) -> dict[str, Any]:
@@ -283,7 +315,7 @@ class Engine:
             return facts[(pid, on)]
 
         def age_ok(hit: dict[str, Any]) -> bool:
-            """The checks that depend on the date of the record: age, first term, majority at the time."""
+            """The checks that depend on the date of the record: age, first term, majority and runner-up at the time."""
             pid = hit.get("person_id")
             if bands:
                 birth = births.get(pid)
@@ -293,11 +325,15 @@ class Engine:
                 on = hit["date"]
                 if not any(a <= on <= b for a, b, _ in seat_spans.get(pid, [])):
                     return False
-            if tenure or majority:
+            if wanted_groups and not groups.ids_on(pid, hit["date"]) & wanted_groups:
+                return False
+            if tenure or majority or second:
                 f = seat(pid, hit["date"]) if pid else {}
                 if tenure and {True: "first-term", False: "returning"}.get(f.get("first_term")) not in tenure:
                     return False
                 if majority and f.get("majority_band") not in majority:
+                    return False
+                if second and f.get("runner_up") not in second:
                     return False
             return True
 
@@ -416,6 +452,7 @@ class Engine:
             profiles = self.resolver.profiles([(s.candidate.record_id, s.candidate.data.get("person_id"),
                                                 s.candidate.date) for s in pool])
             top = select_evidence(pool, profiles, limit, group_by=group_by if group_by in GROUP_BY else "role",
+                                  only_groups=filters.groups,
                                   max_per_speaker=int(r.get("max_per_speaker", 2)),
                                   min_relevance_ratio=float(r.get("min_relevance_ratio", 0.25)),
                                   min_occasions=int(r.get("min_occasions", 3)),
@@ -452,7 +489,10 @@ class Engine:
         missing = [s.candidate.best_passage_id for s in scored
                    if s.candidate.best_passage_id and s.candidate.best_passage_id not in passages]
         passages.update(self.index.passages_for(missing))
-        profiles = self.resolver.profiles([(rid, rows[rid]["xml_person_id"], rows[rid]["date"]) for rid in rows])
+        replies = self.replies_for([rows[rid] for rid in rows if rows[rid].get("record_type") == "question"])
+        profiles = self.resolver.profiles([(rid, rows[rid]["xml_person_id"], rows[rid]["date"]) for rid in rows] +
+                                          [(r["record_id"], r["xml_person_id"], r["date"])
+                                           for rs in replies.values() for r in rs])
         out = []
         for s in scored:
             rec = rows.get(s.candidate.record_id)
@@ -470,5 +510,30 @@ class Engine:
                 "speaker": prof.to_dict() if prof else None,
                 "ranking": s.breakdown(),
                 "occasions": s.candidate.data.get("occasions"),
+                **({"replies": [{"record_id": r["record_id"], "date": r["date"].isoformat(), "text": r["text"],
+                                 "speaker_name_raw": r.get("speaker_name_raw"),
+                                 "speaker": p.to_dict() if (p := profiles.get(r["record_id"])) else None}
+                                for r in replies[s.candidate.record_id]]}
+                   if replies.get(s.candidate.record_id) else {}),
             })
+        return out
+
+    def replies_for(self, questions: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+        """The answers to these written questions, by question record ID. A written answer is filed beside its
+        question, in the same source file and on the same date, with the question's ID ending .rN instead of .qN
+        (parse.xml_stream), so it is read from the same blocks. Shown with the question so a reader sees what was
+        said in reply, even when the answer itself wasn't chosen as a source."""
+        by_part: dict[tuple[str, int], list[dict[str, Any]]] = {}
+        for q in questions:
+            if q.get("thread_id") and q.get("date") is not None:
+                by_part.setdefault((q["source"], q["date"].year), []).append(q)
+        out: dict[str, list[dict[str, Any]]] = {}
+        for (part, year), qs in by_part.items():
+            wanted = {f"{q['thread_id']}.r{i}": q["record_id"] for q in qs for i in range(4)}
+            for rec in read_records(self.settings.parquet_dir, part, year, set(wanted), {q["date"] for q in qs},
+                                    {q["source_key"] for q in qs}):
+                if rec.get("record_type") == "answer" and rec["record_id"] in wanted:
+                    out.setdefault(wanted[rec["record_id"]], []).append(rec)
+        for rs in out.values():
+            rs.sort(key=lambda r: r["record_id"])
         return out

@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS reports (
     at           TEXT NOT NULL,
     kind         TEXT NOT NULL,
     briefing_id  TEXT,
+    page         TEXT,
     message      TEXT NOT NULL,
     contact      TEXT,
     visitor      TEXT,
@@ -104,6 +105,29 @@ CREATE TABLE IF NOT EXISTS reports (
     public_note  TEXT
 );
 CREATE INDEX IF NOT EXISTS reports_status ON reports(status, at);
+-- statements beside items, under the right of reply (src/hansard/api/statements.py). Never part of the record:
+-- nothing that searches the record or writes briefings reads this table. The email address only confirms who sent
+-- it, and is deleted three months after the statement is withdrawn or declined.
+CREATE TABLE IF NOT EXISTS statements (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    at           TEXT NOT NULL,
+    name         TEXT NOT NULL,
+    role         TEXT NOT NULL,
+    item_path    TEXT NOT NULL,
+    person       INTEGER,
+    text         TEXT NOT NULL,
+    link         TEXT,
+    email        TEXT,
+    visitor      TEXT,
+    status       TEXT NOT NULL DEFAULT 'pending',
+    published_at TEXT,
+    updated_at   TEXT,
+    closed_at    TEXT,
+    reason       TEXT,
+    checked      TEXT
+);
+CREATE INDEX IF NOT EXISTS statements_item ON statements(status, item_path);
+CREATE INDEX IF NOT EXISTS statements_person ON statements(status, person);
 -- how often each question is asked, per day (the text and a count only; nothing about who asked)
 CREATE TABLE IF NOT EXISTS question_counts (
     day       TEXT NOT NULL,
@@ -191,6 +215,7 @@ CREATE TABLE IF NOT EXISTS event_totals (
 MIGRATIONS = [
     ("usage", "visitor", "ALTER TABLE usage ADD COLUMN visitor TEXT"),
     ("usage", "cache_write_tokens", "ALTER TABLE usage ADD COLUMN cache_write_tokens INTEGER NOT NULL DEFAULT 0"),
+    ("reports", "page", "ALTER TABLE reports ADD COLUMN page TEXT"),  # the page a report is about, if not a briefing
 ]
 
 

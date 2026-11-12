@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import { aboutRecord } from "../procedure";
 import { VoteKind } from "./VoteKind";
-import { ageLabel, attribution, houseOf, majorityText, reference, roleTitles, seatTypeLabel } from "../people";
+import { besideAnchor, besideCards, StatementBox } from "./Statements";
+import type { Statement } from "../statements";
+import { GROUPS_CAVEAT, PartyGroupList } from "./PartyGroups";
+import { ageLabel, attribution, houseOf, majorityText, reference, roleTitles, runnerUpText, seatTypeLabel } from "../people";
 import { fmtDate, highlightParts } from "../render";
 import type { Highlight, InterestFlag, SourceCard, Speaker } from "../types";
 
@@ -28,13 +31,17 @@ export function SourceList({
   onOpen,
   open,
   writing = false,
+  statements = [],
 }: {
   sources: SourceCard[];
   onOpen: (h: Highlight) => void;
   open: boolean;
   writing?: boolean;
+  /** statements about this briefing (the right of reply), each shown beside the first card from its member */
+  statements?: Statement[];
 }) {
   if (!sources.length) return null;
+  const beside = besideCards(sources, statements);
   const groups: [string, SourceCard[]][] = [];
   for (const s of sources) {
     const g = s.kind === "division" ? "Votes (divisions)" : s.group ?? "Other";
@@ -57,6 +64,7 @@ export function SourceList({
               {items.map((s) => (
                 <li key={s.n}>
                   <SourceItem source={s} onOpen={onOpen} />
+                  {beside.get(s.n)?.map((st) => <StatementBox key={st.id} s={st} level={4} anchor={besideAnchor(st)} />)}
                 </li>
               ))}
             </ol>
@@ -249,6 +257,23 @@ export function SourceDrawer({
                   <dd>{majorityText(sp.majority_then)}</dd>
                 </>
               )}
+              {sp?.house === "commons" && sp.runner_up_then && (
+                <>
+                  <dt>Second at the {sp.runner_up_then.election}</dt>
+                  <dd>{runnerUpText(sp.runner_up_then)}</dd>
+                </>
+              )}
+              {sp?.party_groups && sp.party_groups.length > 0 && (
+                <>
+                  <dt>Party groups ({sp.party_groups[0].evidence[0]?.parliament} Parliament)</dt>
+                  <dd>
+                    <PartyGroupList groups={sp.party_groups} />
+                    <span className="muted small">
+                      {GROUPS_CAVEAT} <a href="/methodology#party-groups">How groups are shown</a>
+                    </span>
+                  </dd>
+                </>
+              )}
               {sp?.majority_now && sp.majority_now.date !== sp.majority_then?.date && (
                 <>
                   <dt>Majority now</dt>
@@ -336,6 +361,18 @@ export function SourceDrawer({
                 )}
               </p>
             ))}
+            {source.record_type === "question" &&
+              (source.replies ?? []).map((r) => (
+                <blockquote className="question reply" key={r.record_id}>
+                  <p>
+                    <strong>Answer{r.date !== source.date ? `, ${fmtDate(r.date)}` : ""}:</strong>{" "}
+                    <Attribution sp={r.speaker} raw={r.speaker_name_raw} />
+                  </p>
+                  {r.text.split("\n\n").map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
+                </blockquote>
+              ))}
           </section>
         )}
 

@@ -47,11 +47,13 @@ export function EvidenceBar({
   evidence,
   demographics = false,
   seats = false,
+  partyGroups = false,
   scope,
 }: {
   evidence?: Evidence;
   demographics?: boolean;
   seats?: boolean;
+  partyGroups?: boolean;
   scope?: Settings["scope"];
 }) {
   if (!evidence || evidence.records === 0) return null;
@@ -114,7 +116,14 @@ export function EvidenceBar({
             label="Majority then"
             counts={relabel(evidence.majority_bands, MAJORITY_LABEL, Object.keys(MAJORITY_LABEL))}
           />
+          <EvidenceRow
+            label="Second in their seat then"
+            counts={relabel(evidence.runner_ups, { unknown: "Not known" })}
+          />
         </>
+      )}
+      {partyGroups && (
+        <EvidenceRow label="Party groups (published evidence)" counts={relabel(evidence.party_groups, { none: "No evidence found" })} />
       )}
       {demographics && (
         <>

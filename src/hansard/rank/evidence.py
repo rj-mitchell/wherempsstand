@@ -24,6 +24,7 @@ from collections import Counter, defaultdict
 from typing import Any
 
 from hansard.rank.composite import Scored
+from hansard.sources.elections import runner_up_name
 
 GROUPS = {
     "gov": "Government ministers",
@@ -77,16 +78,34 @@ def speaker_group(profile: Any) -> str:
     return "other"
 
 
-def demographic_group(profile: Any, group_by: str) -> str:
-    """The group key for gender, age on the date, first term or majority at the time ('unknown' when not known)."""
+def demographic_group(profile: Any, group_by: str, groups: list[str] | set[str] | None = None) -> str:
+    """The group key for gender, age on the date, first term, majority or runner-up at the time ('unknown' when not
+    known), or the party groups there is evidence for on the date (``groups``: only these count; 'none' when there
+    is no evidence, which is not evidence of not belonging)."""
     p = profile.to_dict() if hasattr(profile, "to_dict") else (profile or {})
+    if group_by == "group":
+        ids = sorted(g["id"] for g in p.get("party_groups") or [] if not groups or g["id"] in set(groups))
+        return "+".join(ids) or "none"
     if group_by == "gender":
         return p.get("gender") or "unknown"
     if group_by == "tenure":
         return {True: "first-term", False: "returning"}.get(p.get("first_term"), "unknown")
     if group_by == "majority":
         return p.get("majority_band") or "unknown"
+    if group_by == "runner_up":
+        return p.get("runner_up") or "unknown"
     return p.get("age_band") or "unknown"
+
+
+def runner_up_label(profile: Any, heading: bool = False) -> str | None:
+    """The party that came second in an MP's seat at the last election before they spoke: "The Conservatives",
+    "Reform UK (formerly the Brexit Party)" (``heading``: as within a sentence, "the Conservatives"); None when not
+    known."""
+    p = profile.to_dict() if hasattr(profile, "to_dict") else (profile or {})
+    if not p.get("runner_up"):
+        return None
+    name = runner_up_name(p["runner_up"], (p.get("runner_up_then") or {}).get("party"))
+    return name if heading else name[0].upper() + name[1:]
 
 
 def _person(profile: Any) -> str | None:
@@ -97,7 +116,7 @@ def _person(profile: Any) -> str | None:
 
 def select_evidence(scored: list[Scored], profiles: dict[str, Any], k: int, *, max_per_speaker: int = 2,
                     min_relevance_ratio: float = 0.25, group_by: str = "role", min_occasions: int = 3,
-                    max_persistent: int = 4) -> list[Scored]:
+                    max_persistent: int = 4, only_groups: list[str] | None = None) -> list[Scored]:
     if not scored:
         return []
     def rel(s: Scored) -> float:  # search relevance: re-ranking reorders the evidence but must not narrow it
@@ -109,7 +128,7 @@ def select_evidence(scored: list[Scored], profiles: dict[str, Any], k: int, *, m
     groups: dict[str, list[Scored]] = defaultdict(list)
     for s in pool:  # already in score order
         prof = profiles.get(s.candidate.record_id)
-        groups[speaker_group(prof) if group_by == "role" else demographic_group(prof, group_by)].append(s)
+        groups[speaker_group(prof) if group_by == "role" else demographic_group(prof, group_by, only_groups)].append(s)
     order = sorted(groups, key=lambda g: -groups[g][0].score)
     chosen: list[Scored] = []
     taken: set[str] = set()
@@ -172,6 +191,8 @@ def evidence_summary(records: list[dict[str, Any]], divisions: list[dict[str, An
     ages: Counter[str] = Counter()
     tenures: Counter[str] = Counter()
     majorities: Counter[str] = Counter()
+    runner_ups: Counter[str] = Counter()
+    party_groups: Counter[str] = Counter()
     speakers: set[str] = set()
     persistent: dict[str, int] = {}
     dates = []
@@ -190,6 +211,11 @@ def evidence_summary(records: list[dict[str, Any]], divisions: list[dict[str, An
             if sp.get("house") == "commons":
                 tenures[demographic_group(sp, "tenure")] += 1
                 majorities[demographic_group(sp, "majority")] += 1
+                runner_ups[runner_up_label(sp) or "unknown"] += 1
+            for g in sp.get("party_groups") or []:
+                party_groups[g["name"]] += 1
+            if not sp.get("party_groups"):
+                party_groups["none"] += 1
         speakers.add(sp.get("person_id") or r.get("speaker_name_raw") or r["record_id"])
         dates.append(r["date"])
     return {
@@ -205,6 +231,10 @@ def evidence_summary(records: list[dict[str, Any]], divisions: list[dict[str, An
         "age_bands": dict(ages.most_common()),        # contributions by speakers' age on the day
         "tenure": dict(tenures.most_common()),         # MPs' contributions: first term or re-elected, on the day
         "majority_bands": dict(majorities.most_common()),  # MPs' contributions by majority at the time
+        # MPs' contributions by the party second in their seat at the time (by name; "unknown" when not known)
+        "runner_ups": dict(runner_ups.most_common()),
+        # members' contributions by party group, on the evidence for that Parliament ("none": no evidence found)
+        "party_groups": dict(party_groups.most_common()),
         "imbalance": imbalance(parties, len(records)),
         # members who raised the subject on several separate days (not as ministers), most often first
         "raised_most": [{"name": n, "days": d} for n, d in sorted(persistent.items(), key=lambda kv: (-kv[1], kv[0]))],

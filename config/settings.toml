@@ -44,9 +44,11 @@ vector_refine_factor = 5
 bm25_weight = 0.5
 # Recency factor = floor + (1 - floor) * 0.5 ** (age_years / half_life).
 # Slider s in [0, 1]: s = 0 disables decay; otherwise half_life = min_half_life_years / s.
+# 12 November 2026 (owner, from testers' feedback): the shortest half-life is 6 months (was 2 years), and the default
+# 2 years (was 4), so recent contributions lead more by default and much more when a reader asks for it.
 recency_floor = 0.35
-min_half_life_years = 2.0
-default_recency = 0.5
+min_half_life_years = 0.5
+default_recency = 0.25
 # Role weight slider W in [1.0, 2.0]; authority = 1 + (W - 1) * m.
 default_role_weight = 1.5
 # m by speaker's office on the speech date (max over concurrent offices).
@@ -167,3 +169,12 @@ enabled = true
 file = "topics.toml"
 max_per_run = 4             # at most this many rewrites per sync (the sync runs twice a day)
 unchanged_overlap = 0.8     # not rewritten when this share of the sources is the same as last time
+
+[groups]
+# Party groups and caucuses (src/hansard/groups.py; data_static/groups/groups.json). A member counts as in a group on
+# published evidence only: the group's own list, a letter or statement they signed, or their own words in Parliament.
+# show_ipsa: also show (and filter, group and count by) IPSA's records of MPs' offices paying for a group's pooled
+# research service, labelled as that and never as membership. On from 12 November 2026 (owner), on the basis of the
+# special purposes exemption for research and journalism (the charity's policies/special-category-data.md, section 3).
+# Set to false to stop showing them at once, e.g. after a complaint or legal advice.
+show_ipsa = true

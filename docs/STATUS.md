@@ -24,14 +24,10 @@ and trade mark checks, legal review) are in the charity's plan (rj-mitchell/wher
   - **Where it stands.** TheyWorkForYou Votes states no licence. The paid API's terms put mySociety's own data
     under CC BY-SA 2.5, but they don't mention the vote descriptions. The site labels each sentence "(TheyWorkForYou
     Votes)" and credits mySociety on the methodology page and in ATTRIBUTION.md.
-  - **To do.** Email hello@mysociety.org, through `deploy/mail.sh` so the letter is kept:
-
-    > I run Where MPs Stand (wherempsstand.com), a free, non-commercial site about the UK Parliament's records,
-    > and a project of Where They Stand, which is applying to register as a charity in England and Wales. Next to
-    > votes it shows your TheyWorkForYou Votes "voting aye/no means" descriptions, from the divisions.parquet
-    > download, credited to TheyWorkForYou Votes with a link. Is that OK, under what licence, and how would you
-    > like to be credited?
-
+  - **To do.** Send [`outreach/2026-11/mysociety.txt`](../outreach/2026-11/mysociety.txt) (to hello@mysociety.org,
+    for Alex Parsons, Head of Research and Policy), with `deploy/mail.sh` so it is kept ([`outreach/README.md`](../outreach/README.md)).
+    It also covers the whipping notes from the same download, says how briefings use the descriptions and are
+    checked, and asks about the parlparse `members/` data.
   - **If the answer is share-alike:** nothing changes; say so in ATTRIBUTION.md.
   - **If the answer is no:** switch the descriptions off. The site's own vote labels ("amendment", "second reading"
     and so on) are unaffected.

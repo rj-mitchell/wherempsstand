@@ -41,6 +41,7 @@ export default defineConfig({
         methodology: here("./methodology.html"),
         status: here("./status.html"),
         corrections: here("./corrections.html"),
+        named: here("./named.html"),
         accessibility: here("./accessibility.html"),
         resources: here("./resources.html"),
         glossary: here("./glossary.html"),
