@@ -446,3 +446,16 @@ def test_saved_briefings_with_a_lead_in_in_pieces_are_cleared():
     out = recheck_flags(answer)
     assert [s["status"] for s in out["segments"]] == ["connective", "connective", "cited"]
     assert out["unsupported_segments"] == 0 and out["grounded_ratio"] == 1.0
+
+
+def test_a_short_claim_stays_a_point_to_check_when_a_saved_briefing_is_shown_again():
+    from hansard.rag.verify import _classify_uncited, recheck_flags
+
+    # verify() splits a whole sentence off a lead-in and marks it as a claim, however short it is
+    parts = _classify_uncited("Labour MPs criticised the government. Jane Smith said on 4 May that ", True)
+    assert [p.status for p in parts] == ["unsupported", "connective"]
+    answer = {"segments": [*({"text": p.text, "status": p.status} for p in parts),
+                           {"text": "\"it has failed\"", "status": "cited"}],
+              "unsupported_segments": 1, "grounded_ratio": 0.3}
+    # shown again, it is judged without that knowledge: being short must not clear it
+    assert recheck_flags(answer) is answer
