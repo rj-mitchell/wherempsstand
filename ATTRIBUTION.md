@@ -71,6 +71,18 @@ Groups, officers, members, secretariats and registered benefits come from mySoci
 All-Party Parliamentary Groups (Open Parliament Licence v3.0) and the devolved parliaments' lists of cross-party
 groups. Membership lists found by AI web search are left out; contact details are left out.
 
+## Party groups and caucuses
+
+Lists of members and signatories of party groups (`data_static/groups/groups.json`) are taken from the groups' own
+pages and from the letters and statements they published with their signatories' names, as reproduced by the sources
+named with each entry (LabourList, Labour Outlook, the groups' and members' own websites); each is linked where it is
+shown. Members' statements in Parliament are from Hansard (Open Parliament Licence v3.0). Records of MPs' offices
+paying for groups' pooled research services come from the Independent Parliamentary Standards Authority's
+[published business costs](https://www.theipsa.org.uk/mp-staffing-business-costs/annual-publications), available
+under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)
+(IPSA: "All content is available under the Open Government License v3.0, except where otherwise stated"); they are not
+shown on the site until the charity has legal advice. Matching names to UK Parliament IDs is this site's own work.
+
 ## Gender and date of birth
 
 Members' gender and constituency election results (majorities, votes cast, the party that came second, by-elections)

@@ -96,8 +96,8 @@ under its [licence](LICENSE).
 
 
 A question becomes a filter plan (dates, Houses, regions, parties, speakers, roles, and MPs' seats on the day: seat
-type, majority, the party that came second at the last election, first term), shown as chips the reader can
-change. The search then chooses evidence for balance across speaker groups, not keyword score alone, and Claude
+type, majority, the party that came second at the last election, first term; party groups and caucuses, on
+published evidence), shown as chips the reader can change. The search then chooses evidence for balance across speaker groups, not keyword score alone, and Claude
 writes the briefing from those sources only, with a citation for every point. Each citation and quotation is checked
 word for word against the record, and statements not tied to a source are counted under the briefing. If nothing
 relevant is found, the site says "No records found." instead of guessing. The details are in
@@ -109,7 +109,8 @@ record and to TheyWorkForYou.
 
 Besides briefings, the site has free pages built from the record (no AI):
 
-* **MPs and peers**: roles, seats, majorities and who came second, what they speak about most, recent contributions, voting record
+* **MPs and peers**: roles, seats, majorities and who came second, party groups and caucuses (with the evidence),
+  what they speak about most, recent contributions, voting record
   and rebellions, registered interests (as they stood on any date since 2000), donations, company roles, all-party
   groups, early day motions, evidence given to committees, and an RSS feed of what they say.
 * **Debates** in full, **This week** in Parliament, **Bills** (every sitting and vote), **Charts** of how often a

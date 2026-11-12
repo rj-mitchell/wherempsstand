@@ -92,6 +92,23 @@ the README on 6 November 2026.
   (a tie for second, a single candidate, "Other"), it is shown as not known, never guessed or taken from an earlier
   election.
 
+* **Party groups and caucuses.** Groups within a party (the Socialist Campaign Group, the Labour Growth Group, the
+  Conservative Environment Network...) are not recorded by Parliament and mostly publish no lists. A member counts
+  as in one only on published evidence, kept with its source and shown with it (`src/hansard/groups.py`): the
+  group's own list, a letter or statement they signed that the group published with names, or their own words in
+  Parliament. The lists are in `data_static/groups/groups.json`, made from the research file by
+  `scripts/groups_from_research.py`, which applies the owner's decisions ([DECISIONS.md](DECISIONS.md), 30) and can be
+  run again as lists are found. Self-declarations are found by rule in each update's new and corrected records (and
+  the whole record with `hansard groups-scan --all`; `--report` writes them out for checking): first person only
+  ("I am a member of", "of which I am the chair", "we in the ERG", "I declare that I am part of"), and not negations,
+  questions, hypotheses, quotations, statements about others, ministers answering a group, a member of another party,
+  or names that are also everyday phrases unless written as the group's name. Evidence counts for the Parliament it
+  belongs to (from one general election to the next); a declaration for the whole of its Parliament. Questions can be
+  limited to, or grouped by, groups there is evidence for (`groups`; `group_by` "group": two named groups compared are
+  both searched and grouped; one compared with other members groups everyone). IPSA's records of MPs paying for a
+  group's pooled research service are kept as their own kind and used only when `[groups] show_ipsa` is on, which it
+  is not until the charity has legal advice.
+
 ## Ranking: recency and role weighting
 
 Ranking is soft. Nothing is excluded unless you set a filter.
