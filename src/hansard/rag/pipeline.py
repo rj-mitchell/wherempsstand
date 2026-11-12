@@ -135,6 +135,19 @@ _NOTHING_SAID = re.compile(r"\b((would|could) not (want to |wish to |be able to 
 # Without an embedding model to compare them, the first few found of each (summary, comprehensive)
 FEW_EDMS, FEW_EVIDENCE, FEW_DEVOLVED = (2, 3), (3, 5), (2, 3)
 # how many may be chosen, at most, of each kind (devolved: of each parliament)
+# Filters on who a Westminster member was on the day: motions, the devolved parliaments and witnesses' evidence can't
+# meet them (their speakers have no majority, runner-up or party-group evidence here, and their parties aren't the
+# Westminster party filter), so those side searches are left out when any is set, as they are for named members.
+MEMBER_FILTERS = ("parties", "offices", "genders", "age_bands", "tenure", "majority_bands", "seat_types",
+                  "runner_up_parties", "groups")
+
+
+def about_particular_members(plan: QueryPlan) -> bool:
+    """The question is limited to particular Westminster members: by name, by side, or by who they were on the day."""
+    return bool(plan.speakers or plan.filters.person_ids or plan.compare
+                or any(getattr(plan.filters, f, None) for f in MEMBER_FILTERS))
+
+
 SIDE_CAPS = {False: {"edms": 3, "evidence": 6, "devolved": 8}, True: {"edms": 4, "evidence": 8, "devolved": 12}}
 
 
@@ -374,7 +387,7 @@ class Pipeline:
     def find_evidence(self, plan: QueryPlan, req: AskRequest) -> list[dict[str, Any]]:
         """A few witnesses' answers to committees on the subject (when the reader asks for them): one per session
         and per organisation, so one inquiry or one body does not fill the evidence."""
-        if plan.speakers or plan.filters.person_ids or plan.compare:
+        if about_particular_members(plan):
             return []
         from hansard.sources.committees import Committees
         from hansard.sources.evidence import EvidenceStore, header_witnesses, witness_for
@@ -457,7 +470,7 @@ class Pipeline:
 
     def find_devolved(self, plan: QueryPlan, req: AskRequest) -> list[dict[str, Any]]:
         """A few contributions from each devolved parliament on the subject (when the reader asks for them)."""
-        if plan.speakers or plan.filters.person_ids or plan.compare:
+        if about_particular_members(plan):
             return []
         from hansard.devolved import LEGISLATURES, DevolvedStore, Members
         from hansard.people import person_number
@@ -490,7 +503,7 @@ class Pipeline:
 
     def find_edms(self, plan: QueryPlan, req: AskRequest) -> list[dict[str, Any]]:
         """A few early day motions on the subject, with signatures counted by party on the day (when collected)."""
-        if plan.speakers or plan.filters.person_ids or plan.compare:
+        if about_particular_members(plan):
             return []  # questions about particular members or sides: their own words and votes come first
         from hansard.people import members_by_parliament_id
         from hansard.sources.edms import EdmStore
