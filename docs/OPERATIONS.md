@@ -173,10 +173,10 @@ marked `noindex`. A briefing can be withdrawn with `POST /api/admin/briefings/<i
 page, data and card then return 410 Gone. `GET /api/admin/briefings` lists recent ones.
 
 **Reports and statements.** The corrections and right-of-reply policy (the charity's impartiality policy, section
-7; decision 31) is explained to the people it concerns on `/if-youre-named`. Reports from the form on `/corrections`
+7; decision 31) is explained to the people it concerns on `/named`. Reports from the form on `/corrections`
 (or under a briefing) are listed on the admin page and at `GET /api/admin/reports`, and closed with
 `POST /api/admin/reports/<id>/close`; a public note goes to the corrections log. Statements sent from
-`/if-youre-named` wait as pending: confirm who sent each (usually by writing to their parliament.uk, parliament.scot,
+`/named` wait as pending: confirm who sent each (usually by writing to their parliament.uk, parliament.scot,
 senedd.wales or niassembly.gov.uk address), then publish it as written or decline it with reasons, never editing it,
 with `hansard statements` or the admin page (`/api/admin/statements`, `…/<id>/publish`, `decline`, `update`,
 `withdraw`). Reply within 5 working days and decide within 20. A published statement shows at once beside its item

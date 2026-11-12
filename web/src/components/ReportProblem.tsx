@@ -63,7 +63,7 @@ export function ReportProblem({ briefingId }: { briefingId?: string }) {
         ))}
       </fieldset>
       <p className="muted small">
-        Named in this briefing? You can also <a href={`/if-youre-named${briefingId ? `?item=/b/${briefingId}` : ""}#statement-form`}>
+        Named in this briefing? You can also <a href={`/named${briefingId ? `?item=/b/${briefingId}` : ""}#statement-form`}>
           add a statement in your own words
         </a>{" "}
         beside it.

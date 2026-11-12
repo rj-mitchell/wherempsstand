@@ -60,7 +60,7 @@ jobs:
           curl -fsS http://localhost:8000/ | grep -q "Where MPs Stand"
           curl -fsS http://localhost:8000/methodology | grep -q "Methodology"
           curl -fsS http://localhost:8000/corrections | grep -q "Report a problem"
-          curl -fsS http://localhost:8000/if-youre-named | grep -q "We reply within 5 working days"
+          curl -fsS http://localhost:8000/named | grep -q "We reply within 5 working days"
           curl -fsS http://localhost:8000/api/status | grep -q "latest_record"
           curl -fsS -X POST http://localhost:8000/api/search -H "Content-Type: application/json" \
             -d '{"question": "trial by jury"}' | grep -q '"sources"'

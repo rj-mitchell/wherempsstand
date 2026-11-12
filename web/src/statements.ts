@@ -19,7 +19,7 @@ export interface Statement {
 
 export const MAX_WORDS = 150;
 export const DISCLAIMER = "In their own words. Not checked or endorsed by Where MPs Stand.";
-export const NAMED_PAGE = "/if-youre-named";
+export const NAMED_PAGE = "/named";
 
 /** ?kind= chooses the report form's option, so a link can start the right route: the values the server keeps
  * (correction, complaint, takedown, general), and the routes' short names (wrong, unfair). A statement has its own

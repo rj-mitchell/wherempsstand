@@ -117,7 +117,7 @@ describe("sending a statement", () => {
   });
 
   it("the page has the form, with a trap field for spam bots, and the response times", () => {
-    const html = readFileSync(resolve(__dirname, "../../if-youre-named.html"), "utf8");
+    const html = readFileSync(resolve(__dirname, "../../named.html"), "utf8");
     expect(html).toContain("<h1>If you're named</h1>");
     expect(html).toContain("We reply within 5 working days, and decide within 20 working days.");
     for (const route of ["Something is wrong", "You've been characterised unfairly", "Add a statement in your own words"])
@@ -138,6 +138,6 @@ describe("the report form", () => {
     expect(KIND_ALIASES.unfair).toBe("complaint");
     expect(KIND_ALIASES.takedown).toBe("takedown");
     expect(html).toContain("We reply within 5 working days, and decide within 20 working days.");
-    expect(html).toContain('<a href="/if-youre-named">If you\'re named on this site</a>');
+    expect(html).toContain('<a href="/named">If you\'re named on this site</a>');
   });
 });

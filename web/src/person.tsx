@@ -393,7 +393,7 @@ function Person({ number }: { number: string }) {
           <h2 id="h-statements">{statements.length === 1 ? "A statement" : "Statements"} in their own words</h2>
           <p className="muted small">
             Added by {p.name} or someone acting for them, beside what this site says about them.{" "}
-            <a href="/if-youre-named">If you're named on this site</a>.
+            <a href="/named">If you're named on this site</a>.
           </p>
           {statements.map((s) => (
             <StatementBox key={s.id} s={s} about={s.item !== `/people/${p.number}`} />
@@ -411,7 +411,7 @@ function Person({ number }: { number: string }) {
       <p className="muted small">
         From Hansard, mySociety's member records and the UK Parliament's Members data. See the{" "}
         <a href="/methodology">methodology</a>. If you are {p.name} or act for them, see{" "}
-        <a href="/if-youre-named">If you're named on this site</a> to correct something or add a statement.
+        <a href="/named">If you're named on this site</a> to correct something or add a statement.
       </p>
     </article>
   );
