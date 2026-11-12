@@ -81,14 +81,24 @@ def test_conversion_applies_the_owners_decisions():
     erg = [m for m in ms if m["group"] == "european-research-group"]
     assert [(m["kind"], m["ipsa_years"]) for m in erg] == [("ipsa", "2020–2023")], "a refund alone is no payment"
     assert all(m["party_at_list_date"] == "Conservative" for m in ms), "the party on the list's date (decision 6)"
-    assert not any(m["group"] == "net-zero-scrutiny-group" for m in ms), "pending and coordinated letters left out"
-    pending = convert(_research(), include_pending=True)["memberships"]
-    assert [m["date"] for m in pending if m["group"] == "net-zero-scrutiny-group"] == ["2022-01-02"]
-    sig = next(m for m in ms if m["kind"] == "signatories")
+    # the letter of 2 January 2022, checked against the archived original (12 November 2026), is used; the letter
+    # the group's chair coordinated in 2023 is not
+    assert [m["date"] for m in ms if m["group"] == "net-zero-scrutiny-group"] == ["2022-01-02"]
+    sig = next(m for m in ms if m["kind"] == "signatories" and m["group"] == "socialist-campaign-group")
     assert (sig["document"], sig["publisher_short"], sig["source_url"]) == ("statement", "LabourList",
                                                                               "https://example.org/x")
     assert next(g for g in data["groups"] if g["id"] == "conservative-environment-network")["name"] == \
         "Conservative Environment Network"
+
+
+def test_an_ipsa_claim_described_as_another_groups_is_unclear():
+    from groups_from_research import unclear_claim
+
+    assert unclear_claim("common-sense-group", {"details": "European Research Group"})
+    assert not unclear_claim("european-research-group", {"details": "European Research Group"})
+    assert not unclear_claim("common-sense-group", {"details": "Common Sense Group subscription"})
+    assert not unclear_claim("common-sense-group", {"details": "Pooled research subscription"})
+    assert not unclear_claim("common-sense-group", {"details": "Verge maintenance"})  # no "erg" inside words
 
 
 def test_the_committed_data_file_follows_the_decisions():
@@ -96,8 +106,12 @@ def test_the_committed_data_file_follows_the_decisions():
     ms = data["memberships"]
     assert {m["kind"] for m in ms} == {"members", "signatories", "ipsa"}
     assert not any(m["group"] == "socialist-campaign-group" and m["date"] == "2026-09-29" for m in ms)
-    assert not any(m["group"] == "net-zero-scrutiny-group" for m in ms)
+    nzsg = [m for m in ms if m["group"] == "net-zero-scrutiny-group"]
+    assert len(nzsg) == 20 and {m["date"] for m in nzsg} == {"2022-01-02"}
+    assert all("archive.ph/LaeNS" in m["source_url"] for m in nzsg), "cites the archived original"
     assert not any(m["role_as_published"] and "Fellow" in m["role_as_published"] for m in ms)
+    # the March 2022 batch filed under the Common Sense Group's service but described as the ERG's is left out
+    assert not any(m["group"] == "common-sense-group" and m["kind"] == "ipsa" and m["member_id"] == "1522" for m in ms)
     assert any(m["group"] == "common-sense-group" and m["kind"] == "signatories" for m in ms)
     assert all(m["member_id"] and m["source_url"] and m["publisher"] for m in ms)
     assert any(m["group"] == "socialist-parliamentary-research-group" for m in ms), "kept apart from the SCG"
@@ -296,10 +310,11 @@ def test_ipsa_records_only_when_switched_on(resolver):
     assert on.coverage()["european-research-group"] == {"ipsa": 1}
 
 
-def test_the_setting_is_off_by_default(indexed_settings):
-    assert indexed_settings.section("groups").get("show_ipsa") is False
+def test_the_setting_is_on_and_can_be_switched_off(indexed_settings):
+    # on from 12 November 2026 (owner), on the special purposes basis; switching it off hides IPSA records at once
+    assert indexed_settings.section("groups").get("show_ipsa") is True
     g = Groups.for_settings(indexed_settings, Engine(indexed_settings, today=date(2026, 10, 10)).resolver.con)
-    assert not g.show_ipsa and all(e["kind"] != "ipsa" for items in g.evidence.values() for e in items)
+    assert g.show_ipsa
 
 
 # ---- the filter, the grouping, the evidence summary
@@ -402,7 +417,8 @@ def test_the_api_offers_groups_with_evidence_and_shows_it_on_member_pages(indexe
     app, _, _ = make_app(indexed_settings, tmp_path, auth=False)
     client = TestClient(app)
     offered = {g["id"]: g for g in client.get("/api/meta").json()["party_groups"]}
-    assert "conservative-environment-network" in offered and "european-research-group" not in offered
+    # IPSA records are on (12 November 2026), so a group known only from them is offered too
+    assert "conservative-environment-network" in offered and "european-research-group" in offered
     assert offered["mainstream"]["named"] == "Mainstream"
     page = client.get(f"/api/people/{AHMED.rsplit('/', 1)[1]}?part=core").json()
     lgg = page["party_groups"][0]

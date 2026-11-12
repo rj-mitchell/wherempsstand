@@ -23,9 +23,16 @@ The owner's decisions (12 November 2026), applied here:
 7. (12 November 2026, later) The Common Sense Group's letter of 9 November 2020, reproduced in full by a signatory,
    is used as signatories. The Net Zero Scrutiny Group's letter of 2 January 2022 is held back until it is checked
    against the archived original: its names come from The Week's prose account, not a copy of the letter
-   (``--include-pending`` uses it once the owner has checked it). The letter of 28 June 2023 that the Net Zero
+   (``--include-pending`` uses it once the owner has checked it). The owner checked it on 12 November 2026 against
+   the archived copy of the Telegraph letter (archive.ph/LaeNS): all 20 names match, so it is used, citing the
+   original. The letter of 28 June 2023 that the Net Zero
    Scrutiny Group's chair coordinated is not used: signing a letter a group's chair organised is not evidence of
    belonging to the group, and the reproduction's count of signatories disagrees with its own list.
+
+8. (12 November 2026) IPSA records are used (settings: [groups] show_ipsa), labelled as payments for a group's
+   research service, never as membership, on the basis in the charity's policies/special-category-data.md. A claim
+   whose IPSA service name and the claim's own description name different groups is left out, as unclear (one in
+   the research: a 2021-22 claim under the Common Sense Group's service described as "European Research Group").
 
 Not used: press estimates, Wikipedia, and names the research could not match to a UK Parliament ID.
 """
@@ -50,10 +57,18 @@ EXCLUDED_LISTS = {
     ("net-zero-scrutiny-group", "2023-06-28"): "decision 7: a letter the group's chair coordinated, not the group's; "
                                                "its reproduction's count disagrees with its list",
 }
-# lists held back until checked against the original (decision 7); --include-pending uses them
-PENDING_LISTS = {
-    ("net-zero-scrutiny-group", "2022-01-02"): "pending verification against the original (archived Telegraph "
-                                               "letter): names from The Week's prose account",
+# lists held back until checked against the original (decision 7); --include-pending uses them. None at present:
+# the Net Zero Scrutiny Group's letter of 2 January 2022 was checked by the owner on 12 November 2026.
+PENDING_LISTS: dict[tuple[str, str], str] = {}
+# words that name a group in an IPSA claim's own description, to catch claims filed under one group's service but
+# described as another's (decision 8)
+IPSA_NAMES = {
+    "european-research-group": ("european research group", "erg"),
+    "common-sense-group": ("common sense group",),
+    "northern-research-group": ("northern research group",),
+    "socialist-parliamentary-research-group": ("socialist parliamentary research group",),
+    "labour-movement-for-europe": ("labour movement for europe",),
+    "conservative-union-research-group": ("conservative union research group",),
 }
 GROUP_FIELDS = ("id", "party", "description", "description_source", "aliases", "notes")
 
@@ -77,6 +92,15 @@ def publisher_short(lst: dict[str, Any]) -> str:
     if "own website" in (lst.get("made_public_by") or "") or "own website" in lst.get("publisher", ""):
         return "its website"
     return short_name(lst.get("publisher") or "")
+
+
+def unclear_claim(group: str, claim: dict[str, Any]) -> bool:
+    """A claim filed under this group's service whose own description names a different group (decision 8)."""
+    details = (claim.get("details") or "").lower()
+    names_other = any(re.search(rf"\b{re.escape(n)}\b", details) for other, ns in IPSA_NAMES.items() if other != group
+                      for n in ns)
+    names_own = any(re.search(rf"\b{re.escape(n)}\b", details) for n in IPSA_NAMES.get(group, ()))
+    return names_other and not names_own
 
 
 def claim_years(claims: list[dict[str, Any]]) -> tuple[str, str] | None:
@@ -124,7 +148,11 @@ def convert(research: list[dict[str, Any]], include_pending: bool = False) -> di
                          "role_as_published": role, "party_at_list_date": m.get("party_at_list_date"),
                          "match": m.get("match")}
                 if kind == "ipsa":
-                    years = claim_years(m.get("ipsa_claims") or [])
+                    claims = [c for c in m.get("ipsa_claims") or [] if not unclear_claim(g["id"], c)]
+                    if len(claims) < len(m.get("ipsa_claims") or []):
+                        dropped.setdefault("IPSA claims described as another group's (unclear)", 0)
+                        dropped["IPSA claims described as another group's (unclear)"] += 1
+                    years = claim_years(claims)
                     if years is None:
                         continue
                     entry["ipsa_years"] = years[0] if years[0] == years[1] else f"{years[0]}–{years[1]}"

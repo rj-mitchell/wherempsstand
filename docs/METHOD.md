@@ -106,8 +106,10 @@ the README on 6 November 2026.
   belongs to (from one general election to the next); a declaration for the whole of its Parliament. Questions can be
   limited to, or grouped by, groups there is evidence for (`groups`; `group_by` "group": two named groups compared are
   both searched and grouped; one compared with other members groups everyone). IPSA's records of MPs paying for a
-  group's pooled research service are kept as their own kind and used only when `[groups] show_ipsa` is on, which it
-  is not until the charity has legal advice.
+  group's pooled research service are their own kind, used when `[groups] show_ipsa` is on (it is, from 12 November
+  2026): labelled "paid for the group's research service (IPSA records, years)", never membership, with no amounts.
+  A claim whose IPSA service and own description name different groups is left out as unclear (twelve claims of
+  March 2022 filed under the Common Sense Group's service but described as the European Research Group's).
 
 ## Ranking: recency and role weighting
 
