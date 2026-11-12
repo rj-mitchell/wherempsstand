@@ -11,7 +11,7 @@ relevance  = w * bm25 / max(bm25) + (1 - w) * calibrated(cosine)
              weak set. A retriever that missed a record adds 0.
 recency    = floor + (1 - floor) * 0.5 ** (age_years / half_life)
              slider s in [0, 1]: s = 0 -> recency = 1 for every record;
-             otherwise half_life = min_half_life_years / s (s = 1 -> 2 years)
+             otherwise half_life = min_half_life_years / s (s = 1 -> 6 months; the default s = 0.25 -> 2 years)
 authority  = 1 + (W - 1) * m        W = role slider in [1.0, 2.0]
              m = strongest office the speaker held on the record date:
              government minister, shadow minister or select committee chair
@@ -32,11 +32,11 @@ from typing import Any
 
 @dataclass
 class RankParams:
-    recency: float = 0.5
+    recency: float = 0.25
     role_weight: float = 1.5
     bm25_weight: float = 0.5
     recency_floor: float = 0.35
-    min_half_life_years: float = 2.0
+    min_half_life_years: float = 0.5
     m_gov_match: float = 1.0
     m_gov_other: float = 0.5
     m_shadow_match: float = 1.0  # the opposition's position counts as much as the government's

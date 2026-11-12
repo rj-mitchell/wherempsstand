@@ -162,6 +162,9 @@ def record_source(n: int, r: dict[str, Any], facets: set[str] | bool = False, gr
         "group": r.get("compare_side") or group_label(r.get("speaker"), group_by),
         "text": r["text"],
         "context": r.get("context"),
+        # a written question's answer, for the reader. Not one of the blocks the model is given: it would be cited
+        # as the questioner's words (the answer, when chosen, is its own source with the question as its context)
+        "replies": r.get("replies"),
         "ranking": r.get("ranking"),
         "occasions": r.get("occasions"),
         "declared": declared_interest(r["text"]),

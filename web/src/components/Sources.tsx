@@ -336,6 +336,18 @@ export function SourceDrawer({
                 )}
               </p>
             ))}
+            {source.record_type === "question" &&
+              (source.replies ?? []).map((r) => (
+                <blockquote className="question reply" key={r.record_id}>
+                  <p>
+                    <strong>Answer{r.date !== source.date ? `, ${fmtDate(r.date)}` : ""}:</strong>{" "}
+                    <Attribution sp={r.speaker} raw={r.speaker_name_raw} />
+                  </p>
+                  {r.text.split("\n\n").map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
+                </blockquote>
+              ))}
           </section>
         )}
 

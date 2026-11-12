@@ -52,7 +52,10 @@ describe("filter chips", () => {
 describe("controls", () => {
   it("describes the recency slider in plain words", () => {
     expect(recencyLabel(0)).toMatch(/Off/);
-    expect(recencyLabel(1)).toBe("Half-life 2.0 years");
+    expect(recencyLabel(1)).toBe("Half-life 6 months");
+    expect(recencyLabel(0.25)).toBe("Half-life 2.0 years");
+    expect(recencyLabel(0.5)).toBe("Half-life 1.0 year");
+    expect(recencyLabel(1, 2)).toBe("Half-life 2.0 years");
   });
 
   it("changes the role weighting", () => {
@@ -162,6 +165,18 @@ describe("source drawer", () => {
     expect(screen.getByRole("link", { name: /Official Hansard/ })).toHaveAttribute("href", source.official_url);
     expect(screen.getByRole("link", { name: /TheyWorkForYou/ })).toHaveAttribute("href", source.twfy_url);
     expect(screen.getByText(/Open Parliament Licence/)).toBeInTheDocument();
+  });
+
+  it("shows a written question's answer under it", () => {
+    const q: SourceCard = {
+      ...source,
+      record_type: "question",
+      text: "To ask the Chancellor what assessment he has made of capital allowances.",
+      replies: [{ record_id: "x.r0", date: source.date, text: "Information on the costs is published by HMRC.", speaker_name_raw: "David Gauke" }],
+    };
+    render(<SourceDrawer source={q} quotes={[]} onClose={() => {}} />);
+    expect(screen.getByText("Answer:")).toBeInTheDocument();
+    expect(screen.getByText("Information on the costs is published by HMRC.")).toBeInTheDocument();
   });
 
   it("shows a speaker's own declaration of an interest", () => {

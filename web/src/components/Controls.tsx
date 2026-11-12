@@ -3,17 +3,25 @@ import type { Settings } from "../types";
 interface Props {
   settings: Settings;
   onChange: (s: Settings) => void;
+  minHalfLife?: number;
 }
 
-export function recencyLabel(v: number): string {
+// The shortest half-life (slider at full), as config/settings.toml sets it: the server sends it with the defaults.
+export const MIN_HALF_LIFE_YEARS = 0.5;
+
+export function recencyLabel(v: number, minHalfLife: number = MIN_HALF_LIFE_YEARS): string {
   if (v <= 0) return "Off — all years ranked on relevance alone";
-  const halfLife = 2 / v;
-  return `Half-life ${halfLife >= 10 ? Math.round(halfLife) : halfLife.toFixed(1)} years`;
+  const halfLife = minHalfLife / v;
+  if (halfLife < 1) {
+    const months = Math.round(halfLife * 12);
+    return `Half-life ${months} month${months === 1 ? "" : "s"}`;
+  }
+  return `Half-life ${halfLife >= 10 ? Math.round(halfLife) : halfLife.toFixed(1)} year${halfLife === 1 ? "" : "s"}`;
 }
 
 // The kind of answer (executive summary, chronological briefing or sources only) is chosen under the question box,
 // where it can be seen; these are the finer settings of what is searched and how it is ranked.
-export function Controls({ settings, onChange }: Props) {
+export function Controls({ settings, onChange, minHalfLife }: Props) {
   const set = (patch: Partial<Settings>) => onChange({ ...settings, ...patch });
   const scope = (patch: Partial<Settings["scope"]>) => set({ scope: { ...settings.scope, ...patch } });
   return (
@@ -21,7 +29,7 @@ export function Controls({ settings, onChange }: Props) {
       <div className="slider">
         <span>
           <label htmlFor="recency">Recency bias</label>
-          <output htmlFor="recency">{recencyLabel(settings.recency)}</output>
+          <output htmlFor="recency">{recencyLabel(settings.recency, minHalfLife)}</output>
         </span>
         <input
           id="recency"
@@ -31,7 +39,7 @@ export function Controls({ settings, onChange }: Props) {
           step={0.05}
           value={settings.recency}
           onChange={(e) => set({ recency: Number(e.target.value) })}
-          aria-valuetext={recencyLabel(settings.recency)}
+          aria-valuetext={recencyLabel(settings.recency, minHalfLife)}
         />
         <small className="muted">Older records are down-weighted but never dropped.</small>
       </div>

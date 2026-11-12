@@ -419,8 +419,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             "archive_start": settings.archive_start.isoformat(),
             "index": idx,
             "last_sync": _public_run(runs[0]) if runs else None,
-            "defaults": {"recency": settings.ranking.get("default_recency", 0.5),
-                         "role_weight": settings.ranking.get("default_role_weight", 1.5)},
+            "defaults": {"recency": settings.ranking.get("default_recency", 0.25),
+                         "role_weight": settings.ranking.get("default_role_weight", 1.5),
+                         "min_half_life_years": settings.ranking.get("min_half_life_years", 0.5)},
             "attribution": ATTRIBUTION,
             "donate_url": donate_url(settings),
         }

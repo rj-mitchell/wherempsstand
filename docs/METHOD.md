@@ -83,7 +83,7 @@ Ranking is soft. Nothing is excluded unless you set a filter.
 score = relevance × recency × authority
 
 relevance = ½ · BM25/max(BM25)  +  ½ · calibrated cosine similarity
-recency   = 0.35 + 0.65 · 0.5^(age / half-life)           (slider: off … half-life 2 years)
+recency   = 0.35 + 0.65 · 0.5^(age / half-life)           (slider: off … half-life 6 months; default 2 years)
 authority = 1 + (W − 1) · m                               (slider W: 1.0× … 2.0×)
 ```
 

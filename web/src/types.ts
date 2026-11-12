@@ -79,6 +79,8 @@ export interface SourceCard {
   speaker?: Speaker | null;
   speaker_name_raw?: string | null;
   context?: string | null;
+  // a written question's answer, shown under it (not given to the model)
+  replies?: { record_id: string; date: string; text: string; speaker_name_raw?: string | null; speaker?: Speaker | null }[] | null;
   ranking?: Ranking | null;
   group?: string;
   // divisions
@@ -325,7 +327,7 @@ export interface Meta {
   archive_start: string;
   index: { passages: number; vectors: number };
   last_sync: { finished_at: string | null; status: string } | null;
-  defaults: { recency: number; role_weight: number };
+  defaults: { recency: number; role_weight: number; min_half_life_years?: number };
   attribution: { text: string; url: string }[];
   donate_url?: string | null;
 }

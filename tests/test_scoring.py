@@ -39,11 +39,20 @@ def test_aggressive_decay_never_drops_a_much_stronger_old_match():
 
 
 def test_recency_factor_properties():
-    p = params(recency=0.5)  # half-life 4 years
+    p = params(recency=0.25)  # the default: half-life 2 years
     assert recency_factor(TODAY, p) == pytest.approx(1.0)
-    four_years = date(2022, 10, 1)
-    assert recency_factor(four_years, p) == pytest.approx(0.35 + 0.65 * 0.5, abs=0.005)
+    two_years = date(2024, 10, 1)
+    assert recency_factor(two_years, p) == pytest.approx(0.35 + 0.65 * 0.5, abs=0.005)
     assert recency_factor(date(2012, 1, 1), params(recency=0.0)) == 1.0
+
+
+def test_the_slider_reaches_a_six_month_half_life():
+    # 12 November 2026: testers wanted recent contributions to lead much more strongly than a 2-year half-life allowed
+    p = params(recency=1.0)
+    six_months = date(2026, 4, 1)
+    assert recency_factor(six_months, p) == pytest.approx(0.35 + 0.65 * 0.5, abs=0.01)
+    assert recency_factor(date(2024, 10, 1), p) < 0.4  # two years old: close to the floor
+    assert RankParams().recency == 0.25 and RankParams().min_half_life_years == 0.5
 
 
 def test_role_weight_one_leaves_ranking_unchanged():

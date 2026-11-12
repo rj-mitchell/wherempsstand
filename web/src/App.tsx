@@ -80,17 +80,25 @@ export function examplesFor(day: Date): string[] {
   return EXAMPLE_SETS[Math.floor(day.getTime() / 86_400_000) % EXAMPLE_SETS.length];
 }
 
-// Settings saved before this version searched the devolved parliaments and committee evidence only on request;
-// they now search everywhere by default, so older saved settings are brought up to date once.
-const SETTINGS_VERSION = 2;
+// Settings saved before version 2 searched the devolved parliaments and committee evidence only on request; they now
+// search everywhere by default. Version 3 (12 November 2026): the recency slider's scale changed (its shortest
+// half-life went from 2 years to 6 months), so a saved value is converted to keep the half-life the reader chose,
+// and the old default (4 years) becomes the new default (2 years). Older saved settings are brought up to date once.
+const SETTINGS_VERSION = 3;
+const OLD_DEFAULT_RECENCY = 0.5;
 
 function loadSettings(defaults?: Meta["defaults"]): Settings {
   try {
     const saved = localStorage.getItem("hgpt.settings");
     if (saved) {
       const s = JSON.parse(saved) as Settings;
-      if ((s.version ?? 1) < SETTINGS_VERSION) {
-        return { ...s, version: SETTINGS_VERSION, scope: { ...s.scope, devolved: true, evidence: true } };
+      const version = s.version ?? 1;
+      if (version < SETTINGS_VERSION) {
+        const up = { ...s, version: SETTINGS_VERSION };
+        if (version < 2) up.scope = { ...s.scope, devolved: true, evidence: true };
+        // half-life was 2 / s years, and is now 0.5 / s: the same half-life is a quarter of the old value
+        up.recency = s.recency === OLD_DEFAULT_RECENCY ? defaults?.recency ?? 0.25 : s.recency / 4;
+        return up;
       }
       return s;
     }
@@ -100,7 +108,7 @@ function loadSettings(defaults?: Meta["defaults"]): Settings {
   return {
     version: SETTINGS_VERSION,
     mode: "summary",
-    recency: defaults?.recency ?? 0.5,
+    recency: defaults?.recency ?? 0.25,
     roleWeight: defaults?.role_weight ?? 1.5,
     scope: { written: true, pbc: true, votes: true, edms: true, devolved: true, evidence: true },
   };
@@ -492,7 +500,7 @@ export default function App() {
   const drawerSource = drawerTurn?.sources.find((s) => s.n === drawer?.h.source) ?? null;
 
   const settingsPanel = showControls && (
-    <Controls settings={settings} onChange={setSettings} />
+    <Controls settings={settings} onChange={setSettings} minHalfLife={meta?.defaults.min_half_life_years} />
   );
   // On the home page the settings open under the question box; under a briefing the box is pinned to the foot of
   // the screen, so they open just above it, inside the pinned area.

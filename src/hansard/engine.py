@@ -452,7 +452,10 @@ class Engine:
         missing = [s.candidate.best_passage_id for s in scored
                    if s.candidate.best_passage_id and s.candidate.best_passage_id not in passages]
         passages.update(self.index.passages_for(missing))
-        profiles = self.resolver.profiles([(rid, rows[rid]["xml_person_id"], rows[rid]["date"]) for rid in rows])
+        replies = self.replies_for([rows[rid] for rid in rows if rows[rid].get("record_type") == "question"])
+        profiles = self.resolver.profiles([(rid, rows[rid]["xml_person_id"], rows[rid]["date"]) for rid in rows] +
+                                          [(r["record_id"], r["xml_person_id"], r["date"])
+                                           for rs in replies.values() for r in rs])
         out = []
         for s in scored:
             rec = rows.get(s.candidate.record_id)
@@ -470,5 +473,30 @@ class Engine:
                 "speaker": prof.to_dict() if prof else None,
                 "ranking": s.breakdown(),
                 "occasions": s.candidate.data.get("occasions"),
+                **({"replies": [{"record_id": r["record_id"], "date": r["date"].isoformat(), "text": r["text"],
+                                 "speaker_name_raw": r.get("speaker_name_raw"),
+                                 "speaker": p.to_dict() if (p := profiles.get(r["record_id"])) else None}
+                                for r in replies[s.candidate.record_id]]}
+                   if replies.get(s.candidate.record_id) else {}),
             })
+        return out
+
+    def replies_for(self, questions: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+        """The answers to these written questions, by question record ID. A written answer is filed beside its
+        question, in the same source file and on the same date, with the question's ID ending .rN instead of .qN
+        (parse.xml_stream), so it is read from the same blocks. Shown with the question so a reader sees what was
+        said in reply, even when the answer itself wasn't chosen as a source."""
+        by_part: dict[tuple[str, int], list[dict[str, Any]]] = {}
+        for q in questions:
+            if q.get("thread_id") and q.get("date") is not None:
+                by_part.setdefault((q["source"], q["date"].year), []).append(q)
+        out: dict[str, list[dict[str, Any]]] = {}
+        for (part, year), qs in by_part.items():
+            wanted = {f"{q['thread_id']}.r{i}": q["record_id"] for q in qs for i in range(4)}
+            for rec in read_records(self.settings.parquet_dir, part, year, set(wanted), {q["date"] for q in qs},
+                                    {q["source_key"] for q in qs}):
+                if rec.get("record_type") == "answer" and rec["record_id"] in wanted:
+                    out.setdefault(wanted[rec["record_id"]], []).append(rec)
+        for rs in out.values():
+            rs.sort(key=lambda r: r["record_id"])
         return out

@@ -2421,6 +2421,14 @@ legend,
   text-align: start;
 }
 
+/* a written question's answer, under the question: set apart by a rule, not italic, so it reads as the reply */
+.verbatim .question.reply {
+  margin-block-start: 1em;
+  padding-inline-start: 0.9em;
+  border-inline-start: 2px solid var(--rule);
+  font-style: normal;
+}
+
 .verbatim p {
   text-indent: 0;
 }
