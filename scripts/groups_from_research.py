@@ -88,10 +88,16 @@ def document(title: str) -> str:
 
 
 def publisher_short(lst: dict[str, Any]) -> str:
-    """'LabourList (reproducing ...)' -> 'LabourList'; a group's own site -> 'its website'."""
-    if "own website" in (lst.get("made_public_by") or "") or "own website" in lst.get("publisher", ""):
+    """Who published the copy used, for the label: 'LabourList (reproducing ...)' -> 'LabourList'; the group's own
+    site -> 'its website'; a member's site -> 'Sir Edward Leigh MP's website'. Decided on the publisher alone: the
+    notes on who made a list public can mention other websites."""
+    publisher = lst.get("publisher") or ""
+    if re.search(r"(?i)\b(?:its|the group's) own website\b", publisher):
         return "its website"
-    return short_name(lst.get("publisher") or "")
+    member_site = re.match(r"(.+?\bMP)'s website\b", publisher)
+    if member_site:
+        return f"{member_site.group(1)}'s website"
+    return short_name(publisher)
 
 
 def unclear_claim(group: str, claim: dict[str, Any]) -> bool:

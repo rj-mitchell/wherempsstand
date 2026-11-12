@@ -132,6 +132,14 @@ def test_briefings_can_include_the_devolved_parliaments(indexed_settings):
         dev = [s for s in on if s.kind == "devolved"]
         assert len(dev) == 1 and dev[0].meta["group"] == "Scottish Parliament"
         assert "not of the UK Parliament" in dev[0].blocks[0]
+        # a question limited by who Westminster members were on the day (majority, runner-up, party group, party...)
+        # can't be met by devolved members: left out, as for named members (found on the live site, 13 November 2026)
+        import dataclasses
+        for f in ({"majority_bands": ["marginal"]}, {"runner_up_parties": ["reform"]},
+                  {"groups": ["tribune-group"]}, {"parties": ["labour"]}):
+            narrowed = dataclasses.replace(plan, filters=dataclasses.replace(plan.filters, **f))
+            _, _, got = p.find(narrowed, AskRequest(question=plan.question))
+            assert not [s for s in got if s.kind in ("devolved", "evidence", "edm")], f
     finally:
         for suffix in ("", "-wal", "-shm"):
             path.with_name(path.name + suffix).unlink(missing_ok=True)
