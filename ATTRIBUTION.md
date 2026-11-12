@@ -73,8 +73,9 @@ groups. Membership lists found by AI web search are left out; contact details ar
 
 ## Gender and date of birth
 
-Members' gender and constituency election results (majorities, votes cast, by-elections) come from the UK
-Parliament [Members API](https://members-api.parliament.uk/) (Open Parliament Licence v3.0). General election
+Members' gender and constituency election results (majorities, votes cast, the party that came second, by-elections)
+come from the UK Parliament [Members API](https://members-api.parliament.uk/) (Open Parliament Licence v3.0), the
+runner-up from each result's own candidates. General election
 results for 1997, 2001 and 2005 come from the House of Commons Library's
 [general election results 1918–2019](https://commonslibrary.parliament.uk/research-briefings/cbp-8647/) (CBP-8647,
 Open Parliament Licence v3.0), and by-election results for 2001 to 2010 from its research papers

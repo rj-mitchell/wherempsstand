@@ -75,6 +75,23 @@ the README on 6 November 2026.
   Each source's own lookups link small areas to both sets of seats. That gives about 315 city, 225 town and 110 rural seats in each set. Each source label names the urban area and its size. The rules and source URLs are in
   `scripts/build_geo_lookups.py`.
 
+* **Seats on the day.** Each MP's source carries the result of the most recent election in their seat before the
+  day they spoke (a general election or a by-election): their majority (as votes and as a share of votes cast,
+  banded marginal under 10%, 10% to 20%, safe over 20%), the party that **came second** with its votes, and
+  whether they were still in their first Parliament. Questions can be limited to, or grouped by, any of these
+  (`majority_bands`, `runner_up_parties`, `tenure`; `group_by` "majority", "runner_up", "tenure"), checked against
+  each record's own date. Who came second is that election's result, not a prediction: no polls or projections are
+  used, and a question about seats "threatened by" or "facing" a party is read as seats where it came second, and
+  shown as such ([DECISIONS.md](DECISIONS.md), 29). Results from 2010 come from the Members API: the list of a
+  seat's results gives no candidates, so each result's own page is read once for its runner-up, within the same
+  polite, budgeted refresh, and the copy saved with the code (`data_static/elections/results_snapshot.json`, made
+  by `scripts/snapshot_election_results.py`) supplies any the server has not fetched yet. The general elections of
+  1997–2005 and the by-elections of 1997–2010 come from the Commons Library and Information Office files, which give
+  the runner-up too, except where the Library adds smaller parties together as "Other". Party names are mapped to
+  the site's party ids: the Brexit Party is Reform UK under its earlier name. Where who came second cannot be known
+  (a tie for second, a single candidate, "Other"), it is shown as not known, never guessed or taken from an earlier
+  election.
+
 ## Ranking: recency and role weighting
 
 Ranking is soft. Nothing is excluded unless you set a filter.
