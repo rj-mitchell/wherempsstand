@@ -77,6 +77,24 @@ def second_label(r: dict[str, Any] | None) -> str | None:
     return f"second at the {r['election']}: {name}{over}"
 
 
+GROUP_EVIDENCE = {"members": "listed by the group", "signatories": "signed its {document} of {date}",
+                  "ipsa": "paid for its research service (IPSA records)", "declared": "said so in Parliament on {date}"}
+
+
+def party_groups_label(groups: list[dict[str, Any]] | None) -> str:
+    """e.g. 'party groups on the published evidence for this Parliament: Labour Growth Group (signed its letter of
+    30 July 2024)'; or that none was found, which is not evidence of not belonging."""
+    if not groups:
+        return "no published evidence of a party group in this Parliament"
+    parts = []
+    for g in groups:
+        how = "; ".join(dict.fromkeys(GROUP_EVIDENCE[e["kind"]].format(document=e.get("document") or "statement",
+                                                                      date=_fmt_date(e["date"]))
+                                      for e in g.get("evidence") or []))
+        parts.append(f"{g['name']} ({how})")
+    return "party groups on the published evidence for this Parliament: " + ", ".join(parts)
+
+
 def speaker_label(r: dict[str, Any], facets: set[str] | bool = False) -> str:
     """e.g. 'Hilary Benn (Labour; MP for Leeds Central, city seat (West Yorkshire urban area, 1.9m people),
     Yorkshire and The Humber; role on this date: Chair, Exiting the European Union Committee)'.
@@ -100,6 +118,8 @@ def speaker_label(r: dict[str, Any], facets: set[str] | bool = False) -> str:
             bits.append(majority_label(sp.get("majority_then")) or "majority not known")
         if "runner_up" in facets and sp.get("house") == "commons":
             bits.append(second_label(sp.get("runner_up_then")) or "party second at the last election not known")
+        if "group" in facets:
+            bits.append(party_groups_label(sp.get("party_groups")))
     if sp.get("party"):
         bits.append(sp["party"])
     if sp.get("constituency"):
@@ -117,7 +137,7 @@ def speaker_label(r: dict[str, Any], facets: set[str] | bool = False) -> str:
     return f"{name} ({'; '.join(bits)})" if bits else name
 
 
-def group_label(speaker: dict[str, Any] | None, group_by: str = "role") -> str:
+def group_label(speaker: dict[str, Any] | None, group_by: str = "role", only_groups: list[str] | None = None) -> str:
     """The heading a source is listed under: the speaker's role group, or their gender, age, tenure, majority or the
     party that came second in their seat."""
     if group_by == "tenure":
@@ -127,6 +147,12 @@ def group_label(speaker: dict[str, Any] | None, group_by: str = "role") -> str:
         band = demographic_group(speaker, "majority")
         return (MAJORITY_BAND_LABEL[band][0].upper() + MAJORITY_BAND_LABEL[band][1:] if band in MAJORITY_BAND_LABEL
                 else "Majority not known")
+    if group_by == "group":
+        key = demographic_group(speaker, "group", only_groups)
+        if key == "none":
+            return "No published evidence of these groups" if only_groups else "No published evidence of a group"
+        names = {g["id"]: g["name"] for g in (speaker or {}).get("party_groups") or []}
+        return " and ".join(names.get(k, k) for k in key.split("+"))
     if group_by == "runner_up":
         name = runner_up_label(speaker, heading=True)
         return f"Where {name} came second" if name else "Runner-up not known"
@@ -153,7 +179,8 @@ def declared_interest(text: str) -> str | None:
     return " ".join(m.group(0).split()) if m else None
 
 
-def record_source(n: int, r: dict[str, Any], facets: set[str] | bool = False, group_by: str = "role") -> Source:
+def record_source(n: int, r: dict[str, Any], facets: set[str] | bool = False, group_by: str = "role",
+                  only_groups: list[str] | None = None) -> Source:
     ref = f"col. {r['colnum']}" if r.get("colnum") else (f"UIN {r['uin']}" if r.get("uin") else "")
     heading = r.get("heading") or r.get("minor_heading") or r.get("major_heading") or ""
     kind_label = {"question": "Written question", "answer": "Written answer", "statement": "Written statement"}.get(
@@ -183,7 +210,7 @@ def record_source(n: int, r: dict[str, Any], facets: set[str] | bool = False, gr
         "twfy_url": r["twfy_url"],
         "speaker": r.get("speaker"),
         "speaker_name_raw": r.get("speaker_name_raw"),
-        "group": r.get("compare_side") or group_label(r.get("speaker"), group_by),
+        "group": r.get("compare_side") or group_label(r.get("speaker"), group_by, only_groups),
         "text": r["text"],
         "context": r.get("context"),
         # a written question's answer, for the reader. Not one of the blocks the model is given: it would be cited
@@ -281,8 +308,9 @@ def build_sources(records: list[dict[str, Any]], divisions: list[dict[str, Any]]
                   facets: set[str] | bool = False, group_by: str = "role",
                   edms: list[dict[str, Any]] | None = None,
                   devolved: list[dict[str, Any]] | None = None,
-                  evidence: list[dict[str, Any]] | None = None) -> list[Source]:
-    out = [record_source(i, r, facets, group_by) for i, r in enumerate(records, 1)]
+                  evidence: list[dict[str, Any]] | None = None, only_groups: list[str] | None = None
+                  ) -> list[Source]:
+    out = [record_source(i, r, facets, group_by, only_groups) for i, r in enumerate(records, 1)]
     out += [division_source(len(out) + i, d) for i, d in enumerate(divisions, 1)]
     out += [edm_source(len(out) + i, e) for i, e in enumerate(edms or [], 1)]
     out += [devolved_source(len(out) + i, d) for i, d in enumerate(devolved or [], 1)]

@@ -416,6 +416,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             "region_groups": settings.regions,
             "portfolios": PORTFOLIOS,
             "parties": [{"id": i, "name": n} for i, n in p.party_choices()],
+            # party groups there is published evidence for (a group with none is not offered)
+            "party_groups": p.engine.groups().offered(),
             "answers_enabled": p.has_model(),
             "model": settings.answer.get("model"),
             "archive_start": settings.archive_start.isoformat(),
@@ -574,7 +576,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         else:
             from hansard.rag.query_parse import parse_offline
 
-            plan = parse_offline(body.question, settings.regions, p.today)
+            plan = parse_offline(body.question, settings.regions, p.today, p.group_aliases())
             p._set_comparison(plan, AskRequest(question=body.question, compare=body.compare))
         req = AskRequest(question=body.question, mode=body.mode, recency=body.recency, role_weight=body.role_weight,
                          scope=Scope(**body.scope.model_dump()))
@@ -1518,6 +1520,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                           + (f", {m['party']}" if m["party"] else "")}
         except (OSError, ValueError):
             pass
+        # party groups and caucuses, with the evidence for each, by Parliament
+        page = {**page, "party_groups": get_pipeline().engine.groups().all_for(pid)}
         return page
 
     def person_activity(number: int) -> dict[str, Any]:

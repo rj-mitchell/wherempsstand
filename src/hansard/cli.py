@@ -280,6 +280,22 @@ def _save_vector_settings(settings: Settings, rec: dict) -> str:
         "vector_nprobes": rec["nprobes"], "vector_refine_factor": rec["refine_factor"] or 0}}))
 
 
+@app.command("groups-scan")
+def groups_scan(everything: bool = typer.Option(False, "--all", help="read the whole record again (once, or after "
+                                                                     "the rules change), not just since the last scan"),
+                report: Path = typer.Option(None, help="write every declaration found to this Markdown file, for a "
+                                                       "person to check")):
+    """Find members' own statements in Parliament that they belong to a party group or caucus ("I am a member of the
+    European Research Group"). Each update does this for new records; --all reads the whole archive."""
+    from hansard.groups import declarations_report, scan_declarations
+
+    settings = _settings()
+    typer.echo(json.dumps(scan_declarations(settings, everything=everything), indent=1))
+    if report:
+        report.write_text(declarations_report(settings), encoding="utf-8")
+        typer.echo(f"report written to {report}")
+
+
 @app.command("index-status")
 def index_status(text: bool = typer.Option(False, "--text", help="print only the sentence for the monthly report")):
     """How many passages are searched by meaning now, against the number when the index was last rebuilt
@@ -833,8 +849,9 @@ def eval_plans(model: str = typer.Option(None, help="model that reads the questi
 
     settings = _settings()
     today, qs = _eval_setup(questions, only)
-    parties = Pipeline(settings).parties()
-    res = run_plans(settings, qs, today, _client(), parties, model, effort)
+    pipeline = Pipeline(settings)
+    res = run_plans(settings, qs, today, _client(), pipeline.parties(), model, effort,
+                    party_groups=pipeline.group_choices(), group_aliases=pipeline.group_aliases())
     path = save(out, f"plans-{res['model']}", res)
     typer.echo(json.dumps(res["summary"], indent=1))
     typer.echo(f"saved {path}")

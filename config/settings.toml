@@ -169,3 +169,11 @@ enabled = true
 file = "topics.toml"
 max_per_run = 4             # at most this many rewrites per sync (the sync runs twice a day)
 unchanged_overlap = 0.8     # not rewritten when this share of the sources is the same as last time
+
+[groups]
+# Party groups and caucuses (src/hansard/groups.py; data_static/groups/groups.json). A member counts as in a group on
+# published evidence only: the group's own list, a letter or statement they signed, or their own words in Parliament.
+# show_ipsa: also show (and filter, group and count by) IPSA's records of MPs' offices paying for a group's pooled
+# research service, labelled as that and never as membership. It stays off until the charity has legal advice on the
+# basis for it (the charity's policies/special-category-data.md, section 3).
+show_ipsa = false

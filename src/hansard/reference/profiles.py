@@ -168,6 +168,8 @@ class SpeakerProfile:
     birth_date: date | None = None
     birth_precision: str | None = None    # day | month | year
     seat: dict[str, Any] = field(default_factory=dict)  # majority then and now, first term (Commons only)
+    # party groups and caucuses on the date, each with its evidence (hansard.groups)
+    party_groups: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def office_titles(self) -> list[str]:
@@ -204,6 +206,7 @@ class SpeakerProfile:
             "age_approximate": self.age_approximate if self.age is not None else None,
             "age_band": age_band(self.age),
             **self.seat,
+            "party_groups": self.party_groups,
         }
 
 
@@ -213,6 +216,7 @@ class ProfileResolver:
     def __init__(self, reference_dir: Path, con: duckdb.DuckDBPyConnection | None = None):
         self.con = shared(con)
         attach_reference(self.con, reference_dir)
+        self.groups = None  # hansard.groups.Groups, when the caller has one: party groups on the date
 
     def canonical_person(self, xml_id: str | None) -> str | None:
         if not xml_id:
@@ -267,6 +271,8 @@ class ProfileResolver:
             prof.other_names = [n for n in names.get(prof.person_id, []) if n != prof.name]
             if prof.house == "commons":
                 prof.seat = self.seat_facts(prof.person_id, prof.on)
+            if self.groups is not None:
+                prof.party_groups = self.groups.on(prof.person_id, prof.on)
         return out
 
     # ---- seats, majorities and first terms ---------------------------------------------------------------

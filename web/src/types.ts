@@ -32,6 +32,31 @@ export interface Speaker {
   /** the site's party id of the party that came second in their seat at the last election before the date */
   runner_up?: string | null;
   runner_up_then?: RunnerUp | null;
+  /** party groups and caucuses on the date, on published evidence for that Parliament */
+  party_groups?: PartyGroup[];
+}
+
+/** One piece of evidence that a member belongs to a party group: a list, a letter they signed, IPSA records of a
+ * research service their office paid for (only when the site shows those), or their own words in Parliament. */
+export interface GroupEvidence {
+  kind: "members" | "signatories" | "ipsa" | "declared";
+  date: string;
+  parliament: string;
+  label: string;
+  url: string | null;
+  archive_url?: string | null;
+  publisher?: string | null;
+  role?: string | null;
+  sentence?: string;
+  record_id?: string;
+  house?: string | null;
+  note?: string;
+}
+
+export interface PartyGroup {
+  id: string;
+  name: string;
+  evidence: GroupEvidence[];
 }
 
 /** The party that came second at an election: its name then, the site's id for it, its votes, the winner's majority over it. */
@@ -156,6 +181,8 @@ export interface Filters {
   seat_types?: string[];
   /** MPs in seats where one of these parties came second at the last election before the day they spoke */
   runner_up_parties?: string[];
+  /** members of these party groups, on published evidence for the Parliament they spoke in */
+  groups?: string[];
 }
 
 export interface Plan {
@@ -168,7 +195,7 @@ export interface Plan {
   unresolved_speakers: string[];
   interpretation: string;
   parser: string;
-  group_by?: "role" | "gender" | "age" | "tenure" | "majority" | "runner_up";
+  group_by?: "role" | "gender" | "age" | "tenure" | "majority" | "runner_up" | "group";
   /** sides compared, each searched separately */
   compare?: CompareSide[];
 }
@@ -241,6 +268,8 @@ export interface Evidence {
   majority_bands?: Record<string, number>;
   /** MPs' contributions by the party second in their seat at the time, by name ("unknown" when not known) */
   runner_ups?: Record<string, number>;
+  /** members' contributions by party group, on the evidence for that Parliament ("none": no evidence found) */
+  party_groups?: Record<string, number>;
 }
 
 export type TurnStatus = "planning" | "searching" | "answering" | "verifying" | "done" | "error";
@@ -339,6 +368,8 @@ export interface Meta {
   region_groups: Record<string, string[]>;
   portfolios: Record<string, string>;
   parties: { id: string; name: string }[];
+  /** party groups there is published evidence for */
+  party_groups?: { id: string; name: string; named: string; party: string | null }[];
   answers_enabled: boolean;
   model: string;
   archive_start: string;

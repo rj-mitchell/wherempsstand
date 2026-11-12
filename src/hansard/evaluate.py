@@ -42,7 +42,7 @@ from hansard.rank.evidence import demographic_group, speaker_group
 log = logging.getLogger(__name__)
 
 PLAN_FIELDS = ["date_from", "date_to", "houses", "regions", "parties", "offices", "genders", "age_bands", "tenure",
-               "majority_bands", "seat_types", "runner_up_parties", "speakers", "group_by", "wants_votes"]
+               "majority_bands", "seat_types", "runner_up_parties", "groups", "speakers", "group_by", "wants_votes"]
 DEFAULTS: dict[str, Any] = {"date_from": "", "date_to": "", "group_by": "role", "wants_votes": False}
 DATE_SLACK_DAYS = 45
 SAME_PARTY = {"labourco-operative": "labour"}  # same whip; either reading is right
@@ -98,6 +98,7 @@ def plan_values(plan: QueryPlan) -> dict[str, Any]:
         "offices": sorted(f.offices), "genders": sorted(f.genders), "age_bands": sorted(f.age_bands),
         "tenure": sorted(f.tenure), "majority_bands": sorted(f.majority_bands),
         "seat_types": sorted(f.seat_types), "runner_up_parties": sorted(f.runner_up_parties),
+        "groups": sorted(f.groups),
         "speakers": sorted({n.lower() for n in names}),
         "group_by": plan.group_by, "wants_votes": bool(plan.wants_votes),
         "portfolios": sorted(plan.portfolios),
@@ -128,7 +129,9 @@ def score_plan(expect: dict[str, Any], got: dict[str, Any]) -> dict[str, bool]:
 
 
 def run_plans(settings: Settings, questions: list[Question], today: date, client, parties, model: str | None = None,
-              effort: str | None = None, progress: Callable[[str], None] = print) -> dict[str, Any]:
+              effort: str | None = None, progress: Callable[[str], None] = print,
+              party_groups: list[tuple[str, str]] | None = None,
+              group_aliases: dict[str, list[str]] | None = None) -> dict[str, Any]:
     s = settings
     offline = model == "offline"  # the free built-in rules (used for "Sources only")
     if model and not offline:
@@ -141,10 +144,10 @@ def run_plans(settings: Settings, questions: list[Question], today: date, client
         t0 = time.perf_counter()
         try:
             if offline:
-                plan, usage = parse_offline(q.question, s.regions, today), None
+                plan, usage = parse_offline(q.question, s.regions, today, group_aliases), None
             else:
                 plan, usage = parse_with_model(client, s, q.question, [{"question": h} for h in q.history], parties,
-                                               today)
+                                               today, party_groups)
             error = None
         except Exception as exc:  # recorded as a failure on every field
             plan, usage, error = None, None, f"{type(exc).__name__}: {exc}"

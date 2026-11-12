@@ -164,6 +164,14 @@ GROUP_BY_INSTRUCTIONS = {
         "time they spoke, as given in each result title: marginal (under 10% of votes cast), 10% to 20%, and safe "
         "(over 20%). Leave out groups with no supplied records, and say plainly where the groups said similar things."
     ),
+    "group": (
+        "The question asks how members of party groups or caucuses differ. Group the speakers by the party groups "
+        "given in each result title, which rest on published evidence for the Parliament they spoke in (the group's "
+        "own list, a letter or statement they signed, or their own statement in Parliament). Most groups publish no "
+        "lists, so a speaker with no evidence of a group may still belong to one: never say they do not. Describe "
+        "each group by what its members said, leave out groups with no supplied records, and say plainly where the "
+        "groups said similar things."
+    ),
     "runner_up": (
         "The question asks how MPs differ according to which party came second in their seat at the most recent "
         "election before the day they spoke, as given in each result title. Group the MPs by that party (the Brexit "

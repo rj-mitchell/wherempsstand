@@ -25,6 +25,7 @@ const GROUP_LABEL: Record<string, string> = {
   tenure: "First term or re-elected",
   majority: "Majority (marginal or safe)",
   runner_up: "Party that came second in their seat",
+  group: "Party group or caucus",
 };
 const MAJORITY_BANDS = ["marginal", "middle", "safe"];
 const SEAT_TYPES = ["city", "town", "rural"];
@@ -64,6 +65,14 @@ export function chipsFor(plan: Plan, meta: Meta | null): ChipDef[] {
       key: `ru-${x}`,
       label: `Seats where ${runnerUpName(x, meta?.parties.find((p) => p.id === x)?.name)} came second (last election before they spoke)`,
       remove: without("runner_up_parties", x),
+    }),
+  );
+  // membership on published evidence only: the chip says so
+  (f.groups ?? []).forEach((x) =>
+    chips.push({
+      key: `pg-${x}`,
+      label: `Members of ${meta?.party_groups?.find((g) => g.id === x)?.named ?? x} (on published evidence)`,
+      remove: without("groups", x),
     }),
   );
   if (plan.group_by && plan.group_by !== "role")
@@ -232,6 +241,22 @@ function PlanEditor({ draft, meta, onChange }: { draft: Plan; meta: Meta | null;
           ))}
         </select>
       </label>
+      {(meta?.party_groups ?? []).length > 0 && (
+        <label>
+          Party group or caucus (members on published evidence for the Parliament they spoke in)
+          <select
+            multiple
+            value={f.groups ?? []}
+            onChange={(e) => setF({ groups: Array.from(e.target.selectedOptions).map((o) => o.value) })}
+          >
+            {(meta?.party_groups ?? []).map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <fieldset>
         <legend>Group speakers by</legend>
         {Object.entries(GROUP_LABEL).map(([k, v]) => (

@@ -22,7 +22,7 @@ from hansard.sources.demographics import AGE_BANDS
 from hansard.sources.elections import RUNNER_UP_NAME
 
 AGE_BAND_KEYS = [k for k, *_ in AGE_BANDS]
-GROUP_BY_KEYS = ("role", "gender", "age", "tenure", "majority", "runner_up")
+GROUP_BY_KEYS = ("role", "gender", "age", "tenure", "majority", "runner_up", "group")
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ Office = Literal["gov", "shadow", "chair", "backbench"]
 House = Literal["commons", "lords"]
 Gender = Literal["F", "M"]
 AgeBand = Literal["under-40", "40-54", "55-69", "70-plus"]
-GroupBy = Literal["role", "gender", "age", "tenure", "majority", "runner_up"]
+GroupBy = Literal["role", "gender", "age", "tenure", "majority", "runner_up", "group"]
 Tenure = Literal["first-term", "returning"]
 MajorityBand = Literal["marginal", "middle", "safe"]
 SeatType = Literal["city", "town", "rural"]
@@ -61,6 +61,7 @@ class ParsedQuery(BaseModel):
     seat_types: list[SeatType] = Field(default_factory=list)
     runner_up_parties: list[str] = Field(default_factory=list,
                                          description="Party ids that came second in the MP's seat at the last election")
+    groups: list[str] = Field(default_factory=list, description="Party group ids (caucuses within a party)")
     group_by: GroupBy
     portfolios: list[str]
     wants_votes: bool
@@ -117,6 +118,7 @@ class QueryPlan:
             majority_bands=[b for b in f.get("majority_bands") or [] if b in ("marginal", "middle", "safe")],
             seat_types=[t for t in f.get("seat_types") or [] if t in SEAT_TYPES],
             runner_up_parties=[x for x in few(f.get("runner_up_parties"), 20) if _PARTY_ID.fullmatch(x)],
+            groups=[x for x in few(f.get("groups"), 20) if _PARTY_ID.fullmatch(x)],
         )
         speakers = [{k: str(v)[:200] for k, v in x.items()} for x in (d.get("speakers") or [])[:10]
                     if isinstance(x, dict)]
@@ -287,6 +289,37 @@ def runner_up_rules(ql: str) -> tuple[list[str], bool]:
     return parties, False
 
 
+_COMPARE = r"\b(differ\w*|compar\w*|versus|vs|than|between|contrast\w*)\b"
+
+
+def group_patterns(groups: dict[str, list[str]]) -> dict[str, re.Pattern[str]]:
+    """How a question names each party group: its names; initials and one-word names only as written ("ERG",
+    "Mainstream", not "the mainstream media")."""
+    out = {}
+    for gid, names in groups.items():
+        alts = [f"(?-i:{re.escape(n)})" if " " not in n else re.escape(n) for n in names]
+        out[gid] = re.compile(r"\b(?:the\s+)?(?:" + "|".join(alts) + r")\b(?:\s+(?:members|mps|caucus))?", re.I)
+    return out
+
+
+def group_rules(question: str, groups: dict[str, list[str]] | None) -> tuple[list[str], bool, str]:
+    """Party groups named in a question: (the groups to search, whether to group by them, the question without
+    their names). Two or more groups compared: those groups, grouped. One group compared with other members ("how do
+    SCG members differ from other Labour MPs"): every group, grouped. Otherwise: members of the groups named."""
+    found, rest = [], question
+    for gid, pattern in group_patterns(groups or {}).items():
+        if pattern.search(rest):
+            found.append(gid)
+            rest = pattern.sub(" ", rest)
+    ql = question.lower()
+    compared = re.search(_COMPARE, ql)
+    if len(found) >= 2 and compared:
+        return found, True, rest
+    if len(found) == 1 and compared and re.search(r"\b(other|others|rest of|everyone else|non-members?)\b", ql):
+        return [], True, rest
+    return found, False, rest
+
+
 _DEMOGRAPHIC_PHRASES = re.compile(
     rf"\b(?:(?:women|female|men|male|younger|young|older|oldest|new|newly[- ]elected|first[- ]term)"
     rf"(?: and (?:women|female|men|male|older|younger|long[- ]serving|experienced|returning))? "
@@ -302,9 +335,12 @@ def topic_words(question: str) -> str:
     return " ".join(keep)
 
 
-def parse_offline(question: str, region_groups: dict[str, list[str]], today: date | None = None) -> QueryPlan:
+def parse_offline(question: str, region_groups: dict[str, list[str]], today: date | None = None,
+                  groups: dict[str, list[str]] | None = None) -> QueryPlan:
+    """``groups``: the party groups a reader can choose (id -> names), from ``hansard.groups.Groups.aliases``."""
     today = today or date.today()
-    ql = question.lower()
+    group_ids, by_group, unnamed = group_rules(question, groups)
+    ql = unnamed.lower()
     date_from, date_to = _dates(question, today)
     regions: list[str] = []
     for group, members in region_groups.items():
@@ -336,19 +372,21 @@ def parse_offline(question: str, region_groups: dict[str, list[str]], today: dat
     runner_up_parties, by_runner_up = runner_up_rules(ql)
     if by_runner_up:
         group_by = "runner_up"
+    if by_group:
+        group_by = "group"
     if tenure or majority_bands or seat_group or seat_types or runner_up_parties or by_runner_up:
         houses.append("commons")
     # the party that came second is not the speakers' party: "Labour MPs where Reform came second" is about Labour MPs
     speaking = _SECOND_ANY.sub(" ", ql)
     parties = [pid for pid, pattern in _PARTY_WORDS if re.search(pattern, speaking)]
-    topic = _SECOND_ANY.sub(" ", _DEMOGRAPHIC_PHRASES.sub(" ", question))
+    topic = _SECOND_ANY.sub(" ", _DEMOGRAPHIC_PHRASES.sub(" ", unnamed))
     return QueryPlan(
         question=question,
         search_text=topic_words(topic) or question,
         filters=Filters(date_from=date_from, date_to=date_to, houses=sorted(set(houses)) if len(set(houses)) == 1 else [],
                         regions=regions, offices=offices, parties=parties, genders=genders, age_bands=age_bands,
                         tenure=tenure, majority_bands=majority_bands, seat_types=seat_types,
-                        runner_up_parties=runner_up_parties),
+                        runner_up_parties=runner_up_parties, groups=group_ids),
         portfolios=list(portfolios_for_query(topic)),
         wants_votes=wants_votes,
         interpretation="Interpreted with offline rules (no language model).",
@@ -361,8 +399,9 @@ def parse_offline(question: str, region_groups: dict[str, list[str]], today: dat
 
 
 def system_prompt(region_groups: dict[str, list[str]], parties: list[tuple[str, str]], today: date,
-                  start: date = date(1997, 5, 1)) -> str:
+                  start: date = date(1997, 5, 1), party_groups: list[tuple[str, str]] | None = None) -> str:
     groups = "\n".join(f"- {k}: {', '.join(v)}" for k, v in region_groups.items())
+    group_list = ", ".join(f"{gid} ({name})" for gid, name in party_groups or []) or "none"
     ports = "\n".join(f"- {k}: {v}" for k, v in PORTFOLIOS.items())
     party_list = ", ".join(f"{pid} ({name})" for pid, name in parties)
     return f"""You convert research questions about the UK Parliament into search filters for a Hansard search engine.
@@ -410,10 +449,18 @@ Rules:
   targets, never use polls or projections, and never add majority_bands unless the question also asks about marginal
   or safe seats or the size of majorities. It also implies houses ["commons"]. In the interpretation, describe it as
   the fact ("MPs in seats where Reform UK came second at the last election"), never as a threat.
+- groups: party groups and caucuses within a party, by id from this list: {group_list}. Set it when the question limits
+  speakers to members of a group ("members of the Socialist Campaign Group", "ERG MPs"). Membership is on published
+  evidence only (the group's lists, letters members signed, their own statements in Parliament), so say "members of
+  ... on the published evidence" in the interpretation. A group not in the list is a search topic, never a filter. A
+  group's name is never a parties filter ("Labour Growth Group MPs" is not a Labour filter unless the question also
+  asks for Labour MPs).
 - group_by: "gender" if the question asks how women and men differ, "age" if it asks how views differ by age,
   "tenure" if it compares new and long-serving MPs, "majority" if it compares MPs in marginal and safe seats,
   "runner_up" if it compares MPs by which party came second in their seats ("Labour MPs where Reform came second
-  compared with those where others came second", "seats threatened by Reform versus by the Conservatives");
+  compared with those where others came second", "seats threatened by Reform versus by the Conservatives"), "group"
+  if it compares party groups ("how does the Labour Growth Group differ from Tribune": groups set to both, so only
+  their members are searched; "how do SCG members differ from other Labour MPs": groups left empty);
   otherwise "role" (the default: ministers, opposition, backbenchers by seat type). When grouping by one of these,
   leave the matching filter empty so every group is searched. The party that came second is never a parties filter:
   "Labour MPs where Reform came second" sets parties ["labour"] and runner_up_parties ["reform"].
@@ -453,7 +500,8 @@ def parse_model(settings) -> str:
 
 
 def parse_with_model(client, settings, question: str, history: list[dict[str, str]] | None,
-                     parties: list[tuple[str, str]], today: date | None = None) -> tuple[QueryPlan, Any]:
+                     parties: list[tuple[str, str]], today: date | None = None,
+                     party_groups: list[tuple[str, str]] | None = None) -> tuple[QueryPlan, Any]:
     from hansard.rag.answer import cached_system
 
     today = today or date.today()
@@ -470,7 +518,7 @@ def parse_with_model(client, settings, question: str, history: list[dict[str, st
     resp = client.messages.parse(
         model=parse_model(settings),
         max_tokens=2000,
-        system=cached_system(system_prompt(settings.regions, parties, today, settings.archive_start)),
+        system=cached_system(system_prompt(settings.regions, parties, today, settings.archive_start, party_groups)),
         messages=[{"role": "user", "content": f"{convo}Question: {question}"}],
         output_config={"effort": settings.answer.get("query_parse_effort", "low")},
         output_format=ParsedQuery,
@@ -495,6 +543,7 @@ def parse_with_model(client, settings, question: str, history: list[dict[str, st
             seat_types=[t for t in SEAT_TYPES if t in p.seat_types],
             runner_up_parties=[x for x in dict.fromkeys(p.runner_up_parties)
                                if x in known_parties or x in RUNNER_UP_NAME] if p.group_by != "runner_up" else [],
+            groups=[x for x in dict.fromkeys(p.groups) if x in {g for g, _ in party_groups or []}],
         ),
         portfolios=[x for x in p.portfolios if x in known_ports],
         wants_votes=p.wants_votes,

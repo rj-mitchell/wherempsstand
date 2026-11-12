@@ -21,6 +21,7 @@ from typing import Any
 
 from hansard.config import Settings
 from hansard.engine import Engine, Filters, Scope
+from hansard.groups import group_names
 from hansard.rag.british import britishise_segments, to_british
 from hansard.rag.neutral import flag_loaded
 from hansard.rag.prompts import NO_RECORDS
@@ -84,6 +85,11 @@ def plan_note(plan: QueryPlan, scope: Scope) -> str:
     if f.runner_up_parties:
         bits.append("MPs in seats where " + " or ".join(runner_up_name(p) for p in f.runner_up_parties)
                     + " came second at the most recent election before the day they spoke")
+    if f.groups:
+        names = group_names()
+        bits.append("members of " + " or ".join(names.get(g, g) for g in f.groups) + " on the published evidence "
+                    "for the Parliament they spoke in (their lists, letters members signed, members' own statements "
+                    "in Parliament)")
     if not scope.written:
         bits.append("written answers/statements excluded")
     if not scope.pbc:
@@ -99,7 +105,7 @@ def plan_facets(plan: QueryPlan) -> set[str]:
     f = plan.filters
     out = {plan.group_by} - {"role"}
     for facet, active in (("gender", f.genders), ("age", f.age_bands), ("tenure", f.tenure),
-                          ("majority", f.majority_bands), ("runner_up", f.runner_up_parties)):
+                          ("majority", f.majority_bands), ("runner_up", f.runner_up_parties), ("group", f.groups)):
         if active:
             out.add(facet)
     return out
@@ -187,6 +193,13 @@ class Pipeline:
         names recorded two ways (Labour includes Labour/Co-operative members)."""
         return [(i, n) for i, n in self.parties() if i not in HIDDEN_PARTIES]
 
+    def group_choices(self) -> list[tuple[str, str]]:
+        """The party groups a reader can choose from: those there is published evidence for (hansard.groups)."""
+        return [(g["id"], g["name"]) for g in self.engine.groups().offered()]
+
+    def group_aliases(self) -> dict[str, list[str]]:
+        return self.engine.groups().aliases()
+
     def make_plan(self, req: AskRequest) -> tuple[QueryPlan, dict[str, int] | None]:
         if req.plan:
             return QueryPlan.from_dict({"question": req.question, **req.plan}), None
@@ -194,17 +207,17 @@ class Pipeline:
         if self.has_model():
             try:
                 plan, u = parse_with_model(self.client, self.settings, req.question, req.history, self.parties(),
-                                           self.today)
+                                           self.today, self.group_choices())
                 plan.interpretation = to_british(plan.interpretation)
                 from hansard.rag.answer import usage_dict
 
                 usage = usage_dict(u)
             except Exception as exc:
                 log.warning("model query parsing failed (%s); using offline rules", exc)
-                plan = parse_offline(req.question, self.settings.regions, self.today)
+                plan = parse_offline(req.question, self.settings.regions, self.today, self.group_aliases())
                 plan.parse_error = f"{type(exc).__name__}: {exc}"
         else:
-            plan = parse_offline(req.question, self.settings.regions, self.today)
+            plan = parse_offline(req.question, self.settings.regions, self.today, self.group_aliases())
         if plan.unresolved_speakers:
             plan.speakers, plan.unresolved_speakers = resolve_speakers(
                 self.engine.resolver.con, plan.unresolved_speakers, plan.filters)
@@ -267,7 +280,8 @@ class Pipeline:
         side_found = {k: found.get(k, []) for k in ("edms", "devolved", "evidence")}
         result, side_found = self.make_room(plan, req, result, side_found, limit)
         return result, divisions, build_sources(result.records, divisions, plan_facets(plan), plan.group_by,
-                                                side_found["edms"], side_found["devolved"], side_found["evidence"])
+                                                side_found["edms"], side_found["devolved"], side_found["evidence"],
+                                                only_groups=plan.filters.groups)
 
     def compared(self, kind: str, items: list[dict[str, Any]], plan: QueryPlan) -> list[dict[str, Any]]:
         """Each item with its closeness in meaning to the question (``_sim``), worked out while the main search runs.

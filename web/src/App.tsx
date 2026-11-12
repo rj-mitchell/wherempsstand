@@ -493,6 +493,7 @@ export default function App() {
             !!t.plan.filters.majority_bands?.length ||
             !!t.plan.filters.runner_up_parties?.length)
         }
+        partyGroups={!!t.plan && (t.plan.group_by === "group" || !!t.plan.filters.groups?.length)}
       />
     </>
   );

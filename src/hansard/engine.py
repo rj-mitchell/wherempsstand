@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 WRITTEN_SOURCES = {"wrans", "lordswrans", "wms", "lordswms"}
 PBC_SOURCES = {"standing"}
 ORAL_SOURCES = {"debates", "westminhall", "lordspages"}
-GROUP_BY = ("role", "gender", "age", "tenure", "majority", "runner_up")
+GROUP_BY = ("role", "gender", "age", "tenure", "majority", "runner_up", "group")
 
 
 @dataclass
@@ -51,6 +51,8 @@ class Filters:
     majority_bands: list[str] = field(default_factory=list)  # "marginal", "middle", "safe" (MPs, on the day)
     # party ids: MPs in seats where that party came second at the last election before the day they spoke
     runner_up_parties: list[str] = field(default_factory=list)
+    # party groups and caucuses (hansard.groups): members with published evidence for the Parliament they spoke in
+    groups: list[str] = field(default_factory=list)
     seat_types: list[str] = field(default_factory=list)      # "city", "town", "rural" (MPs' seats, on the day)
 
     def as_dict(self) -> dict[str, Any]:
@@ -146,6 +148,23 @@ class Engine:
         self.con = shared()
         self.con.execute("SET enable_object_cache = true")  # cache Parquet footers between queries
         self._has_vectors = False
+        self._groups_stamp: float | None = None
+        self.groups()
+
+    def groups(self):
+        """Party groups and their evidence (hansard.groups), read again when the update has found new
+        self-declarations."""
+        from hansard.groups import Groups, declarations_path
+
+        path = declarations_path(self.settings.data_dir)
+        try:
+            stamp = path.stat().st_mtime
+        except OSError:
+            stamp = 0.0
+        if stamp != self._groups_stamp:
+            self.resolver.groups = Groups.for_settings(self.settings, self.resolver.con)
+            self._groups_stamp = stamp
+        return self.resolver.groups
 
     def has_vectors(self) -> bool:
         """Whether meaning-based search has anything to search yet (once true, it stays true: vectors only grow)."""
@@ -248,6 +267,7 @@ class Engine:
         """``local_question``: whether the question is about a place, so local contributions are not
         down-weighted (by default: when the search words name a place, or regions or members are filtered)."""
         filters, scope = filters or Filters(), scope or Scope()
+        groups = self.groups()
         places = places_for(self.settings.reference_dir)
         if local_question is None:
             local_question = bool(filters.regions or filters.person_ids or places.mentioned(query))
@@ -255,7 +275,7 @@ class Engine:
         if filters.parties:
             filters = Filters(**{**filters.__dict__, "parties": self.expand_parties(filters.parties)})
         by_seat = bool(filters.tenure or filters.majority_bands or filters.runner_up_parties)
-        post_filters = bool(filters.age_bands or by_seat or filters.seat_types)
+        post_filters = bool(filters.age_bands or by_seat or filters.seat_types or filters.groups)
         if by_seat and not (filters.genders or filters.age_bands):
             # First terms, majorities and runner-ups depend on the day, so each candidate is checked below; listing
             # every MP in the search itself would only slow it down. Limiting it to the Commons is enough.
@@ -274,6 +294,14 @@ class Engine:
                 people = [p for p in people if p in set(filters.person_ids)]
             if not filters.houses:
                 filters = Filters(**{**filters.__dict__, "houses": ["commons"]})
+        wanted_groups = set(filters.groups)
+        if wanted_groups:
+            # members with evidence for these groups in a Parliament within the dates; each record is then checked
+            # against the evidence for the Parliament it was said in
+            members = groups.people(filters.groups, filters.date_from, filters.date_to)
+            people = sorted(members & set(people)) if people is not None else sorted(members)
+            if filters.person_ids:
+                people = [p for p in people if p in set(filters.person_ids)]
         if people is not None:
             # an impossible id keeps the search empty when nobody matches
             filters = Filters(**{**filters.__dict__, "person_ids": people or ["-none-"]})
@@ -297,6 +325,8 @@ class Engine:
                 on = hit["date"]
                 if not any(a <= on <= b for a, b, _ in seat_spans.get(pid, [])):
                     return False
+            if wanted_groups and not groups.ids_on(pid, hit["date"]) & wanted_groups:
+                return False
             if tenure or majority or second:
                 f = seat(pid, hit["date"]) if pid else {}
                 if tenure and {True: "first-term", False: "returning"}.get(f.get("first_term")) not in tenure:
@@ -422,6 +452,7 @@ class Engine:
             profiles = self.resolver.profiles([(s.candidate.record_id, s.candidate.data.get("person_id"),
                                                 s.candidate.date) for s in pool])
             top = select_evidence(pool, profiles, limit, group_by=group_by if group_by in GROUP_BY else "role",
+                                  only_groups=filters.groups,
                                   max_per_speaker=int(r.get("max_per_speaker", 2)),
                                   min_relevance_ratio=float(r.get("min_relevance_ratio", 0.25)),
                                   min_occasions=int(r.get("min_occasions", 3)),

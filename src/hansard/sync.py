@@ -307,6 +307,15 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
                           "people_reenriched": len(people), "seconds": round(time.time() - t, 1), **idx.stats()}
 
         t = time.time()
+        try:  # members' own statements that they belong to a party group, in the new and corrected records
+            from hansard.groups import scan_declarations
+
+            stats["group_declarations"] = {**scan_declarations(settings), "seconds": round(time.time() - t, 1)}
+        except Exception as exc:  # never let this stop the sync
+            log.warning("party group declarations not scanned: %s", exc)
+            stats["group_declarations"] = {"error": str(exc)[:200]}
+
+        t = time.time()
         if fetch and settings.section("interests").get("enabled", True):
             try:  # the Register of Members' Financial Interests: a new edition every two weeks or so
                 import duckdb

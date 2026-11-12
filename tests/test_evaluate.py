@@ -20,7 +20,7 @@ def test_questions_file_is_valid():
     assert today == date(2026, 10, 11)
     assert len(qs) >= 50
     fields = {"date_from", "date_to", "houses", "regions", "parties", "offices", "genders", "age_bands", "tenure",
-              "majority_bands", "runner_up_parties", "speakers", "group_by", "wants_votes", "portfolios"}
+              "majority_bands", "runner_up_parties", "groups", "speakers", "group_by", "wants_votes", "portfolios"}
     for q in qs:
         assert {k.removesuffix("_any") for k in q.expect} <= fields, q.id
 

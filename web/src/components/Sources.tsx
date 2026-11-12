@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { aboutRecord } from "../procedure";
 import { VoteKind } from "./VoteKind";
+import { GROUPS_CAVEAT, PartyGroupList } from "./PartyGroups";
 import { ageLabel, attribution, houseOf, majorityText, reference, roleTitles, runnerUpText, seatTypeLabel } from "../people";
 import { fmtDate, highlightParts } from "../render";
 import type { Highlight, InterestFlag, SourceCard, Speaker } from "../types";
@@ -253,6 +254,17 @@ export function SourceDrawer({
                 <>
                   <dt>Second at the {sp.runner_up_then.election}</dt>
                   <dd>{runnerUpText(sp.runner_up_then)}</dd>
+                </>
+              )}
+              {sp?.party_groups && sp.party_groups.length > 0 && (
+                <>
+                  <dt>Party groups ({sp.party_groups[0].evidence[0]?.parliament} Parliament)</dt>
+                  <dd>
+                    <PartyGroupList groups={sp.party_groups} />
+                    <span className="muted small">
+                      {GROUPS_CAVEAT} <a href="/methodology#party-groups">How groups are shown</a>
+                    </span>
+                  </dd>
                 </>
               )}
               {sp?.majority_now && sp.majority_now.date !== sp.majority_then?.date && (

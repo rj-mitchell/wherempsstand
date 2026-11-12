@@ -4,7 +4,7 @@ import { AnswerView } from "../components/AnswerView";
 import { Controls, recencyLabel } from "../components/Controls";
 import { chipsFor, PlanChips } from "../components/PlanChips";
 import { SourceDrawer } from "../components/Sources";
-import type { Answer, Plan, SourceCard } from "../types";
+import type { Answer, Meta, Plan, SourceCard } from "../types";
 
 const plan: Plan = {
   question: "q",
@@ -49,6 +49,13 @@ describe("filter chips", () => {
     expect(labels).toContain("Seats where an independent candidate came second (last election before they spoke)");
     expect(labels).toContain("Grouped by party that came second in their seat");
     expect(labels.join(" ")).not.toMatch(/threat|risk|target/i);
+  });
+
+  it("names party groups as membership on published evidence", () => {
+    const meta = { parties: [], portfolios: {}, party_groups: [{ id: "mainstream", name: "Mainstream", named: "Mainstream", party: "Labour" }] } as unknown as Meta;
+    const labels = chipsFor({ ...plan, filters: { ...plan.filters, groups: ["mainstream"] }, group_by: "group" }, meta).map((c) => c.label);
+    expect(labels).toContain("Members of Mainstream (on published evidence)");
+    expect(labels).toContain("Grouped by party group or caucus");
   });
 
   it("re-runs with a removed chip", () => {
@@ -201,6 +208,31 @@ describe("source drawer", () => {
     render(<SourceDrawer source={{ ...source, speaker: sp }} quotes={[]} onClose={() => {}} />);
     expect(screen.getByText("Second at the 2019 general election")).toBeInTheDocument();
     expect(screen.getByText("The Brexit Party, now Reform UK (majority over them: 3,571 votes)")).toBeInTheDocument();
+  });
+
+  it("shows a speaker's party groups with the evidence, linked", () => {
+    const sp = {
+      ...source.speaker!,
+      party_groups: [
+        {
+          id: "tribune-group",
+          name: "Tribune Group of Labour MPs",
+          evidence: [
+            {
+              kind: "declared" as const,
+              date: "2022-02-02",
+              parliament: "2019–24",
+              label: "Said in the Commons on 2 February 2022: “I am privileged to chair the Tribune group of Labour MPs.”",
+              url: "https://hansard.parliament.uk/x",
+            },
+          ],
+        },
+      ],
+    };
+    render(<SourceDrawer source={{ ...source, speaker: sp }} quotes={[]} onClose={() => {}} />);
+    expect(screen.getByText("Party groups (2019–24 Parliament)")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /I am privileged to chair/ })).toHaveAttribute("href", "https://hansard.parliament.uk/x");
+    expect(screen.getByText(/no evidence is not evidence of not belonging/)).toBeInTheDocument();
   });
 
   it("shows a speaker's own declaration of an interest", () => {
