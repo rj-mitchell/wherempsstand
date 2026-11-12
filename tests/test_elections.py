@@ -147,7 +147,8 @@ def test_majority_and_tenure_filters_check_the_day(engine):
 
 
 def _api(calls: list[str], throttle_after: int | None = None):
-    """A stand-in Members API: member N sat for seat N (member "9" left in 2015); every seat has one result."""
+    """A stand-in Members API: member N sat for seat N (member "9" left in 2015); every seat has one result, in which
+    Reform UK came second."""
     def handler(request: httpx.Request) -> httpx.Response:
         calls.append(request.url.path)
         if throttle_after is not None and len(calls) > throttle_after:
@@ -157,8 +158,14 @@ def _api(calls: list[str], throttle_after: int | None = None):
             end = "2015-03-30T00:00:00" if n == "9" else None
             return httpx.Response(200, json={"value": {"representations": [
                 {"house": 1, "id": int(n), "name": f"Seat {n}", "startDate": "2010-05-06T00:00:00", "endDate": end}]}})
+        if "/ElectionResult/" in request.url.path:
+            n = request.url.path.split("/")[-3]
+            return httpx.Response(200, json={"value": {"candidates": [
+                {"party": {"name": "Labour"}, "votes": 1000 + int(n), "rankOrder": 1},
+                {"party": {"name": "Reform UK"}, "votes": 1000, "rankOrder": 2}]}})
         return httpx.Response(200, json={"value": [{"electionDate": "2010-05-06T00:00:00", "isGeneralElection": True,
-                                                    "isNotional": False, "majority": int(n), "result": "Hold"}]})
+                                                    "isNotional": False, "majority": int(n), "result": "Hold",
+                                                    "electionId": 19}]})
     return httpx.Client(transport=httpx.MockTransport(handler))
 
 
@@ -169,7 +176,7 @@ def test_a_throttled_refresh_keeps_its_progress_and_carries_on(tmp_path):
     assert first["status"] == "partial" and "slow down" in first["stopped"] and len(calls) == 4  # stopped at once
     second = refresh_elections(cache, members, client=_api(calls), sleep=lambda s: None)
     assert second["status"] == "updated" and second["remaining"] == 0
-    assert len(calls) == 4 + 5  # only what was left: one member and four seats
+    assert len(calls) == 4 + 9  # only what was left: one member, four seats and the runner-up of each result
     assert refresh_elections(cache, members, client=_api(calls), sleep=lambda s: None)["status"] == "fresh"
 
 

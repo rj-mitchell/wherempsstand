@@ -96,6 +96,7 @@ def person_text(core: dict[str, Any], activity: dict[str, Any] | None) -> str:
         parts.append("</ul>")
     for s in core.get("seats") or []:
         results = "; ".join(f"{r['election']}: majority {r['majority']:,}" + (f" ({r['pct']}%)" if r.get("pct") else "")
+                            + (f", second: {r['runner_up']}" if r.get("runner_up") else "")
                             for r in s.get("results") or [] if r.get("majority") is not None)
         if results:
             parts.append(f"<p>{e(s['constituency'])}: {e(results)}.</p>")

@@ -173,7 +173,7 @@ class People:
         return "Not a current member"
 
     def _seats(self, person_id: str) -> list[dict[str, Any]]:
-        """Each seat held, with the results of the elections they won there (newest first)."""
+        """Each seat held, with the results of the elections they won there (newest first), and who came second."""
         idx = self.resolver._seat_index()
         out = []
         for start, end, cid, cname in reversed(idx["reps"].get(person_id, [])):
@@ -186,7 +186,8 @@ class People:
                     votes = r.get("votes") or 0
                     pct = round(100 * r["majority"] / votes, 1) if votes and r.get("majority") is not None else None
                     results.append({"election": election_label(r), "date": r["date"], "majority": r["majority"],
-                                    "pct": pct, "band": majority_band(pct), "party": r.get("party")})
+                                    "pct": pct, "band": majority_band(pct), "party": r.get("party"),
+                                    "runner_up": r.get("runner_up"), "runner_up_votes": r.get("runner_up_votes")})
             out.append({"constituency": cname, "start": start.isoformat(), "end": _iso(end), "results": results})
         return out
 

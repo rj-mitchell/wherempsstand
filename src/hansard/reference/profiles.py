@@ -22,7 +22,13 @@ import pyarrow as pa
 from hansard.reference.build import office_display
 from hansard.reference.portfolios import KIND_CHAIR, KIND_GOV, KIND_SHADOW
 from hansard.sources.demographics import age_band, age_on, assumed_birth
-from hansard.sources.elections import election_label, first_term, general_elections, majority_band
+from hansard.sources.elections import (
+    election_label,
+    first_term,
+    general_elections,
+    majority_band,
+    runner_up_facts,
+)
 from hansard.store.shared import shared
 
 REFERENCE_TABLES = ("persons", "person_ids", "names", "memberships", "offices", "constituencies", "parties",
@@ -59,6 +65,14 @@ def attach_reference(con: duckdb.DuckDBPyConnection, reference_dir: Path) -> Non
     if missing:
         path = (Path(reference_dir) / "persons.parquet").as_posix()
         con.execute(f"CREATE OR REPLACE VIEW ref_persons AS SELECT *, {', '.join(missing)} "
+                    f"FROM read_parquet('{path}')")
+    # reference sets built before the runner-up was added to election results: not known
+    cols = {r[0] for r in con.execute("DESCRIBE ref_election_results").fetchall()}
+    missing = [f"NULL::{t} AS {c}" for c, t in (("runner_up", "VARCHAR"), ("runner_up_votes", "INTEGER"))
+               if c not in cols]
+    if missing:
+        path = (Path(reference_dir) / "election_results.parquet").as_posix()
+        con.execute(f"CREATE OR REPLACE VIEW ref_election_results AS SELECT *, {', '.join(missing)} "
                     f"FROM read_parquet('{path}')")
 
 
@@ -265,11 +279,12 @@ class ProfileResolver:
                 reps.setdefault(pid, []).append((start, end, cid, name))
             results: dict[int, list[dict[str, Any]]] = {}
             for row in self.con.execute(
-                    "SELECT constituency_id, election_date, is_general, majority, votes, party FROM ref_election_results "
-                    "ORDER BY election_date").fetchall():
-                cid, d, general, majority, votes, party = row
+                    "SELECT constituency_id, election_date, is_general, majority, votes, party, runner_up, "
+                    "runner_up_votes FROM ref_election_results ORDER BY election_date").fetchall():
+                cid, d, general, majority, votes, party, second, second_votes = row
                 results.setdefault(cid, []).append({"date": d.isoformat(), "general": general, "majority": majority,
-                                                    "votes": votes, "party": party})
+                                                    "votes": votes, "party": party, "runner_up": second,
+                                                    "runner_up_votes": second_votes})
             first = dict(self.con.execute(
                 "SELECT person_id, min(start) FROM ref_memberships WHERE house = 'commons' GROUP BY person_id").fetchall())
             self._seats = {"reps": reps, "results": results, "first": first,
@@ -286,7 +301,8 @@ class ProfileResolver:
                 "election": election_label(result), "date": result["date"]}
 
     def seat_facts(self, person_id: str | None, on: date) -> dict[str, Any]:
-        """Majority at the time (the last election in their seat before ``on``), majority now, and first term."""
+        """Majority at the time (the last election in their seat before ``on``), the party that came second in that
+        same election (``runner_up``: the site's party id, or None when not known), majority now, and first term."""
         if not person_id:
             return {}
         idx = self._seat_index()
@@ -303,6 +319,12 @@ class ProfileResolver:
             if then:
                 out["majority_then"] = then
                 out["majority_band"] = then["band"]
+            # from the same election as the majority: an older result is never used when this one's is not known
+            second = runner_up_facts(past[-1] if past else None)
+            if past:
+                out["runner_up"] = second["party_id"] if second else None
+            if second:
+                out["runner_up_then"] = second
         if reps and reps[-1][1].year == 9999:  # an MP today: their current seat's latest result
             latest = idx["results"].get(reps[-1][2], [])
             now = self._majority(latest[-1] if latest else None)
