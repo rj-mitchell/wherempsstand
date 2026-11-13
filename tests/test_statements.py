@@ -83,6 +83,32 @@ def test_statements_are_checked(site, over, said):
     assert list_statements(state) == []
 
 
+def test_a_statement_is_only_accepted_beside_an_item_that_exists(site):
+    client, state, _ = site
+    bid = events(client.post("/api/ask", json={"question": "What has been said about trial by jury?"}))[-1]["briefing_id"]
+    gone = client.post("/api/statements", json=statement(item="/b/abcdefghjk"))  # a well-formed address, no briefing
+    assert gone.status_code == 400 and "There is no briefing at that address" in gone.json()["detail"]
+    nobody = client.post("/api/statements", json=statement(item="https://wherempsstand.com/people/99999999/no-one"))
+    assert nobody.status_code == 400 and "There is no member's page at that address" in nobody.json()["detail"]
+    assert list_statements(state) == []
+    assert client.post("/api/statements", json=statement(item=f"/b/{bid}")).status_code == 200
+    assert client.post("/api/statements", json=statement(item=f"/people/{BENN}")).status_code == 200
+    # the other kinds of page are not looked up: the owner sees the address before publishing
+    assert client.post("/api/statements", json=statement(item="/groups/commons/no-such-group")).status_code == 200
+    assert {s["item_path"] for s in list_statements(state)} == {f"/b/{bid}", f"/people/{BENN}",
+                                                                "/groups/commons/no-such-group"}
+    # a withdrawn briefing takes no new statements
+    assert client.post(f"/api/admin/briefings/{bid}/withdraw", headers=ADMIN,
+                       json={"reason": "It misattributed a quotation."}).status_code == 200
+    withdrawn = client.post("/api/statements", json=statement(item=f"/b/{bid}"))
+    assert withdrawn.status_code == 400 and "has been withdrawn" in withdrawn.json()["detail"]
+    assert len(list_statements(state)) == 3
+    # the other checks still come first, and the function alone (the owner's tools, tests) asks nothing
+    first = client.post("/api/statements", json=statement(item="/b/abcdefghjk", text="Too short."))
+    assert "a sentence or more" in first.json()["detail"]
+    assert add_statement(state, **statement(item="/b/abcdefghjk"))
+
+
 def test_exactly_150_words_is_accepted_and_required_fields_are_required(site):
     client, state, _ = site
     assert client.post("/api/statements", json=statement(text=" ".join(["word"] * MAX_WORDS))).status_code == 200

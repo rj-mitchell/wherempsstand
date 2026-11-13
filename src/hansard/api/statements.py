@@ -18,6 +18,7 @@ privacy notice), by ``forget_old_emails``, which runs whenever statements are wr
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from urllib.parse import urlparse
@@ -111,11 +112,15 @@ def recent_count(state: StateDB, visitor: str | None) -> int:
 
 
 def add_statement(state: StateDB, *, name: str, role: str, item: str, text: str, link: str | None, email: str,
-                  visitor: str | None = None) -> int:
-    """Store a statement as pending. Raises StatementError if it can't be accepted."""
+                  visitor: str | None = None, missing: Callable[[str], str | None] | None = None) -> int:
+    """Store a statement as pending. Raises StatementError if it can't be accepted. ``missing`` is asked whether
+    the item at the address is there: it returns why not, in words for the sender, or None."""
     text = clean_text(text)
     check(name, role, text, email)
     path = item_path(item)
+    why = missing(path) if missing else None
+    if why:
+        raise StatementError(why)
     with state.connect() as con:
         cur = con.execute("INSERT INTO statements (at, name, role, item_path, person, text, link, email, visitor) "
                           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",

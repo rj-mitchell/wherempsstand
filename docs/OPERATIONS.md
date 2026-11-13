@@ -179,7 +179,9 @@ page, data and card then return 410 Gone. `GET /api/admin/briefings` lists recen
 `/named` wait as pending: confirm who sent each (usually by writing to their parliament.uk, parliament.scot,
 senedd.wales or niassembly.gov.uk address), then publish it as written or decline it with reasons, never editing it,
 with `hansard statements` or the admin page (`/api/admin/statements`, `…/<id>/publish`, `decline`, `update`,
-`withdraw`). Reply within 5 working days and decide within 20. A published statement shows at once beside its item
+`withdraw`). A statement about a briefing or a member's page is accepted only if that briefing exists and has not
+been withdrawn, or that member exists; the other kinds of page are not looked up, so check the address before
+publishing. Reply within 5 working days and decide within 20. A published statement shows at once beside its item
 and on the member's page. Its email address is deleted three months after it is withdrawn or declined, by the
 twice-daily update and whenever statements are written or listed. Statements live only in `data/state.sqlite`, so
 backups include them; nothing that searches the record or writes briefings reads them.

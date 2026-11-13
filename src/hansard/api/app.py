@@ -82,6 +82,7 @@ from hansard.api.statements import (
     add_statement,
     decline_statement,
     list_statements,
+    person_of,
     publish_statement,
     published,
     update_statement,
@@ -1851,6 +1852,31 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
     # ---- statements beside items (the right of reply). Kept apart from the record: the briefing pipeline, search
     # and the pages' readable text never read them; the site fetches them on their own, to show beside the item.
+    def item_missing(path: str) -> str | None:
+        """Why a statement can't sit beside the item at this address, when it is known not to be there. Checked: a
+        briefing (it must exist and not be withdrawn) and a member's page. Not checked: topics, debates, bills, party
+        groups, early day motions, committees, inquiries, evidence and devolved sittings, each of which is looked up
+        in its own store; the owner sees the address before a statement is published."""
+        if path.startswith("/b/"):
+            b = get_briefing(state, path.removeprefix("/b/"))
+            if b is None:
+                return ("There is no briefing at that address: please check the address of the briefing the "
+                        "statement is about.")
+            if b["withdrawn_at"]:
+                return "That briefing has been withdrawn, so a statement can't sit beside it."
+        number = person_of(path)
+        if number is not None:
+            try:
+                known = bool(get_people().resolve(number))
+            except Exception:  # the members' data can't be read just now: keep the statement, the owner checks it
+                log.warning("statement about /people/%s accepted without checking the member exists", number,
+                            exc_info=True)
+                return None
+            if not known:
+                return ("There is no member's page at that address: please check the address of the page the "
+                        "statement is about.")
+        return None
+
     @app.post("/api/statements")
     def statement_add(body: StatementBody, request: Request, user=Depends(current_user)):
         visitor, _ = requester(request, user)
@@ -1860,7 +1886,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             raise HTTPException(429, "Thank you, we have your statements. Please email us if there is more to add.")
         try:
             add_statement(state, name=body.name, role=body.role, item=body.item, text=body.text, link=body.link,
-                          email=body.email, visitor=visitor)
+                          email=body.email, visitor=visitor, missing=item_missing)
         except StatementError as exc:
             raise HTTPException(400, str(exc)) from None
         return {"ok": True}
