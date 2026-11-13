@@ -27,7 +27,12 @@ PREFIX = "where-they-stand-"
 REQUIRED_TABLES = frozenset({"manifest", "usage", "briefings", "reports"})
 
 
-def make_backup(settings: Settings, dest: Path | None = None, keep: int = 14, day: str | None = None) -> Path:
+def make_backup(settings: Settings, dest: Path | None = None, keep: int = 14,
+                day: str | None = None) -> Path | None:
+    """The backup written, or None when there is no state database yet (a new site): opening it to copy it would
+    create an empty one, and an empty database is not a backup."""
+    if not settings.state_db.exists():
+        return None
     dest = Path(dest or settings.data_dir / "backups")
     dest.mkdir(parents=True, exist_ok=True)
     day = day or datetime.now(UTC).strftime("%Y-%m-%d")

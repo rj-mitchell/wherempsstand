@@ -723,6 +723,9 @@ def backup(to: Path = typer.Option(None, help="folder for backups (default: <dat
 
     _setup_logging()
     archive = make_backup(_settings(), to, keep)
+    if archive is None:  # a new site: nothing has been saved yet
+        typer.echo("Nothing to back up yet: there is no state database.")
+        return
     typer.echo(f"Backed up to {archive}")
     try:  # and a copy off the server, when a Backblaze B2 bucket is set up
         out = send(archive)

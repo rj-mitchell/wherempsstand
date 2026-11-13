@@ -1,4 +1,5 @@
-"""Restoring a backup: checked before anything is replaced, and the database it replaces is kept."""
+"""Backing up a new site, and restoring a backup: checked before anything is replaced, and the database it
+replaces is kept. (The backup itself is tested in test_sync.py.)"""
 
 from __future__ import annotations
 
@@ -31,6 +32,20 @@ def archive_of(path, **members: bytes):
             info.size = len(data)
             tar.addfile(info, io.BytesIO(data))
     return path
+
+
+def test_a_new_site_has_nothing_to_back_up(settings, tmp_path, monkeypatch):
+    for name in ("HANSARD_B2_BUCKET", "HANSARD_B2_KEY_ID", "HANSARD_B2_APPLICATION_KEY"):
+        monkeypatch.delenv(name, raising=False)
+    assert make_backup(settings, tmp_path / "b") is None
+    r = CliRunner().invoke(app, ["backup", "--to", str(tmp_path / "b")])
+    assert r.exit_code == 0 and "Nothing to back up yet" in r.output and "Backed up" not in r.output
+    # no empty database is created to be archived as if it were a good backup, and no folder for it
+    assert not settings.state_db.exists() and not (tmp_path / "b").exists()
+    StateDB(settings.state_db).set("marker", "saved")
+    r = CliRunner().invoke(app, ["backup", "--to", str(tmp_path / "b")])
+    assert r.exit_code == 0 and "Backed up to" in r.output and "Off-site copy: not set up" in r.output
+    assert len(list((tmp_path / "b").glob("where-they-stand-*.tar.gz"))) == 1
 
 
 def test_restore_puts_a_backup_back_and_keeps_the_database_it_replaces(settings, tmp_path):
