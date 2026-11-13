@@ -187,6 +187,43 @@ def test_repeat_questions_come_from_the_cache_and_cost_nothing(public):
         assert con.execute("SELECT count(*) FROM usage WHERE kind = 'answer'").fetchone()[0] == 2
 
 
+def test_a_cached_briefing_is_rechecked_by_the_current_rules_when_it_is_replayed(public):
+    """As a saved briefing is (/b/<id>): a mark the current rules no longer raise is not shown; nothing is added."""
+    client, state, model = public
+    ask = {"question": "What has been said about trial by jury?"}
+    first = events(client.post("/api/ask", json=ask))[-1]
+    with state.connect() as con:
+        key, stored = con.execute("SELECT key, events FROM answer_cache").fetchone()
+    cached = json.loads(stored)
+    assert cached[-1]["answer"] == first["answer"]
+    # as an earlier version of the checks would have left it: a date and a neutral use of "claimed" marked,
+    # beside a real point to check and a real judgemental word
+    extra = [{"text": " (16 September 2025).\n", "status": "unsupported"},
+             {"text": "Prices rose by 4% in the year to March, the fastest rise since 1992.", "status": "unsupported"},
+             {"text": "He questioned the benefits claimed for the trial", "status": "connective",
+              "loaded": [{"start": 31, "end": 38, "word": "claimed"}]},
+             {"text": "Jones claimed that it failed", "status": "connective",
+              "loaded": [{"start": 6, "end": 13, "word": "claimed"}]}]
+    old = {**first["answer"], "segments": first["answer"]["segments"] + extra, "unsupported_segments": 2,
+           "loaded_words": 2}
+    cached[-1] = {**cached[-1], "answer": old}
+    with state.connect() as con:
+        con.execute("UPDATE answer_cache SET events = ? WHERE key = ?", (json.dumps(cached), key))
+
+    again = events(client.post("/api/ask", json=ask))
+    assert len(model.calls) == 1 and again[-1]["cached"] is True
+    assert [e["type"] for e in again] == ["plan", "sources", "text", "final"]
+    answer = again[-1]["answer"]
+    shown = answer["segments"][-4:]
+    assert [x["status"] for x in shown] == ["connective", "unsupported", "connective", "connective"]  # the date cleared
+    assert answer["unsupported_segments"] == 1 and answer["loaded_words"] == 1
+    assert not shown[2]["loaded"] and shown[3]["loaded"]  # the neutral use cleared; the real one still marked
+    # nothing newly flagged: the briefing's own segments are as they were
+    assert answer["segments"][:-4] == first["answer"]["segments"]
+    with state.connect() as con:  # and the cached copy is as it was written
+        assert json.loads(con.execute("SELECT events FROM answer_cache").fetchone()[0])[-1]["answer"] == old
+
+
 def test_each_visitor_has_a_daily_limit_but_cached_answers_still_load(public):
     client, _, _ = public
     for q in ("trial by jury", "jury trials and courts"):
