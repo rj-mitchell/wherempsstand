@@ -181,9 +181,10 @@ private person's name or details first, then newest first), and closed with
 senedd.wales or niassembly.gov.uk address), then publish it as written or decline it with reasons, never editing it,
 with `hansard statements` or the admin page (`/api/admin/statements`, `…/<id>/publish`, `decline`, `update`,
 `withdraw`). Publishing needs a note of how the sender was confirmed (`--checked`, or `checked` on the admin
-route): it is kept privately. A statement about a briefing or a member's page is accepted only if that briefing exists and has not
-been withdrawn, or that member exists; the other kinds of page are not looked up, so check the address before
-publishing. Reply within 5 working days and decide within 20. A published statement shows at once beside its item
+route): it is kept privately. A statement about a briefing or a member's page is accepted only if that briefing
+exists and has not been withdrawn, or that member exists; the other kinds of page are not looked up, so check the
+address before publishing. Reply within 5 working days and decide within 20. A published statement shows at once
+beside its item
 and on the member's page. Its email address is deleted three months after it is withdrawn or declined, by the
 twice-daily update and whenever statements are written or listed. Statements live only in `data/state.sqlite`, so
 backups include them; nothing that searches the record or writes briefings reads them.
@@ -195,7 +196,8 @@ keeping the last 14; `hansard restore FILE` puts one back. On a server set up by
 nightly into `deploy/backups/` (see [HOSTING.md](HOSTING.md#backups)). A restore checks the backup before it
 replaces anything: a file that is damaged, or is not a backup of this site's records, is refused with
 "Not restored: …" and nothing changes. The database it replaces is kept as `data/state.sqlite.before-restore`
-(with its `-wal` file, if it had one); delete it once the restored site is right.
+(with its `-wal` file, if it had one). It holds readers' contact details like the database itself, and nothing
+deletes it for you: delete it once the restored site is right.
 
 ## Development and tests
 

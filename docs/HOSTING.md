@@ -728,7 +728,10 @@ docker compose start app
 
 The backup is checked before anything is replaced. If it is damaged, or is not one of this site's backups, the
 command says "Not restored: …" and changes nothing. What was there before is kept in the data folder as
-`state.sqlite.before-restore`, in case the restore was a mistake; it can be deleted once the site is right.
+`state.sqlite.before-restore`, in case the restore was a mistake. It holds the same private details as the
+database, and nothing deletes it for you: delete it once the site is right
+(`docker compose run --rm -T app sh -c 'rm -f /data/state.sqlite.before-restore*'`). A restore needs free disk
+space of about twice the size of `state.sqlite`.
 
 ## Spending limits
 
