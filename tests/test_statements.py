@@ -83,6 +83,32 @@ def test_statements_are_checked(site, over, said):
     assert list_statements(state) == []
 
 
+def test_a_statement_is_only_accepted_beside_an_item_that_exists(site):
+    client, state, _ = site
+    bid = events(client.post("/api/ask", json={"question": "What has been said about trial by jury?"}))[-1]["briefing_id"]
+    gone = client.post("/api/statements", json=statement(item="/b/abcdefghjk"))  # a well-formed address, no briefing
+    assert gone.status_code == 400 and "There is no briefing at that address" in gone.json()["detail"]
+    nobody = client.post("/api/statements", json=statement(item="https://wherempsstand.com/people/99999999/no-one"))
+    assert nobody.status_code == 400 and "There is no member's page at that address" in nobody.json()["detail"]
+    assert list_statements(state) == []
+    assert client.post("/api/statements", json=statement(item=f"/b/{bid}")).status_code == 200
+    assert client.post("/api/statements", json=statement(item=f"/people/{BENN}")).status_code == 200
+    # the other kinds of page are not looked up: the owner sees the address before publishing
+    assert client.post("/api/statements", json=statement(item="/groups/commons/no-such-group")).status_code == 200
+    assert {s["item_path"] for s in list_statements(state)} == {f"/b/{bid}", f"/people/{BENN}",
+                                                                "/groups/commons/no-such-group"}
+    # a withdrawn briefing takes no new statements
+    assert client.post(f"/api/admin/briefings/{bid}/withdraw", headers=ADMIN,
+                       json={"reason": "It misattributed a quotation."}).status_code == 200
+    withdrawn = client.post("/api/statements", json=statement(item=f"/b/{bid}"))
+    assert withdrawn.status_code == 400 and "has been withdrawn" in withdrawn.json()["detail"]
+    assert len(list_statements(state)) == 3
+    # the other checks still come first, and the function alone (the owner's tools, tests) asks nothing
+    first = client.post("/api/statements", json=statement(item="/b/abcdefghjk", text="Too short."))
+    assert "a sentence or more" in first.json()["detail"]
+    assert add_statement(state, **statement(item="/b/abcdefghjk"))
+
+
 def test_exactly_150_words_is_accepted_and_required_fields_are_required(site):
     client, state, _ = site
     assert client.post("/api/statements", json=statement(text=" ".join(["word"] * MAX_WORDS))).status_code == 200
@@ -119,7 +145,14 @@ def test_owner_publishes_declines_updates_and_withdraws(site):
                      json={"checked": "Replied from his parliament.uk address"})
     assert ok.status_code == 200
     # a statement about a page that isn't the member's own is given the member when published
-    client.post(f"/api/admin/statements/{group}/publish", headers=ADMIN, json={"person": BENN})
+    # how the sender was confirmed is required, as on the command line: without it nothing is published
+    for body in ({"person": BENN}, {"person": BENN, "checked": ""}):
+        assert client.post(f"/api/admin/statements/{group}/publish", headers=ADMIN, json=body).status_code == 422
+    spaces = client.post(f"/api/admin/statements/{group}/publish", headers=ADMIN, json={"person": BENN, "checked": "  "})
+    assert spaces.status_code == 400 and "how you confirmed who sent it" in spaces.json()["detail"]
+    assert [s["item"] for s in client.get(f"/api/statements?person={BENN}").json()["statements"]] == ["/people/10669"]
+    client.post(f"/api/admin/statements/{group}/publish", headers=ADMIN,
+                json={"person": BENN, "checked": "Phoned the group's office"})
     shown = client.get(f"/api/statements?person={BENN}").json()["statements"]
     assert [s["item"] for s in shown] == ["/people/10669", "/groups/commons/socialist-campaign-group"]
     assert set(shown[0]) == {"id", "name", "role", "item", "person", "text", "link", "date"}  # never the email
@@ -129,7 +162,8 @@ def test_owner_publishes_declines_updates_and_withdraws(site):
     assert client.get("/api/statements").json() == {"statements": []}
 
     # published twice: refused
-    assert client.post(f"/api/admin/statements/{benn}/publish", headers=ADMIN, json={}).status_code == 404
+    assert client.post(f"/api/admin/statements/{benn}/publish", headers=ADMIN,
+                       json={"checked": "again"}).status_code == 404
 
     # the author's new words: shown as written, with the new date
     new = "Having read the debate again, I stand by every word of what I said about juries then."
@@ -142,6 +176,8 @@ def test_owner_publishes_declines_updates_and_withdraws(site):
 
     # declined with a reason, kept private; withdrawn at the author's request
     assert client.post(f"/api/admin/statements/{cameron}/decline", headers=ADMIN, json={"reason": "x"}).status_code == 422
+    blank = client.post(f"/api/admin/statements/{cameron}/decline", headers=ADMIN, json={"reason": "     "})
+    assert blank.status_code == 400 and "Please give the reason" in blank.json()["detail"]  # a message, not a 500
     assert client.post(f"/api/admin/statements/{cameron}/decline", headers=ADMIN,
                        json={"reason": "It is about another member's conduct."}).status_code == 200
     assert client.post(f"/api/admin/statements/{group}/withdraw", headers=ADMIN, json={}).status_code == 200
@@ -150,7 +186,8 @@ def test_owner_publishes_declines_updates_and_withdraws(site):
     assert everything[cameron]["status"] == "declined" and "conduct" in everything[cameron]["reason"]
     assert everything[group]["status"] == "withdrawn"
     # a declined or withdrawn statement can't be published or changed again
-    assert client.post(f"/api/admin/statements/{cameron}/publish", headers=ADMIN, json={}).status_code == 404
+    assert client.post(f"/api/admin/statements/{cameron}/publish", headers=ADMIN,
+                       json={"checked": "again"}).status_code == 404
     assert client.post(f"/api/admin/statements/{group}/update", headers=ADMIN, json={"text": new}).status_code == 404
     assert client.post("/api/admin/statements/999/withdraw", headers=ADMIN, json={}).status_code == 404
 
@@ -167,12 +204,19 @@ def test_the_statements_commands(settings, monkeypatch, tmp_path):
     listed = run(cli.app, ["statements", "list"])
     assert listed.exit_code == 0 and f"#{sid}  pending" in listed.output and "hilary.benn.mp@parliament.uk" in listed.output
     assert run(cli.app, ["statements", "publish", str(sid)]).exit_code != 0  # --checked is required
+    unsaid = run(cli.app, ["statements", "publish", str(sid), "--checked", " "])  # and must say something
+    assert unsaid.exit_code == 1 and "how you confirmed who sent it" in unsaid.output
+    assert published(state, person=BENN) == []
     assert run(cli.app, ["statements", "publish", str(sid), "--checked", "Replied from parliament.uk"]).exit_code == 0
     assert published(state, person=BENN)[0]["id"] == sid
     words = tmp_path / "new.txt"
     words.write_text("These are the author's new words, sent by email, exactly as written.\n", encoding="utf-8")
     assert run(cli.app, ["statements", "update", str(sid), "--text-file", str(words)]).exit_code == 0
     assert published(state, person=BENN)[0]["text"] == "These are the author's new words, sent by email, exactly as written."
+    no_reason = run(cli.app, ["statements", "decline", str(sid), "--reason", " "])
+    assert no_reason.exit_code == 1 and "Please give the reason" in no_reason.output and "Traceback" not in no_reason.output
+    assert no_reason.exception is None or isinstance(no_reason.exception, SystemExit)
+    assert published(state, person=BENN)[0]["id"] == sid  # still shown
     assert run(cli.app, ["statements", "withdraw", str(sid)]).exit_code == 0
     assert published(state, person=BENN) == []
     assert run(cli.app, ["statements", "decline", str(sid), "--reason", "too late"]).exit_code == 1  # already withdrawn

@@ -82,6 +82,7 @@ from hansard.api.statements import (
     add_statement,
     decline_statement,
     list_statements,
+    person_of,
     publish_statement,
     published,
     update_statement,
@@ -192,7 +193,7 @@ class StatementBody(BaseModel):
 
 class PublishStatementBody(BaseModel):
     person: int | None = None  # the member it is about, when its address isn't their page
-    checked: str | None = Field(default=None, max_length=500)  # how the sender was confirmed (private)
+    checked: str = Field(min_length=1, max_length=500)  # how the sender was confirmed (private); required
 
 
 class DeclineStatementBody(BaseModel):
@@ -294,9 +295,10 @@ KEEP_ALIVE_SECONDS = 15
 
 
 def sse(events: Iterator[dict[str, Any]], keep_alive: float = KEEP_ALIVE_SECONDS) -> Iterator[bytes]:
-    """Server-sent events, with a comment line after every few seconds of silence (while the model is thinking, say):
-    Cloudflare closes a response that sends nothing for 100 seconds. The events are worked out in a thread of their
-    own, which stops at the next event once the reader has gone."""
+    """Server-sent events, with a comment line after a few seconds of silence (while the model is thinking): proxies
+    close a response that sends nothing for too long. The events are worked out in a thread of their own, which stops
+    at the next event once the reader has gone, and closes them, so a briefing nobody is reading stops being written
+    (and paid for)."""
     q: queue.Queue = queue.Queue()
     gone = threading.Event()
     end = object()
@@ -311,7 +313,7 @@ def sse(events: Iterator[dict[str, Any]], keep_alive: float = KEEP_ALIVE_SECONDS
             q.put(exc)
         finally:
             if hasattr(events, "close"):
-                events.close()  # here, in the thread that ran it (a briefing being written stops)
+                events.close()  # here, in the thread that ran it: the model's stream is closed with it
             q.put(end)
 
     threading.Thread(target=work, name="sse", daemon=True).start()
@@ -344,7 +346,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     auth_required = bool(settings.section("auth").get("required", False))
     limiter = RateLimiter(int(settings.usage.get("requests_per_minute", 20)))
     hit_limiter = RateLimiter(120)  # page counts: their own allowance, so browsing never uses up the one for questions
-    cache_hours = float(settings.usage.get("answer_cache_hours", 24))
+    cache_hours = float(settings.usage.get("answer_cache_hours", 168))  # as config/settings.toml: a week
     admin_token = os.environ.get("HANSARD_ADMIN_TOKEN") or None
     lock = threading.Lock()
     dist = Path(settings.section("paths").get("web_dist", REPO_ROOT / "web" / "dist"))
@@ -1841,6 +1843,31 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
     # ---- statements beside items (the right of reply). Kept apart from the record: the briefing pipeline, search
     # and the pages' readable text never read them; the site fetches them on their own, to show beside the item.
+    def item_missing(path: str) -> str | None:
+        """Why a statement can't sit beside the item at this address, when it is known not to be there. Checked: a
+        briefing (it must exist and not be withdrawn) and a member's page. Not checked: topics, debates, bills, party
+        groups, early day motions, committees, inquiries, evidence and devolved sittings, each of which is looked up
+        in its own store; the owner sees the address before a statement is published."""
+        if path.startswith("/b/"):
+            b = get_briefing(state, path.removeprefix("/b/"))
+            if b is None:
+                return ("There is no briefing at that address: please check the address of the briefing the "
+                        "statement is about.")
+            if b["withdrawn_at"]:
+                return "That briefing has been withdrawn, so a statement can't sit beside it."
+        number = person_of(path)
+        if number is not None:
+            try:
+                known = bool(get_people().resolve(number))
+            except Exception:  # the members' data can't be read just now: keep the statement, the owner checks it
+                log.warning("statement about /people/%s accepted without checking the member exists", number,
+                            exc_info=True)
+                return None
+            if not known:
+                return ("There is no member's page at that address: please check the address of the page the "
+                        "statement is about.")
+        return None
+
     @app.post("/api/statements")
     def statement_add(body: StatementBody, request: Request, user=Depends(current_user)):
         visitor, _ = requester(request, user)
@@ -1850,7 +1877,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             raise HTTPException(429, "Thank you, we have your statements. Please email us if there is more to add.")
         try:
             add_statement(state, name=body.name, role=body.role, item=body.item, text=body.text, link=body.link,
-                          email=body.email, visitor=visitor)
+                          email=body.email, visitor=visitor, missing=item_missing)
         except StatementError as exc:
             raise HTTPException(400, str(exc)) from None
         return {"ok": True}
@@ -1870,11 +1897,17 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
     @app.post("/api/admin/statements/{sid}/publish")
     def statement_publish(sid: int, body: PublishStatementBody, user=Depends(admin_user)):
-        return statement_action(publish_statement(state, sid, person=body.person, checked=body.checked))
+        try:
+            return statement_action(publish_statement(state, sid, person=body.person, checked=body.checked))
+        except StatementError as exc:  # how the sender was confirmed is all spaces
+            raise HTTPException(400, str(exc)) from None
 
     @app.post("/api/admin/statements/{sid}/decline")
     def statement_decline(sid: int, body: DeclineStatementBody, user=Depends(admin_user)):
-        return statement_action(decline_statement(state, sid, body.reason))
+        try:
+            return statement_action(decline_statement(state, sid, body.reason))
+        except StatementError as exc:  # a reason of spaces only
+            raise HTTPException(400, str(exc)) from None
 
     @app.post("/api/admin/statements/{sid}/update")
     def statement_update(sid: int, body: UpdateStatementBody, user=Depends(admin_user)):
@@ -1946,7 +1979,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def usage(user=Depends(admin_user)):
         from hansard.offsite import backup_alerts
 
-        backups = Path(os.environ.get("HANSARD_BACKUP_DIR", "/backups"))
+        backups = Path(os.environ.get("HANSARD_BACKUP_DIR") or "/backups")  # set but empty: the default too
         return {**summary(state), "visits": visit_summary(state), "tasks": task_summary(state),
                 "alerts": alerts(state, settings.usage) + backup_alerts(backups),
                 "failures": recent_failures(state), "popular_questions": popular_questions(state)}

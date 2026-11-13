@@ -60,7 +60,7 @@ Then open <http://localhost:8000>.
 Briefings are charged to your Anthropic account, at roughly 5 US cents each (Claude Sonnet 5.5). The same spending limits as the
 public site apply.
 
-**For developers: offline sample.** With Python 3.12+, [uv](https://docs.astral.sh/uv/) and Node 20+, this needs
+**For developers: offline sample.** With Python 3.12+, [uv](https://docs.astral.sh/uv/) and Node 22, this needs
 no downloads and finishes in seconds:
 
 ```bash
@@ -174,12 +174,17 @@ page, data and card then return 410 Gone. `GET /api/admin/briefings` lists recen
 
 **Reports and statements.** The corrections and right-of-reply policy (the charity's impartiality policy, section
 7; decision 31) is explained to the people it concerns on `/named`. Reports from the form on `/corrections`
-(or under a briefing) are listed on the admin page and at `GET /api/admin/reports`, and closed with
+(or under a briefing) are listed on the admin page and at `GET /api/admin/reports` (open requests to remove a
+private person's name or details first, then newest first), and closed with
 `POST /api/admin/reports/<id>/close`; a public note goes to the corrections log. Statements sent from
 `/named` wait as pending: confirm who sent each (usually by writing to their parliament.uk, parliament.scot,
 senedd.wales or niassembly.gov.uk address), then publish it as written or decline it with reasons, never editing it,
 with `hansard statements` or the admin page (`/api/admin/statements`, `…/<id>/publish`, `decline`, `update`,
-`withdraw`). Reply within 5 working days and decide within 20. A published statement shows at once beside its item
+`withdraw`). Publishing needs a note of how the sender was confirmed (`--checked`, or `checked` on the admin
+route): it is kept privately. A statement about a briefing or a member's page is accepted only if that briefing
+exists and has not been withdrawn, or that member exists; the other kinds of page are not looked up, so check the
+address before publishing. Reply within 5 working days and decide within 20. A published statement shows at once
+beside its item
 and on the member's page. Its email address is deleted three months after it is withdrawn or declined, by the
 twice-daily update and whenever statements are written or listed. Statements live only in `data/state.sqlite`, so
 backups include them; nothing that searches the record or writes briefings reads them.
@@ -188,7 +193,13 @@ backups include them; nothing that searches the record or writes briefings reads
 briefings, reports, statements, usage, the answer cache, feedback, visit counts, the sync log and any accounts.
 `hansard backup` makes a checked copy (with `settings.local.toml`) as `data/backups/where-they-stand-DATE.tar.gz`,
 keeping the last 14; `hansard restore FILE` puts one back. On a server set up by `provision.sh`, a timer runs it
-nightly into `deploy/backups/` (see [HOSTING.md](HOSTING.md#backups)).
+nightly into `deploy/backups/` (see [HOSTING.md](HOSTING.md#backups)). A restore checks the backup before it
+replaces anything: a file that is damaged, or is not a backup of this site's records, is refused with
+"Not restored: …" and nothing changes. The database it replaces is kept as `data/state.sqlite.before-restore`
+(with its `-wal` file, if it had one). It holds readers' contact details like the database itself, and nothing
+deletes it for you: delete it once the restored site is right. While it is there, another restore is refused
+("… is still there from an earlier restore: move or delete it first"), so a second restore can never write over
+the only copy of what the first one replaced.
 
 ## Development and tests
 

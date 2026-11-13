@@ -389,12 +389,13 @@ def test_a_citation_across_two_paragraphs_is_accepted():
 
 
 def test_client_has_an_explicit_timeout(monkeypatch):
-    from hansard.rag.answer import make_client
+    from hansard.rag.answer import CONNECT_SECONDS, MAX_RETRIES, TIMEOUT_SECONDS, make_client
 
     monkeypatch.setenv("HANSARD_ANTHROPIC_API_KEY", "test-key")
     client = make_client()
     assert client.timeout.connect == 10.0 and client.timeout.read == 300.0
     assert client.max_retries == 2
+    assert (TIMEOUT_SECONDS, CONNECT_SECONDS, MAX_RETRIES) == (300.0, 10.0, 2)  # the same in every site
 
 
 # ---- ported from Where Countries Stand's verifier ---------------------------------------------------------------
@@ -446,3 +447,31 @@ def test_saved_briefings_with_a_lead_in_in_pieces_are_cleared():
     out = recheck_flags(answer)
     assert [s["status"] for s in out["segments"]] == ["connective", "connective", "cited"]
     assert out["unsupported_segments"] == 0 and out["grounded_ratio"] == 1.0
+
+
+def test_a_short_claim_stays_a_point_to_check_when_a_saved_briefing_is_shown_again():
+    from hansard.rag.verify import _classify_uncited, recheck_flags
+
+    # verify() splits a whole sentence off a lead-in and marks it as a claim, however short it is
+    parts = _classify_uncited("Labour MPs criticised the government. Jane Smith said on 4 May that ", True)
+    assert [p.status for p in parts] == ["unsupported", "connective"]
+    answer = {"segments": [*({"text": p.text, "status": p.status} for p in parts),
+                           {"text": "\"it has failed\"", "status": "cited"}],
+              "unsupported_segments": 1, "grounded_ratio": 0.3}
+    # shown again, it is judged without that knowledge: being short must not clear it
+    assert recheck_flags(answer) is answer
+
+
+def test_a_claim_above_a_lead_in_stays_a_point_to_check_when_shown_again():
+    from hansard.rag.verify import _classify_uncited, recheck_flags
+
+    for block in ("- Spending on the scheme rose by 40% under the last administration\n- Jane Smith said ",
+                  "Was the funding cut by 40% in real terms? Jane Smith said ",
+                  "The scheme was cut by 40% in real terms! Jane Smith said "):
+        parts = _classify_uncited(block, True)
+        assert [p.status for p in parts] == ["unsupported", "connective"], block
+        answer = {"segments": [*({"text": p.text, "status": p.status} for p in parts),
+                               {"text": "\"it has failed\"", "status": "cited"}],
+                  "unsupported_segments": 1, "grounded_ratio": 0.3}
+        # judged again without the block it was written in, it must not pass for the opening of the quotation
+        assert recheck_flags(answer) is answer, block
