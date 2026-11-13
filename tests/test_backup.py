@@ -6,6 +6,7 @@ from __future__ import annotations
 import io
 import sqlite3
 import tarfile
+from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
@@ -78,8 +79,33 @@ def test_the_kept_database_has_writes_still_in_the_write_ahead_log(settings, tmp
     assert (settings.data_dir / "state.sqlite-wal").stat().st_size > 0
     kept = restore_backup(settings, out)
     assert marker(kept) == "after" and marker(settings.state_db) == "before"
-    # a second restore replaces the kept copy and its log together
-    assert marker(restore_backup(settings, out)) == "before"
+
+
+def test_a_second_restore_never_writes_over_the_kept_database(settings, tmp_path):
+    """Restoring the wrong day and then the right one must not lose what was there to begin with."""
+    state = StateDB(settings.state_db)
+    state.set("marker", "monday")
+    wrong = make_backup(settings, tmp_path / "backups", day="2026-10-01")
+    state.set("marker", "tuesday")
+    right = make_backup(settings, tmp_path / "backups", day="2026-10-02")
+    state.set("marker", "live")
+    kept = restore_backup(settings, wrong)
+    with pytest.raises(RuntimeError, match="state.sqlite.before-restore is still there from an earlier restore: "
+                                           "move or delete it first"):
+        restore_backup(settings, right)
+    # nothing was touched: the live database, the kept one and the backup are all still there
+    assert marker(settings.state_db) == "monday" and marker(kept) == "live" and right.exists()
+    assert not any(p.name.startswith("tmp") for p in settings.data_dir.iterdir())
+    r = CliRunner().invoke(app, ["restore", str(right), "--yes"])
+    assert r.exit_code == 1 and "Not restored: " in r.output and "is still there from an earlier restore" in r.output
+    # a write-ahead log left on its own by an earlier restore stops it too: it is not this database's
+    kept.rename(tmp_path / "set-aside.sqlite")
+    Path(f"{kept}-wal").write_bytes(b"left behind")
+    with pytest.raises(RuntimeError, match="before-restore-wal is still there"):
+        restore_backup(settings, right)
+    Path(f"{kept}-wal").unlink()
+    # once the kept copy has been moved away, the right day goes back, and what it replaces is kept in turn
+    assert marker(restore_backup(settings, right)) == "monday" and marker(settings.state_db) == "tuesday"
 
 
 def test_restore_refuses_a_damaged_or_foreign_file_and_changes_nothing(settings, tmp_path):
@@ -130,12 +156,12 @@ def test_the_restore_command(settings, tmp_path):
     r = CliRunner().invoke(app, ["restore", str(out)], input="n\n")  # the question is still asked
     assert r.exit_code == 1 and "This replaces the current saved briefings" in r.output
     assert marker(settings.state_db) == "after"
-    r = CliRunner().invoke(app, ["restore", str(out), "--yes"])
-    assert r.exit_code == 0, r.output
-    assert "Restored. Start the site again." in r.output and "state.sqlite.before-restore" in r.output
-    assert marker(settings.state_db) == "before"
     not_a_backup = tmp_path / "notes.tar.gz"
     not_a_backup.write_bytes(b"x" * 1000)
     r = CliRunner().invoke(app, ["restore", str(not_a_backup), "--yes"])
     assert r.exit_code == 1 and "Not restored: notes.tar.gz could not be read" in r.output
-    assert "Traceback" not in r.output and marker(settings.state_db) == "before"
+    assert "Traceback" not in r.output and marker(settings.state_db) == "after"
+    r = CliRunner().invoke(app, ["restore", str(out), "--yes"])
+    assert r.exit_code == 0, r.output
+    assert "Restored. Start the site again." in r.output and "state.sqlite.before-restore" in r.output
+    assert marker(settings.state_db) == "before"

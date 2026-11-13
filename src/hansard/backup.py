@@ -65,8 +65,13 @@ def make_backup(settings: Settings, dest: Path | None = None, keep: int = 14,
 def restore_backup(settings: Settings, archive: Path) -> Path | None:
     """Put a backup's state database (and local settings) back. Stop the site first. The backup is unpacked beside
     the database and checked before anything is replaced; the database it replaces is kept beside it as
-    ``state.sqlite.before-restore``, which is returned (None when there was none)."""
+    ``state.sqlite.before-restore``, which is returned (None when there was none). A kept copy from an earlier
+    restore is never written over: the restore is refused until it has been moved or deleted."""
     archive, state_db = Path(archive), settings.state_db
+    kept = state_db.with_name(state_db.name + ".before-restore") if state_db.exists() else None
+    for earlier in (kept, Path(f"{kept}-wal")) if kept else ():
+        if earlier.exists():  # the only copy of what an earlier restore replaced: never written over
+            raise RuntimeError(f"{earlier} is still there from an earlier restore: move or delete it first.")
     state_db.parent.mkdir(parents=True, exist_ok=True)
     # beside the database, not in the system's temporary folder: the swap is then a rename on one file system
     with tempfile.TemporaryDirectory(dir=state_db.parent) as tmp:
@@ -92,17 +97,18 @@ def restore_backup(settings: Settings, archive: Path) -> Path | None:
             raise RuntimeError(f"the backup's database failed its integrity check: {ok}")
         if REQUIRED_TABLES - tables:
             raise RuntimeError(f"{archive.name} is not a backup of this site's state database")
-        kept = None
-        if state_db.exists():
-            kept = state_db.with_name(state_db.name + ".before-restore")
-            shutil.copy2(state_db, kept)
-            # This database keeps its newest writes in a write-ahead log until they are folded in (store/state.py),
-            # so the log is kept with the copy: SQLite reads the two together. One left by an earlier restore
-            # belongs to another database and must not stay beside this copy.
-            for suffix in ("-wal", "-shm"):
-                Path(f"{kept}{suffix}").unlink(missing_ok=True)
+        if kept:
+            # Copied under a temporary name and renamed into place, so a failure part-way never leaves a damaged
+            # kept copy. This database keeps its newest writes in a write-ahead log until they are folded in
+            # (store/state.py), so the log is kept with the copy: SQLite reads the two together. The log is put in
+            # place first: the copy is never there without it.
+            copy = Path(tmp) / kept.name
+            shutil.copy2(state_db, copy)
+            Path(f"{kept}-shm").unlink(missing_ok=True)  # an index of a log that is no longer there; SQLite remakes it
             if Path(f"{state_db}-wal").exists():
-                shutil.copy2(f"{state_db}-wal", f"{kept}-wal")
+                shutil.copy2(f"{state_db}-wal", f"{copy}-wal")
+                Path(f"{copy}-wal").replace(f"{kept}-wal")
+            copy.replace(kept)
         for suffix in ("-wal", "-shm", "-journal"):  # left from the database being replaced, they would corrupt it
             Path(f"{state_db}{suffix}").unlink(missing_ok=True)
         db.chmod(0o600)  # as the backup: it holds password hashes and readers' contact details

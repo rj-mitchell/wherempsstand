@@ -731,7 +731,9 @@ command says "Not restored: …" and changes nothing. What was there before is k
 `state.sqlite.before-restore`, in case the restore was a mistake. It holds the same private details as the
 database, and nothing deletes it for you: delete it once the site is right
 (`docker compose run --rm -T app sh -c 'rm -f /data/state.sqlite.before-restore*'`). A restore needs free disk
-space of about twice the size of `state.sqlite`.
+space of about twice the size of `state.sqlite`. While `state.sqlite.before-restore` is there, another restore is
+refused, so that it is never written over: if you restored the wrong day, move it somewhere safe first (it is the
+only copy of what was there before), then restore the right day.
 
 ## Spending limits
 

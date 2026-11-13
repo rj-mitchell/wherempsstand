@@ -197,7 +197,9 @@ nightly into `deploy/backups/` (see [HOSTING.md](HOSTING.md#backups)). A restore
 replaces anything: a file that is damaged, or is not a backup of this site's records, is refused with
 "Not restored: …" and nothing changes. The database it replaces is kept as `data/state.sqlite.before-restore`
 (with its `-wal` file, if it had one). It holds readers' contact details like the database itself, and nothing
-deletes it for you: delete it once the restored site is right.
+deletes it for you: delete it once the restored site is right. While it is there, another restore is refused
+("… is still there from an earlier restore: move or delete it first"), so a second restore can never write over
+the only copy of what the first one replaced.
 
 ## Development and tests
 
