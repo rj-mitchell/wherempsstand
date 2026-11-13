@@ -41,6 +41,8 @@ def add_report(state: StateDB, kind: str, message: str, briefing_id: str | None,
 
 
 def list_reports(state: StateDB, status: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+    """Reports, newest first, but open requests to remove a private person's name or details before everything
+    else (the impartiality policy, 7.1: they are the ones that cannot wait)."""
     sql = ("SELECT id, at, kind, briefing_id, page, message, contact, status, closed_at, resolution, public_note "
            "FROM reports")
     args: tuple = ()
@@ -48,7 +50,8 @@ def list_reports(state: StateDB, status: str | None = None, limit: int = 100) ->
         sql += " WHERE status = ?"
         args = (status,)
     with state.connect() as con:
-        return [dict(r) for r in con.execute(sql + " ORDER BY at DESC LIMIT ?", (*args, limit)).fetchall()]
+        return [dict(r) for r in con.execute(
+            sql + " ORDER BY (status = 'open' AND kind = 'takedown') DESC, at DESC LIMIT ?", (*args, limit)).fetchall()]
 
 
 def close_report(state: StateDB, report_id: int, status: str, resolution: str, public_note: str | None) -> bool:

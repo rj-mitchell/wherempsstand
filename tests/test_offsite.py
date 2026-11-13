@@ -92,6 +92,18 @@ def test_failures_are_reported_and_recorded(tmp_path):
              client=httpx.Client(transport=httpx.MockTransport(FakeB2(bucket="someone-else"))))
 
 
+def test_sites_sharing_a_bucket_keep_their_own_backups(tmp_path):
+    """Another of the charity's sites' backups in the same bucket are neither counted nor deleted."""
+    b2 = FakeB2()
+    b2.files["wcs-state-2026-10-01.sqlite.gz"] = b"another site's"
+    client = httpx.Client(transport=httpx.MockTransport(b2))
+    for day in ("2026-10-11", "2026-10-12"):
+        out = send(archive(tmp_path, day), keep=1, env=ENV, client=client)
+    assert out["stored"] == 1 and "wcs-state-2026-10-01.sqlite.gz" in b2.files
+    assert sorted(b2.files) == ["wcs-state-2026-10-01.sqlite.gz", "where-they-stand-2026-10-12.tar.gz"]
+    assert check(env=ENV, client=client)["backups"] == 1
+
+
 def test_admin_alerts(tmp_path):
     now = datetime.now(UTC)
     assert backup_alerts(tmp_path / "missing") == []
@@ -99,10 +111,47 @@ def test_admin_alerts(tmp_path):
     a = archive(tmp_path, "2026-10-12")
     old = (now - timedelta(days=3)).timestamp()
     os.utime(a, (old, old))
-    texts = [x["text"] for x in backup_alerts(tmp_path, env={})]
-    assert any("over two days ago" in t for t in texts) and any("server only" in t for t in texts)
+    alerts = backup_alerts(tmp_path, env={})
+    assert alerts[0]["level"] == "error" and "over two days ago" in alerts[0]["text"]
+    assert "server only" in alerts[1]["text"]
     os.utime(a, None)
+    assert "No off-site copy has been made yet" in backup_alerts(tmp_path, env=ENV)[0]["text"]
     (tmp_path / "offsite.json").write_text(json.dumps({"ok": False, "when": now.isoformat(), "error": "503"}))
     assert backup_alerts(tmp_path, env=ENV)[0]["level"] == "error"
+    # a failed copy whose record has no usable time (null, or a number) is still reported, not an exception
+    for when in (None, 1731400000):
+        (tmp_path / "offsite.json").write_text(json.dumps({"ok": False, "when": when, "error": "503"}))
+        alert = backup_alerts(tmp_path, env=ENV)[0]
+        assert alert["level"] == "error" and alert["text"].endswith("): 503")
+    stale = (now - timedelta(days=3)).isoformat()
+    (tmp_path / "offsite.json").write_text(json.dumps({"ok": True, "when": stale}))
+    stale_alert = backup_alerts(tmp_path, env=ENV)[0]
+    assert stale_alert["level"] == "error" and "off-site copy was over two days ago" in stale_alert["text"]
     (tmp_path / "offsite.json").write_text(json.dumps({"ok": True, "when": now.isoformat()}))
     assert backup_alerts(tmp_path, env=ENV) == []
+
+
+def test_the_admin_page_lists_backup_alerts_and_an_empty_folder_setting_means_the_default(indexed_settings, tmp_path,
+                                                                                          monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from .test_api import make_app
+
+    monkeypatch.setenv("HANSARD_ADMIN_TOKEN", "s3cret-token")
+    for name in ENV:
+        monkeypatch.delenv(name, raising=False)
+    app, _, _ = make_app(indexed_settings, tmp_path, auth=False)
+    client = TestClient(app)
+
+    def alerts() -> list[str]:
+        usage = client.get("/api/admin/usage", headers={"Authorization": "Bearer s3cret-token"})
+        return [a["text"] for a in usage.json()["alerts"]]
+
+    folder = tmp_path / "backups"
+    folder.mkdir()
+    monkeypatch.setenv("HANSARD_BACKUP_DIR", str(folder))
+    assert "No backups have been made yet." in alerts()
+    monkeypatch.delenv("HANSARD_BACKUP_DIR")
+    default = alerts()  # /backups: not there on a developer's machine, so nothing to say
+    monkeypatch.setenv("HANSARD_BACKUP_DIR", "")  # as "HANSARD_BACKUP_DIR=" in deploy/.env: not the working folder
+    assert alerts() == default
