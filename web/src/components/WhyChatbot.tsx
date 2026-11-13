@@ -18,7 +18,7 @@ export function WhyChatbot() {
           </li>
           <li>
             <strong>Every point linked and checked.</strong> Each point links to its source. Citations are checked
-            against the source text, quotations word for word, and any statement no source supports is flagged.
+            against the source text, quotations word for word, and sentences no source supports are flagged.
           </li>
           <li>
             <strong>Up to date.</strong> Hansard is read in twice a day.
@@ -34,7 +34,7 @@ export function WhyChatbot() {
         </ul>
         <p>
           Briefings here are written by AI too. The difference is what the AI is given and how it is checked.{" "}
-          <a href="/methodology#chatbot">How it works</a>
+          <a href="/methodology#chatbot" className="nowrap">How it works</a>
         </p>
       </details>
     </div>
