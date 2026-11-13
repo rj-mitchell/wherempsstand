@@ -18,6 +18,7 @@ import { fmtDate } from "./render";
 import { FamilyEndorsement } from "./components/Family";
 import { SameQuestion } from "./components/SameQuestion";
 import { SiteFooter } from "./components/SiteFooter";
+import { WhyChatbot } from "./components/WhyChatbot";
 import { followUpsFor } from "./followups";
 import { COMPARE_HANDOVER, MENUS, NAV } from "./nav";
 import type {
@@ -700,11 +701,12 @@ export default function App() {
               Ask in your own words. Get a short briefing on who said what, from which side and in what role, with every
               point cited to Hansard, or the most relevant records on their own, without AI.
             </p>
+            {composer("composer composer-inline")}
+            <WhyChatbot />
             <p className="and-more">
               Not just MPs, despite the name: peers, select committees and their witnesses, and the Scottish
               Parliament, the Senedd and the Northern Ireland Assembly are all in here too.
             </p>
-            {composer("composer composer-inline")}
             <h3 className="examples-head">Try</h3>
             <ol className="examples">
               {examplesFor(new Date()).map((ex) => (
@@ -739,25 +741,13 @@ export default function App() {
               worth using alongside this one.
             </p>
             <h3 className="examples-head">How this differs from a search</h3>
-            <ul className="ask-why">
-              <li>
-                <strong>Answers, not a list of hits.</strong> Hansard's own search and TheyWorkForYou list every
-                mention of the words you type, in date order, for you to read through. Here the question is read for
-                its meaning, so the MPs and peers who spoke on it are found even when they put it differently, and the
-                speeches, answers, statements and votes since {meta ? meta.archive_start.slice(0, 4) : "1997"} that
-                answer it are brought together in one briefing.
-              </li>
-              <li>
-                <strong>Balanced by design.</strong> Each briefing draws on ministers and the opposition, backbenchers
-                and peers, across parties and parts of the country, and shows that spread. It takes no view of its
-                own.
-              </li>
-              <li>
-                <strong>Checkable.</strong> Each point links to the record it comes from, with the speaker's party,
-                seat and role on the day. Every citation and quotation is checked word for word against the source,
-                and the few statements not tied to a source are counted under the briefing, so you know what to check.
-              </li>
-            </ul>
+            <p>
+              <strong>Answers, not a list of hits.</strong> Hansard's own search and TheyWorkForYou list every mention
+              of the words you type, in date order, for you to read through. Here the question is read for its
+              meaning, so the MPs and peers who spoke on it are found even when they put it differently, and the
+              speeches, answers, statements and votes since {meta ? meta.archive_start.slice(0, 4) : "1997"} that
+              answer it are brought together in one briefing.
+            </p>
           </section>
         )}
         {turns.map((t) => (

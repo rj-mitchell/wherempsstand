@@ -19,6 +19,7 @@
         <nav class="toc" aria-label="On this page">
           <ol>
             <li><a href="#what">What it does, and what it does not</a></li>
+            <li><a href="#chatbot">Why use this rather than a chatbot?</a></li>
             <li><a href="#coverage">What is covered</a></li>
             <li><a href="#how">How a question is answered</a></li>
             <li><a href="#people">Who said it, as they were at the time</a></li>
@@ -49,6 +50,55 @@
           Where MPs Stand answers questions instead. Ask, in plain English, what has been said on a subject and by
           whom, and it writes a short briefing on the positions taken, grouped by who holds them, with every point
           linked to the speech it came from.
+        </p>
+
+        <h2 id="chatbot">Why use this rather than a chatbot?</h2>
+        <p>
+          Anyone can put a question about Parliament to a general AI chatbot. This is what Where MPs Stand does
+          instead; the rest of this page gives the detail.
+        </p>
+        <ul>
+          <li>
+            <strong>Only the record.</strong> The AI that writes a briefing is given only the records found for your
+            question, and may use nothing else (<a href="#how">step 5</a>): Hansard and, where they bear on the
+            question, early day motions, committee evidence and the devolved parliaments' official reports. A
+            follow-up question also carries a short summary of the briefings before it, for context only.
+          </li>
+          <li>
+            <strong>Every point linked and checked.</strong> Each point links to its source. Citations are checked
+            against the source text, and one that does not match is removed. Quotations are checked word for word,
+            and sentences no source supports are flagged: they are counted under the briefing and can be shown
+            (<a href="#how">step 6</a>; <a href="#warnings">what the warnings mean</a>).
+          </li>
+          <li>
+            <strong>Up to date.</strong> Hansard is read in twice a day, at about 07:15 and 19:15 UK time. The
+            <a href="/status">status page</a> shows the most recent record and the last update.
+          </li>
+          <li>
+            <strong>It says when there is nothing.</strong> If the record holds nothing relevant, you see "No records
+            found", not a guess, and no briefing is written (<a href="#how">step 7</a>).
+          </li>
+          <li>
+            <strong>Balanced by design.</strong> Evidence is chosen across ministers, opposition and backbenchers, not
+            only by relevance, with no more than two contributions from any one speaker, and the spread is shown with
+            each briefing (<a href="#how">step 3</a>). Briefings report in neutral words
+            (<a href="#neutrality">neutrality</a>).
+          </li>
+          <li>
+            <strong>Records searched in full.</strong> Parliament's debates and votes since 1997 (written answers
+            since 2001), each MP's votes, interests and donations, all searchable and linked.
+            <a href="#coverage">What is covered</a> gives the date each part starts. Every record is found by keyword
+            search; meaning-based search is built gradually, newest records first (<a href="#limits">limitations</a>).
+          </li>
+          <li>
+            <strong>Open.</strong> The method is this page, and the
+            <a href="https://github.com/rj-mitchell/wherempsstand">code</a> is published. Every briefing is labelled
+            as written by AI, the site is free, and it doesn't track you (<a href="/privacy">privacy</a>).
+          </li>
+        </ul>
+        <p>
+          Briefings here are written by AI too. The difference is what the AI is given and how it is checked.
+          <a href="#how">How it works</a>
         </p>
 
         <h2 id="coverage">What is covered</h2>

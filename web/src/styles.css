@@ -3848,7 +3848,39 @@ main:focus {
   text-transform: none;
 }
 
-/* the gentle note under the home page's introduction that the site covers more than MPs */
+/* under the home page's question box: the line that is always shown, and the fold-out that answers "Why use this
+   rather than a chatbot?" (WhyChatbot.tsx). It sits under the box, so opening it never moves the box */
+.why {
+  margin-block-start: calc(-1 * var(--space-xs)); /* close under the box it speaks for */
+  font-family: var(--sans);
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+.why-line {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.why-chatbot > summary {
+  display: flex;
+  align-items: center;
+  inline-size: fit-content;
+  color: var(--accent);
+}
+
+.why-chatbot > ul {
+  display: grid;
+  gap: var(--space-2xs);
+  margin-block: var(--space-2xs);
+  padding-inline-start: 1.3em; /* the indent of a plain list in running text (.prose ul) */
+}
+
+.why-chatbot strong {
+  color: var(--ink);
+}
+
+/* the gentle note under the home page's question box that the site covers more than MPs */
 .and-more {
   font-family: var(--sans);
   font-size: var(--step--1);
