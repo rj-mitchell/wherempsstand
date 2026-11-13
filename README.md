@@ -128,7 +128,7 @@ follow-up questions that build on the briefing.
 
 ## Try it
 
-With Python 3.12+, [uv](https://docs.astral.sh/uv/) and Node 20+, an offline sample needs no downloads and finishes
+With Python 3.12+, [uv](https://docs.astral.sh/uv/) and Node 22, an offline sample needs no downloads and finishes
 in seconds:
 
 ```bash
