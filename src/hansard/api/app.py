@@ -195,7 +195,7 @@ class StatementBody(BaseModel):
 
 class PublishStatementBody(BaseModel):
     person: int | None = None  # the member it is about, when its address isn't their page
-    checked: str | None = Field(default=None, max_length=500)  # how the sender was confirmed (private)
+    checked: str = Field(min_length=1, max_length=500)  # how the sender was confirmed (private); required
 
 
 class DeclineStatementBody(BaseModel):
@@ -1906,7 +1906,10 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
     @app.post("/api/admin/statements/{sid}/publish")
     def statement_publish(sid: int, body: PublishStatementBody, user=Depends(admin_user)):
-        return statement_action(publish_statement(state, sid, person=body.person, checked=body.checked))
+        try:
+            return statement_action(publish_statement(state, sid, person=body.person, checked=body.checked))
+        except StatementError as exc:  # how the sender was confirmed is all spaces
+            raise HTTPException(400, str(exc)) from None
 
     @app.post("/api/admin/statements/{sid}/decline")
     def statement_decline(sid: int, body: DeclineStatementBody, user=Depends(admin_user)):

@@ -197,15 +197,17 @@ def published(state: StateDB, *, paths: list[str] | tuple[str, ...] = (), person
 
 
 def publish_statement(state: StateDB, sid: int, *, person: int | None = None, checked: str | None = None) -> bool:
-    """Publish a pending statement as written, once the owner has confirmed who sent it (``checked`` notes how,
-    privately). ``person`` is the member it is about, when its address isn't their own page."""
+    """Publish a pending statement as written, once the owner has confirmed who sent it (``checked`` says how,
+    privately, and is required). ``person`` is the member it is about, when its address isn't their own page."""
     s = get_statement(state, sid)
     if not s or s["status"] != "pending":
         return False
+    checked = (checked or "").strip()
+    if not checked:
+        raise StatementError("Please say how you confirmed who sent it: it is kept privately.")
     with state.connect() as con:
         con.execute("UPDATE statements SET status = 'published', published_at = ?, person = ?, checked = ? "
-                    "WHERE id = ?", (utcnow(), person if person is not None else s["person"],
-                                     (checked or "").strip() or None, sid))
+                    "WHERE id = ?", (utcnow(), person if person is not None else s["person"], checked, sid))
     return True
 
 

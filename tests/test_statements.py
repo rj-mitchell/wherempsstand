@@ -145,7 +145,14 @@ def test_owner_publishes_declines_updates_and_withdraws(site):
                      json={"checked": "Replied from his parliament.uk address"})
     assert ok.status_code == 200
     # a statement about a page that isn't the member's own is given the member when published
-    client.post(f"/api/admin/statements/{group}/publish", headers=ADMIN, json={"person": BENN})
+    # how the sender was confirmed is required, as on the command line: without it nothing is published
+    for body in ({"person": BENN}, {"person": BENN, "checked": ""}):
+        assert client.post(f"/api/admin/statements/{group}/publish", headers=ADMIN, json=body).status_code == 422
+    spaces = client.post(f"/api/admin/statements/{group}/publish", headers=ADMIN, json={"person": BENN, "checked": "  "})
+    assert spaces.status_code == 400 and "how you confirmed who sent it" in spaces.json()["detail"]
+    assert [s["item"] for s in client.get(f"/api/statements?person={BENN}").json()["statements"]] == ["/people/10669"]
+    client.post(f"/api/admin/statements/{group}/publish", headers=ADMIN,
+                json={"person": BENN, "checked": "Phoned the group's office"})
     shown = client.get(f"/api/statements?person={BENN}").json()["statements"]
     assert [s["item"] for s in shown] == ["/people/10669", "/groups/commons/socialist-campaign-group"]
     assert set(shown[0]) == {"id", "name", "role", "item", "person", "text", "link", "date"}  # never the email
@@ -155,7 +162,8 @@ def test_owner_publishes_declines_updates_and_withdraws(site):
     assert client.get("/api/statements").json() == {"statements": []}
 
     # published twice: refused
-    assert client.post(f"/api/admin/statements/{benn}/publish", headers=ADMIN, json={}).status_code == 404
+    assert client.post(f"/api/admin/statements/{benn}/publish", headers=ADMIN,
+                       json={"checked": "again"}).status_code == 404
 
     # the author's new words: shown as written, with the new date
     new = "Having read the debate again, I stand by every word of what I said about juries then."
@@ -178,7 +186,8 @@ def test_owner_publishes_declines_updates_and_withdraws(site):
     assert everything[cameron]["status"] == "declined" and "conduct" in everything[cameron]["reason"]
     assert everything[group]["status"] == "withdrawn"
     # a declined or withdrawn statement can't be published or changed again
-    assert client.post(f"/api/admin/statements/{cameron}/publish", headers=ADMIN, json={}).status_code == 404
+    assert client.post(f"/api/admin/statements/{cameron}/publish", headers=ADMIN,
+                       json={"checked": "again"}).status_code == 404
     assert client.post(f"/api/admin/statements/{group}/update", headers=ADMIN, json={"text": new}).status_code == 404
     assert client.post("/api/admin/statements/999/withdraw", headers=ADMIN, json={}).status_code == 404
 
@@ -195,6 +204,9 @@ def test_the_statements_commands(settings, monkeypatch, tmp_path):
     listed = run(cli.app, ["statements", "list"])
     assert listed.exit_code == 0 and f"#{sid}  pending" in listed.output and "hilary.benn.mp@parliament.uk" in listed.output
     assert run(cli.app, ["statements", "publish", str(sid)]).exit_code != 0  # --checked is required
+    unsaid = run(cli.app, ["statements", "publish", str(sid), "--checked", " "])  # and must say something
+    assert unsaid.exit_code == 1 and "how you confirmed who sent it" in unsaid.output
+    assert published(state, person=BENN) == []
     assert run(cli.app, ["statements", "publish", str(sid), "--checked", "Replied from parliament.uk"]).exit_code == 0
     assert published(state, person=BENN)[0]["id"] == sid
     words = tmp_path / "new.txt"

@@ -832,10 +832,14 @@ def statements_publish(sid: int = typer.Argument(..., help="the statement's numb
                        person: int = typer.Option(None, help="the member it is about (their number, as in "
                                                              "/people/<number>), when its address isn't their page")):
     """Publish a pending statement as written, once you have confirmed who sent it."""
-    from hansard.api.statements import publish_statement
+    from hansard.api.statements import StatementError, publish_statement
 
-    _statement_done(publish_statement(_statements_state(), sid, person=person, checked=checked),
-                    f"published #{sid}")
+    try:
+        done = publish_statement(_statements_state(), sid, person=person, checked=checked)
+    except StatementError as exc:  # --checked "" says nothing
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from None
+    _statement_done(done, f"published #{sid}")
 
 
 @statements_app.command("decline")
