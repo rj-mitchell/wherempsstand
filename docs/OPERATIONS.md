@@ -188,7 +188,10 @@ backups include them; nothing that searches the record or writes briefings reads
 briefings, reports, statements, usage, the answer cache, feedback, visit counts, the sync log and any accounts.
 `hansard backup` makes a checked copy (with `settings.local.toml`) as `data/backups/where-they-stand-DATE.tar.gz`,
 keeping the last 14; `hansard restore FILE` puts one back. On a server set up by `provision.sh`, a timer runs it
-nightly into `deploy/backups/` (see [HOSTING.md](HOSTING.md#backups)).
+nightly into `deploy/backups/` (see [HOSTING.md](HOSTING.md#backups)). A restore checks the backup before it
+replaces anything: a file that is damaged, or is not a backup of this site's records, is refused with
+"Not restored: …" and nothing changes. The database it replaces is kept as `data/state.sqlite.before-restore`
+(with its `-wal` file, if it had one); delete it once the restored site is right.
 
 ## Development and tests
 

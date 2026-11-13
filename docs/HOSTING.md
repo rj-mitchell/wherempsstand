@@ -726,6 +726,10 @@ docker compose start app
 
 (Use the date of the backup you want; `ls backups` lists them.)
 
+The backup is checked before anything is replaced. If it is damaged, or is not one of this site's backups, the
+command says "Not restored: …" and changes nothing. What was there before is kept in the data folder as
+`state.sqlite.before-restore`, in case the restore was a mistake; it can be deleted once the site is right.
+
 ## Spending limits
 
 Every 10 new briefings in a day, a visitor sees a short note on what the site costs, with a link to the charity's

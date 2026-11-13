@@ -745,13 +745,18 @@ def offsite():
 @app.command()
 def restore(archive: Path = typer.Argument(..., exists=True, dir_okay=False),
             yes: bool = typer.Option(False, "--yes", help="do not ask for confirmation")):
-    """Put a backup back (stop the site first). Replaces the current saved briefings, reports and usage."""
+    """Put a backup back (stop the site first). Replaces the current saved briefings, reports and usage. The backup
+    is checked before anything is replaced, and the database it replaces is kept as state.sqlite.before-restore."""
     from hansard.backup import restore_backup
 
     if not yes:
         typer.confirm("This replaces the current saved briefings, reports and usage records. Continue?", abort=True)
-    restore_backup(_settings(), archive)
-    typer.echo("Restored. Start the site again.")
+    try:
+        kept = restore_backup(_settings(), archive)
+    except (OSError, RuntimeError) as exc:
+        typer.echo(f"Not restored: {exc}", err=True)
+        raise typer.Exit(1) from exc
+    typer.echo("Restored. Start the site again." + (f" The database it replaced is kept as {kept}." if kept else ""))
 
 
 @user_app.command("add")
