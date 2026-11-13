@@ -660,6 +660,20 @@ def test_briefings_in_progress_count_against_the_caps():
     assert f.running == {} and f.pending_usd() == 0
 
 
+def test_the_settings_file_says_what_the_code_falls_back_to(indexed_settings):
+    """The limits on briefings in progress, their estimated cost and the cache's life are written in
+    config/settings.toml, with the values the code uses when a key is missing."""
+    import inspect
+
+    from hansard.api.usage import InFlight
+
+    u = indexed_settings.raw["usage"]
+    defaults = {k: p.default for k, p in inspect.signature(InFlight).parameters.items()}
+    assert (u["briefings_at_once_per_reader"], u["briefings_at_once"], u["briefing_estimate_usd"]) == \
+        (defaults["per_key"], defaults["total"], defaults["estimate_usd"]) == (2, 8, 0.15)
+    assert u["answer_cache_hours"] == 168
+
+
 def test_an_ipv6_connection_counts_as_one_visitor():
     from hansard.api.usage import network_of
 

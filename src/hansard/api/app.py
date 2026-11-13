@@ -355,7 +355,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     auth_required = bool(settings.section("auth").get("required", False))
     limiter = RateLimiter(int(settings.usage.get("requests_per_minute", 20)))
     hit_limiter = RateLimiter(120)  # page counts: their own allowance, so browsing never uses up the one for questions
-    cache_hours = float(settings.usage.get("answer_cache_hours", 24))
+    cache_hours = float(settings.usage.get("answer_cache_hours", 168))  # as config/settings.toml: a week
     admin_token = os.environ.get("HANSARD_ADMIN_TOKEN") or None
     lock = threading.Lock()
     dist = Path(settings.section("paths").get("web_dist", REPO_ROOT / "web" / "dist"))
