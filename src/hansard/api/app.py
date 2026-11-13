@@ -1910,7 +1910,10 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
     @app.post("/api/admin/statements/{sid}/decline")
     def statement_decline(sid: int, body: DeclineStatementBody, user=Depends(admin_user)):
-        return statement_action(decline_statement(state, sid, body.reason))
+        try:
+            return statement_action(decline_statement(state, sid, body.reason))
+        except StatementError as exc:  # a reason of spaces only
+            raise HTTPException(400, str(exc)) from None
 
     @app.post("/api/admin/statements/{sid}/update")
     def statement_update(sid: int, body: UpdateStatementBody, user=Depends(admin_user)):

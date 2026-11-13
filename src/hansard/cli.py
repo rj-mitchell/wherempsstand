@@ -841,10 +841,14 @@ def statements_publish(sid: int = typer.Argument(..., help="the statement's numb
 @statements_app.command("decline")
 def statements_decline(sid: int, reason: str = typer.Option(..., help="why: sent to the author, never shown")):
     """Decline a pending statement, or take down a published one that breaks the rules, with the reason."""
-    from hansard.api.statements import decline_statement
+    from hansard.api.statements import StatementError, decline_statement
 
-    _statement_done(decline_statement(_statements_state(), sid, reason),
-                    f"declined #{sid}: tell the author why; their email address is deleted in three months")
+    try:
+        done = decline_statement(_statements_state(), sid, reason)
+    except StatementError as exc:  # no reason given
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from None
+    _statement_done(done, f"declined #{sid}: tell the author why; their email address is deleted in three months")
 
 
 @statements_app.command("update")

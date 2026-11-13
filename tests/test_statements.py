@@ -168,6 +168,8 @@ def test_owner_publishes_declines_updates_and_withdraws(site):
 
     # declined with a reason, kept private; withdrawn at the author's request
     assert client.post(f"/api/admin/statements/{cameron}/decline", headers=ADMIN, json={"reason": "x"}).status_code == 422
+    blank = client.post(f"/api/admin/statements/{cameron}/decline", headers=ADMIN, json={"reason": "     "})
+    assert blank.status_code == 400 and "Please give the reason" in blank.json()["detail"]  # a message, not a 500
     assert client.post(f"/api/admin/statements/{cameron}/decline", headers=ADMIN,
                        json={"reason": "It is about another member's conduct."}).status_code == 200
     assert client.post(f"/api/admin/statements/{group}/withdraw", headers=ADMIN, json={}).status_code == 200
@@ -199,6 +201,10 @@ def test_the_statements_commands(settings, monkeypatch, tmp_path):
     words.write_text("These are the author's new words, sent by email, exactly as written.\n", encoding="utf-8")
     assert run(cli.app, ["statements", "update", str(sid), "--text-file", str(words)]).exit_code == 0
     assert published(state, person=BENN)[0]["text"] == "These are the author's new words, sent by email, exactly as written."
+    no_reason = run(cli.app, ["statements", "decline", str(sid), "--reason", " "])
+    assert no_reason.exit_code == 1 and "Please give the reason" in no_reason.output and "Traceback" not in no_reason.output
+    assert no_reason.exception is None or isinstance(no_reason.exception, SystemExit)
+    assert published(state, person=BENN)[0]["id"] == sid  # still shown
     assert run(cli.app, ["statements", "withdraw", str(sid)]).exit_code == 0
     assert published(state, person=BENN) == []
     assert run(cli.app, ["statements", "decline", str(sid), "--reason", "too late"]).exit_code == 1  # already withdrawn
