@@ -1988,7 +1988,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def usage(user=Depends(admin_user)):
         from hansard.offsite import backup_alerts
 
-        backups = Path(os.environ.get("HANSARD_BACKUP_DIR", "/backups"))
+        backups = Path(os.environ.get("HANSARD_BACKUP_DIR") or "/backups")  # set but empty: the default too
         return {**summary(state), "visits": visit_summary(state), "tasks": task_summary(state),
                 "alerts": alerts(state, settings.usage) + backup_alerts(backups),
                 "failures": recent_failures(state), "popular_questions": popular_questions(state)}
