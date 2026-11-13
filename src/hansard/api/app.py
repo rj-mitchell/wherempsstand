@@ -119,11 +119,9 @@ from hansard.devolution import notes_for
 from hansard.engine import Engine, Scope
 from hansard.rag import prompts
 from hansard.rag.interests import without_public_office
-from hansard.rag.neutral import still_loaded
 from hansard.rag.pipeline import AskRequest, Pipeline
 from hansard.rag.query_parse import ITL1_REGIONS, QueryPlan, parse_model
 from hansard.rag.query_parse import system_prompt as query_parse_instructions
-from hansard.rag.verify import recheck_flags
 from hansard.reference.portfolios import PORTFOLIOS
 from hansard.store.state import StateDB
 
@@ -294,14 +292,6 @@ def server_timing(timings: dict[str, float]) -> str:
 
 
 KEEP_ALIVE_SECONDS = 15
-
-
-def rechecked(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """A cached briefing as shown today: its points to check and its judgemental-word marks judged again by the
-    current rules, so a mark since found to be wrong is not shown. Nothing is ever newly flagged. (The same is done
-    for saved briefings, in api/briefings.py's public_view.) The cached copy itself is left as it was written."""
-    return [{**e, "answer": still_loaded(recheck_flags(e["answer"]))}
-            if e.get("type") == "final" and isinstance(e.get("answer"), dict) else e for e in events]
 
 
 def sse(events: Iterator[dict[str, Any]], keep_alive: float = KEEP_ALIVE_SECONDS) -> Iterator[bytes]:
@@ -539,7 +529,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                     # cached before shareable links existed: give it an address now, and remember it
                     hit[-1] = {**final, **keep_briefing(body, hit, final)}
                     store_events(state, key, hit, cache_hours)
-                yield from rechecked(hit)
+                yield from hit
                 return
             if body.sources_only:
                 yield from sources_only_events(body, "Sources only: no briefing was written. Ask again without "
