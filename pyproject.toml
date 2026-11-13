@@ -9,16 +9,16 @@ dependencies = [
     "anthropic>=0.69",
     "argon2-cffi>=23.1",
     "duckdb>=1.1",
-    "fastapi>=0.115",
+    "fastapi>=0.162.3",
     "httpx>=0.27",
     "lancedb>=0.17",
     "lxml>=5.3",
-    "numpy>=1.26",
-    "pillow>=11",
-    "pyarrow>=17",
-    "pydantic>=2.8",
-    "typer>=0.12",
-    "uvicorn[standard]>=0.30",
+    "numpy>=2.5.4",
+    "pillow>=13.0.0",
+    "pyarrow>=26.0.1",
+    "pydantic>=2.14.3",
+    "typer>=0.29.0",
+    "uvicorn[standard]>=0.54.0",
 ]
 
 [project.optional-dependencies]
@@ -32,8 +32,8 @@ hansard = "hansard.cli:app"
 [dependency-groups]
 dev = [
     "psutil>=6.0",
-    "pytest>=8.3",
-    "ruff>=0.6",
+    "pytest>=9.2.0",
+    "ruff>=0.17.4",
 ]
 
 [build-system]
