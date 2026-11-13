@@ -108,6 +108,27 @@ def test_a_second_restore_never_writes_over_the_kept_database(settings, tmp_path
     assert marker(restore_backup(settings, right)) == "monday" and marker(settings.state_db) == "tuesday"
 
 
+def test_restore_accepts_a_backup_repacked_by_hand(settings, tmp_path):
+    """`tar -czf new.tar.gz -C folder .` names its members ./state.sqlite and ./settings.local.toml."""
+    state = StateDB(settings.state_db)
+    state.set("marker", "before")
+    local = settings.data_dir / "settings.local.toml"
+    local.write_text('[archive]\nstart_date = "2015-01-01"\n')
+    out = make_backup(settings, tmp_path / "backups", day="2026-10-01")
+    unpacked = tmp_path / "unpacked"
+    with tarfile.open(out) as tar:
+        tar.extractall(unpacked, filter="data")
+    repacked = tmp_path / "repacked.tar.gz"
+    with tarfile.open(repacked, "w:gz") as tar:
+        tar.add(unpacked, arcname=".")
+    with tarfile.open(repacked) as tar:
+        assert {"./state.sqlite", "./settings.local.toml"} <= set(tar.getnames())
+    state.set("marker", "after")
+    local.write_text('[archive]\nstart_date = "2020-01-01"\n')
+    restore_backup(settings, repacked)
+    assert marker(settings.state_db) == "before" and "2015-01-01" in local.read_text()
+
+
 def test_restore_refuses_a_damaged_or_foreign_file_and_changes_nothing(settings, tmp_path):
     state = StateDB(settings.state_db)
     state.set("marker", "live")

@@ -78,7 +78,8 @@ def restore_backup(settings: Settings, archive: Path) -> Path | None:
         db, local = Path(tmp) / "state.sqlite", Path(tmp) / "settings.local.toml"
         try:
             with tarfile.open(archive) as tar:
-                members = {m.name: m for m in tar.getmembers() if m.isfile()}
+                # "./state.sqlite" as well as "state.sqlite": a backup repacked by hand is named that way
+                members = {m.name.removeprefix("./"): m for m in tar.getmembers() if m.isfile()}
                 if "state.sqlite" not in members:
                     raise RuntimeError(f"{archive.name} is not a backup of this site: it has no state.sqlite")
                 tar.extractall(tmp, members=[members[n] for n in (db.name, local.name) if n in members],
