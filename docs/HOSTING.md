@@ -733,7 +733,8 @@ database, and nothing deletes it for you: delete it once the site is right
 (`docker compose run --rm -T app sh -c 'rm -f /data/state.sqlite.before-restore*'`). A restore needs free disk
 space of about twice the size of `state.sqlite`. While `state.sqlite.before-restore` is there, another restore is
 refused, so that it is never written over: if you restored the wrong day, move it somewhere safe first (it is the
-only copy of what was there before), then restore the right day.
+only copy of what was there before), then restore the right day. If the very last step fails (putting the checked
+backup in place), the message names the files to move back to return to what was there; nothing is undone for you.
 
 ## Spending limits
 

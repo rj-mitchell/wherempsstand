@@ -108,6 +108,35 @@ def test_a_second_restore_never_writes_over_the_kept_database(settings, tmp_path
     assert marker(restore_backup(settings, right)) == "monday" and marker(settings.state_db) == "tuesday"
 
 
+def test_a_swap_that_fails_says_which_files_to_move_back(settings, tmp_path, monkeypatch):
+    state = StateDB(settings.state_db)
+    state.set("marker", "before")
+    out = make_backup(settings, tmp_path / "backups", day="2026-10-01")
+    state.set("marker", "after")  # in the write-ahead log only, which the restore removes just before the swap
+    live, kept = settings.state_db, settings.data_dir / "state.sqlite.before-restore"
+    rename = Path.replace
+
+    def fails_for_the_database(self, target):
+        if Path(target) == live:
+            raise OSError(18, "Invalid cross-device link")
+        return rename(self, target)
+
+    monkeypatch.setattr(Path, "replace", fails_for_the_database)
+    with pytest.raises(RuntimeError) as failed:
+        restore_backup(settings, out)
+    said = str(failed.value)
+    assert "could not be put in place" in said and "Invalid cross-device link" in said
+    assert f"move {kept} to {live} and {kept}-wal to {live}-wal" in said
+    r = CliRunner().invoke(app, ["restore", str(out), "--yes"])  # and until that is done, nothing more is touched
+    assert r.exit_code == 1 and "is still there from an earlier restore" in r.output
+    monkeypatch.setattr(Path, "replace", rename)
+    # doing what it says brings back everything, the newest writes included
+    assert not Path(f"{live}-wal").exists() and kept.exists() and Path(f"{kept}-wal").exists()
+    kept.replace(live)
+    Path(f"{kept}-wal").replace(f"{live}-wal")
+    assert marker(live) == "after"
+
+
 def test_restore_accepts_a_backup_repacked_by_hand(settings, tmp_path):
     """`tar -czf new.tar.gz -C folder .` names its members ./state.sqlite and ./settings.local.toml."""
     state = StateDB(settings.state_db)

@@ -110,10 +110,20 @@ def restore_backup(settings: Settings, archive: Path) -> Path | None:
                 shutil.copy2(f"{state_db}-wal", f"{copy}-wal")
                 Path(f"{copy}-wal").replace(f"{kept}-wal")
             copy.replace(kept)
-        for suffix in ("-wal", "-shm", "-journal"):  # left from the database being replaced, they would corrupt it
-            Path(f"{state_db}{suffix}").unlink(missing_ok=True)
-        db.chmod(0o600)  # as the backup: it holds password hashes and readers' contact details
-        db.replace(state_db)
+        try:
+            for suffix in ("-wal", "-shm", "-journal"):  # left from the database being replaced, they would corrupt it
+                Path(f"{state_db}{suffix}").unlink(missing_ok=True)
+            db.chmod(0o600)  # as the backup: it holds password hashes and readers' contact details
+            db.replace(state_db)
+        except OSError as exc:
+            if not kept:
+                raise
+            # Nothing is rolled back automatically: the owner is told exactly which files hold what was there.
+            back = f"move {kept} to {state_db}"
+            if Path(f"{kept}-wal").exists():
+                back += f" and {kept}-wal to {state_db}-wal"
+            raise RuntimeError(f"the backup could not be put in place ({exc}). {state_db} is no longer complete: its "
+                               f"write-ahead log has been removed. To go back to what was there, {back}.") from exc
         if local.exists():
             local.replace(settings.data_dir / "settings.local.toml")
     return kept
