@@ -389,12 +389,13 @@ def test_a_citation_across_two_paragraphs_is_accepted():
 
 
 def test_client_has_an_explicit_timeout(monkeypatch):
-    from hansard.rag.answer import make_client
+    from hansard.rag.answer import CONNECT_SECONDS, MAX_RETRIES, TIMEOUT_SECONDS, make_client
 
     monkeypatch.setenv("HANSARD_ANTHROPIC_API_KEY", "test-key")
     client = make_client()
     assert client.timeout.connect == 10.0 and client.timeout.read == 300.0
     assert client.max_retries == 2
+    assert (TIMEOUT_SECONDS, CONNECT_SECONDS, MAX_RETRIES) == (300.0, 10.0, 2)  # the same in every site
 
 
 # ---- ported from Where Countries Stand's verifier ---------------------------------------------------------------
