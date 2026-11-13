@@ -174,7 +174,8 @@ page, data and card then return 410 Gone. `GET /api/admin/briefings` lists recen
 
 **Reports and statements.** The corrections and right-of-reply policy (the charity's impartiality policy, section
 7; decision 31) is explained to the people it concerns on `/named`. Reports from the form on `/corrections`
-(or under a briefing) are listed on the admin page and at `GET /api/admin/reports`, and closed with
+(or under a briefing) are listed on the admin page and at `GET /api/admin/reports` (open requests to remove a
+private person's name or details first, then newest first), and closed with
 `POST /api/admin/reports/<id>/close`; a public note goes to the corrections log. Statements sent from
 `/named` wait as pending: confirm who sent each (usually by writing to their parliament.uk, parliament.scot,
 senedd.wales or niassembly.gov.uk address), then publish it as written or decline it with reasons, never editing it,

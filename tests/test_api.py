@@ -455,6 +455,24 @@ def test_reports_are_private_until_closed_with_a_public_note(indexed_settings, t
     assert withdrawn["note"] == "Misquoted a minister." and withdrawn["briefing_id"] == bid
 
 
+def test_open_takedown_requests_are_listed_first(tmp_path):
+    from hansard.api.reports import close_report, list_reports
+
+    state = StateDB(tmp_path / "state.sqlite")
+    rows = [("2026-11-01T09:00:00+00:00", "takedown", "open"), ("2026-11-02T09:00:00+00:00", "correction", "open"),
+            ("2026-11-03T09:00:00+00:00", "takedown", "open"), ("2026-11-04T09:00:00+00:00", "complaint", "open"),
+            ("2026-11-05T09:00:00+00:00", "takedown", "resolved")]
+    with state.connect() as con:
+        con.executemany("INSERT INTO reports (at, kind, status, message) VALUES (?, ?, ?, 'Please look at this.')", rows)
+    listed = [(r["kind"], r["at"][8:10]) for r in list_reports(state, "open")]
+    assert listed == [("takedown", "03"), ("takedown", "01"), ("complaint", "04"), ("correction", "02")]
+    assert [r["kind"] for r in list_reports(state, "open", limit=2)] == ["takedown", "takedown"]  # never cut off
+    # with closed reports too: the open requests first, then everything else newest first
+    assert [r["at"][8:10] for r in list_reports(state)] == ["03", "01", "05", "04", "02"]
+    assert close_report(state, list_reports(state)[0]["id"], "resolved", "Name removed.", None)
+    assert [r["at"][8:10] for r in list_reports(state)] == ["01", "05", "04", "03", "02"]
+
+
 def test_reports_are_limited_per_visitor(indexed_settings, tmp_path):
     app, _, _ = make_app(indexed_settings, tmp_path, auth=False, requests_per_minute=100)
     client = TestClient(app)
