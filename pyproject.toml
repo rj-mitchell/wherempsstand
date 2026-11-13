@@ -6,12 +6,12 @@ readme = "README.md"
 license = "AGPL-3.0-only"
 requires-python = ">=3.12"
 dependencies = [
-    "anthropic>=0.69",
+    "anthropic>=2.7.0",
     "argon2-cffi>=23.1",
     "duckdb>=1.1",
     "fastapi>=0.115",
     "httpx>=0.27",
-    "lancedb>=0.17",
+    "lancedb>=0.41.0",
     "lxml>=5.3",
     "numpy>=1.26",
     "pillow>=11",
@@ -24,7 +24,7 @@ dependencies = [
 [project.optional-dependencies]
 # Local open-source embedding models (ONNX runtime). Weights are downloaded once
 # from Hugging Face at setup and pinned; no data is fetched from Hugging Face.
-embed = ["fastembed>=0.4"]
+embed = ["fastembed>=0.9.1"]
 
 [project.scripts]
 hansard = "hansard.cli:app"
