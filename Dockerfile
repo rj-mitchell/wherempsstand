@@ -8,7 +8,7 @@ COPY web/ ./
 RUN npm run build
 
 # ---- service -----------------------------------------------------------------
-FROM python:3.12.15-slim
+FROM python:3.12.16-slim
 # the base image's own packages are brought up to date too, so security fixes released since it was built are in
 RUN apt-get update \
  && apt-get upgrade -y \
