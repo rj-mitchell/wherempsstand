@@ -460,3 +460,18 @@ def test_a_short_claim_stays_a_point_to_check_when_a_saved_briefing_is_shown_aga
               "unsupported_segments": 1, "grounded_ratio": 0.3}
     # shown again, it is judged without that knowledge: being short must not clear it
     assert recheck_flags(answer) is answer
+
+
+def test_a_claim_above_a_lead_in_stays_a_point_to_check_when_shown_again():
+    from hansard.rag.verify import _classify_uncited, recheck_flags
+
+    for block in ("- Spending on the scheme rose by 40% under the last administration\n- Jane Smith said ",
+                  "Was the funding cut by 40% in real terms? Jane Smith said ",
+                  "The scheme was cut by 40% in real terms! Jane Smith said "):
+        parts = _classify_uncited(block, True)
+        assert [p.status for p in parts] == ["unsupported", "connective"], block
+        answer = {"segments": [*({"text": p.text, "status": p.status} for p in parts),
+                               {"text": "\"it has failed\"", "status": "cited"}],
+                  "unsupported_segments": 1, "grounded_ratio": 0.3}
+        # judged again without the block it was written in, it must not pass for the opening of the quotation
+        assert recheck_flags(answer) is answer, block
