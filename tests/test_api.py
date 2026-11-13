@@ -652,8 +652,12 @@ def test_briefings_in_progress_count_against_the_caps():
     assert "already being written" in f.start("a")
     assert f.start("b") is None and "Many briefings" in f.start("c")
     assert f.pending_usd() == 1.5 and f.pending_usd(besides=1) == 1.0
+    assert set(f.running) == {"a", "b"}  # the refused visitor left nothing behind
     f.finish("a")
     assert f.start("c") is None
+    for key in ("a", "b", "c"):
+        f.finish(key)
+    assert f.running == {} and f.pending_usd() == 0
 
 
 def test_an_ipv6_connection_counts_as_one_visitor():

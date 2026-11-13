@@ -178,7 +178,7 @@ class InFlight:
     def start(self, key: str) -> str | None:
         """Reserve a place, or say why not."""
         with self.lock:
-            if self.running[key] >= self.per_key:
+            if self.running.get(key, 0) >= self.per_key:  # .get: a refused visitor leaves nothing behind
                 return "A briefing is already being written for you; please wait for it to finish."
             if sum(self.running.values()) >= self.total:
                 return "Many briefings are being written at the moment; please try again in a minute."
