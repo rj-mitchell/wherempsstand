@@ -33,15 +33,19 @@ def token_counts(usage: dict[str, int] | None) -> dict[str, int]:
     (``cache_read_tokens``, ``cache_write_tokens``, and ``input_tokens`` that includes the cache writes) or the SDK's
     own (``cache_read_input_tokens``, ``cache_creation_input_tokens``, and ``input_tokens`` that does not)."""
     u = usage or {}
-    reads = u.get("cache_read_tokens") or u.get("cache_read_input_tokens") or 0
+    # Every count is made a whole number, and this site's name for cache reads is used whenever it is present, even
+    # at 0, before the SDK's.
+    reads = u.get("cache_read_tokens")
+    if reads is None:
+        reads = u.get("cache_read_input_tokens")
     if "cache_write_tokens" in u:
-        writes = u.get("cache_write_tokens") or 0
-        uncached = (u.get("input_tokens") or 0) - writes
+        writes = int(u.get("cache_write_tokens") or 0)
+        uncached = int(u.get("input_tokens") or 0) - writes
     else:
-        writes = u.get("cache_creation_input_tokens") or 0
-        uncached = u.get("input_tokens") or 0
-    return {"input_tokens": uncached + writes, "output_tokens": u.get("output_tokens") or 0,
-            "cache_read_tokens": reads, "cache_write_tokens": writes}
+        writes = int(u.get("cache_creation_input_tokens") or 0)
+        uncached = int(u.get("input_tokens") or 0)
+    return {"input_tokens": uncached + writes, "output_tokens": int(u.get("output_tokens") or 0),
+            "cache_read_tokens": int(reads or 0), "cache_write_tokens": writes}
 
 
 def cost_usd(usage: dict[str, int] | None, prices: dict[str, Any], model: str | None = None) -> float:

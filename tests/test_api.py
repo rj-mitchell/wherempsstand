@@ -565,6 +565,15 @@ def test_raw_sdk_token_names_are_priced_and_cache_writes_recorded(tmp_path):
     assert cost_usd(raw, prices) == pytest.approx(4.0 + 2.0 + 5.0 + 0.2)
     # the same call through usage_dict costs the same
     assert cost_usd(usage_dict(NS(**raw)), prices) == cost_usd(raw, prices)
+    # counts that are missing, None or not whole numbers are coped with; this site's name for cache reads comes
+    # first when both are given, even at 0 (as Where Countries Stand's copy)
+    from hansard.api.usage import token_counts
+
+    assert cost_usd({"input_tokens": 1000, "cache_read_input_tokens": None}, prices) == pytest.approx(0.004)
+    assert token_counts({"input_tokens": 1000.0, "output_tokens": "20", "cache_read_tokens": 0,
+                         "cache_read_input_tokens": 50}) == {"input_tokens": 1000, "output_tokens": 20,
+                                                             "cache_read_tokens": 0, "cache_write_tokens": 0}
+    assert all(type(v) is int for v in token_counts({"input_tokens": 7.0, "cache_write_tokens": 2.0}).values())
 
     state = StateDB(tmp_path / "state.db")
     record_usage(state, None, "answer", "m", raw, prices)
