@@ -18,6 +18,7 @@ privacy notice), by ``forget_old_emails``, which runs whenever statements are wr
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from urllib.parse import urlparse
@@ -111,11 +112,15 @@ def recent_count(state: StateDB, visitor: str | None) -> int:
 
 
 def add_statement(state: StateDB, *, name: str, role: str, item: str, text: str, link: str | None, email: str,
-                  visitor: str | None = None) -> int:
-    """Store a statement as pending. Raises StatementError if it can't be accepted."""
+                  visitor: str | None = None, missing: Callable[[str], str | None] | None = None) -> int:
+    """Store a statement as pending. Raises StatementError if it can't be accepted. ``missing`` is asked whether
+    the item at the address is there: it returns why not, in words for the sender, or None."""
     text = clean_text(text)
     check(name, role, text, email)
     path = item_path(item)
+    why = missing(path) if missing else None
+    if why:
+        raise StatementError(why)
     with state.connect() as con:
         cur = con.execute("INSERT INTO statements (at, name, role, item_path, person, text, link, email, visitor) "
                           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -192,15 +197,17 @@ def published(state: StateDB, *, paths: list[str] | tuple[str, ...] = (), person
 
 
 def publish_statement(state: StateDB, sid: int, *, person: int | None = None, checked: str | None = None) -> bool:
-    """Publish a pending statement as written, once the owner has confirmed who sent it (``checked`` notes how,
-    privately). ``person`` is the member it is about, when its address isn't their own page."""
+    """Publish a pending statement as written, once the owner has confirmed who sent it (``checked`` says how,
+    privately, and is required). ``person`` is the member it is about, when its address isn't their own page."""
     s = get_statement(state, sid)
     if not s or s["status"] != "pending":
         return False
+    checked = (checked or "").strip()
+    if not checked:
+        raise StatementError("Please say how you confirmed who sent it: it is kept privately.")
     with state.connect() as con:
         con.execute("UPDATE statements SET status = 'published', published_at = ?, person = ?, checked = ? "
-                    "WHERE id = ?", (utcnow(), person if person is not None else s["person"],
-                                     (checked or "").strip() or None, sid))
+                    "WHERE id = ?", (utcnow(), person if person is not None else s["person"], checked, sid))
     return True
 
 

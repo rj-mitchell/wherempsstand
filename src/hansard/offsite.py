@@ -6,8 +6,9 @@ Uses B2's own API over HTTPS (no extra software). Set in deploy/.env:
     HANSARD_B2_KEY_ID=<keyID>
     HANSARD_B2_APPLICATION_KEY=<applicationKey>
 
-The key should be limited to that one bucket. Each backup is uploaded with its SHA-1 checked by B2; the newest
-``keep`` copies are kept there and older ones deleted. Nothing here ever prints the key.
+The charity's sites can share one bucket and key: each site's backups have their own name (``PREFIX``), and only
+its own old copies are deleted. The key should be limited to that one bucket. Each backup is uploaded with its SHA-1
+checked by B2; the newest ``keep`` copies are kept there and older ones deleted. Nothing here ever prints the key.
 """
 
 from __future__ import annotations
@@ -174,7 +175,7 @@ def backup_alerts(folder: Path, env: dict[str, str] | None = None, now: datetime
     if local and status is None:
         out.append({"level": "warning", "text": "No off-site copy has been made yet; one is made with the next backup."})
     elif status and not status.get("ok"):
-        out.append({"level": "error", "text": f"The last off-site copy failed ({status.get('when', '')[:16]}): "
+        out.append({"level": "error", "text": f"The last off-site copy failed ({str(status.get('when', ''))[:16]}): "
                                               f"{status.get('error', '')}"})
     elif status and (now - datetime.fromisoformat(status["when"])).total_seconds() > stale_hours * 3600:
         out.append({"level": "error", "text": f"The last off-site copy was over two days ago ({status['when'][:10]})."})

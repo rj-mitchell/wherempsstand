@@ -127,6 +127,11 @@ per_visitor_daily_questions = 40   # anonymous visitors (keyed by a salted hash 
 per_user_daily_questions = 60      # signed-in users, when invite-only sign-in is on
 requests_per_minute = 20           # questions and searches per visitor
 answer_cache_hours = 168           # identical questions are not re-run until new records arrive (or a week)
+# A briefing's cost is known only when it is finished, so each one being written is counted at this estimate
+# against the caps below meanwhile; and only so many are written at once, for one reader and in all.
+briefing_estimate_usd = 0.15
+briefings_at_once = 8
+briefings_at_once_per_reader = 2
 daily_spend_cap_usd = 10.0
 monthly_spend_cap_usd = 150.0
 # USD per million tokens, used for spend tracking only.

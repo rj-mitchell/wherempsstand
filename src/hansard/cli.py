@@ -723,6 +723,9 @@ def backup(to: Path = typer.Option(None, help="folder for backups (default: <dat
 
     _setup_logging()
     archive = make_backup(_settings(), to, keep)
+    if archive is None:  # a new site: nothing has been saved yet
+        typer.echo("Nothing to back up yet: there is no state database.")
+        return
     typer.echo(f"Backed up to {archive}")
     try:  # and a copy off the server, when a Backblaze B2 bucket is set up
         out = send(archive)
@@ -745,13 +748,18 @@ def offsite():
 @app.command()
 def restore(archive: Path = typer.Argument(..., exists=True, dir_okay=False),
             yes: bool = typer.Option(False, "--yes", help="do not ask for confirmation")):
-    """Put a backup back (stop the site first). Replaces the current saved briefings, reports and usage."""
+    """Put a backup back (stop the site first). Replaces the current saved briefings, reports and usage. The backup
+    is checked before anything is replaced, and the database it replaces is kept as state.sqlite.before-restore."""
     from hansard.backup import restore_backup
 
     if not yes:
         typer.confirm("This replaces the current saved briefings, reports and usage records. Continue?", abort=True)
-    restore_backup(_settings(), archive)
-    typer.echo("Restored. Start the site again.")
+    try:
+        kept = restore_backup(_settings(), archive)
+    except (OSError, RuntimeError) as exc:
+        typer.echo(f"Not restored: {exc}", err=True)
+        raise typer.Exit(1) from exc
+    typer.echo("Restored. Start the site again." + (f" The database it replaced is kept as {kept}." if kept else ""))
 
 
 @user_app.command("add")
@@ -827,19 +835,27 @@ def statements_publish(sid: int = typer.Argument(..., help="the statement's numb
                        person: int = typer.Option(None, help="the member it is about (their number, as in "
                                                              "/people/<number>), when its address isn't their page")):
     """Publish a pending statement as written, once you have confirmed who sent it."""
-    from hansard.api.statements import publish_statement
+    from hansard.api.statements import StatementError, publish_statement
 
-    _statement_done(publish_statement(_statements_state(), sid, person=person, checked=checked),
-                    f"published #{sid}")
+    try:
+        done = publish_statement(_statements_state(), sid, person=person, checked=checked)
+    except StatementError as exc:  # --checked "" says nothing
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from None
+    _statement_done(done, f"published #{sid}")
 
 
 @statements_app.command("decline")
 def statements_decline(sid: int, reason: str = typer.Option(..., help="why: sent to the author, never shown")):
     """Decline a pending statement, or take down a published one that breaks the rules, with the reason."""
-    from hansard.api.statements import decline_statement
+    from hansard.api.statements import StatementError, decline_statement
 
-    _statement_done(decline_statement(_statements_state(), sid, reason),
-                    f"declined #{sid}: tell the author why; their email address is deleted in three months")
+    try:
+        done = decline_statement(_statements_state(), sid, reason)
+    except StatementError as exc:  # no reason given
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from None
+    _statement_done(done, f"declined #{sid}: tell the author why; their email address is deleted in three months")
 
 
 @statements_app.command("update")

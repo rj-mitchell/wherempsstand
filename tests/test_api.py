@@ -418,6 +418,24 @@ def test_reports_are_private_until_closed_with_a_public_note(indexed_settings, t
     assert withdrawn["note"] == "Misquoted a minister." and withdrawn["briefing_id"] == bid
 
 
+def test_open_takedown_requests_are_listed_first(tmp_path):
+    from hansard.api.reports import close_report, list_reports
+
+    state = StateDB(tmp_path / "state.sqlite")
+    rows = [("2026-11-01T09:00:00+00:00", "takedown", "open"), ("2026-11-02T09:00:00+00:00", "correction", "open"),
+            ("2026-11-03T09:00:00+00:00", "takedown", "open"), ("2026-11-04T09:00:00+00:00", "complaint", "open"),
+            ("2026-11-05T09:00:00+00:00", "takedown", "resolved")]
+    with state.connect() as con:
+        con.executemany("INSERT INTO reports (at, kind, status, message) VALUES (?, ?, ?, 'Please look at this.')", rows)
+    listed = [(r["kind"], r["at"][8:10]) for r in list_reports(state, "open")]
+    assert listed == [("takedown", "03"), ("takedown", "01"), ("complaint", "04"), ("correction", "02")]
+    assert [r["kind"] for r in list_reports(state, "open", limit=2)] == ["takedown", "takedown"]  # never cut off
+    # with closed reports too: the open requests first, then everything else newest first
+    assert [r["at"][8:10] for r in list_reports(state)] == ["03", "01", "05", "04", "02"]
+    assert close_report(state, list_reports(state)[0]["id"], "resolved", "Name removed.", None)
+    assert [r["at"][8:10] for r in list_reports(state)] == ["01", "05", "04", "03", "02"]
+
+
 def test_reports_are_limited_per_visitor(indexed_settings, tmp_path):
     app, _, _ = make_app(indexed_settings, tmp_path, auth=False, requests_per_minute=100)
     client = TestClient(app)
@@ -510,6 +528,15 @@ def test_raw_sdk_token_names_are_priced_and_cache_writes_recorded(tmp_path):
     assert cost_usd(raw, prices) == pytest.approx(4.0 + 2.0 + 5.0 + 0.2)
     # the same call through usage_dict costs the same
     assert cost_usd(usage_dict(NS(**raw)), prices) == cost_usd(raw, prices)
+    # counts that are missing, None or not whole numbers are coped with; this site's name for cache reads comes
+    # first when both are given, even at 0 (as Where Countries Stand's copy)
+    from hansard.api.usage import token_counts
+
+    assert cost_usd({"input_tokens": 1000, "cache_read_input_tokens": None}, prices) == pytest.approx(0.004)
+    assert token_counts({"input_tokens": 1000.0, "output_tokens": "20", "cache_read_tokens": 0,
+                         "cache_read_input_tokens": 50}) == {"input_tokens": 1000, "output_tokens": 20,
+                                                             "cache_read_tokens": 0, "cache_write_tokens": 0}
+    assert all(type(v) is int for v in token_counts({"input_tokens": 7.0, "cache_write_tokens": 2.0}).values())
 
     state = StateDB(tmp_path / "state.db")
     record_usage(state, None, "answer", "m", raw, prices)
@@ -597,8 +624,26 @@ def test_briefings_in_progress_count_against_the_caps():
     assert "already being written" in f.start("a")
     assert f.start("b") is None and "Many briefings" in f.start("c")
     assert f.pending_usd() == 1.5 and f.pending_usd(besides=1) == 1.0
+    assert set(f.running) == {"a", "b"}  # the refused visitor left nothing behind
     f.finish("a")
     assert f.start("c") is None
+    for key in ("a", "b", "c"):
+        f.finish(key)
+    assert f.running == {} and f.pending_usd() == 0
+
+
+def test_the_settings_file_says_what_the_code_falls_back_to(indexed_settings):
+    """The limits on briefings in progress, their estimated cost and the cache's life are written in
+    config/settings.toml, with the values the code uses when a key is missing."""
+    import inspect
+
+    from hansard.api.usage import InFlight
+
+    u = indexed_settings.raw["usage"]
+    defaults = {k: p.default for k, p in inspect.signature(InFlight).parameters.items()}
+    assert (u["briefings_at_once_per_reader"], u["briefings_at_once"], u["briefing_estimate_usd"]) == \
+        (defaults["per_key"], defaults["total"], defaults["estimate_usd"]) == (2, 8, 0.15)
+    assert u["answer_cache_hours"] == 168
 
 
 def test_an_ipv6_connection_counts_as_one_visitor():
