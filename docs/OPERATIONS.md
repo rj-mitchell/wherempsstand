@@ -60,7 +60,7 @@ Then open <http://localhost:8000>.
 Briefings are charged to your Anthropic account, at roughly 5 US cents each (Claude Sonnet 5.5). The same spending limits as the
 public site apply.
 
-**For developers: offline sample.** With Python 3.12+, [uv](https://docs.astral.sh/uv/) and Node 20+, this needs
+**For developers: offline sample.** With Python 3.12+, [uv](https://docs.astral.sh/uv/) and Node 22, this needs
 no downloads and finishes in seconds:
 
 ```bash
