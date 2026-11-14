@@ -13,10 +13,11 @@ from collections import OrderedDict
 from datetime import date
 from typing import Any
 
+from wts_core.adapters.duckdb import shared
+
 from hansard.config import Settings
 from hansard.reference.profiles import ProfileResolver
 from hansard.store.parquet import attach_store, partition_dir
-from hansard.store.shared import shared
 from hansard.vote_types import vote_types
 
 # the chamber as it appears in a debate's address, and the record source behind it

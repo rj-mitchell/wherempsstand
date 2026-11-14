@@ -65,9 +65,10 @@ def indexed_settings(tmp_path_factory):
     import dataclasses
     from datetime import date
 
-    from hansard.embed.base import HashingEmbedder
+    from wts_core.adapters.hashing import HashingEmbedder
+
     from hansard.index.build import Indexer, embed_pending
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import search_index
     from hansard.ingest import ingest
     from hansard.store.state import StateDB
 
@@ -79,10 +80,11 @@ def indexed_settings(tmp_path_factory):
                                     elections=load_elections(ELECTIONS, snapshot=False)), s.reference_dir)
     state = StateDB(s.state_db)
     ingest(s, workers=1, since=date(2010, 1, 1), state=state)
-    idx = SearchIndex(s.index_dir, 64)
+    embedder = HashingEmbedder(64)
+    idx = search_index(s.index_dir, embedder)
     Indexer(s, idx, state).index_pending()
-    idx.build_indices()
-    embed_pending(s, idx, state, HashingEmbedder(64))
+    idx.build_indexes()
+    embed_pending(s, idx, state, embedder)
     return s
 
 
@@ -92,3 +94,10 @@ def xml_mirror(settings) -> Path:
     dest = settings.raw_xml_dir
     shutil.copytree(XML, dest)
     return dest
+
+
+def model_of(sdk):
+    """The site's model client over a faked Anthropic SDK (``None`` stays ``None``: no model at all)."""
+    from wts_core.adapters.anthropic import BASE_URL, AnthropicClient
+
+    return None if sdk is None else AnthropicClient("test-key", base_url=BASE_URL, client=sdk)

@@ -117,3 +117,39 @@ def test_a_briefing_written_under_todays_rules_is_shown_as_it_was_saved():
     unstamped = shown_again(shared.an_answer())
     assert [s["status"] for s in unstamped["segments"]] == ["cited", "connective", "cited", "unsupported"]
     assert unstamped["loaded_words"] == 0
+
+
+# ---- the interests check ---------------------------------------------------------------------------------------
+
+
+def test_the_interests_check_asks_the_model_the_same_and_makes_the_same_of_its_answer():
+    """What the small model is sent (the whole request) and the flags made of its answer, case for case. One
+    difference, on purpose: when the model's answer has nothing in it, the check still finds no matches, but what
+    that call cost is no longer known, so none is recorded for it (wts-core docs/AS-BUILT.md, adapters:
+    "``structured`` raises when the model returns nothing")."""
+    from hansard.rag import interests
+    from hansard.rag.sources import Source
+
+    from .conftest import model_of
+
+    golden = shared.read("interests.json")
+    sources = [Source(**s) for s in shared.INTEREST_SOURCES]
+    for name, matches in shared.INTEREST_CASES.items():
+        sdk = shared.InterestsSDK(matches)
+        flags, usage = interests.check(model_of(sdk), "claude-haiku-5-5", "What has been said about trial by jury?",
+                                       sources, shared.Register(shared.REGISTER), None, effort="low")
+        was = golden[name]
+        assert shared.plain(sdk.asked) == was["asked"], name
+        assert shared.plain(flags) == was["flags"], name
+        if matches is None:
+            assert usage is None and was["usage"]["input_tokens"] == 400 and flags == []
+        else:
+            assert usage.as_stored() == {
+                "input_tokens": was["usage"]["input_tokens"] + was["usage"]["cache_creation_input_tokens"],
+                "output_tokens": was["usage"]["output_tokens"],
+                "cache_read_tokens": was["usage"]["cache_read_input_tokens"],
+                "cache_write_tokens": was["usage"]["cache_creation_input_tokens"]}, name
+    sdk = shared.InterestsSDK([])
+    assert interests.check(model_of(sdk), "claude-haiku-5-5", "q", sources[2:], shared.Register({}), None) == (
+        [], None)
+    assert sdk.asked == [] == golden["nobody quoted has an entry: the model is not asked"]["asked"]

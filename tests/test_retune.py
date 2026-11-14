@@ -2,8 +2,9 @@ from datetime import date
 
 import numpy as np
 import pytest
+from wts_core.ports import IndexMeta
 
-from hansard.index.lance import SearchIndex
+from hansard.index.lance import search_index
 from hansard.index.retune import SAMPLE_QUERIES, rebuild, recall
 
 DIM = 16
@@ -18,7 +19,7 @@ class FakeEmbedder:
 
 @pytest.fixture
 def idx(tmp_path):
-    idx = SearchIndex(tmp_path / "index", DIM)
+    idx = search_index(tmp_path / "index", IndexMeta("an-embedding-model", DIM, number_type="float16"))
     rng = np.random.default_rng(1)
     n = 12_000
     rows = [{"passage_id": f"p{i}", "record_id": f"r{i}", "source": "debates", "source_key": "k", "record_type": "speech",
@@ -42,7 +43,7 @@ def test_rebuild_keeps_an_index_that_finds_the_same_passages(idx):
     assert out["kept"] and out["recommended"]["nprobes"] in (20, 40)
     assert 0 <= out["before"]["recall"] <= 1
     assert [(t["nprobes"], t["refine_factor"]) for t in out["trials"]] == [(20, None), (20, 5), (40, None), (40, 5)]
-    assert len(idx.vector(FakeEmbedder().embed_query(SAMPLE_QUERIES[0][0]), None, 10)) == 10
+    assert len(idx.search_meaning(FakeEmbedder().embed_query(SAMPLE_QUERIES[0][0]), None, 10)) == 10
 
 
 def test_rebuild_puts_the_old_index_back_when_results_differ(idx):
@@ -51,7 +52,7 @@ def test_rebuild_puts_the_old_index_back_when_results_differ(idx):
                   tolerance=-1.0)
     assert not out["kept"] and "put back" in out["note"]
     assert idx.vectors().version > version  # restoring writes a new version equal to the old one
-    assert len(idx.vector(FakeEmbedder().embed_query("x"), None, 10)) == 10
+    assert len(idx.search_meaning(FakeEmbedder().embed_query("x"), None, 10)) == 10
 
 
 def test_a_kept_rebuild_is_recorded_and_one_put_back_is_not(idx):
@@ -98,7 +99,7 @@ def test_the_index_status_command(settings, monkeypatch):
     monkeypatch.setattr(cli, "_settings", lambda: settings)
     empty = CliRunner().invoke(cli.app, ["index-status", "--text"])
     assert empty.exit_code == 0 and "no passages" in empty.output
-    idx = SearchIndex(settings.index_dir, 64)
+    idx = search_index(settings.index_dir, IndexMeta("an-embedding-model", 64, number_type="float16"))
     rows = [{"passage_id": f"p{i}", "record_id": f"r{i}", "source": "debates", "source_key": "k",
              "record_type": "speech", "house": "commons", "date": date(2021, 1, 1), "year": 2021, "person_id": None,
              "party_id": None, "region": None, "is_gov": False, "is_shadow": False, "is_chair": False,

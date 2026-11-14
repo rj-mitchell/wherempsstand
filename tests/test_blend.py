@@ -1,4 +1,5 @@
-from hansard.embed.base import HashingEmbedder
+from wts_core.adapters.hashing import HashingEmbedder
+
 from hansard.rag.blend import blend, similarities, windows
 
 CAPS = {"edms": 3, "evidence": 6, "devolved": 8}

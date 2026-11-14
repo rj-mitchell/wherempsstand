@@ -8,15 +8,16 @@ import json
 
 import pytest
 from fastapi.testclient import TestClient
+from wts_core.adapters.hashing import HashingEmbedder
 
 from hansard.api.app import create_app
 from hansard.api.auth import create_user
 from hansard.api.usage import cost_usd, record_usage
-from hansard.embed.base import HashingEmbedder
 from hansard.engine import Engine
 from hansard.rag.pipeline import Pipeline
 from hansard.store.state import StateDB
 
+from .conftest import model_of
 from .test_rag import TODAY, FakeClient
 
 
@@ -28,7 +29,8 @@ def make_app(indexed_settings, tmp_path, *, auth: bool, **usage):
         "usage": {**indexed_settings.raw["usage"], "per_user_daily_questions": 2, "per_visitor_daily_questions": 2,
                   **usage}})
     client = FakeClient()
-    pipeline = Pipeline(s, Engine(s, embedder=HashingEmbedder(64), today=TODAY), client=client, today=TODAY)
+    pipeline = Pipeline(s, Engine(s, embedder=HashingEmbedder(64), today=TODAY), client=model_of(client),
+                        today=TODAY)
     state = StateDB(tmp_path / "state.sqlite")
     return create_app(s, pipeline, state), state, client
 
@@ -516,9 +518,9 @@ def test_cache_writes_and_reads_are_priced(tmp_path):
 
 
 def test_raw_sdk_token_names_are_priced_and_cache_writes_recorded(tmp_path):
-    from types import SimpleNamespace as NS
 
-    from hansard.rag.answer import usage_dict
+    from wts_core.ports import Usage
+
     from hansard.store.state import StateDB
 
     prices = {"price_input_per_mtok": 4.0, "price_output_per_mtok": 20.0, "price_cache_read_per_mtok": 0.2}
@@ -527,7 +529,7 @@ def test_raw_sdk_token_names_are_priced_and_cache_writes_recorded(tmp_path):
            "cache_read_input_tokens": 1_000_000}
     assert cost_usd(raw, prices) == pytest.approx(4.0 + 2.0 + 5.0 + 0.2)
     # the same call through usage_dict costs the same
-    assert cost_usd(usage_dict(NS(**raw)), prices) == cost_usd(raw, prices)
+    assert cost_usd(Usage.from_mapping(raw).as_stored(), prices) == cost_usd(raw, prices)
     # counts that are missing, None or not whole numbers are coped with; this site's name for cache reads comes
     # first when both are given, even at 0 (as Where Countries Stand's copy)
     from hansard.api.usage import token_counts
@@ -540,7 +542,7 @@ def test_raw_sdk_token_names_are_priced_and_cache_writes_recorded(tmp_path):
 
     state = StateDB(tmp_path / "state.db")
     record_usage(state, None, "answer", "m", raw, prices)
-    record_usage(state, None, "answer", "m", usage_dict(NS(**raw)), prices)
+    record_usage(state, None, "answer", "m", Usage.from_mapping(raw).as_stored(), prices)
     with state.connect() as con:
         rows = [tuple(r) for r in con.execute(
             "SELECT input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd FROM usage")]

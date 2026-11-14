@@ -32,7 +32,7 @@ import pyarrow.parquet as pq
 
 from hansard.config import STATIC_DIR, Settings
 from hansard.index.build import Indexer, embed_pending
-from hansard.index.lance import SearchIndex
+from hansard.index.lance import IndexOutOfDate, ensure_portfolio_indices, search_index
 from hansard.ingest import ingest
 from hansard.reference.build import (
     REFERENCE_VERSION,
@@ -278,24 +278,25 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
             log.exception("1997-2001 votes not loaded")
             stats["votes_1997"] = {"error": repr(exc)}
 
-        idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+        # opened as it stands: adding passages and searching by words need no embedding model
+        idx = search_index(settings.index_dir)
         indexer = Indexer(settings, idx, state)
         t = time.time()
         first_build = not idx.has_data()
         passages = indexer.index_pending()
         if idx.ensure_vector_ids():
             log.info("built the vectors table's passage index")
-        if idx.ensure_portfolio_indices():
+        if ensure_portfolio_indices(idx):
             log.info("built the passages' portfolio indices")
         log.info("checking for passages waiting to be merged into the search indices")
         waiting = 0 if first_build else idx.unmerged()  # includes rows an earlier, stopped update added
         if first_build and passages:
-            idx.build_indices()
+            idx.build_indexes()
         elif passages or waiting:
             # before updating speaker details below: those updates find passages through these indices
             log.info("merging %d new passages into the search indices", waiting or passages)
             t_merge = time.time()
-            idx.optimize()  # merges new rows into the BM25 and scalar indices incrementally
+            idx.tidy()  # merges new rows into the BM25 and scalar indices incrementally
             log.info("merged in %.0fs", time.time() - t_merge)
         people = pending_people(state)
         reenriched = 0
@@ -304,7 +305,7 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
             reenriched = indexer.reenrich_people(people)
             log.info("speaker details changed on %d passages", reenriched)
             if reenriched:
-                idx.optimize()
+                idx.tidy()
         state.set(PENDING_PEOPLE, "[]")
         stats["index"] = {"passages_written": passages, "passages_reenriched": reenriched,
                           "people_reenriched": len(people), "seconds": round(time.time() - t, 1), **idx.stats()}
@@ -510,18 +511,25 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
         stats["reranker"] = ensure_reranker(settings)
 
         if settings.embedding.get("enabled", True) and (embed_minutes is None or embed_minutes > 0):
-            from hansard.embed.base import get_embedder
+            from hansard.adapters import get_embedder
 
             t = time.time()
             emb = embedder or get_embedder(settings)
-            n = embed_pending(settings, idx, state, emb,
-                              max_seconds=embed_minutes * 60 if embed_minutes else None)
-            stats["embed"] = {"passages_embedded": n, "files_remaining": len(state.unembedded()),
-                              "seconds": round(time.time() - t, 1)}
+            try:  # the index says which model its vectors were made with, and takes no other's
+                n = embed_pending(settings, search_index(settings.index_dir, emb), state, emb,
+                                  max_seconds=embed_minutes * 60 if embed_minutes else None)
+                stats["embed"] = {"passages_embedded": n, "files_remaining": len(state.unembedded()),
+                                  "seconds": round(time.time() - t, 1)}
+            except IndexOutOfDate as exc:
+                n = 0
+                log.error("no new passages embedded: %s", exc)
+                stats["embed"] = {"error": f"the embedding model has changed since the search index was built ({exc}): "
+                                           "search is by words alone until `hansard embed --start-again` has made "
+                                           "the vectors again", "files_remaining": len(state.unembedded())}
             if n:  # index the new vectors now, so later look-ups by passage never read them all into memory
                 idx.ensure_vector_ids()
                 log.info("indexing %d new vectors", n)
-                idx.optimize()
+                idx.tidy()
 
             t = time.time()
             try:  # witnesses' answers to committees, for meaning-based search, within their own time allowance

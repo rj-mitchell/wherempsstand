@@ -15,28 +15,47 @@ Rows are keyed by ``source_key`` (one scrapedxml file), so a corrected
 Hansard revision is applied by deleting that key's rows and adding the new
 ones. Speaker columns (name, party, region, offices) come from the reference
 data on the record's date and are refreshed per person when member data changes.
+
+The tables themselves (opening, replacing a key's rows, adding vectors, building and merging the indexes, searching
+by words and by meaning) are the Where They Stand sites' shared index (wts-core, ``wts_core.adapters.lancedb``),
+opened here with this site's columns by ``search_index``. It also records beside the tables which embedding model
+their vectors were made with (``wts_index.json``), and refuses to be opened for another, so vectors of two models
+are never mixed. What is this site's own is here: the columns, ``similarities`` and ``ensure_portfolio_indices``
+(functions over the index), and the number types of vectors, which the committee evidence's own table
+(hansard/index/evidence.py) and the 16-bit conversion (hansard/index/float16.py) use as well.
 """
 
 from __future__ import annotations
 
-import logging
 import os
-import re
-from datetime import date, timedelta
 from pathlib import Path
-from typing import Any
 
 # LanceDB's own warnings (one per cluster while a vector index is trained on few rows, as the evidence index's first
 # ones are) would fill the update logs: only its errors are shown. Read once, when LanceDB is first imported, so
 # hansard/index/evidence.py sets it too. LANCEDB_LOG=warn (or info) in the environment brings them back.
 os.environ.setdefault("LANCEDB_LOG", "error")
 
-import lancedb  # noqa: E402
-import numpy as np
-import pyarrow as pa
-from lancedb.index import FTS, Bitmap, BTree, LabelList
+import numpy as np  # noqa: E402
+import pyarrow as pa  # noqa: E402
+from wts_core.adapters.lancedb import (  # noqa: E402
+    KEEP_OLD_VERSIONS,
+    IndexSchema,
+    LanceIndex,
+    ScalarColumns,
+    date_lit,
+    retry_once,
+    sanitise_query,
+    sql_list,
+    sql_str,
+)
+from wts_core.ports import Embedder, IndexMeta, IndexOutOfDate  # noqa: E402
 
-log = logging.getLogger(__name__)
+__all__ = [
+    "FILTER_FIELDS", "KEEP_OLD_VERSIONS", "PASSAGES", "PASSAGE_SCHEMA", "PORTFOLIO_COLUMNS", "VECTORS",
+    "VECTOR_TYPE", "IndexOutOfDate", "LanceIndex", "date_lit", "ensure_portfolio_indices", "query_vector",
+    "retry_once", "sanitise_query", "search_index", "similarities", "sql_list", "sql_str", "vector_array",
+    "vector_schema", "vector_value_type",
+]
 
 PASSAGES = "passages"
 VECTORS = "vectors"
@@ -63,8 +82,7 @@ FILTER_FIELDS = [
 
 PORTFOLIO_COLUMNS = ("gov_portfolios", "shadow_portfolios", "chair_portfolios")
 
-PASSAGE_SCHEMA = pa.schema([
-    *FILTER_FIELDS,
+PASSAGE_FIELDS = [
     ("chunk", pa.int32()),
     ("chamber", pa.string()),
     ("speaker_name", pa.string()),
@@ -74,12 +92,34 @@ PASSAGE_SCHEMA = pa.schema([
     ("heading", pa.string()),
     ("text", pa.string()),
     ("search_text", pa.string()),
-])
+]
 
+PASSAGE_SCHEMA = pa.schema([*FILTER_FIELDS, *PASSAGE_FIELDS])
+
+# This site's columns, as the shared index takes them. ``version`` changes when the columns do.
+SCHEMA = IndexSchema(filter_fields=FILTER_FIELDS, passage_fields=PASSAGE_FIELDS, version=1)
+# Indices that let filtered (prefilter) searches skip non-matching rows.
+SCALAR_COLUMNS = ScalarColumns(
+    btree=("passage_id", "source_key", "record_id", "person_id", "date"),
+    bitmap=("source", "house", "record_type", "region", "party_id", "is_gov", "is_shadow", "is_chair", "year"),
+    label_list=PORTFOLIO_COLUMNS)
 
 # New vector tables store 16-bit floats. Embeddings are computed in 32 bits and rounded when written; a query is
 # given in the table's own type.
 VECTOR_TYPE = pa.float16()
+
+
+def search_index(path: Path, embedder: Embedder | IndexMeta | None = None, vectors_name: str = VECTORS) -> LanceIndex:
+    """The site's search index in ``path``.
+
+    ``embedder`` is the embedding model whose vectors are to be written or searched; the index must have been built
+    with the same, or ``IndexOutOfDate`` is raised (``hansard embed --start-again`` then makes the vectors again
+    with the new one). Without one the index is opened as it stands, whatever it was built with: for adding
+    passages, search by words, building and merging the indexes, counts and searches of the vectors there are. Such
+    an index adds no vectors. ``vectors_name`` is another name only while hansard/index/float16.py builds a new
+    table."""
+    return LanceIndex(Path(path), embedder, schema=SCHEMA, scalar_columns=SCALAR_COLUMNS, passages=PASSAGES,
+                      vectors=vectors_name, number_type="float16")
 
 
 def vector_schema(dim: int, value_type: pa.DataType = VECTOR_TYPE) -> pa.Schema:
@@ -103,261 +143,26 @@ def query_vector(vec: np.ndarray, value_type: pa.DataType) -> np.ndarray:
     return np.asarray(vec, dtype=np.float32).astype(value_type.to_pandas_dtype())
 
 
-def retry_once(fn):
-    """Run a read, and once more if it fails: ``hansard vectors-f16`` swaps a table's folder for a new one, and a search
-    that had opened the old one just before reads files that are no longer there. Opened again, it reads the new one."""
-    try:
-        return fn()
-    except Exception as exc:
-        log.info("search failed (%s); trying once more", exc)
-        return fn()
+def ensure_portfolio_indices(index: LanceIndex) -> bool:
+    """Indices on the passages' portfolios, for the search of a subject's frontbench (added after the first
+    build, so an existing index gets them once). Returns True if they had to be built."""
+    return index.ensure_scalar_indexes(PORTFOLIO_COLUMNS)
 
 
-_QUERY_JUNK = re.compile(r"[\"'()\[\]{}:^~*+\-!?\\/<>=|&]")
-
-
-def sanitise_query(text: str) -> str:
-    """Plain words only: user text must never be read as full-text query syntax."""
-    return " ".join(_QUERY_JUNK.sub(" ", text or "").split())
-
-
-def sql_str(value: str) -> str:
-    return "'" + str(value).replace("'", "''") + "'"
-
-
-def sql_list(values) -> str:
-    return "[" + ", ".join(sql_str(v) for v in values) + "]"
-
-
-# Every read opens the latest table version, so older versions only take disk space.
-# Lance would keep them for a week: about 10 GB after one large re-enrichment or clean-up.
-KEEP_OLD_VERSIONS = timedelta(hours=1)
-
-
-class SearchIndex:
-    def __init__(self, path: Path, dim: int, vectors_name: str = VECTORS):
-        self.path = Path(path)
-        self.path.mkdir(parents=True, exist_ok=True)
-        self.dim = dim
-        self.vectors_name = vectors_name  # another name only while hansard/index/float16.py builds a new table
-        self.db = lancedb.connect(str(self.path))
-
-    # ---- tables ---------------------------------------------------------------
-    def _names(self) -> set[str]:
-        res = self.db.list_tables()
-        return set(getattr(res, "tables", res))
-
-    def passages(self):
-        if PASSAGES not in self._names():
-            return self.db.create_table(PASSAGES, schema=PASSAGE_SCHEMA)
-        return self.db.open_table(PASSAGES)
-
-    def vectors(self):
-        if self.vectors_name not in self._names():
-            return self.db.create_table(self.vectors_name, schema=vector_schema(self.dim))
-        return self.db.open_table(self.vectors_name)
-
-    def has_data(self) -> bool:
-        return PASSAGES in self._names() and self.passages().count_rows() > 0
-
-    # ---- writes ---------------------------------------------------------------
-    def replace_keys(self, keys: list[str], rows: list[dict[str, Any]]) -> None:
-        """Replace all passages (and their vectors) for the given source keys."""
-        tbl = self.passages()
-        if keys:
-            where = f"source_key IN ({', '.join(sql_str(k) for k in keys)})"
-            tbl.delete(where)
-            if self.vectors_name in self._names():
-                self.vectors().delete(where)
-        if rows:
-            tbl.add(pa.Table.from_pylist(rows, schema=PASSAGE_SCHEMA))
-
-    def delete_copies(self, pairs: list[tuple[str, str]], chunk: int = 500) -> int:
-        """Delete the passages and vectors of specific (record_id, source_key) copies of records."""
-        names = self._names()
-        for i in range(0, len(pairs), chunk):
-            part = pairs[i:i + chunk]
-            # the record_id clause can use the scalar index; the concat clause makes the match exact
-            where = (f"record_id IN ({', '.join(sql_str(r) for r in sorted({r for r, _ in part}))}) "
-                     f"AND concat(record_id, '|', source_key) IN ({', '.join(sql_str(f'{r}|{k}') for r, k in part)})")
-            for name in (PASSAGES, self.vectors_name):
-                if name in names:
-                    self.db.open_table(name).delete(where)
-        return len(pairs)
-
-    def add_vectors(self, keys: list[str], rows: list[dict[str, Any]], vectors: np.ndarray) -> None:
-        tbl = self.vectors()
-        if keys:
-            tbl.delete(f"source_key IN ({', '.join(sql_str(k) for k in keys)})")
-        if not rows:
-            return
-        # in the table's own number type: 16-bit, or 32-bit in a table not yet converted
-        value_type = vector_value_type(tbl.schema)
-        cols = {name: [r[name] for r in rows] for name, _ in FILTER_FIELDS}
-        cols["vector"] = vector_array(vectors, value_type)
-        tbl.add(pa.Table.from_pydict(cols, schema=vector_schema(self.dim, value_type)))
-
-    def build_indices(self) -> None:
-        tbl = self.passages()
-        if tbl.count_rows() == 0:
-            return
-        tbl.create_index("search_text", config=FTS(with_position=False, stem=True, remove_stop_words=True),
-                         replace=True)
-        self.build_scalar_indices(tbl)
-        self.ensure_vector_ids()
-        if self.vectors_name in self._names():
-            vt = self.vectors()
-            n = vt.count_rows()
-            if n >= 10_000:
-                from lancedb.index import IvfPq
-
-                vt.create_index("vector", config=IvfPq(distance_type="cosine",
-                                                       num_sub_vectors=max(1, self.dim // 8)), replace=True)
-
-    def ensure_vector_ids(self) -> bool:
-        """An index on the vectors table's passage_id. Without it, updating speaker details on a few passages reads
-        every vector into memory (gigabytes, once there are millions). Returns True if it had to be built."""
-        if self.vectors_name not in self._names():
-            return False
-        vt = self.vectors()
-        if vt.count_rows() == 0 or any("passage_id" in (ix.columns or []) for ix in vt.list_indices()):
-            return False
-        vt.create_index("passage_id", config=BTree(), replace=True)
-        return True
-
-    def ensure_portfolio_indices(self) -> bool:
-        """Indices on the passages' portfolios, for the search of a subject's frontbench (added after the first
-        build, so an existing index gets them once). Returns True if they had to be built."""
-        if not self.has_data():
-            return False
-        tbl = self.passages()
-        have = {c for ix in tbl.list_indices() for c in (ix.columns or [])}
-        missing = [c for c in PORTFOLIO_COLUMNS if c not in have]
-        for col in missing:
-            tbl.create_index(col, config=LabelList(), replace=True)
-        return bool(missing)
-
-    def build_scalar_indices(self, tbl) -> None:
-        """Indices that let filtered (prefilter) searches skip non-matching rows."""
-        specs = [(c, BTree()) for c in ("passage_id", "source_key", "record_id", "person_id", "date")]
-        specs += [(c, Bitmap()) for c in ("source", "house", "record_type", "region", "party_id",
-                                         "is_gov", "is_shadow", "is_chair", "year")]
-        specs += [(c, LabelList()) for c in PORTFOLIO_COLUMNS]
-        for col, cfg in specs:
-            try:
-                tbl.create_index(col, config=cfg, replace=True)
-            except Exception as exc:  # scalar indices are an optimisation only
-                log.warning("scalar index on %s skipped: %s", col, exc)
-
-    def unmerged(self) -> int:
-        """Passages not yet in the keyword (BM25) index: added by an update that stopped before merging them."""
-        if PASSAGES not in self._names():
-            return 0
-        tbl = self.passages()
-        for ix in tbl.list_indices():
-            if "search_text" in (ix.columns or []):
-                st = tbl.index_stats(ix.name)
-                return int(st.num_unindexed_rows) if st else 0
-        return 0
-
-    def optimize(self) -> None:
-        """Merge new rows into the indices, compact small files and drop superseded versions."""
-        for name in (PASSAGES, self.vectors_name):
-            if name in self._names():
-                self.db.open_table(name).optimize(cleanup_older_than=KEEP_OLD_VERSIONS)
-
-    # ---- reads ----------------------------------------------------------------
-    def bm25(self, query: str, where: str | None, limit: int) -> list[dict[str, Any]]:
-        q = sanitise_query(query)
-        if not q or PASSAGES not in self._names():
-            return []
-        search = self.passages().search(q, query_type="fts")
-        if where:
-            search = search.where(where, prefilter=True)
-        return search.limit(limit).to_list()
-
-    def vector(self, vec: np.ndarray, where: str | None, limit: int, nprobes: int | None = None,
-               refine_factor: int | None = None, columns: list[str] | None = None,
-               exact: bool = False) -> list[dict[str, Any]]:
-        """Nearest passages by meaning. The index compares compressed vectors, which misses about a third of the
-        truly nearest 300; ``refine_factor`` re-checks that many times ``limit`` candidates against the full vectors,
-        finding nearly all of them for a few milliseconds more."""
-        def run() -> list[dict[str, Any]]:
-            if self.vectors_name not in self._names():
-                return []
-            vt = self.vectors()
-            if vt.count_rows() == 0:
-                return []
-            q = query_vector(vec, vector_value_type(vt.schema))
-            search = vt.search(q, vector_column_name="vector").distance_type("cosine")
-            if exact:  # every vector compared in full: slow, for checking the index
-                search = search.bypass_vector_index()
-            else:
-                if nprobes:
-                    search = search.nprobes(int(nprobes))
-                if refine_factor:
-                    search = search.refine_factor(int(refine_factor))
-            if where:
-                search = search.where(where, prefilter=True)
-            # every column but the vector itself: 300 vectors as Python floats cost more than the search
-            search = search.select([*(columns or [name for name, _ in FILTER_FIELDS]), "_distance"])
-            return search.limit(limit).to_list()
-
-        return retry_once(run)
-
-    def similarities(self, vec: np.ndarray, passage_ids: list[str]) -> dict[str, float]:
-        """Closeness in meaning (cosine similarity, as the search by meaning gives it) of these passages to the query,
-        from their stored vectors."""
-        if not passage_ids or self.vectors_name not in self._names():
-            return {}
-        rows = retry_once(lambda: self.vectors().search()
-                          .where(f"passage_id IN ({', '.join(sql_str(p) for p in passage_ids)})")
-                          .select(["passage_id", "vector"]).limit(None).to_list())
-        q = np.asarray(vec, dtype=np.float32)
-        q = q / (np.linalg.norm(q) or 1.0)
-        out = {}
-        for row in rows:
-            v = np.asarray(row["vector"], dtype=np.float32)
-            n = float(np.linalg.norm(v))
-            if n:
-                out[row["passage_id"]] = float(v @ q) / n
-        return out
-
-    def rebuild_vector_index(self, rows_per_partition: int = 8192) -> None:
-        """Rebuild the meaning-search index with partitions sized for the vectors there are now.
-
-        The index is first built when there are few vectors, and later additions join its existing partitions; with
-        millions of vectors in a few dozen partitions, each search reads a third of them. Searches carry on with the
-        old index while the new one is built."""
-        from lancedb.index import IvfPq
-
-        vt = self.vectors()
-        vt.create_index("vector", config=IvfPq(distance_type="cosine", num_sub_vectors=max(1, self.dim // 8),
-                                               target_partition_size=int(rows_per_partition)), replace=True)
-
-    def passages_for(self, passage_ids: list[str]) -> dict[str, dict[str, Any]]:
-        if not passage_ids:
-            return {}
-        rows = self.passages().search().where(
-            f"passage_id IN ({', '.join(sql_str(p) for p in passage_ids)})").limit(None).to_list()
-        return {r["passage_id"]: r for r in rows}
-
-    def rows_for_keys(self, keys: list[str]) -> list[dict[str, Any]]:
-        if not keys:
-            return []
-        # limit(None): an explicit huge limit makes LanceDB size buffers for it (GBs of RSS)
-        where = f"source_key IN ({', '.join(sql_str(k) for k in keys)})"
-        cols = [name for name, _ in FILTER_FIELDS] + ["heading", "search_text"]
-        return self.passages().search().where(where).select(cols).limit(None).to_list()
-
-    def stats(self) -> dict[str, Any]:
-        out = {"passages": 0, "vectors": 0}
-        if PASSAGES in self._names():
-            out["passages"] = self.passages().count_rows()
-        if self.vectors_name in self._names():
-            out["vectors"] = self.vectors().count_rows()
-        return out
-
-
-def date_lit(d: date) -> str:
-    return f"DATE '{d.isoformat()}'"
+def similarities(index: LanceIndex, vec: np.ndarray, passage_ids: list[str]) -> dict[str, float]:
+    """Closeness in meaning (cosine similarity, as the search by meaning gives it) of these passages to the query,
+    from their stored vectors."""
+    if not passage_ids or index.vectors_name not in index.names():
+        return {}
+    rows = retry_once(lambda: index.vectors().search()
+                      .where(f"passage_id IN ({', '.join(sql_str(p) for p in passage_ids)})")
+                      .select(["passage_id", "vector"]).limit(None).to_list())
+    q = np.asarray(vec, dtype=np.float32)
+    q = q / (np.linalg.norm(q) or 1.0)
+    out = {}
+    for row in rows:
+        v = np.asarray(row["vector"], dtype=np.float32)
+        n = float(np.linalg.norm(v))
+        if n:
+            out[row["passage_id"]] = float(v @ q) / n
+    return out

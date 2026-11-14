@@ -7,12 +7,20 @@ from datetime import date
 import numpy as np
 import pyarrow as pa
 import pytest
+from wts_core.ports import IndexMeta
 
 from hansard.index import float16
 from hansard.index.evidence import EvidenceVectors
-from hansard.index.lance import SearchIndex, vector_schema, vector_value_type
+from hansard.index.lance import (
+    LanceIndex,
+    search_index,
+    similarities,
+    vector_schema,
+    vector_value_type,
+)
 
 DIM = 16
+EMBEDDER = IndexMeta("an-embedding-model", DIM, number_type="float16")  # whichever model made the vectors: the tools here do not mind
 ROWS = 12_000  # enough for a meaning-search index
 
 
@@ -29,9 +37,9 @@ def _vectors(n: int, seed: int = 0) -> np.ndarray:
     return v / np.linalg.norm(v, axis=1, keepdims=True)
 
 
-def _old_index(path, rows: int = ROWS) -> tuple[SearchIndex, np.ndarray]:
+def _old_index(path, rows: int = ROWS) -> tuple[LanceIndex, np.ndarray]:
     """A vectors table as made before November 2026: 32-bit, with its index and passage_id index."""
-    idx = SearchIndex(path, DIM)
+    idx = search_index(path, EMBEDDER)
     idx.db.create_table("vectors", schema=vector_schema(DIM, pa.float32()))
     vecs = _vectors(rows)
     half = rows // 2
@@ -47,25 +55,25 @@ def _target(path) -> float16.Target:
 
 
 def test_new_tables_store_16_bit_vectors_and_find_the_same(tmp_path):
-    idx = SearchIndex(tmp_path, DIM)
+    idx = search_index(tmp_path, EMBEDDER)
     vecs = _vectors(50)
     idx.add_vectors([], _rows(50), vecs)
     assert vector_value_type(idx.vectors().schema) == pa.float16()
-    hits = idx.vector(vecs[7], None, 3)
+    hits = idx.search_meaning(vecs[7], None, 3)
     assert hits[0]["passage_id"] == "p7" and hits[0]["_distance"] < 1e-3
-    sims = idx.similarities(vecs[7], ["p7", "p8"])
+    sims = similarities(idx, vecs[7], ["p7", "p8"])
     assert sims["p7"] == pytest.approx(1.0, abs=1e-3)
     assert sims["p8"] == pytest.approx(float(vecs[7] @ vecs[8]), abs=2e-3)
 
 
 def test_an_old_32_bit_table_is_still_read_and_written(tmp_path):
-    idx = SearchIndex(tmp_path, DIM)
+    idx = search_index(tmp_path, EMBEDDER)
     idx.db.create_table("vectors", schema=vector_schema(DIM, pa.float32()))
     vecs = _vectors(40)
     idx.add_vectors([], _rows(40), vecs)
     assert vector_value_type(idx.vectors().schema) == pa.float32()  # written in the table's own type
-    assert idx.vector(vecs[3], "house = 'commons'", 1)[0]["passage_id"] == "p3"
-    assert idx.similarities(vecs[3], ["p3"])["p3"] == pytest.approx(1.0, abs=1e-6)
+    assert idx.search_meaning(vecs[3], "house = 'commons'", 1)[0]["passage_id"] == "p3"
+    assert similarities(idx, vecs[3], ["p3"])["p3"] == pytest.approx(1.0, abs=1e-6)
 
 
 def test_evidence_vectors_of_either_kind(tmp_path):
@@ -86,7 +94,7 @@ def test_evidence_vectors_of_either_kind(tmp_path):
 
 def test_conversion_copies_checks_and_swaps(tmp_path):
     idx, vecs = _old_index(tmp_path)
-    before = idx.vector(vecs[11], None, 10, refine_factor=5)
+    before = idx.search_meaning(vecs[11], None, 10, refine_factor=5)
     out = float16.convert(_target(tmp_path), queries=list(_vectors(20, seed=1)), commit_rows=5000)
     assert out["status"] == "converted", out
     assert out["copy"]["rows"] == ROWS and out["checks"]["rows_ok"]
@@ -97,7 +105,7 @@ def test_conversion_copies_checks_and_swaps(tmp_path):
     assert vector_value_type(vt.schema) == pa.float16() and vt.count_rows() == ROWS
     assert {tuple(ix.columns) for ix in vt.list_indices()} == {("vector",), ("passage_id",)}
     assert not (tmp_path / "vectors_f16.lance").exists() and not (tmp_path / "vectors_f16.progress.json").exists()
-    after = idx.vector(vecs[11], None, 10, refine_factor=5)
+    after = idx.search_meaning(vecs[11], None, 10, refine_factor=5)
     assert after[0]["passage_id"] == before[0]["passage_id"] == "p11"
     # the site carries on writing, now in 16 bits
     idx.add_vectors(["k0"], _rows(3), _vectors(3, seed=2))
@@ -136,7 +144,7 @@ def test_dry_run_and_too_little_space_change_nothing(tmp_path):
     refused = float16.convert(_target(tmp_path), min_free_after=10 ** 15)
     assert refused["refused"] and "Free some space" in refused["status"]
     assert not (tmp_path / "vectors_f16.lance").exists()
-    assert vector_value_type(SearchIndex(tmp_path, DIM).vectors().schema) == pa.float32()
+    assert vector_value_type(search_index(tmp_path, EMBEDDER).vectors().schema) == pa.float32()
 
 
 def test_without_an_atomic_exchange_two_renames_do(tmp_path, monkeypatch):
@@ -144,7 +152,7 @@ def test_without_an_atomic_exchange_two_renames_do(tmp_path, monkeypatch):
     monkeypatch.setattr(float16, "exchange", lambda a, b: False)
     out = float16.convert(_target(tmp_path), keep_old=True)
     assert out["swap"] == "renamed in two steps"
-    assert vector_value_type(SearchIndex(tmp_path, DIM).vectors().schema) == pa.float16()
+    assert vector_value_type(search_index(tmp_path, EMBEDDER).vectors().schema) == pa.float16()
     assert (tmp_path / "vectors_f32.lance").exists()  # kept, as asked
     again = float16.convert(_target(tmp_path))
     assert again["removed"] == ["vectors_f32"] and not (tmp_path / "vectors_f32.lance").exists()
@@ -196,7 +204,7 @@ def test_the_command_converts_both_tables_under_the_update_lock(settings, monkey
 
     monkeypatch.setattr(cli, "_settings", lambda: settings)
     dim = int(settings.embedding["dim"])
-    idx = SearchIndex(settings.index_dir, dim)
+    idx = search_index(settings.index_dir, IndexMeta("an-embedding-model", dim, number_type="float16"))
     idx.db.create_table("vectors", schema=vector_schema(dim, pa.float32()))
     rng = np.random.default_rng(5)
     idx.add_vectors([], _rows(300), rng.standard_normal((300, dim)).astype(np.float32))
@@ -257,7 +265,7 @@ def test_a_new_index_that_finds_fewer_is_not_swapped(tmp_path):
                                      tolerance=-1.0)  # nothing can beat the old index by more than everything
     out = float16.convert(target, commit_rows=5000)
     assert out["refused"] and "the index check failed" in out["status"] and "recommended" not in out["tuning"]
-    assert vector_value_type(SearchIndex(tmp_path, DIM).vectors().schema) == pa.float32()
+    assert vector_value_type(search_index(tmp_path, EMBEDDER).vectors().schema) == pa.float32()
     assert read_record(tmp_path) is None
 
 
@@ -271,7 +279,7 @@ def test_the_command_saves_the_measured_settings(settings, monkeypatch):
 
     monkeypatch.setattr(cli, "_settings", lambda: settings)
     dim = int(settings.embedding["dim"])
-    idx = SearchIndex(settings.index_dir, dim)
+    idx = search_index(settings.index_dir, IndexMeta("an-embedding-model", dim, number_type="float16"))
     idx.db.create_table("vectors", schema=vector_schema(dim, pa.float32()))
     vecs = np.random.default_rng(6).standard_normal((3000, dim)).astype(np.float32)
     idx.add_vectors([], _rows(3000), vecs)

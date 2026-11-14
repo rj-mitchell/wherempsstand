@@ -1,6 +1,6 @@
 import threading
 
-from hansard.store.shared import shared
+from wts_core.adapters.duckdb import shared
 
 
 def test_threads_get_their_own_results():

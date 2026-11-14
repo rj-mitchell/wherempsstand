@@ -75,11 +75,18 @@ def rerank(scored: list[Scored], query: str, reranker: Reranker, top: int = 150,
     return out
 
 
+def models_dir(settings) -> Path:
+    """Where the re-ranking model's weights are kept: a folder of its own. The search index records which weights
+    its vectors were made with by every model file in the embedding model's folder (data/models), so a second
+    model downloaded there would make the index look as if it had been built with another."""
+    return settings.data_dir / "reranker-models"
+
+
 def get_reranker(settings) -> Reranker | None:
     name = settings.ranking.get("reranker") or ""
     if not name:
         return None
-    cache = settings.data_dir / "models"
+    cache = models_dir(settings)
     try:
         return Reranker(name, cache, threads=settings.embedding.get("threads"))
     except Exception as exc:  # missing weights or no network: search still works without it
@@ -92,6 +99,6 @@ def ensure_reranker(settings) -> dict:
     name = settings.ranking.get("reranker") or ""
     if not name:
         return {"status": "off"}
-    if model_on_disk(settings.data_dir / "models", name):
+    if model_on_disk(models_dir(settings), name):
         return {"status": "present", "model": name}
     return {"status": "downloaded" if get_reranker(settings) else "failed", "model": name}

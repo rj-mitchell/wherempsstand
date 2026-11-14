@@ -7,11 +7,11 @@ from datetime import date, timedelta
 import pyarrow as pa
 import pyarrow.compute  # noqa: F401  (pa.compute)
 import pytest
+from wts_core.adapters import lancedb
+from wts_core.adapters.hashing import HashingEmbedder
 
-from hansard.embed.base import HashingEmbedder
-from hansard.index import lance
 from hansard.index.build import Indexer
-from hansard.index.lance import SearchIndex, sql_str
+from hansard.index.lance import search_index, sql_str
 from hansard.store.state import StateDB
 from hansard.sync import run_sync
 
@@ -21,7 +21,7 @@ BENN = "uk.org.publicwhip/person/10669"
 
 
 def _passages(settings, where):
-    idx = SearchIndex(settings.index_dir, 64)
+    idx = search_index(settings.index_dir)
     return idx.passages().search().where(where).limit(None).to_list()
 
 
@@ -33,7 +33,7 @@ def test_sync_end_to_end_and_member_reshuffle(settings, xml_mirror, tmp_path):
     assert "error" not in first, first
     assert first["ingest"]["files_new"] > 0 and first["index"]["passages_written"] > 0
     assert first["embed"]["files_remaining"] == 0
-    vectors_before = SearchIndex(settings.index_dir, 64).stats()["vectors"]
+    vectors_before = search_index(settings.index_dir).stats()["vectors"]
     assert vectors_before > 0
 
     # Pick a speaker who appears in the fixture debates and give them a new government post.
@@ -59,8 +59,8 @@ def test_sync_end_to_end_and_member_reshuffle(settings, xml_mirror, tmp_path):
     assert after and all("transport" in r["gov_portfolios"] for r in after)
     # other speakers untouched, embeddings kept (text unchanged)
     assert second["embed"]["passages_embedded"] == 0
-    assert SearchIndex(settings.index_dir, 64).stats()["vectors"] == vectors_before
-    vt = SearchIndex(settings.index_dir, 64).vectors()
+    assert search_index(settings.index_dir).stats()["vectors"] == vectors_before
+    vt = search_index(settings.index_dir).vectors()
     vec_rows = vt.search().where(f"person_id = {sql_str(target)} AND date >= DATE '2026-01-01'").limit(None).to_list()
     assert vec_rows and all(r["is_gov"] for r in vec_rows)
     assert others  # sanity: fixture has several speakers
@@ -111,7 +111,7 @@ def _republish_answer(xml_mirror):
 
 
 def _copies(settings, table, record_id):
-    idx = SearchIndex(settings.index_dir, 64)
+    idx = search_index(settings.index_dir)
     tbl = idx.passages() if table == "passages" else idx.vectors()
     return tbl.search().where(f"record_id = {sql_str(record_id)}").limit(None).to_list()
 
@@ -141,7 +141,7 @@ def test_republished_written_answer_replaces_the_older_copy(settings, xml_mirror
     # the rest of the older file is still indexed
     assert _passages(settings, "source_key = 'answers2026-10-08'")
     # passage IDs are unique again, so in-place speaker updates work
-    idx = SearchIndex(settings.index_dir, 64)
+    idx = search_index(settings.index_dir)
     who = "uk.org.publicwhip/person/25673"
     indexer = Indexer(settings, idx, StateDB(settings.state_db))
     assert indexer.reenrich_people({who}) == 0  # nothing changed: nothing rewritten
@@ -165,7 +165,7 @@ def test_dedupe_cleans_an_index_built_with_both_copies(settings, xml_mirror, tmp
     assert {r["source_key"] for r in _copies(settings, "passages", ANSWER)} == {"answers2026-10-12"}
 
     # simulate an index built by the old indexer: an older copy and a repeated question
-    idx = SearchIndex(settings.index_dir, 64)
+    idx = search_index(settings.index_dir)
     tbl = idx.passages()
     newer = tbl.search().where(f"record_id IN ({sql_str(ANSWER)}, {sql_str(QUESTION)})").limit(None).to_arrow()
     older = newer.set_column(newer.schema.get_field_index("source_key"), "source_key",
@@ -224,12 +224,12 @@ def test_superseded_index_versions_are_deleted(settings, xml_mirror, tmp_path, m
     run_sync(settings, fetch=False, members_dir=members, embedder=HashingEmbedder(64), embed_minutes=None, workers=1,
              today=date(2026, 10, 1))
     _republish_answer(xml_mirror)
-    idx = SearchIndex(settings.index_dir, 64)
+    idx = search_index(settings.index_dir)
     Indexer(settings, idx, StateDB(settings.state_db)).index_pending()
     before = len(idx.passages().list_versions())
     assert before > 2
-    monkeypatch.setattr(lance, "KEEP_OLD_VERSIONS", timedelta(0))
-    idx.optimize()
+    monkeypatch.setattr(lancedb, "KEEP_OLD_VERSIONS", timedelta(0))
+    idx.tidy()
     assert len(idx.passages().list_versions()) < before
     assert _copies(settings, "passages", ANSWER)  # the current data is intact
 
@@ -255,7 +255,7 @@ def test_keyword_only_installations_skip_meaning_search(settings, xml_mirror, tm
     stats = run_sync(s, fetch=False, members_dir=members, embedder=HashingEmbedder(64), embed_minutes=None,
                      workers=1, today=date(2026, 10, 1))
     assert "embed" not in stats
-    assert SearchIndex(s.index_dir, 64).stats()["vectors"] == 0
+    assert search_index(s.index_dir).stats()["vectors"] == 0
 
 
 def test_bootstrap_choices_are_remembered_for_later_syncs(tmp_path, monkeypatch):
@@ -300,7 +300,7 @@ def test_an_update_killed_before_merging_is_finished_by_the_next(settings, xml_m
     run_sync(settings, **kw)
     # an update that added passages and was killed before merging them into the keyword index
     _republish_answer(xml_mirror)
-    idx = SearchIndex(settings.index_dir, 64)
+    idx = search_index(settings.index_dir)
     state = StateDB(settings.state_db)
     state.start_run("sync")
     from hansard.ingest import ingest
@@ -333,7 +333,7 @@ def test_the_vectors_table_is_indexed_by_passage(settings, xml_mirror, tmp_path)
     shutil.copytree(MEMBERS, members)
     run_sync(settings, fetch=False, members_dir=members, embedder=HashingEmbedder(64), embed_minutes=None, workers=1,
              today=date(2026, 10, 1))
-    idx = SearchIndex(settings.index_dir, 64)
+    idx = search_index(settings.index_dir)
     assert any("passage_id" in (ix.columns or []) for ix in idx.vectors().list_indices())
     assert idx.ensure_vector_ids() is False  # already there
 

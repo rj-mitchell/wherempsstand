@@ -15,9 +15,19 @@ from dataclasses import asdict, dataclass, field
 from datetime import date
 from typing import Any
 
+from wts_core.adapters.duckdb import shared
+from wts_core.ports import Embedder
+
+from hansard.adapters import get_embedder
 from hansard.config import Settings
-from hansard.embed.base import Embedder, get_embedder
-from hansard.index.lance import SearchIndex, date_lit, sql_list, sql_str
+from hansard.index.lance import (
+    IndexOutOfDate,
+    date_lit,
+    search_index,
+    similarities,
+    sql_list,
+    sql_str,
+)
 from hansard.rank.composite import Candidate, RankParams, Scored, rank
 from hansard.rank.evidence import evidence_summary, select_evidence
 from hansard.rank.places import places_for
@@ -25,7 +35,6 @@ from hansard.rank.rerank import Reranker, get_reranker, rerank
 from hansard.reference.profiles import ProfileResolver
 from hansard.sources.demographics import AGE_BANDS, age_band, age_on, assumed_birth, band_dates
 from hansard.store.parquet import read_records
-from hansard.store.shared import shared
 
 log = logging.getLogger(__name__)
 
@@ -140,8 +149,9 @@ class Engine:
         self.settings = settings
         # True: load the model named in the settings when first needed; None or False: no re-ranking
         self._reranker: Reranker | None | bool = reranker
-        dim = int(settings.embedding.get("dim", 384))
-        self.index = SearchIndex(settings.index_dir, dim)
+        # opened as it stands: search by words needs no embedding model, and none is loaded until a search needs it
+        self.index = search_index(settings.index_dir)
+        self._fits: bool | None = None  # whether the index's vectors were made with this embedding model
         self.resolver = ProfileResolver(settings.reference_dir)
         self._embedder = embedder
         self.today = today
@@ -171,6 +181,24 @@ class Engine:
         if not self._has_vectors:
             self._has_vectors = self.index.stats()["vectors"] > 0
         return self._has_vectors
+
+    def embedder_fits(self) -> bool:
+        """Whether the index's vectors were made with the embedding model in use (checked once, when a search
+        first needs it). If the model has changed since, searching the old vectors with the new model's would find
+        nonsense: search carries on by words alone, as it does before anything is embedded, until
+        ``hansard embed --start-again`` has made the vectors again."""
+        if self._fits is None:
+            try:
+                search_index(self.settings.index_dir, self._embedder)
+                self._fits = True
+            except IndexOutOfDate as exc:
+                log.error("search by meaning is off: %s. Run `hansard embed --start-again` to make the vectors "
+                          "again with the model in the settings", exc)
+                self._fits = False
+            except OSError as exc:  # the index folder cannot be written to here: the check is made by the update
+                log.warning("could not record the embedding model beside the index (%s)", exc)
+                self._fits = True
+        return self._fits
 
     @property
     def embedder(self) -> Embedder | None:
@@ -352,7 +380,8 @@ class Engine:
 
         def keyword() -> tuple[list[dict[str, Any]], float]:
             start = time.perf_counter()
-            return self.index.bm25(query, where, int(r.get("candidates_bm25", 300)) * widen), time.perf_counter() - start
+            return (self.index.search_words(query, where, int(r.get("candidates_bm25", 300)) * widen),
+                    time.perf_counter() - start)
 
         # The ministers, shadow ministers and committee chairs for the question's subject are also searched on their
         # own: on a subject debated at length, the few speeches setting out each side's position can fall outside
@@ -366,15 +395,15 @@ class Engine:
         # the keyword searches run on their own threads while the question is embedded and searched by meaning
         with ThreadPoolExecutor(max_workers=1 + len(fronts)) as pool:
             by_keyword = pool.submit(keyword)
-            by_front = [pool.submit(self.index.bm25, query, w, front) for w in fronts]
+            by_front = [pool.submit(self.index.search_words, query, w, front) for w in fronts]
             vec_hits: list[dict[str, Any]] = []
-            semantic = self.has_vectors() and self.embedder is not None
+            semantic = self.has_vectors() and self.embedder is not None and self.embedder_fits()
             if semantic:
                 vec = self.embedder.embed_query(query)
                 lap("embed")
-                vec_hits = self.index.vector(vec, where, int(r.get("candidates_vector", 300)) * widen,
-                                             nprobes=r.get("vector_nprobes"),
-                                             refine_factor=r.get("vector_refine_factor"))
+                vec_hits = self.index.search_meaning(vec, where, int(r.get("candidates_vector", 300)) * widen,
+                                                     nprobes=r.get("vector_nprobes"),
+                                                     refine_factor=r.get("vector_refine_factor"))
                 lap("meaning")
             bm, timings["keyword"] = by_keyword.result()
             front_hits = [h for f in by_front for h in f.result()]
@@ -419,7 +448,7 @@ class Engine:
         if semantic and front_hits:
             unread = {h["passage_id"]: cands[h["record_id"]] for h in front_hits
                       if h["record_id"] in cands and cands[h["record_id"]].cosine is None}
-            for pid, sim in self.index.similarities(vec, list(unread)).items():
+            for pid, sim in similarities(self.index, vec, list(unread)).items():
                 c = unread[pid]
                 c.cosine = sim if c.cosine is None else max(c.cosine, sim)
             lap("frontbench_meaning")

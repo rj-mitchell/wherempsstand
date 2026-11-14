@@ -2,7 +2,8 @@
 
 from datetime import date
 
-from hansard.embed.base import HashingEmbedder
+from wts_core.adapters.hashing import HashingEmbedder
+
 from hansard.engine import Engine, Filters, Scope, build_where
 
 TODAY = date(2026, 10, 1)

@@ -21,6 +21,7 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 from pydantic import BaseModel, Field
+from wts_core.ports import ModelClient, ModelRequest, Usage
 
 from hansard.people import person_number
 
@@ -257,19 +258,28 @@ def prompt(question: str, people: dict[str, Any]) -> tuple[str, dict[str, dict[s
     return "\n".join(parts), labels
 
 
-def check(client, model: str, question: str, sources: list[Any], commons, lords, donations=None,
-          effort: str = "low") -> tuple[list[dict[str, Any]], Any]:
-    """Relevant registered interests for the briefing's sources, one entry per source, and the model's usage."""
+def check(client: ModelClient, model: str, question: str, sources: list[Any], commons, lords, donations=None,
+          effort: str = "low", cache_instructions: str = "short") -> tuple[list[dict[str, Any]], Usage | None]:
+    """Relevant registered interests for the briefing's sources, one entry per source, and the model's usage.
+
+    An answer from the model with nothing in it means no matches, as it always has: the shared model client raises
+    for one (its ``structured``), and that is caught here. What such a call cost is not known then, so none is
+    recorded for it. Any other failure is the caller's to catch (the pipeline's ``find_interests`` never lets one
+    stop a briefing)."""
     people = candidates(sources, commons, lords, donations)
     if not people:
         return [], None
     text, labels = prompt(question, people)
-    from hansard.rag.answer import cached_system
-
-    resp = client.messages.parse(model=model, max_tokens=6000, system=cached_system(SYSTEM),
-                                 messages=[{"role": "user", "content": text}],
-                                 output_config={"effort": effort}, output_format=Matches)
-    found = resp.parsed_output.matches if resp.parsed_output else []
+    request = ModelRequest(model=model, instructions=SYSTEM, question=text, max_tokens=6000, effort=effort,
+                           cache_instructions=cache_instructions)
+    try:
+        answer, usage = client.structured(request, Matches)
+    except RuntimeError as exc:
+        if "returned no output" not in str(exc):
+            raise
+        log.info("interests check: the model's answer had nothing in it; taken as no matches")
+        return [], None
+    found = answer.matches
     by_source: dict[int, dict[str, Any]] = {}
     for m in found:
         if not m.relevant or _DOUBT.search(m.connection):
@@ -293,7 +303,7 @@ def check(client, model: str, question: str, sources: list[Any], commons, lords,
             flag["items"].append({"category": entry["category"], "summary": entry["summary"],
                                   "registered": entry["registered"], "connection": " ".join(m.connection.split()),
                                   "kind": entry["kind"], "register": entry["register"], "url": entry["url"]})
-    return sorted(by_source.values(), key=lambda f: f["source"]), resp.usage
+    return sorted(by_source.values(), key=lambda f: f["source"]), usage
 
 
 def without_public_office(flags: list[dict[str, Any]] | None) -> list[dict[str, Any]]:

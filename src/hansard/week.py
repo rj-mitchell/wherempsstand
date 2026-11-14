@@ -10,10 +10,11 @@ from collections import OrderedDict, defaultdict
 from datetime import date, timedelta
 from typing import Any
 
+from wts_core.adapters.duckdb import shared
+
 from hansard.config import Settings
 from hansard.debates import SOURCES, anchor, debate_path, slug, title_of
 from hansard.store.parquet import attach_store
-from hansard.store.shared import shared
 from hansard.vote_types import vote_types
 
 CHAMBERS = [("debates", "House of Commons"), ("lordspages", "House of Lords"), ("westminhall", "Westminster Hall"),

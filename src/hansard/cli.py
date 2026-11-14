@@ -191,52 +191,72 @@ def index(rebuild_fts: bool = typer.Option(True, help="(re)build the BM25 index 
 
 def index_pending(settings: Settings, rebuild_fts: bool = True, dedupe: bool = False) -> dict:
     from hansard.index.build import Indexer
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import search_index
     from hansard.store.state import StateDB
 
-    idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+    idx = search_index(settings.index_dir)
     t = time.time()
     indexer = Indexer(settings, idx, StateDB(settings.state_db))
     out = indexer.dedupe() if dedupe else {}
     n = indexer.index_pending()
     if rebuild_fts and (n or dedupe):
-        idx.build_indices()
+        idx.build_indexes()
     elif n:
-        idx.optimize()
+        idx.tidy()
     return {"passages_written": n, **out, "seconds": round(time.time() - t, 1), **idx.stats()}
 
 
 @app.command()
 def embed(max_files: int = typer.Option(None, help="stop after this many files"),
-          max_minutes: float = typer.Option(None, help="stop after this many minutes (resumable)")):
+          max_minutes: float = typer.Option(None, help="stop after this many minutes (resumable)"),
+          start_again: bool = typer.Option(False, "--start-again", help="after the embedding model has changed: "
+                                           "throw the vectors away and make them all again with the model in the "
+                                           "settings (search is by words alone until they are made)")):
     """Embed passages for semantic search, newest first (resumable)."""
     _setup_logging()
     settings = _settings()
-    typer.echo(json.dumps(embed_pending_cmd(settings, max_files, max_minutes), indent=2))
+    typer.echo(json.dumps(embed_pending_cmd(settings, max_files, max_minutes, start_again=start_again), indent=2))
 
 
-def embed_pending_cmd(settings: Settings, max_files=None, max_minutes=None) -> dict:
-    from hansard.embed.base import get_embedder, model_fingerprint
+MODEL_CHANGED = ("embedding model weights changed since the index was built; restore the pinned model, or make "
+                 "the vectors again with `hansard embed --start-again`")
+
+
+def embed_pending_cmd(settings: Settings, max_files=None, max_minutes=None, start_again: bool = False) -> dict:
+    from wts_core.adapters.fastembed import model_fingerprint
+
+    from hansard.adapters import get_embedder, models_dir
     from hansard.index.build import embed_pending
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import IndexOutOfDate, search_index
     from hansard.store.state import StateDB
 
     state = StateDB(settings.state_db)
-    idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
     embedder = get_embedder(settings)
-    if settings.embedding.get("backend") == "fastembed":
-        fp = model_fingerprint(settings.data_dir / "models")
+    fastembed = settings.embedding.get("backend") == "fastembed"
+    if start_again:
+        # the vectors go, the index records the new model, and every file is marked as waiting to be embedded
+        search_index(settings.index_dir).start_again(embedder, number_type="float16")
+        with state.connect() as con:
+            con.execute("UPDATE manifest SET embedded_at = NULL")
+            con.execute("DELETE FROM kv WHERE key = 'embedding_model_sha256'")
+    if fastembed:
+        fp = model_fingerprint(models_dir(settings))
         prev = state.get("embedding_model_sha256")
         if prev and prev != fp:
-            raise typer.Exit("embedding model weights changed since the index was built; "
-                             "rebuild vectors or restore the pinned model")
+            raise typer.Exit(MODEL_CHANGED)
+    try:  # the index says which model its vectors were made with, and is not opened for another
+        idx = search_index(settings.index_dir, embedder)
+    except IndexOutOfDate as exc:
+        log.error("%s", exc)
+        raise typer.Exit(MODEL_CHANGED) from None
+    if fastembed:
         state.set("embedding_model_sha256", fp)
         state.set("embedding_model", embedder.name)
     t = time.time()
     n = embed_pending(settings, idx, state, embedder, max_files=max_files,
                       max_seconds=max_minutes * 60 if max_minutes else None)
     if n and idx.stats()["vectors"] >= 10_000:
-        idx.build_indices()
+        idx.build_indexes()
     return {"passages_embedded": n, "seconds": round(time.time() - t, 1), **idx.stats()}
 
 
@@ -250,14 +270,14 @@ def reindex_vectors(rows_per_partition: int = typer.Option(8192, help="vectors p
     Takes a while on the full record (tens of minutes, most of it comparing every vector to measure how many of the
     nearest passages each index finds); the site keeps working on the old index meanwhile, and the twice-daily
     update waits for it to finish."""
-    from hansard.embed.base import get_embedder
-    from hansard.index.lance import SearchIndex
+    from hansard.adapters import get_embedder
+    from hansard.index.lance import search_index
     from hansard.index.retune import rebuild
     from hansard.sync import update_lock
 
     _setup_logging()
     settings = _settings()
-    idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+    idx = search_index(settings.index_dir)
     with update_lock(settings):
         current = {"nprobes": settings.ranking.get("vector_nprobes"),
                    "refine_factor": settings.ranking.get("vector_refine_factor")}
@@ -303,14 +323,14 @@ def groups_scan(everything: bool = typer.Option(False, "--all", help="read the w
 def index_status(text: bool = typer.Option(False, "--text", help="print only the sentence for the monthly report")):
     """How many passages are searched by meaning now, against the number when the index was last rebuilt
     (index/vector-index.json), and whether it is time to rebuild it (20% more). Reads no vectors: quick at any time."""
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import search_index
     from hansard.index.retune import status as index_status_of
 
     settings = _settings()
     if not settings.index_dir.exists():
         out = index_status_of(settings.index_dir, 0)
     else:
-        idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+        idx = search_index(settings.index_dir)
         out = index_status_of(settings.index_dir, idx.stats()["vectors"])
     typer.echo(out["reminder"] if text else json.dumps(out, indent=2))
 
@@ -346,7 +366,7 @@ def vectors_f16(dry_run: bool = typer.Option(False, "--dry-run", help="report si
     on both), then swaps it in place of the old one in one step and deletes the old one. The site keeps searching
     throughout. Safe to stop and run again: it carries on where it stopped. Run under the server's update lock
     (docs/HOSTING.md, "Disk space"); restart the app afterwards if it says so."""
-    from hansard.embed.base import get_embedder
+    from hansard.adapters import get_embedder
     from hansard.index.float16 import convert, evidence_target, passages_target
     from hansard.sync import SyncRunning, evidence_index_path, update_lock
 
@@ -400,13 +420,13 @@ def vectors_f16(dry_run: bool = typer.Option(False, "--dry-run", help="report si
 @app.command()
 def status():
     """Show data, index and sync status."""
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import search_index
     from hansard.store.state import StateDB
 
     settings = _settings()
     state = StateDB(settings.state_db)
     manifest = state.manifest()
-    idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+    idx = search_index(settings.index_dir)
     out = {
         "data_dir": str(settings.data_dir),
         "files_ingested": len(manifest),
@@ -502,7 +522,7 @@ def evidence(sessions: int = typer.Option(10000, help="transcripts to fetch in t
     with _one_at_a_time():
         import sqlite3
 
-        from hansard.embed.base import get_embedder
+        from hansard.adapters import get_embedder
         from hansard.index.evidence import EvidenceVectors, embed_evidence
         from hansard.sources.evidence import SINCE, EvidenceStore, sync_transcripts
         from hansard.sync import committees_path, evidence_index_path, evidence_path
@@ -672,7 +692,9 @@ def set_key(key: str = typer.Option(..., prompt="Paste your Anthropic API key (i
     """Save the Anthropic API key in the data folder (handy when running on your own computer)."""
     import os
 
-    from hansard.rag.answer import KEY_FILE, make_client
+    from wts_core.adapters.anthropic import KEY_FILE
+
+    from hansard.adapters import model_client
 
     key = key.strip()
     if not key.startswith("sk-ant-"):
@@ -688,7 +710,7 @@ def set_key(key: str = typer.Option(..., prompt="Paste your Anthropic API key (i
 
     try:
         os.environ["HANSARD_ANTHROPIC_API_KEY"] = key
-        make_client().models.list(limit=1)
+        model_client(_settings()).client.models.list(limit=1)  # the SDK's own client: one free call, to check the key
     except anthropic.AuthenticationError:
         path.unlink()
         typer.echo("Anthropic did not accept that key, so it was not kept. Check it and run this again.")
@@ -933,9 +955,9 @@ def _eval_setup(questions: Path, only: str | None):
 
 
 def _client():
-    from hansard.rag.answer import make_client
+    from hansard.adapters import model_client
 
-    return make_client()
+    return model_client(_settings())
 
 
 def _load_plans(path: Path) -> dict[str, dict]:

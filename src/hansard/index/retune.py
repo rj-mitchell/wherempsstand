@@ -10,7 +10,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
-from hansard.index.lance import SearchIndex
+from hansard.index.lance import LanceIndex
 
 PROBES = (20, 40, 80)
 REFINES = (None, 5, 10)
@@ -36,13 +36,13 @@ SAMPLE_QUERIES: list[tuple[str, str | None]] = [
 ]
 
 
-def top_ids(idx: SearchIndex, vectors: list[Any], limit: int, nprobes: int | None = None,
+def top_ids(idx: LanceIndex, vectors: list[Any], limit: int, nprobes: int | None = None,
             refine_factor: int | None = None, exact: bool = False) -> tuple[list[list[str]], float]:
     """The passage IDs each sample query finds, and the median search time in milliseconds."""
     found, times = [], []
     for vec, (_, where) in zip(vectors, SAMPLE_QUERIES, strict=True):
         start = time.perf_counter()
-        hits = idx.vector(vec, where, limit, nprobes=nprobes, refine_factor=refine_factor, columns=["passage_id"],
+        hits = idx.search_meaning(vec, where, limit, nprobes=nprobes, refine_factor=refine_factor, columns=["passage_id"],
                           exact=exact)
         times.append((time.perf_counter() - start) * 1000)
         found.append([h["passage_id"] for h in hits])
@@ -66,7 +66,7 @@ class Baseline:
     before: dict[str, Any]
 
 
-def measure_before(idx: SearchIndex, embedder, current: dict[str, Any] | None = None, limit: int = 300) -> Baseline:
+def measure_before(idx: LanceIndex, embedder, current: dict[str, Any] | None = None, limit: int = 300) -> Baseline:
     current = current or {}
     vectors = [embedder.embed_query(q) for q, _ in SAMPLE_QUERIES]
     truth, exact_ms = top_ids(idx, vectors, limit, exact=True)
@@ -76,7 +76,7 @@ def measure_before(idx: SearchIndex, embedder, current: dict[str, Any] | None = 
     return Baseline(vectors, truth, exact_ms, {**settings, "median_ms": before_ms, "recall": recall(truth, before)})
 
 
-def measure_after(idx: SearchIndex, base: Baseline, limit: int = 300, probes: tuple[int, ...] = PROBES,
+def measure_after(idx: LanceIndex, base: Baseline, limit: int = 300, probes: tuple[int, ...] = PROBES,
                   refines: tuple[int | None, ...] = REFINES, tolerance: float = 0.02) -> dict[str, Any]:
     """Try each ``nprobes`` and ``refine_factor`` on a new index. If some setting finds at least as many of the true
     nearest passages as the old index did (within ``tolerance``), the fastest setting within ``tolerance`` of the
@@ -96,7 +96,7 @@ def measure_after(idx: SearchIndex, base: Baseline, limit: int = 300, probes: tu
     return out
 
 
-def rebuild(idx: SearchIndex, embedder, rows_per_partition: int = 8192, probes: tuple[int, ...] = PROBES,
+def rebuild(idx: LanceIndex, embedder, rows_per_partition: int = 8192, probes: tuple[int, ...] = PROBES,
             refines: tuple[int | None, ...] = REFINES, current: dict[str, Any] | None = None,
             limit: int = 300, tolerance: float = 0.02, force: bool = False) -> dict[str, Any]:
     """Rebuild the vector index, then try each ``nprobes`` and ``refine_factor``, measuring how many of the true
@@ -131,7 +131,7 @@ def rebuild(idx: SearchIndex, embedder, rows_per_partition: int = 8192, probes: 
     return out
 
 
-def measure(old: SearchIndex, new: SearchIndex, embedder, rows_per_partition: int, current: dict[str, Any] | None = None,
+def measure(old: LanceIndex, new: LanceIndex, embedder, rows_per_partition: int, current: dict[str, Any] | None = None,
             limit: int = 300, probes: tuple[int, ...] = PROBES, refines: tuple[int | None, ...] = REFINES,
             tolerance: float = 0.02) -> dict[str, Any]:
     """``rebuild``'s measurement for an index already built on a new table beside the old one (``hansard

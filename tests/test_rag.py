@@ -5,13 +5,16 @@ from __future__ import annotations
 from datetime import date
 from types import SimpleNamespace as NS
 
-from hansard.embed.base import HashingEmbedder
+from wts_core.adapters.hashing import HashingEmbedder
+
 from hansard.engine import Engine, Filters, Scope
 from hansard.rag.checks import VERIFIER
 from hansard.rag.pipeline import AskRequest, Pipeline, answer_once
 from hansard.rag.prompts import NO_RECORDS
 from hansard.rag.query_parse import parse_offline
 from hansard.rag.sources import Source
+
+from .conftest import model_of
 
 TODAY = date(2026, 10, 1)
 GROUPS = {"northern": ["North East", "North West", "Yorkshire and The Humber"]}
@@ -167,7 +170,8 @@ class FakeClient:
 
 
 def pipeline(settings, client):
-    return Pipeline(settings, Engine(settings, embedder=HashingEmbedder(64), today=TODAY), client=client, today=TODAY)
+    return Pipeline(settings, Engine(settings, embedder=HashingEmbedder(64), today=TODAY), client=model_of(client),
+                    today=TODAY)
 
 
 def test_pipeline_end_to_end_is_grounded(indexed_settings):
@@ -227,14 +231,20 @@ def test_offline_parse_northern_labour_mps():
 
 
 def test_api_key_falls_back_to_the_key_file_in_the_data_folder(tmp_path, monkeypatch):
-    from hansard.rag.answer import KEY_FILE, api_key
+    from wts_core.adapters.anthropic import KEY_FILE
 
-    for name in ("HANSARD_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY"):
+    from hansard.adapters import has_model, model_client
+    from hansard.config import load_settings
+
+    def api_key():
+        return model_client(load_settings()).api_key
+
+    for name in ("HANSARD_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("HANSARD_DATA_DIR", str(tmp_path))
-    assert api_key() is None
+    assert api_key() is None and has_model(load_settings()) is False
     (tmp_path / KEY_FILE).write_text("sk-ant-from-file\n")
-    assert api_key() == "sk-ant-from-file"
+    assert api_key() == "sk-ant-from-file" and has_model(load_settings()) is True
     monkeypatch.setenv("HANSARD_ANTHROPIC_API_KEY", "sk-ant-from-env")
     assert api_key() == "sk-ant-from-env"
 
@@ -383,7 +393,7 @@ def test_a_follow_up_is_read_with_the_earlier_answer(indexed_settings):
             portfolios=[], wants_votes=False, interpretation="x", group_by="role", speakers=[])
         return SimpleNamespace(stop_reason="end_turn", parsed_output=out, usage=None)
 
-    client = SimpleNamespace(messages=SimpleNamespace(parse=parse))
+    client = model_of(SimpleNamespace(messages=SimpleNamespace(parse=parse)))
     history = [{"question": "What has been said about Palantir in the NHS?", "topic": "Palantir NHS",
                 "answer": "Backbenchers urged ministers to use the break clause in 2027."}]
     plan, _ = parse_with_model(client, indexed_settings, "what about the break clause?", history, [])
@@ -405,13 +415,17 @@ def test_a_citation_across_two_paragraphs_is_accepted():
 
 
 def test_client_has_an_explicit_timeout(monkeypatch):
-    from hansard.rag.answer import CONNECT_SECONDS, MAX_RETRIES, TIMEOUT_SECONDS, make_client
+    from hansard.adapters import model_client
+    from hansard.config import load_settings
 
     monkeypatch.setenv("HANSARD_ANTHROPIC_API_KEY", "test-key")
-    client = make_client()
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://elsewhere.example")  # another tool's: never followed
+    model = model_client(load_settings())  # the shared package's client, made from this site's settings
+    client = model.client  # the SDK's own client, as the site's is set up
     assert client.timeout.connect == 10.0 and client.timeout.read == 300.0
-    assert client.max_retries == 2
-    assert (TIMEOUT_SECONDS, CONNECT_SECONDS, MAX_RETRIES) == (300.0, 10.0, 2)  # the same in every site
+    assert client.max_retries == 2 and client.api_key == "test-key"
+    assert str(client.base_url).startswith("https://api.anthropic.com")
+    assert (model.timeout, model.connect, model.max_retries) == (300.0, 10.0, 2)  # the same in every site
 
 
 # ---- ported from Where Countries Stand's verifier ---------------------------------------------------------------

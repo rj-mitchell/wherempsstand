@@ -22,8 +22,8 @@ os.environ.setdefault("LANCEDB_LOG", "error")
 import lancedb  # noqa: E402
 import numpy as np
 import pyarrow as pa
+from wts_core.ports import Embedder
 
-from hansard.embed.base import Embedder
 from hansard.index.lance import (
     KEEP_OLD_VERSIONS,
     VECTOR_TYPE,

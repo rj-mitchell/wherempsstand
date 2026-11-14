@@ -104,7 +104,8 @@ def test_pages_and_api(indexed_settings, tmp_path):
 
 
 def test_motions_join_the_evidence_for_a_briefing(indexed_settings):
-    from hansard.embed.base import HashingEmbedder
+    from wts_core.adapters.hashing import HashingEmbedder
+
     from hansard.engine import Engine, Scope
     from hansard.rag.pipeline import AskRequest, Pipeline
     from hansard.rag.query_parse import parse_offline

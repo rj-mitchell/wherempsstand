@@ -4,6 +4,8 @@ from types import SimpleNamespace
 from hansard.rag.interests import Match, Matches, check, held_on
 from hansard.rag.sources import Source
 
+from .conftest import model_of
+
 GIFT = {"type": "3", "name": "Gifts, benefits and hospitality from UK sources", "items": [
     {"summary": "Betting & Gaming Council - £1,920.00", "details": [["Payment Description", "Tickets at Ascot"]],
      "registered": "02 July 2026", "children": []},
@@ -55,7 +57,8 @@ class Client:
 
     def parse(self, **kw):
         self.prompt = kw["messages"][0]["content"]
-        return SimpleNamespace(parsed_output=Matches(matches=self.matches), usage=SimpleNamespace(input_tokens=1))
+        parsed = None if self.matches is None else Matches(matches=self.matches)
+        return SimpleNamespace(stop_reason="end_turn", parsed_output=parsed, usage=SimpleNamespace(input_tokens=1))
 
 
 def source(n, pid, house, text, day="2026-09-10"):
@@ -72,7 +75,7 @@ def test_check_keeps_only_real_matches():
                      Match(contribution=2, interest="A1", subjects="s", relevant=True, connection="Another member's entry."),
                      Match(contribution=2, interest="Q7", subjects="s", relevant=True, connection="A label that does not exist."),
                      Match(contribution=3, interest="C1", subjects="s", relevant=True, connection="Ofcom role; Ofcom codes.")])
-    flags, usage = check(client, "m", "question", sources, commons, Lords())
+    flags, usage = check(model_of(client), "m", "question", sources, commons, Lords())
     assert usage is not None and "Member 9" not in client.prompt
     assert [(f["source"], f["name"], [i["summary"] for i in f["items"]]) for f in flags] == [
         (1, "Member 1", ["Betting & Gaming Council - £1,920.00"]),
@@ -80,9 +83,30 @@ def test_check_keeps_only_real_matches():
     assert flags[0]["link"] == "/people/1#h-interests" and flags[1]["register"] == "Register of Lords' Interests"
 
 
+def test_an_answer_with_nothing_in_it_means_no_matches():
+    """As before the shared model client, which raises for such an answer: the check takes it for no matches and
+    the briefing carries on. What the call cost is not known then (wts-core docs/AS-BUILT.md, adapters)."""
+    commons = Register({"uk.org.publicwhip/person/1": [GIFT]})
+    client = Client(None)
+    assert check(model_of(client), "m", "q", [source(1, 1, "commons", "Gambling")], commons, Lords()) == ([], None)
+    assert "Member 1" in client.prompt  # the model was asked
+
+
+def test_a_failed_call_is_the_callers_to_catch():
+    import pytest
+
+    class Broken(Client):
+        def parse(self, **kw):
+            raise ConnectionError("the network is down")
+
+    commons = Register({"uk.org.publicwhip/person/1": [GIFT]})
+    with pytest.raises(ConnectionError):
+        check(model_of(Broken([])), "m", "q", [source(1, 1, "commons", "Gambling")], commons, Lords())
+
+
 def test_no_model_call_without_entries():
     client = Client([])
-    assert check(client, "m", "q", [source(1, 9, "commons", "x")], Register({}), Lords()) == ([], None)
+    assert check(model_of(client), "m", "q", [source(1, 9, "commons", "x")], Register({}), Lords()) == ([], None)
     assert client.prompt == ""
 
 
@@ -112,7 +136,7 @@ def test_doubtful_connections_are_dropped():
     commons = Register({"uk.org.publicwhip/person/1": [GIFT]})
     client = Client([Match(contribution=1, interest="A1", subjects="gifts; gambling", relevant=True,
                            connection="The link is too weak, so this should not be listed.")])
-    assert check(client, "m", "q", [source(1, 1, "commons", "Gambling")], commons, Lords())[0] == []
+    assert check(model_of(client), "m", "q", [source(1, 1, "commons", "Gambling")], commons, Lords())[0] == []
 
 
 def test_posts_in_government_or_parliament_are_not_outside_interests():

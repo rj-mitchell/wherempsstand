@@ -18,6 +18,7 @@ from typing import Any
 
 import duckdb
 import pyarrow as pa
+from wts_core.adapters.duckdb import shared
 
 from hansard.reference.build import office_display
 from hansard.reference.portfolios import KIND_CHAIR, KIND_GOV, KIND_SHADOW
@@ -29,7 +30,6 @@ from hansard.sources.elections import (
     majority_band,
     runner_up_facts,
 )
-from hansard.store.shared import shared
 
 REFERENCE_TABLES = ("persons", "person_ids", "names", "memberships", "offices", "constituencies", "parties",
                     "representations", "election_results")

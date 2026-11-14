@@ -34,20 +34,21 @@ import pyarrow as pa
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from hansard.adapters import get_embedder  # noqa: E402
 from hansard.config import load_settings  # noqa: E402
-from hansard.embed.base import get_embedder  # noqa: E402
 from hansard.evaluate import load_questions  # noqa: E402
 from hansard.index.float16 import compare_hits  # noqa: E402
 from hansard.index.lance import (  # noqa: E402
     FILTER_FIELDS,
-    SearchIndex,
+    LanceIndex,
+    search_index,
     vector_array,
     vector_schema,
 )
 from hansard.index.retune import SAMPLE_QUERIES  # noqa: E402
 
 
-def read_vectors(idx: SearchIndex) -> pa.Table:
+def read_vectors(idx: LanceIndex) -> pa.Table:
     tbl = idx.vectors()
     if tbl.schema.field("vector").type.value_type != pa.float32():
         raise SystemExit("this index's vectors are already 16-bit: give it one made with 32-bit vectors")
@@ -55,27 +56,27 @@ def read_vectors(idx: SearchIndex) -> pa.Table:
 
 
 def build(path: Path, name: str, rows: pa.Table, value_type: pa.DataType, dim: int,
-          rows_per_partition: int) -> SearchIndex:
-    idx = SearchIndex(path, dim, vectors_name=name)
+          rows_per_partition: int) -> LanceIndex:
     vecs = rows.column("vector").combine_chunks().flatten().to_numpy().reshape(-1, dim)
     cols = {n: rows.column(n) for n, _ in FILTER_FIELDS}
     cols["vector"] = vector_array(vecs, value_type)
-    idx.db.create_table(name, data=pa.table(cols, schema=vector_schema(dim, value_type)))
+    search_index(path).db.create_table(name, data=pa.table(cols, schema=vector_schema(dim, value_type)))
+    idx = search_index(path, vectors_name=name)  # opened once its table is there, so it knows the vectors' size
     if rows.num_rows >= 10_000:
         idx.rebuild_vector_index(rows_per_partition)
     return idx
 
 
-def headings(idx: SearchIndex, n: int) -> list[str]:
+def headings(idx: LanceIndex, n: int) -> list[str]:
     rows = idx.passages().search().select(["heading"]).limit(None).to_arrow().column("heading").to_pylist()
     distinct = sorted({h.strip() for h in rows if h and len(h.split()) >= 3})
     return random.Random(0).sample(distinct, min(n, len(distinct)))
 
 
-def search_all(idx: SearchIndex, queries: list[np.ndarray], limit: int, exact: bool, nprobes, refine):
+def search_all(idx: LanceIndex, queries: list[np.ndarray], limit: int, exact: bool, nprobes, refine):
     out = []
     for q in queries:
-        hits = idx.vector(q, None, limit, nprobes=nprobes, refine_factor=refine, columns=["passage_id"],
+        hits = idx.search_meaning(q, None, limit, nprobes=nprobes, refine_factor=refine, columns=["passage_id"],
                           exact=exact)
         out.append([((h["passage_id"],), 1.0 - float(h["_distance"])) for h in hits])
     return out
@@ -98,7 +99,7 @@ def main() -> None:
     dim = int(settings.embedding.get("dim", 384))
     nprobes = settings.ranking.get("vector_nprobes")
     refine = settings.ranking.get("vector_refine_factor")
-    live = SearchIndex(settings.index_dir, dim)
+    live = search_index(settings.index_dir)
     rows = read_vectors(live)
     vecs = rows.column("vector").combine_chunks().flatten().to_numpy().reshape(-1, dim)
     rounding = float(np.max(np.abs(vecs - vecs.astype(np.float16).astype(np.float32))))

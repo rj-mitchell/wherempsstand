@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
+from wts_core.adapters.hashing import HashingEmbedder
 
-from hansard.embed.base import HashingEmbedder
 from hansard.engine import Engine
 from hansard.people import person_number
 

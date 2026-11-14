@@ -30,11 +30,11 @@ from pathlib import Path
 from typing import Any, Literal
 
 from pydantic import BaseModel
+from wts_core.ports import ModelClient, ModelRequest, Usage
+from wts_core.usage import PriceTable
 
-from hansard.api.usage import cost_usd
 from hansard.config import Settings
 from hansard.engine import Engine, Scope
-from hansard.rag.answer import usage_dict
 from hansard.rag.pipeline import AskRequest, Pipeline, rerank_query
 from hansard.rag.query_parse import QueryPlan, parse_model, parse_offline, parse_with_model
 from hansard.rank.evidence import demographic_group, speaker_group
@@ -152,18 +152,36 @@ def run_plans(settings: Settings, questions: list[Question], today: date, client
         except Exception as exc:  # recorded as a failure on every field
             plan, usage, error = None, None, f"{type(exc).__name__}: {exc}"
         secs = time.perf_counter() - t0
-        u = usage_dict(usage) if usage else None
+        u = usage.as_stored() if usage else None
         got = plan_values(plan) if plan else None
         fields = score_plan(q.expect, got) if got else {f: False for f in [*PLAN_FIELDS, "portfolios"]}
         filters_ok = all(v for k, v in fields.items() if k != "portfolios")
         rows.append({"id": q.id, "category": q.category, "question": q.question, "got": got, "fields": fields,
                      "filters_ok": filters_ok, "error": error, "seconds": round(secs, 2), "usage": u,
-                     "cost": cost_usd(u, settings.usage, model), "plan": plan.to_dict() if plan else None,
+                     "cost": cost_usd(u, settings, model), "plan": plan.to_dict() if plan else None,
                      "search_text": plan.search_text if plan else None})
         progress(f"  {q.id:22} {'ok ' if filters_ok else 'MISS'} {secs:5.1f}s "
                  + ("" if filters_ok else ", ".join(k for k, v in fields.items() if not v and k != "portfolios")))
     return {"stage": "plans", "model": model, "effort": s.answer.get("query_parse_effort"), "today": today,
             "rows": rows, "summary": summarise_plans(rows)}
+
+
+def cost_usd(usage: dict[str, Any] | None, settings: Settings, model: str | None) -> float:
+    """What one model call cost, by the prices in ``[usage]`` (the shared package's price table)."""
+    if not usage:
+        return 0.0
+    return PriceTable.from_settings(settings.usage, file=settings.config_path).cost(Usage.from_mapping(usage), model)
+
+
+def asked(client: ModelClient, request: ModelRequest, schema: type[Any]) -> tuple[Any, Usage]:
+    """A judge's answer in ``schema`` and what it cost; None for an answer with nothing in it (the shared model
+    client raises for one, and a judge that says nothing is passed over, as it always was)."""
+    try:
+        return client.structured(request, schema)
+    except RuntimeError as exc:
+        if "returned no output" not in str(exc):
+            raise
+        return None, Usage()
 
 
 def summarise_plans(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -246,7 +264,7 @@ def run_sources(settings: Settings, plans: dict[str, dict[str, Any]], questions:
         row = {"id": q.id, "seconds": round(secs, 2), "candidates": res.candidates,
                "no_records": res.no_records, "records": recs}
         if meaning and engine.has_vectors() and engine.embedder is not None:
-            hits = engine.index.vector(engine.embedder.embed_query(plan.search_text), None, meaning,
+            hits = engine.index.search_meaning(engine.embedder.embed_query(plan.search_text), None, meaning,
                                        nprobes=s.ranking.get("vector_nprobes"),
                                        refine_factor=s.ranking.get("vector_refine_factor"), columns=["passage_id"])
             row["meaning"] = [[h["passage_id"], round(1.0 - float(h["_distance"]), 6)] for h in hits]
@@ -322,6 +340,7 @@ def judge_sources(settings: Settings, client, questions: list[Question], runs: l
                   model: str, progress: Callable[[str], None] = print, batch: int = 20) -> dict[str, Any]:
     """Grade every chosen passage not already graded; append the grades to ``path``."""
     known = judgments_load(path)
+    prices = PriceTable.from_settings(settings.usage, file=settings.config_path)
     by_q = {q.id: q for q in questions}
     todo: dict[str, dict[str, dict[str, Any]]] = {}
     for run in runs:
@@ -339,12 +358,11 @@ def judge_sources(settings: Settings, client, questions: list[Question], runs: l
             listing = "\n\n".join(f"[{n}] {r.get('heading') or ''}\n{r['excerpt'][:1200]}"
                                   for n, r in enumerate(chunk, 1))
             topic = q.question + (f" (follow-up to: {'; '.join(q.history)})" if q.history else "")
-            resp = client.messages.parse(
-                model=model, max_tokens=4000, system=JUDGE_SYSTEM,
-                messages=[{"role": "user", "content": f"Question: {topic}\n\nPassages:\n\n{listing}"}],
-                output_config={"effort": "low"}, output_format=Grades)
-            spent += cost_usd(usage_dict(resp.usage), settings.usage, model)
-            grades = {g.n: g.grade for g in (resp.parsed_output.grades if resp.parsed_output else [])}
+            judged, used = asked(client, ModelRequest(
+                model=model, max_tokens=4000, instructions=JUDGE_SYSTEM, effort="low", cache_instructions="off",
+                question=f"Question: {topic}\n\nPassages:\n\n{listing}"), Grades)
+            spent += prices.cost(used, model)
+            grades = {g.n: g.grade for g in (judged.grades if judged else [])}
             with path.open("a", encoding="utf-8") as fh:
                 for n, r in enumerate(chunk, 1):
                     if n in grades:
@@ -428,7 +446,7 @@ def run_briefings(settings: Settings, plans: dict[str, dict[str, Any]], question
         cited = {n for sg in segs for n in sg.get("sources", []) or []}
         rows.append({
             "id": q.id, "question": q.question, "seconds": round(secs, 1), "usage": u,
-            "cost": cost_usd(u, settings.usage, model), "error": (out.get("error") or {}).get("message"),
+            "cost": cost_usd(u, settings, model), "error": (out.get("error") or {}).get("message"),
             "markdown": ans.get("markdown", ""), "grounded_ratio": ans.get("grounded_ratio"),
             "citations_total": ans.get("citations_total"), "citations_invalid": ans.get("citations_invalid"),
             "unsupported_segments": ans.get("unsupported_segments"),
@@ -465,6 +483,7 @@ def compare_briefings(settings: Settings, client, a: dict[str, Any], b: dict[str
                       progress: Callable[[str], None] = print, seed: int = 7) -> dict[str, Any]:
     """Blind side-by-side judgement of two briefing runs on the same questions (order shuffled per question)."""
     rng = random.Random(seed)
+    prices = PriceTable.from_settings(settings.usage, file=settings.config_path)
     rb = {r["id"]: r for r in b["rows"]}
     tally: dict[str, Counter] = {k: Counter() for k in ("accuracy", "balance", "coverage", "clarity", "overall")}
     rows, spent = [], 0.0
@@ -475,13 +494,11 @@ def compare_briefings(settings: Settings, client, a: dict[str, Any], b: dict[str
         swap = rng.random() < 0.5
         first, second = (other, ra) if swap else (ra, other)
         sources = "\n\n".join(f"[Source {x['n']}] {x['speaker'] or ''}\n{x['text']}" for x in ra["source_text"])
-        resp = client.messages.parse(
-            model=judge, max_tokens=3000, system=COMPARE_SYSTEM,
-            messages=[{"role": "user", "content": f"Question: {ra['question']}\n\nSources:\n\n{sources}\n\n"
-                       f"Briefing A:\n\n{first['markdown']}\n\nBriefing B:\n\n{second['markdown']}"}],
-            output_config={"effort": "medium"}, output_format=Verdict)
-        spent += cost_usd(usage_dict(resp.usage), settings.usage, judge)
-        v = resp.parsed_output
+        v, used = asked(client, ModelRequest(
+            model=judge, max_tokens=3000, instructions=COMPARE_SYSTEM, effort="medium", cache_instructions="off",
+            question=f"Question: {ra['question']}\n\nSources:\n\n{sources}\n\n"
+                     f"Briefing A:\n\n{first['markdown']}\n\nBriefing B:\n\n{second['markdown']}"), Verdict)
+        spent += prices.cost(used, judge)
         if v is None:
             continue
         verdict = {}

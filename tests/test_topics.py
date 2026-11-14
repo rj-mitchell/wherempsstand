@@ -8,16 +8,17 @@ from types import SimpleNamespace as NS
 
 import pytest
 from fastapi.testclient import TestClient
+from wts_core.adapters.hashing import HashingEmbedder
 
 from hansard.api.app import create_app
 from hansard.config import REPO_ROOT
-from hansard.embed.base import HashingEmbedder
 from hansard.engine import Engine
 from hansard.rag.pipeline import Pipeline
 from hansard.rag.query_parse import ParsedQuery
 from hansard.store.state import StateDB
 from hansard.topics import is_due, load_topics, refresh_topics, versions
 
+from .conftest import model_of
 from .test_rag import TODAY, FakeClient
 
 TOKEN = {"Authorization": "Bearer s3cret-token"}
@@ -50,7 +51,8 @@ def site(indexed_settings, tmp_path, monkeypatch):
     topics.write_text(TOPICS)
     s = dataclasses.replace(indexed_settings, raw={**indexed_settings.raw,
                                                    "topics": {"file": str(topics), "max_per_run": 4}})
-    pipe = Pipeline(s, Engine(s, embedder=HashingEmbedder(64), today=TODAY), client=ReadingClient(), today=TODAY)
+    pipe = Pipeline(s, Engine(s, embedder=HashingEmbedder(64), today=TODAY), client=model_of(ReadingClient()),
+                    today=TODAY)
     state = StateDB(tmp_path / "state.sqlite")
     return s, pipe, state, TestClient(create_app(s, pipe, state))
 

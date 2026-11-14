@@ -13,17 +13,22 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
 
 from wts_core.checks import to_british
+from wts_core.events import Completed, blocks_as_today, to_reader
+from wts_core.ports import ModelClient
 
+from hansard.adapters import has_model, model_client
 from hansard.config import Settings
 from hansard.engine import Engine, Filters, Scope
 from hansard.groups import group_names
+from hansard.messages import MESSAGES, NO_MODEL
+from hansard.rag.answer import briefing_request
 from hansard.rag.checks import checked
 from hansard.rag.prompts import NO_RECORDS
 from hansard.rag.query_parse import (
@@ -151,7 +156,12 @@ def first_few(side: dict[str, list], comprehensive: bool) -> dict[str, list]:
 
 
 class Pipeline:
-    def __init__(self, settings: Settings, engine: Engine | None = None, client=None, today: date | None = None):
+    """Where MPs Stand's pipeline. ``client`` is the model that reads questions, checks interests and writes
+    briefings (the shared package's ``ports.ModelClient``); left out, it is made from the settings when first needed
+    and kept for the life of the process."""
+
+    def __init__(self, settings: Settings, engine: Engine | None = None, client: ModelClient | None = None,
+                 today: date | None = None):
         self.settings = settings
         self.engine = engine or Engine(settings, today=today)
         self.votes = VoteFinder(settings, self.engine.con)
@@ -165,21 +175,14 @@ class Pipeline:
         self._registers = None
 
     @property
-    def client(self):
+    def client(self) -> ModelClient:
         if self._client is None:
-            from hansard.rag.answer import make_client
-
-            self._client = make_client()
+            self._client = model_client(self.settings)
         return self._client
 
     def has_model(self) -> bool:
-        if self._client is not None:
-            return True
-        import os
-
-        from hansard.rag.answer import api_key
-
-        return bool(api_key() or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+        """Whether briefings can be written at all: a model was given, or an API key is set."""
+        return self._client is not None or has_model(self.settings)
 
     def parties(self) -> list[tuple[str, str]]:
         rows = self.engine.resolver.con.execute(
@@ -209,9 +212,7 @@ class Pipeline:
                 plan, u = parse_with_model(self.client, self.settings, req.question, req.history, self.parties(),
                                            self.today, self.group_choices())
                 plan.interpretation = to_british(plan.interpretation)
-                from hansard.rag.answer import usage_dict
-
-                usage = usage_dict(u)
+                usage = u.as_stored()
             except Exception as exc:
                 log.warning("model query parsing failed (%s); using offline rules", exc)
                 plan = parse_offline(req.question, self.settings.regions, self.today, self.group_aliases())
@@ -564,7 +565,8 @@ class Pipeline:
                                    Donations(donations_path(self.settings)))
             commons, lords, donations = self._registers
             return check(self.client, parse_model(self.settings), question, sources, commons, lords, donations,
-                         effort=self.settings.answer.get("query_parse_effort", "low"))
+                         effort=self.settings.answer.get("query_parse_effort", "low"),
+                         cache_instructions=self.settings.answer.get("cache_instructions", "short"))
         except Exception:
             log.exception("interests check failed")
             return [], None
@@ -581,7 +583,10 @@ class Pipeline:
                 self._size = (now, 0)
         return self._size[1]
 
-    def run(self, req: AskRequest) -> Iterator[dict[str, Any]]:
+    def run(self, req: AskRequest, keep: Callable[..., None] | None = None) -> Iterator[dict[str, Any]]:
+        """The events of one briefing. ``keep``, if given, is handed what the model was sent and what it wrote back
+        (the documents, the finished blocks and each source's heading): how an evaluation run keeps a briefing, so
+        that the checks can be run over it again later without the model."""
         # straight away, before the question is read: the reader sees work begin, and how much will be searched
         yield {"type": "progress", "step": "reading", "passages": self.archive_size()}
         plan, parse_usage = self.make_plan(req)
@@ -608,31 +613,32 @@ class Pipeline:
                    "citations_invalid": 0, "grounded_ratio": 1.0, "unsupported_segments": 0}, "usage": None}
             return
         if not self.has_model():
-            yield {"type": "final", "answer": None, "usage": None,
-                   "note": "Showing the evidence set only (no Anthropic API key on the server)."}
+            yield {"type": "final", "answer": None, "usage": None, "note": NO_MODEL}
             return
-
-        from hansard.rag.answer import Answerer
 
         # members' registered interests that may relate to what they said: checked while the briefing is written
         pool = ThreadPoolExecutor(max_workers=1)
         interests = pool.submit(self.find_interests, req.question, sources) if self.checks_interests() else None
         flags: tuple[list[dict[str, Any]], Any] | None = None
-        final = None
+        request = briefing_request(self.settings, req.question, sources, req.mode, plan_note(plan, req.scope),
+                                   req.history, self.today, group_by=plan.group_by, compare=plan.compare)
+        final: Completed | None = None
         try:
-            for ev in Answerer(self.settings, self.client).stream(
-                    req.question, sources, req.mode, plan_note(plan, req.scope), req.history, self.today,
-                    group_by=plan.group_by, compare=plan.compare):
-                if ev["type"] == "final":
-                    final = ev
-                else:
-                    yield ev
-                if interests is not None and flags is None and interests.done():
-                    flags = interests.result()
-                    if flags[0]:
-                        yield {"type": "interests", "interests": flags[0]}
-            if final is None or final["stop_reason"] == "refusal":
-                yield {"type": "error", "message": "The model declined to answer this question."}
+            stream = self.client.stream(request)
+            try:
+                for ev in stream:
+                    if isinstance(ev, Completed):
+                        final = ev
+                    else:
+                        yield to_reader(ev)  # text and citations, as they are written
+                    if interests is not None and flags is None and interests.done():
+                        flags = interests.result()
+                        if flags[0]:
+                            yield {"type": "interests", "interests": flags[0]}
+            finally:
+                stream.close()  # if the reader has gone, this stops the model: nothing more is written or paid for
+            if final is None or final.stop_reason == "refusal":
+                yield {"type": "error", "message": MESSAGES.model_declined}
                 return
             yield {"type": "progress", "step": "checking"}
             if interests is not None and flags is None:
@@ -644,12 +650,12 @@ class Pipeline:
         # Every check, in the family's one order (rag/checks.py): each citation looked up in its source; "Across the
         # records retrieved, ..." openers dropped; the model's own words made British (quotations stay verbatim);
         # judgemental words in its own voice highlighted, not hidden; quotations not found word for word marked.
-        answer = checked(final["blocks"], sources)
-        from hansard.rag.answer import usage_dict
-
-        yield {"type": "final", "answer": answer, "usage": final["usage"], "model": final["model"],
-               "stop_reason": final["stop_reason"], "interests": (flags or ([], None))[0],
-               "interests_usage": usage_dict(flags[1]) if flags and flags[1] is not None else None}
+        if keep is not None:
+            keep(request.documents, final.blocks, tuple(str(s.meta.get("heading") or "") for s in sources))
+        answer = checked(blocks_as_today(final), sources)
+        yield {"type": "final", "answer": answer, "usage": final.usage.as_stored(), "model": final.model,
+               "stop_reason": final.stop_reason, "interests": (flags or ([], None))[0],
+               "interests_usage": flags[1].as_stored() if flags and flags[1] is not None else None}
 
 
 def answer_once(pipeline: Pipeline, req: AskRequest) -> dict[str, Any]:
