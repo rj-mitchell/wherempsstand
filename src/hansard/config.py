@@ -1,29 +1,48 @@
-"""Settings loaded from config/settings.toml, with environment overrides."""
+"""The site's settings: config/settings.toml, read by the Where They Stand sites' shared loader (wts-core,
+``wts_core.settings``), and the facts about this site that are fixed in its code.
+
+The loader reads config/settings.toml (or the file named by ``HANSARD_CONFIG``), then ``settings.local.toml`` in
+the data folder if there is one (laid over it one level deep; written by ``hansard bootstrap`` and
+``hansard reindex-vectors``, or by hand on a server), then any overrides given by name
+(``**{"usage.daily_spend_cap_usd": 1.0}``). The data folder is ``HANSARD_DATA_DIR``, else ``[paths] data_dir``.
+"""
 
 from __future__ import annotations
 
-import os
-import tomllib
-from dataclasses import dataclass, field
+from collections.abc import Mapping
 from datetime import date
-from functools import lru_cache
+from importlib import metadata
 from pathlib import Path
 from typing import Any
+
+from wts_core import settings as core
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG = REPO_ROOT / "config" / "settings.toml"
 STATIC_DIR = REPO_ROOT / "data_static"
 
 
-@dataclass(frozen=True)
-class Settings:
-    raw: dict[str, Any]
-    data_dir: Path
-    config_path: Path
-    overrides: dict[str, Any] = field(default_factory=dict)
+def _version() -> str:
+    try:
+        return metadata.version("hansard")
+    except metadata.PackageNotFoundError:  # run from the source without being installed
+        return "0"
 
-    def section(self, name: str) -> dict[str, Any]:
-        return self.raw.get(name, {})
+
+SITE = core.Site(
+    name="Where MPs Stand",
+    package="hansard",
+    env_prefix="HANSARD",  # HANSARD_DATA_DIR, HANSARD_CONFIG, HANSARD_ANTHROPIC_API_KEY, HANSARD_B2_BUCKET…
+    root=REPO_ROOT,
+    hosts=("wherempsstand.com", "www.wherempsstand.com"),
+    state_file="state.sqlite",  # SQLite, shared safely by the web app and the update (a write-ahead log)
+    version=_version(),
+)
+
+
+class Settings(core.Settings):
+    """The shared package's settings (``raw``, ``data_dir``, ``config_path``, ``section``, ``answer``, ``usage``,
+    ``state_db``), with this site's own accessors."""
 
     # Convenience accessors -------------------------------------------------
     @property
@@ -39,20 +58,12 @@ class Settings:
         return self.section("ranking")
 
     @property
-    def answer(self) -> dict[str, Any]:
-        return self.section("answer")
-
-    @property
     def embedding(self) -> dict[str, Any]:
         return self.section("embedding")
 
     @property
     def regions(self) -> dict[str, list[str]]:
         return self.section("regions")
-
-    @property
-    def usage(self) -> dict[str, Any]:
-        return self.section("usage")
 
     @property
     def sources(self) -> dict[str, Any]:
@@ -80,62 +91,22 @@ class Settings:
         return self.data_dir / "index"
 
     @property
-    def state_db(self) -> Path:
-        # SQLite: shared safely by the web app and the sync job (WAL mode).
-        return self.data_dir / "state.sqlite"
-
-    @property
     def log_dir(self) -> Path:
+        """The structured log of briefings (``briefings.jsonl``: the stages each reached and how it ended; never a
+        reader's words) and the weekly reports (``reports/``)."""
         return self.data_dir / "logs"
 
-
-def _resolve(path: str | Path) -> Path:
-    p = Path(path)
-    return p if p.is_absolute() else REPO_ROOT / p
-
-
-def load_settings(config_path: str | Path | None = None, **overrides: Any) -> Settings:
-    path = _resolve(config_path or os.environ.get("HANSARD_CONFIG") or DEFAULT_CONFIG)
-    with open(path, "rb") as fh:
-        raw = tomllib.load(fh)
-    data_dir = _resolve(os.environ.get("HANSARD_DATA_DIR") or raw.get("paths", {}).get("data_dir", "data"))
-    # Per-installation overrides written by `hansard bootstrap` (e.g. the offline sample demo).
-    local = data_dir / "settings.local.toml"
-    if local.exists():
-        with open(local, "rb") as fh:
-            for section, values in tomllib.load(fh).items():
-                raw.setdefault(section, {}).update(values)
-    for dotted, value in overrides.items():
-        section, _, key = dotted.partition(".")
-        raw.setdefault(section, {})[key] = value
-    return Settings(raw=raw, data_dir=data_dir, config_path=path, overrides=overrides)
+    @property
+    def reports_dir(self) -> Path:
+        """The weekly reports, written by ``hansard weekly-report``."""
+        return self.log_dir / "reports"
 
 
-def save_local_settings(data_dir: Path, updates: dict[str, dict[str, Any]]) -> Path:
+def load_settings(config_path: str | Path | None = None, env: Mapping[str, str] | None = None,
+                  **overrides: Any) -> Settings:
+    return core.load_settings(Settings, SITE, config_path, env, **overrides)
+
+
+def save_local_settings(data_dir: Path, updates: Mapping[str, Mapping[str, Any]]) -> Path:
     """Merge simple values into <data_dir>/settings.local.toml, so later commands (sync, serve) use them too."""
-    path = data_dir / "settings.local.toml"
-    current: dict[str, dict[str, Any]] = {}
-    if path.exists():
-        with open(path, "rb") as fh:
-            current = tomllib.load(fh)
-    for section, values in updates.items():
-        current.setdefault(section, {}).update(values)
-
-    def lit(v: Any) -> str:
-        if isinstance(v, bool):
-            return "true" if v else "false"
-        if isinstance(v, (int, float)):
-            return repr(v)
-        return '"' + str(v).replace("\\", "\\\\").replace('"', '\\"') + '"'
-
-    lines = ["# Per-installation settings written by `hansard bootstrap`; they override config/settings.toml."]
-    for section, values in current.items():
-        lines += ["", f"[{section}]", *(f"{k} = {lit(v)}" for k, v in values.items())]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n")
-    return path
-
-
-@lru_cache(maxsize=1)
-def get_settings() -> Settings:
-    return load_settings()
+    return core.save_local_settings(data_dir, updates, "hansard bootstrap")

@@ -1,15 +1,25 @@
 from __future__ import annotations
 
-import shutil
-from pathlib import Path
+import os
 
-import pytest
+# A test that reads a command's help must have Typer's colours off before Typer is imported: GitHub Actions makes
+# Typer colour its help, which splits an option's name in two.
+os.environ["_TYPER_FORCE_DISABLE_TERMINAL"] = "1"
+os.environ["NO_COLOR"] = "1"
 
-from hansard.config import STATIC_DIR, load_settings
-from hansard.reference.build import build_reference, write_reference
-from hansard.reference.profiles import ProfileResolver
-from hansard.sources.demographics import load_demographics
-from hansard.sources.elections import load_elections
+import shutil  # noqa: E402
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+import pytest  # noqa: E402
+
+from hansard.config import STATIC_DIR, load_settings  # noqa: E402
+from hansard.reference.build import build_reference, write_reference  # noqa: E402
+from hansard.reference.profiles import ProfileResolver  # noqa: E402
+from hansard.sources.demographics import load_demographics  # noqa: E402
+from hansard.sources.elections import load_elections  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).parent / "golden"))  # tests/golden/shared.py: the scenarios the goldens hold
 
 FIXTURES = Path(__file__).parent / "fixtures"
 MEMBERS = FIXTURES / "members"
