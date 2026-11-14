@@ -1,0 +1,1529 @@
+{
+ "both written, then neither is due": {
+  "calls": [
+   "make_plan",
+   "written",
+   "make_plan",
+   "written"
+  ],
+  "checks": [
+   [
+    "rural-buses",
+    "2026-11-13T12:00:09+00:00",
+    "rewritten (briefingab)"
+   ],
+   [
+    "trial-by-jury",
+    "2026-11-13T12:00:04+00:00",
+    "rewritten (briefingaa)"
+   ]
+  ],
+  "listing": [
+   200,
+   {
+    "featured": [],
+    "topics": [
+     {
+      "area": "Justice",
+      "current": {
+       "briefing_id": "briefingaa",
+       "prepared_at": "2026-11-13T12:00:04+00:00",
+       "records_up_to": "2026-11-12",
+       "summary": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber."
+      },
+      "description": "Jury trials and the courts.",
+      "question": "trial by jury",
+      "refresh_days": 7,
+      "slug": "trial-by-jury",
+      "title": "Trial by jury",
+      "versions": 1
+     },
+     {
+      "area": "Transport",
+      "current": {
+       "briefing_id": "briefingab",
+       "prepared_at": "2026-11-13T12:00:09+00:00",
+       "records_up_to": "2026-11-12",
+       "summary": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber."
+      },
+      "description": "",
+      "question": "bus services in rural areas",
+      "refresh_days": 7,
+      "slug": "rural-buses",
+      "title": "Rural bus services",
+      "versions": 1
+     }
+    ]
+   }
+  ],
+  "page": [
+   200,
+   {
+    "briefing": {
+     "answer": {
+      "citations_invalid": 0,
+      "citations_total": 2,
+      "grounded_ratio": 0.68,
+      "loaded_words": 0,
+      "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+      "no_records": false,
+      "quotes_total": 1,
+      "quotes_unverified": 0,
+      "segments": [
+       {
+        "cited": [
+         {
+          "n": 1,
+          "text": "The right to trial by jury is a cornerstone of our liberties"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         1
+        ],
+        "status": "cited",
+        "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "connective",
+        "text": " In the debate that followed:"
+       },
+       {
+        "cited": [
+         {
+          "n": 2,
+          "text": "We will keep jury trial for serious offences"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         2
+        ],
+        "status": "cited",
+        "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " This was a turning point for every member in the Chamber."
+       }
+      ],
+      "unsupported_segments": 1
+     },
+     "candidates": 12,
+     "created_at": "2026-11-13T12:00:04+00:00",
+     "evidence": {
+      "committee_evidence": 0,
+      "devolution": [],
+      "devolved": 0,
+      "divisions": 1,
+      "edms": 1,
+      "records": 2
+     },
+     "id": "briefingaa",
+     "interests": [
+      {
+       "items": [
+        {
+         "category": "3 Gifts",
+         "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2021-01-05",
+         "summary": "Bar Council - £500.00",
+         "url": null
+        }
+       ],
+       "link": "/people/10669#h-interests",
+       "name": "Hilary Benn",
+       "person_id": "uk.org.publicwhip/person/10669",
+       "register": "Register of Members' Financial Interests",
+       "source": 1
+      }
+     ],
+     "plan": {
+      "filters": {
+       "date_from": "2020-01-01"
+      },
+      "interpretation": "Debates on \"trial by jury\" since 2020.",
+      "parser": "model",
+      "question": "trial by jury"
+     },
+     "question": "trial by jury",
+     "records_up_to": "2026-11-12",
+     "semantic": true,
+     "settings": {
+      "mode": "summary",
+      "topic": "trial-by-jury"
+     },
+     "sources": [
+      {
+       "date": "2021-03-04",
+       "group": "opposition",
+       "kind": "record",
+       "n": 1,
+       "title": "Hilary Benn, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "government",
+       "kind": "record",
+       "n": 2,
+       "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "edm",
+       "kind": "edm",
+       "n": 3,
+       "title": "Early day motion 123: Trial by jury"
+      },
+      {
+       "kind": "division",
+       "n": 4,
+       "title": "Division 45: Courts Bill, second reading"
+      }
+     ]
+    },
+    "topic": {
+     "area": "Justice",
+     "description": "Jury trials and the courts.",
+     "question": "trial by jury",
+     "refresh_days": 7,
+     "slug": "trial-by-jury",
+     "title": "Trial by jury"
+    },
+    "versions": [
+     {
+      "briefing_id": "briefingaa",
+      "prepared_at": "2026-11-13T12:00:04+00:00",
+      "records_up_to": "2026-11-12"
+     }
+    ]
+   }
+  ],
+  "rows": {
+   "briefings": [
+    [
+     "briefingaa",
+     "2026-11-13T12:00:04+00:00",
+     "trial by jury",
+     "{\"mode\": \"summary\", \"topic\": \"trial-by-jury\"}",
+     "[{\"type\": \"plan\", \"plan\": {\"question\": \"trial by jury\", \"parser\": \"model\", \"filters\": {\"date_from\": \"2020-01-01\"}, \"interpretation\": \"Debates on \\\"trial by jury\\\" since 2020.\"}, \"usage\": {\"input_tokens\": 1200, \"output_tokens\": 80, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}, {\"type\": \"sources\", \"sources\": [{\"n\": 1, \"kind\": \"record\", \"title\": \"Hilary Benn, House of Commons, 4 March 2021\", \"group\": \"opposition\", \"date\": \"2021-03-04\"}, {\"n\": 2, \"kind\": \"record\", \"title\": \"Kenneth Clarke, House of Commons, 4 March 2021\", \"group\": \"government\"}, {\"n\": 3, \"kind\": \"edm\", \"title\": \"Early day motion 123: Trial by jury\", \"group\": \"edm\"}, {\"n\": 4, \"kind\": \"division\", \"title\": \"Division 45: Courts Bill, second reading\"}], \"candidates\": 12, \"semantic\": true, \"evidence\": {\"records\": 2, \"divisions\": 1, \"devolution\": [], \"edms\": 1, \"devolved\": 0, \"committee_evidence\": 0}}, {\"type\": \"final\", \"answer\": {\"segments\": [{\"text\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\".\", \"sources\": [1], \"cited\": [{\"n\": 1, \"text\": \"The right to trial by jury is a cornerstone of our liberties\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" In the debate that followed:\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" Kenneth Clarke said jury trial would be kept for serious offences.\", \"sources\": [2], \"cited\": [{\"n\": 2, \"text\": \"We will keep jury trial for serious offences\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" This was a turning point for every member in the Chamber.\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [{\"start\": 12, \"end\": 19, \"word\": \"turning\"}], \"misquotes\": []}], \"markdown\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.\", \"no_records\": false, \"citations_total\": 2, \"citations_invalid\": 0, \"grounded_ratio\": 0.5, \"unsupported_segments\": 2, \"loaded_words\": 1, \"quotes_total\": 1, \"quotes_unverified\": 0}, \"model\": \"claude-sonnet-5-5\", \"stop_reason\": \"end_turn\", \"interests\": [{\"source\": 1, \"person_id\": \"uk.org.publicwhip/person/10669\", \"name\": \"Hilary Benn\", \"register\": \"Register of Members' Financial Interests\", \"link\": \"/people/10669#h-interests\", \"items\": [{\"category\": \"3 Gifts\", \"summary\": \"Bar Council - \\u00a3500.00\", \"registered\": \"2021-01-05\", \"connection\": \"The gift is from the barristers' professional body and the speech is on jury trial.\", \"kind\": \"register\", \"register\": \"commons\", \"url\": null}]}], \"interests_usage\": {\"input_tokens\": 400, \"output_tokens\": 30, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}]",
+     null,
+     null,
+     {
+      "model": "claude-sonnet-5-5",
+      "records_up_to": "2026-11-12"
+     }
+    ],
+    [
+     "briefingab",
+     "2026-11-13T12:00:09+00:00",
+     "bus services in rural areas",
+     "{\"mode\": \"summary\", \"topic\": \"rural-buses\"}",
+     "[{\"type\": \"plan\", \"plan\": {\"question\": \"bus services in rural areas\", \"parser\": \"model\", \"filters\": {\"date_from\": \"2020-01-01\"}, \"interpretation\": \"Debates on \\\"trial by jury\\\" since 2020.\"}, \"usage\": {\"input_tokens\": 1200, \"output_tokens\": 80, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}, {\"type\": \"sources\", \"sources\": [{\"n\": 1, \"kind\": \"record\", \"title\": \"Hilary Benn, House of Commons, 4 March 2021\", \"group\": \"opposition\", \"date\": \"2021-03-04\"}, {\"n\": 2, \"kind\": \"record\", \"title\": \"Kenneth Clarke, House of Commons, 4 March 2021\", \"group\": \"government\"}, {\"n\": 3, \"kind\": \"edm\", \"title\": \"Early day motion 123: Trial by jury\", \"group\": \"edm\"}, {\"n\": 4, \"kind\": \"division\", \"title\": \"Division 45: Courts Bill, second reading\"}], \"candidates\": 12, \"semantic\": true, \"evidence\": {\"records\": 2, \"divisions\": 1, \"devolution\": [], \"edms\": 1, \"devolved\": 0, \"committee_evidence\": 0}}, {\"type\": \"final\", \"answer\": {\"segments\": [{\"text\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\".\", \"sources\": [1], \"cited\": [{\"n\": 1, \"text\": \"The right to trial by jury is a cornerstone of our liberties\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" In the debate that followed:\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" Kenneth Clarke said jury trial would be kept for serious offences.\", \"sources\": [2], \"cited\": [{\"n\": 2, \"text\": \"We will keep jury trial for serious offences\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" This was a turning point for every member in the Chamber.\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [{\"start\": 12, \"end\": 19, \"word\": \"turning\"}], \"misquotes\": []}], \"markdown\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.\", \"no_records\": false, \"citations_total\": 2, \"citations_invalid\": 0, \"grounded_ratio\": 0.5, \"unsupported_segments\": 2, \"loaded_words\": 1, \"quotes_total\": 1, \"quotes_unverified\": 0}, \"model\": \"claude-sonnet-5-5\", \"stop_reason\": \"end_turn\", \"interests\": [{\"source\": 1, \"person_id\": \"uk.org.publicwhip/person/10669\", \"name\": \"Hilary Benn\", \"register\": \"Register of Members' Financial Interests\", \"link\": \"/people/10669#h-interests\", \"items\": [{\"category\": \"3 Gifts\", \"summary\": \"Bar Council - \\u00a3500.00\", \"registered\": \"2021-01-05\", \"connection\": \"The gift is from the barristers' professional body and the speech is on jury trial.\", \"kind\": \"register\", \"register\": \"commons\", \"url\": null}]}], \"interests_usage\": {\"input_tokens\": 400, \"output_tokens\": 30, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}]",
+     null,
+     null,
+     {
+      "model": "claude-sonnet-5-5",
+      "records_up_to": "2026-11-12"
+     }
+    ]
+   ],
+   "cache": [],
+   "day_events": [],
+   "failures": [],
+   "question_counts": [],
+   "spending": [
+    [
+     "2026-11-13T12:00:00+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T12:00:04+00:00",
+     "topic",
+     "claude-sonnet-5-5",
+     null,
+     null,
+     9000,
+     700,
+     3000,
+     2000,
+     0.0266
+    ],
+    [
+     "2026-11-13T12:00:04+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T12:00:09+00:00",
+     "topic",
+     "claude-sonnet-5-5",
+     null,
+     null,
+     9000,
+     700,
+     3000,
+     2000,
+     0.0266
+    ]
+   ]
+  },
+  "said": [
+   [
+    {
+     "outcome": "rewritten (briefingaa)",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "rewritten (briefingab)",
+     "slug": "rural-buses"
+    }
+   ],
+   [
+    {
+     "outcome": "written 0 days ago",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "written 0 days ago",
+     "slug": "rural-buses"
+    }
+   ]
+  ],
+  "versions": [
+   [
+    "rural-buses",
+    "briefingab",
+    "2026-11-13T12:00:09+00:00",
+    "2026-11-12"
+   ],
+   [
+    "trial-by-jury",
+    "briefingaa",
+    "2026-11-13T12:00:04+00:00",
+    "2026-11-12"
+   ]
+  ]
+ },
+ "no API key": {
+  "calls": [],
+  "checks": [],
+  "listing": [
+   200,
+   {
+    "featured": [],
+    "topics": [
+     {
+      "area": "Justice",
+      "current": null,
+      "description": "Jury trials and the courts.",
+      "question": "trial by jury",
+      "refresh_days": 7,
+      "slug": "trial-by-jury",
+      "title": "Trial by jury",
+      "versions": 0
+     },
+     {
+      "area": "Transport",
+      "current": null,
+      "description": "",
+      "question": "bus services in rural areas",
+      "refresh_days": 7,
+      "slug": "rural-buses",
+      "title": "Rural bus services",
+      "versions": 0
+     }
+    ]
+   }
+  ],
+  "page": [
+   200,
+   {
+    "briefing": null,
+    "topic": {
+     "area": "Justice",
+     "description": "Jury trials and the courts.",
+     "question": "trial by jury",
+     "refresh_days": 7,
+     "slug": "trial-by-jury",
+     "title": "Trial by jury"
+    },
+    "versions": []
+   }
+  ],
+  "rows": {
+   "briefings": [],
+   "cache": [],
+   "day_events": [],
+   "failures": [],
+   "question_counts": [],
+   "spending": []
+  },
+  "said": [
+   [
+    {
+     "outcome": "skipped: no API key",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "skipped: no API key",
+     "slug": "rural-buses"
+    }
+   ],
+   [
+    {
+     "outcome": "skipped: no API key",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "skipped: no API key",
+     "slug": "rural-buses"
+    }
+   ]
+  ],
+  "versions": []
+ },
+ "no records for the first, the second written": {
+  "calls": [
+   "make_plan",
+   "no_records",
+   "make_plan",
+   "written",
+   "make_plan",
+   "written"
+  ],
+  "checks": [
+   [
+    "rural-buses",
+    "2026-11-13T12:00:05+00:00",
+    "rewritten (briefingaa)"
+   ],
+   [
+    "trial-by-jury",
+    "2026-11-13T13:00:10+00:00",
+    "rewritten (briefingab)"
+   ]
+  ],
+  "listing": [
+   200,
+   {
+    "featured": [],
+    "topics": [
+     {
+      "area": "Justice",
+      "current": {
+       "briefing_id": "briefingab",
+       "prepared_at": "2026-11-13T13:00:10+00:00",
+       "records_up_to": "2026-11-12",
+       "summary": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber."
+      },
+      "description": "Jury trials and the courts.",
+      "question": "trial by jury",
+      "refresh_days": 7,
+      "slug": "trial-by-jury",
+      "title": "Trial by jury",
+      "versions": 1
+     },
+     {
+      "area": "Transport",
+      "current": {
+       "briefing_id": "briefingaa",
+       "prepared_at": "2026-11-13T12:00:05+00:00",
+       "records_up_to": "2026-11-12",
+       "summary": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber."
+      },
+      "description": "",
+      "question": "bus services in rural areas",
+      "refresh_days": 7,
+      "slug": "rural-buses",
+      "title": "Rural bus services",
+      "versions": 1
+     }
+    ]
+   }
+  ],
+  "page": [
+   200,
+   {
+    "briefing": {
+     "answer": {
+      "citations_invalid": 0,
+      "citations_total": 2,
+      "grounded_ratio": 0.68,
+      "loaded_words": 0,
+      "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+      "no_records": false,
+      "quotes_total": 1,
+      "quotes_unverified": 0,
+      "segments": [
+       {
+        "cited": [
+         {
+          "n": 1,
+          "text": "The right to trial by jury is a cornerstone of our liberties"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         1
+        ],
+        "status": "cited",
+        "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "connective",
+        "text": " In the debate that followed:"
+       },
+       {
+        "cited": [
+         {
+          "n": 2,
+          "text": "We will keep jury trial for serious offences"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         2
+        ],
+        "status": "cited",
+        "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " This was a turning point for every member in the Chamber."
+       }
+      ],
+      "unsupported_segments": 1
+     },
+     "candidates": 12,
+     "created_at": "2026-11-13T13:00:10+00:00",
+     "evidence": {
+      "committee_evidence": 0,
+      "devolution": [],
+      "devolved": 0,
+      "divisions": 1,
+      "edms": 1,
+      "records": 2
+     },
+     "id": "briefingab",
+     "interests": [
+      {
+       "items": [
+        {
+         "category": "3 Gifts",
+         "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2021-01-05",
+         "summary": "Bar Council - £500.00",
+         "url": null
+        }
+       ],
+       "link": "/people/10669#h-interests",
+       "name": "Hilary Benn",
+       "person_id": "uk.org.publicwhip/person/10669",
+       "register": "Register of Members' Financial Interests",
+       "source": 1
+      }
+     ],
+     "plan": {
+      "filters": {
+       "date_from": "2020-01-01"
+      },
+      "interpretation": "Debates on \"trial by jury\" since 2020.",
+      "parser": "model",
+      "question": "trial by jury"
+     },
+     "question": "trial by jury",
+     "records_up_to": "2026-11-12",
+     "semantic": true,
+     "settings": {
+      "mode": "summary",
+      "topic": "trial-by-jury"
+     },
+     "sources": [
+      {
+       "date": "2021-03-04",
+       "group": "opposition",
+       "kind": "record",
+       "n": 1,
+       "title": "Hilary Benn, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "government",
+       "kind": "record",
+       "n": 2,
+       "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "edm",
+       "kind": "edm",
+       "n": 3,
+       "title": "Early day motion 123: Trial by jury"
+      },
+      {
+       "kind": "division",
+       "n": 4,
+       "title": "Division 45: Courts Bill, second reading"
+      }
+     ]
+    },
+    "topic": {
+     "area": "Justice",
+     "description": "Jury trials and the courts.",
+     "question": "trial by jury",
+     "refresh_days": 7,
+     "slug": "trial-by-jury",
+     "title": "Trial by jury"
+    },
+    "versions": [
+     {
+      "briefing_id": "briefingab",
+      "prepared_at": "2026-11-13T13:00:10+00:00",
+      "records_up_to": "2026-11-12"
+     }
+    ]
+   }
+  ],
+  "rows": {
+   "briefings": [
+    [
+     "briefingaa",
+     "2026-11-13T12:00:05+00:00",
+     "bus services in rural areas",
+     "{\"mode\": \"summary\", \"topic\": \"rural-buses\"}",
+     "[{\"type\": \"plan\", \"plan\": {\"question\": \"bus services in rural areas\", \"parser\": \"model\", \"filters\": {\"date_from\": \"2020-01-01\"}, \"interpretation\": \"Debates on \\\"trial by jury\\\" since 2020.\"}, \"usage\": {\"input_tokens\": 1200, \"output_tokens\": 80, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}, {\"type\": \"sources\", \"sources\": [{\"n\": 1, \"kind\": \"record\", \"title\": \"Hilary Benn, House of Commons, 4 March 2021\", \"group\": \"opposition\", \"date\": \"2021-03-04\"}, {\"n\": 2, \"kind\": \"record\", \"title\": \"Kenneth Clarke, House of Commons, 4 March 2021\", \"group\": \"government\"}, {\"n\": 3, \"kind\": \"edm\", \"title\": \"Early day motion 123: Trial by jury\", \"group\": \"edm\"}, {\"n\": 4, \"kind\": \"division\", \"title\": \"Division 45: Courts Bill, second reading\"}], \"candidates\": 12, \"semantic\": true, \"evidence\": {\"records\": 2, \"divisions\": 1, \"devolution\": [], \"edms\": 1, \"devolved\": 0, \"committee_evidence\": 0}}, {\"type\": \"final\", \"answer\": {\"segments\": [{\"text\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\".\", \"sources\": [1], \"cited\": [{\"n\": 1, \"text\": \"The right to trial by jury is a cornerstone of our liberties\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" In the debate that followed:\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" Kenneth Clarke said jury trial would be kept for serious offences.\", \"sources\": [2], \"cited\": [{\"n\": 2, \"text\": \"We will keep jury trial for serious offences\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" This was a turning point for every member in the Chamber.\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [{\"start\": 12, \"end\": 19, \"word\": \"turning\"}], \"misquotes\": []}], \"markdown\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.\", \"no_records\": false, \"citations_total\": 2, \"citations_invalid\": 0, \"grounded_ratio\": 0.5, \"unsupported_segments\": 2, \"loaded_words\": 1, \"quotes_total\": 1, \"quotes_unverified\": 0}, \"model\": \"claude-sonnet-5-5\", \"stop_reason\": \"end_turn\", \"interests\": [{\"source\": 1, \"person_id\": \"uk.org.publicwhip/person/10669\", \"name\": \"Hilary Benn\", \"register\": \"Register of Members' Financial Interests\", \"link\": \"/people/10669#h-interests\", \"items\": [{\"category\": \"3 Gifts\", \"summary\": \"Bar Council - \\u00a3500.00\", \"registered\": \"2021-01-05\", \"connection\": \"The gift is from the barristers' professional body and the speech is on jury trial.\", \"kind\": \"register\", \"register\": \"commons\", \"url\": null}]}], \"interests_usage\": {\"input_tokens\": 400, \"output_tokens\": 30, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}]",
+     null,
+     null,
+     {
+      "model": "claude-sonnet-5-5",
+      "records_up_to": "2026-11-12"
+     }
+    ],
+    [
+     "briefingab",
+     "2026-11-13T13:00:10+00:00",
+     "trial by jury",
+     "{\"mode\": \"summary\", \"topic\": \"trial-by-jury\"}",
+     "[{\"type\": \"plan\", \"plan\": {\"question\": \"trial by jury\", \"parser\": \"model\", \"filters\": {\"date_from\": \"2020-01-01\"}, \"interpretation\": \"Debates on \\\"trial by jury\\\" since 2020.\"}, \"usage\": {\"input_tokens\": 1200, \"output_tokens\": 80, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}, {\"type\": \"sources\", \"sources\": [{\"n\": 1, \"kind\": \"record\", \"title\": \"Hilary Benn, House of Commons, 4 March 2021\", \"group\": \"opposition\", \"date\": \"2021-03-04\"}, {\"n\": 2, \"kind\": \"record\", \"title\": \"Kenneth Clarke, House of Commons, 4 March 2021\", \"group\": \"government\"}, {\"n\": 3, \"kind\": \"edm\", \"title\": \"Early day motion 123: Trial by jury\", \"group\": \"edm\"}, {\"n\": 4, \"kind\": \"division\", \"title\": \"Division 45: Courts Bill, second reading\"}], \"candidates\": 12, \"semantic\": true, \"evidence\": {\"records\": 2, \"divisions\": 1, \"devolution\": [], \"edms\": 1, \"devolved\": 0, \"committee_evidence\": 0}}, {\"type\": \"final\", \"answer\": {\"segments\": [{\"text\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\".\", \"sources\": [1], \"cited\": [{\"n\": 1, \"text\": \"The right to trial by jury is a cornerstone of our liberties\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" In the debate that followed:\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" Kenneth Clarke said jury trial would be kept for serious offences.\", \"sources\": [2], \"cited\": [{\"n\": 2, \"text\": \"We will keep jury trial for serious offences\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" This was a turning point for every member in the Chamber.\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [{\"start\": 12, \"end\": 19, \"word\": \"turning\"}], \"misquotes\": []}], \"markdown\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.\", \"no_records\": false, \"citations_total\": 2, \"citations_invalid\": 0, \"grounded_ratio\": 0.5, \"unsupported_segments\": 2, \"loaded_words\": 1, \"quotes_total\": 1, \"quotes_unverified\": 0}, \"model\": \"claude-sonnet-5-5\", \"stop_reason\": \"end_turn\", \"interests\": [{\"source\": 1, \"person_id\": \"uk.org.publicwhip/person/10669\", \"name\": \"Hilary Benn\", \"register\": \"Register of Members' Financial Interests\", \"link\": \"/people/10669#h-interests\", \"items\": [{\"category\": \"3 Gifts\", \"summary\": \"Bar Council - \\u00a3500.00\", \"registered\": \"2021-01-05\", \"connection\": \"The gift is from the barristers' professional body and the speech is on jury trial.\", \"kind\": \"register\", \"register\": \"commons\", \"url\": null}]}], \"interests_usage\": {\"input_tokens\": 400, \"output_tokens\": 30, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}]",
+     null,
+     null,
+     {
+      "model": "claude-sonnet-5-5",
+      "records_up_to": "2026-11-12"
+     }
+    ]
+   ],
+   "cache": [],
+   "day_events": [],
+   "failures": [],
+   "question_counts": [],
+   "spending": [
+    [
+     "2026-11-13T12:00:00+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T12:00:00+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T12:00:05+00:00",
+     "topic",
+     "claude-sonnet-5-5",
+     null,
+     null,
+     9000,
+     700,
+     3000,
+     2000,
+     0.0266
+    ],
+    [
+     "2026-11-13T13:00:05+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T13:00:10+00:00",
+     "topic",
+     "claude-sonnet-5-5",
+     null,
+     null,
+     9000,
+     700,
+     3000,
+     2000,
+     0.0266
+    ]
+   ]
+  },
+  "said": [
+   [
+    {
+     "outcome": "no records found: not written",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "rewritten (briefingaa)",
+     "slug": "rural-buses"
+    }
+   ],
+   [
+    {
+     "outcome": "rewritten (briefingab)",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "written 0 days ago",
+     "slug": "rural-buses"
+    }
+   ]
+  ],
+  "versions": [
+   [
+    "rural-buses",
+    "briefingaa",
+    "2026-11-13T12:00:05+00:00",
+    "2026-11-12"
+   ],
+   [
+    "trial-by-jury",
+    "briefingab",
+    "2026-11-13T13:00:10+00:00",
+    "2026-11-12"
+   ]
+  ]
+ },
+ "the budget is spent": {
+  "calls": [],
+  "checks": [],
+  "listing": [
+   200,
+   {
+    "featured": [],
+    "topics": [
+     {
+      "area": "Justice",
+      "current": null,
+      "description": "Jury trials and the courts.",
+      "question": "trial by jury",
+      "refresh_days": 7,
+      "slug": "trial-by-jury",
+      "title": "Trial by jury",
+      "versions": 0
+     },
+     {
+      "area": "Transport",
+      "current": null,
+      "description": "",
+      "question": "bus services in rural areas",
+      "refresh_days": 7,
+      "slug": "rural-buses",
+      "title": "Rural bus services",
+      "versions": 0
+     }
+    ]
+   }
+  ],
+  "page": [
+   200,
+   {
+    "briefing": null,
+    "topic": {
+     "area": "Justice",
+     "description": "Jury trials and the courts.",
+     "question": "trial by jury",
+     "refresh_days": 7,
+     "slug": "trial-by-jury",
+     "title": "Trial by jury"
+    },
+    "versions": []
+   }
+  ],
+  "rows": {
+   "briefings": [],
+   "cache": [],
+   "day_events": [],
+   "failures": [],
+   "question_counts": [],
+   "spending": []
+  },
+  "said": [
+   [
+    {
+     "outcome": "skipped: Today's budget for new briefings has been used up. It resets at midnight UTC.",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "skipped: Today's budget for new briefings has been used up. It resets at midnight UTC.",
+     "slug": "rural-buses"
+    }
+   ],
+   [
+    {
+     "outcome": "skipped: Today's budget for new briefings has been used up. It resets at midnight UTC.",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "skipped: Today's budget for new briefings has been used up. It resets at midnight UTC.",
+     "slug": "rural-buses"
+    }
+   ]
+  ],
+  "versions": []
+ },
+ "the first cannot be read: the run stops": {
+  "calls": [
+   "make_plan",
+   "make_plan",
+   "written",
+   "make_plan",
+   "written"
+  ],
+  "checks": [
+   [
+    "rural-buses",
+    "2026-11-13T13:00:09+00:00",
+    "rewritten (briefingab)"
+   ],
+   [
+    "trial-by-jury",
+    "2026-11-13T13:00:04+00:00",
+    "rewritten (briefingaa)"
+   ]
+  ],
+  "listing": [
+   200,
+   {
+    "featured": [],
+    "topics": [
+     {
+      "area": "Justice",
+      "current": {
+       "briefing_id": "briefingaa",
+       "prepared_at": "2026-11-13T13:00:04+00:00",
+       "records_up_to": "2026-11-12",
+       "summary": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber."
+      },
+      "description": "Jury trials and the courts.",
+      "question": "trial by jury",
+      "refresh_days": 7,
+      "slug": "trial-by-jury",
+      "title": "Trial by jury",
+      "versions": 1
+     },
+     {
+      "area": "Transport",
+      "current": {
+       "briefing_id": "briefingab",
+       "prepared_at": "2026-11-13T13:00:09+00:00",
+       "records_up_to": "2026-11-12",
+       "summary": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber."
+      },
+      "description": "",
+      "question": "bus services in rural areas",
+      "refresh_days": 7,
+      "slug": "rural-buses",
+      "title": "Rural bus services",
+      "versions": 1
+     }
+    ]
+   }
+  ],
+  "page": [
+   200,
+   {
+    "briefing": {
+     "answer": {
+      "citations_invalid": 0,
+      "citations_total": 2,
+      "grounded_ratio": 0.68,
+      "loaded_words": 0,
+      "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+      "no_records": false,
+      "quotes_total": 1,
+      "quotes_unverified": 0,
+      "segments": [
+       {
+        "cited": [
+         {
+          "n": 1,
+          "text": "The right to trial by jury is a cornerstone of our liberties"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         1
+        ],
+        "status": "cited",
+        "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "connective",
+        "text": " In the debate that followed:"
+       },
+       {
+        "cited": [
+         {
+          "n": 2,
+          "text": "We will keep jury trial for serious offences"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         2
+        ],
+        "status": "cited",
+        "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " This was a turning point for every member in the Chamber."
+       }
+      ],
+      "unsupported_segments": 1
+     },
+     "candidates": 12,
+     "created_at": "2026-11-13T13:00:04+00:00",
+     "evidence": {
+      "committee_evidence": 0,
+      "devolution": [],
+      "devolved": 0,
+      "divisions": 1,
+      "edms": 1,
+      "records": 2
+     },
+     "id": "briefingaa",
+     "interests": [
+      {
+       "items": [
+        {
+         "category": "3 Gifts",
+         "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2021-01-05",
+         "summary": "Bar Council - £500.00",
+         "url": null
+        }
+       ],
+       "link": "/people/10669#h-interests",
+       "name": "Hilary Benn",
+       "person_id": "uk.org.publicwhip/person/10669",
+       "register": "Register of Members' Financial Interests",
+       "source": 1
+      }
+     ],
+     "plan": {
+      "filters": {
+       "date_from": "2020-01-01"
+      },
+      "interpretation": "Debates on \"trial by jury\" since 2020.",
+      "parser": "model",
+      "question": "trial by jury"
+     },
+     "question": "trial by jury",
+     "records_up_to": "2026-11-12",
+     "semantic": true,
+     "settings": {
+      "mode": "summary",
+      "topic": "trial-by-jury"
+     },
+     "sources": [
+      {
+       "date": "2021-03-04",
+       "group": "opposition",
+       "kind": "record",
+       "n": 1,
+       "title": "Hilary Benn, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "government",
+       "kind": "record",
+       "n": 2,
+       "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "edm",
+       "kind": "edm",
+       "n": 3,
+       "title": "Early day motion 123: Trial by jury"
+      },
+      {
+       "kind": "division",
+       "n": 4,
+       "title": "Division 45: Courts Bill, second reading"
+      }
+     ]
+    },
+    "topic": {
+     "area": "Justice",
+     "description": "Jury trials and the courts.",
+     "question": "trial by jury",
+     "refresh_days": 7,
+     "slug": "trial-by-jury",
+     "title": "Trial by jury"
+    },
+    "versions": [
+     {
+      "briefing_id": "briefingaa",
+      "prepared_at": "2026-11-13T13:00:04+00:00",
+      "records_up_to": "2026-11-12"
+     }
+    ]
+   }
+  ],
+  "rows": {
+   "briefings": [
+    [
+     "briefingaa",
+     "2026-11-13T13:00:04+00:00",
+     "trial by jury",
+     "{\"mode\": \"summary\", \"topic\": \"trial-by-jury\"}",
+     "[{\"type\": \"plan\", \"plan\": {\"question\": \"trial by jury\", \"parser\": \"model\", \"filters\": {\"date_from\": \"2020-01-01\"}, \"interpretation\": \"Debates on \\\"trial by jury\\\" since 2020.\"}, \"usage\": {\"input_tokens\": 1200, \"output_tokens\": 80, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}, {\"type\": \"sources\", \"sources\": [{\"n\": 1, \"kind\": \"record\", \"title\": \"Hilary Benn, House of Commons, 4 March 2021\", \"group\": \"opposition\", \"date\": \"2021-03-04\"}, {\"n\": 2, \"kind\": \"record\", \"title\": \"Kenneth Clarke, House of Commons, 4 March 2021\", \"group\": \"government\"}, {\"n\": 3, \"kind\": \"edm\", \"title\": \"Early day motion 123: Trial by jury\", \"group\": \"edm\"}, {\"n\": 4, \"kind\": \"division\", \"title\": \"Division 45: Courts Bill, second reading\"}], \"candidates\": 12, \"semantic\": true, \"evidence\": {\"records\": 2, \"divisions\": 1, \"devolution\": [], \"edms\": 1, \"devolved\": 0, \"committee_evidence\": 0}}, {\"type\": \"final\", \"answer\": {\"segments\": [{\"text\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\".\", \"sources\": [1], \"cited\": [{\"n\": 1, \"text\": \"The right to trial by jury is a cornerstone of our liberties\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" In the debate that followed:\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" Kenneth Clarke said jury trial would be kept for serious offences.\", \"sources\": [2], \"cited\": [{\"n\": 2, \"text\": \"We will keep jury trial for serious offences\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" This was a turning point for every member in the Chamber.\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [{\"start\": 12, \"end\": 19, \"word\": \"turning\"}], \"misquotes\": []}], \"markdown\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.\", \"no_records\": false, \"citations_total\": 2, \"citations_invalid\": 0, \"grounded_ratio\": 0.5, \"unsupported_segments\": 2, \"loaded_words\": 1, \"quotes_total\": 1, \"quotes_unverified\": 0}, \"model\": \"claude-sonnet-5-5\", \"stop_reason\": \"end_turn\", \"interests\": [{\"source\": 1, \"person_id\": \"uk.org.publicwhip/person/10669\", \"name\": \"Hilary Benn\", \"register\": \"Register of Members' Financial Interests\", \"link\": \"/people/10669#h-interests\", \"items\": [{\"category\": \"3 Gifts\", \"summary\": \"Bar Council - \\u00a3500.00\", \"registered\": \"2021-01-05\", \"connection\": \"The gift is from the barristers' professional body and the speech is on jury trial.\", \"kind\": \"register\", \"register\": \"commons\", \"url\": null}]}], \"interests_usage\": {\"input_tokens\": 400, \"output_tokens\": 30, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}]",
+     null,
+     null,
+     {
+      "model": "claude-sonnet-5-5",
+      "records_up_to": "2026-11-12"
+     }
+    ],
+    [
+     "briefingab",
+     "2026-11-13T13:00:09+00:00",
+     "bus services in rural areas",
+     "{\"mode\": \"summary\", \"topic\": \"rural-buses\"}",
+     "[{\"type\": \"plan\", \"plan\": {\"question\": \"bus services in rural areas\", \"parser\": \"model\", \"filters\": {\"date_from\": \"2020-01-01\"}, \"interpretation\": \"Debates on \\\"trial by jury\\\" since 2020.\"}, \"usage\": {\"input_tokens\": 1200, \"output_tokens\": 80, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}, {\"type\": \"sources\", \"sources\": [{\"n\": 1, \"kind\": \"record\", \"title\": \"Hilary Benn, House of Commons, 4 March 2021\", \"group\": \"opposition\", \"date\": \"2021-03-04\"}, {\"n\": 2, \"kind\": \"record\", \"title\": \"Kenneth Clarke, House of Commons, 4 March 2021\", \"group\": \"government\"}, {\"n\": 3, \"kind\": \"edm\", \"title\": \"Early day motion 123: Trial by jury\", \"group\": \"edm\"}, {\"n\": 4, \"kind\": \"division\", \"title\": \"Division 45: Courts Bill, second reading\"}], \"candidates\": 12, \"semantic\": true, \"evidence\": {\"records\": 2, \"divisions\": 1, \"devolution\": [], \"edms\": 1, \"devolved\": 0, \"committee_evidence\": 0}}, {\"type\": \"final\", \"answer\": {\"segments\": [{\"text\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\".\", \"sources\": [1], \"cited\": [{\"n\": 1, \"text\": \"The right to trial by jury is a cornerstone of our liberties\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" In the debate that followed:\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" Kenneth Clarke said jury trial would be kept for serious offences.\", \"sources\": [2], \"cited\": [{\"n\": 2, \"text\": \"We will keep jury trial for serious offences\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" This was a turning point for every member in the Chamber.\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [{\"start\": 12, \"end\": 19, \"word\": \"turning\"}], \"misquotes\": []}], \"markdown\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.\", \"no_records\": false, \"citations_total\": 2, \"citations_invalid\": 0, \"grounded_ratio\": 0.5, \"unsupported_segments\": 2, \"loaded_words\": 1, \"quotes_total\": 1, \"quotes_unverified\": 0}, \"model\": \"claude-sonnet-5-5\", \"stop_reason\": \"end_turn\", \"interests\": [{\"source\": 1, \"person_id\": \"uk.org.publicwhip/person/10669\", \"name\": \"Hilary Benn\", \"register\": \"Register of Members' Financial Interests\", \"link\": \"/people/10669#h-interests\", \"items\": [{\"category\": \"3 Gifts\", \"summary\": \"Bar Council - \\u00a3500.00\", \"registered\": \"2021-01-05\", \"connection\": \"The gift is from the barristers' professional body and the speech is on jury trial.\", \"kind\": \"register\", \"register\": \"commons\", \"url\": null}]}], \"interests_usage\": {\"input_tokens\": 400, \"output_tokens\": 30, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}]",
+     null,
+     null,
+     {
+      "model": "claude-sonnet-5-5",
+      "records_up_to": "2026-11-12"
+     }
+    ]
+   ],
+   "cache": [],
+   "day_events": [],
+   "failures": [
+    [
+     "2026-11-13T12:00:00+00:00",
+     "topic",
+     "trial by jury",
+     "AuthenticationError: bad key"
+    ]
+   ],
+   "question_counts": [],
+   "spending": [
+    [
+     "2026-11-13T12:00:00+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T13:00:00+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T13:00:04+00:00",
+     "topic",
+     "claude-sonnet-5-5",
+     null,
+     null,
+     9000,
+     700,
+     3000,
+     2000,
+     0.0266
+    ],
+    [
+     "2026-11-13T13:00:04+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T13:00:09+00:00",
+     "topic",
+     "claude-sonnet-5-5",
+     null,
+     null,
+     9000,
+     700,
+     3000,
+     2000,
+     0.0266
+    ]
+   ]
+  },
+  "said": [
+   [
+    {
+     "outcome": "failed: the question could not be read (see failures on the admin page)",
+     "slug": "trial-by-jury"
+    }
+   ],
+   [
+    {
+     "outcome": "rewritten (briefingaa)",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "rewritten (briefingab)",
+     "slug": "rural-buses"
+    }
+   ]
+  ],
+  "versions": [
+   [
+    "rural-buses",
+    "briefingab",
+    "2026-11-13T13:00:09+00:00",
+    "2026-11-12"
+   ],
+   [
+    "trial-by-jury",
+    "briefingaa",
+    "2026-11-13T13:00:04+00:00",
+    "2026-11-12"
+   ]
+  ]
+ },
+ "the model declines the first: the run stops": {
+  "calls": [
+   "make_plan",
+   "declined",
+   "make_plan",
+   "written",
+   "make_plan",
+   "written"
+  ],
+  "checks": [
+   [
+    "rural-buses",
+    "2026-11-13T13:00:13+00:00",
+    "rewritten (briefingab)"
+   ],
+   [
+    "trial-by-jury",
+    "2026-11-13T13:00:09+00:00",
+    "rewritten (briefingaa)"
+   ]
+  ],
+  "listing": [
+   200,
+   {
+    "featured": [],
+    "topics": [
+     {
+      "area": "Justice",
+      "current": {
+       "briefing_id": "briefingaa",
+       "prepared_at": "2026-11-13T13:00:09+00:00",
+       "records_up_to": "2026-11-12",
+       "summary": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber."
+      },
+      "description": "Jury trials and the courts.",
+      "question": "trial by jury",
+      "refresh_days": 7,
+      "slug": "trial-by-jury",
+      "title": "Trial by jury",
+      "versions": 1
+     },
+     {
+      "area": "Transport",
+      "current": {
+       "briefing_id": "briefingab",
+       "prepared_at": "2026-11-13T13:00:13+00:00",
+       "records_up_to": "2026-11-12",
+       "summary": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber."
+      },
+      "description": "",
+      "question": "bus services in rural areas",
+      "refresh_days": 7,
+      "slug": "rural-buses",
+      "title": "Rural bus services",
+      "versions": 1
+     }
+    ]
+   }
+  ],
+  "page": [
+   200,
+   {
+    "briefing": {
+     "answer": {
+      "citations_invalid": 0,
+      "citations_total": 2,
+      "grounded_ratio": 0.68,
+      "loaded_words": 0,
+      "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+      "no_records": false,
+      "quotes_total": 1,
+      "quotes_unverified": 0,
+      "segments": [
+       {
+        "cited": [
+         {
+          "n": 1,
+          "text": "The right to trial by jury is a cornerstone of our liberties"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         1
+        ],
+        "status": "cited",
+        "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "connective",
+        "text": " In the debate that followed:"
+       },
+       {
+        "cited": [
+         {
+          "n": 2,
+          "text": "We will keep jury trial for serious offences"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         2
+        ],
+        "status": "cited",
+        "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " This was a turning point for every member in the Chamber."
+       }
+      ],
+      "unsupported_segments": 1
+     },
+     "candidates": 12,
+     "created_at": "2026-11-13T13:00:09+00:00",
+     "evidence": {
+      "committee_evidence": 0,
+      "devolution": [],
+      "devolved": 0,
+      "divisions": 1,
+      "edms": 1,
+      "records": 2
+     },
+     "id": "briefingaa",
+     "interests": [
+      {
+       "items": [
+        {
+         "category": "3 Gifts",
+         "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2021-01-05",
+         "summary": "Bar Council - £500.00",
+         "url": null
+        }
+       ],
+       "link": "/people/10669#h-interests",
+       "name": "Hilary Benn",
+       "person_id": "uk.org.publicwhip/person/10669",
+       "register": "Register of Members' Financial Interests",
+       "source": 1
+      }
+     ],
+     "plan": {
+      "filters": {
+       "date_from": "2020-01-01"
+      },
+      "interpretation": "Debates on \"trial by jury\" since 2020.",
+      "parser": "model",
+      "question": "trial by jury"
+     },
+     "question": "trial by jury",
+     "records_up_to": "2026-11-12",
+     "semantic": true,
+     "settings": {
+      "mode": "summary",
+      "topic": "trial-by-jury"
+     },
+     "sources": [
+      {
+       "date": "2021-03-04",
+       "group": "opposition",
+       "kind": "record",
+       "n": 1,
+       "title": "Hilary Benn, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "government",
+       "kind": "record",
+       "n": 2,
+       "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "edm",
+       "kind": "edm",
+       "n": 3,
+       "title": "Early day motion 123: Trial by jury"
+      },
+      {
+       "kind": "division",
+       "n": 4,
+       "title": "Division 45: Courts Bill, second reading"
+      }
+     ]
+    },
+    "topic": {
+     "area": "Justice",
+     "description": "Jury trials and the courts.",
+     "question": "trial by jury",
+     "refresh_days": 7,
+     "slug": "trial-by-jury",
+     "title": "Trial by jury"
+    },
+    "versions": [
+     {
+      "briefing_id": "briefingaa",
+      "prepared_at": "2026-11-13T13:00:09+00:00",
+      "records_up_to": "2026-11-12"
+     }
+    ]
+   }
+  ],
+  "rows": {
+   "briefings": [
+    [
+     "briefingaa",
+     "2026-11-13T13:00:09+00:00",
+     "trial by jury",
+     "{\"mode\": \"summary\", \"topic\": \"trial-by-jury\"}",
+     "[{\"type\": \"plan\", \"plan\": {\"question\": \"trial by jury\", \"parser\": \"model\", \"filters\": {\"date_from\": \"2020-01-01\"}, \"interpretation\": \"Debates on \\\"trial by jury\\\" since 2020.\"}, \"usage\": {\"input_tokens\": 1200, \"output_tokens\": 80, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}, {\"type\": \"sources\", \"sources\": [{\"n\": 1, \"kind\": \"record\", \"title\": \"Hilary Benn, House of Commons, 4 March 2021\", \"group\": \"opposition\", \"date\": \"2021-03-04\"}, {\"n\": 2, \"kind\": \"record\", \"title\": \"Kenneth Clarke, House of Commons, 4 March 2021\", \"group\": \"government\"}, {\"n\": 3, \"kind\": \"edm\", \"title\": \"Early day motion 123: Trial by jury\", \"group\": \"edm\"}, {\"n\": 4, \"kind\": \"division\", \"title\": \"Division 45: Courts Bill, second reading\"}], \"candidates\": 12, \"semantic\": true, \"evidence\": {\"records\": 2, \"divisions\": 1, \"devolution\": [], \"edms\": 1, \"devolved\": 0, \"committee_evidence\": 0}}, {\"type\": \"final\", \"answer\": {\"segments\": [{\"text\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\".\", \"sources\": [1], \"cited\": [{\"n\": 1, \"text\": \"The right to trial by jury is a cornerstone of our liberties\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" In the debate that followed:\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" Kenneth Clarke said jury trial would be kept for serious offences.\", \"sources\": [2], \"cited\": [{\"n\": 2, \"text\": \"We will keep jury trial for serious offences\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" This was a turning point for every member in the Chamber.\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [{\"start\": 12, \"end\": 19, \"word\": \"turning\"}], \"misquotes\": []}], \"markdown\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.\", \"no_records\": false, \"citations_total\": 2, \"citations_invalid\": 0, \"grounded_ratio\": 0.5, \"unsupported_segments\": 2, \"loaded_words\": 1, \"quotes_total\": 1, \"quotes_unverified\": 0}, \"model\": \"claude-sonnet-5-5\", \"stop_reason\": \"end_turn\", \"interests\": [{\"source\": 1, \"person_id\": \"uk.org.publicwhip/person/10669\", \"name\": \"Hilary Benn\", \"register\": \"Register of Members' Financial Interests\", \"link\": \"/people/10669#h-interests\", \"items\": [{\"category\": \"3 Gifts\", \"summary\": \"Bar Council - \\u00a3500.00\", \"registered\": \"2021-01-05\", \"connection\": \"The gift is from the barristers' professional body and the speech is on jury trial.\", \"kind\": \"register\", \"register\": \"commons\", \"url\": null}]}], \"interests_usage\": {\"input_tokens\": 400, \"output_tokens\": 30, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}]",
+     null,
+     null,
+     {
+      "model": "claude-sonnet-5-5",
+      "records_up_to": "2026-11-12"
+     }
+    ],
+    [
+     "briefingab",
+     "2026-11-13T13:00:13+00:00",
+     "bus services in rural areas",
+     "{\"mode\": \"summary\", \"topic\": \"rural-buses\"}",
+     "[{\"type\": \"plan\", \"plan\": {\"question\": \"bus services in rural areas\", \"parser\": \"model\", \"filters\": {\"date_from\": \"2020-01-01\"}, \"interpretation\": \"Debates on \\\"trial by jury\\\" since 2020.\"}, \"usage\": {\"input_tokens\": 1200, \"output_tokens\": 80, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}, {\"type\": \"sources\", \"sources\": [{\"n\": 1, \"kind\": \"record\", \"title\": \"Hilary Benn, House of Commons, 4 March 2021\", \"group\": \"opposition\", \"date\": \"2021-03-04\"}, {\"n\": 2, \"kind\": \"record\", \"title\": \"Kenneth Clarke, House of Commons, 4 March 2021\", \"group\": \"government\"}, {\"n\": 3, \"kind\": \"edm\", \"title\": \"Early day motion 123: Trial by jury\", \"group\": \"edm\"}, {\"n\": 4, \"kind\": \"division\", \"title\": \"Division 45: Courts Bill, second reading\"}], \"candidates\": 12, \"semantic\": true, \"evidence\": {\"records\": 2, \"divisions\": 1, \"devolution\": [], \"edms\": 1, \"devolved\": 0, \"committee_evidence\": 0}}, {\"type\": \"final\", \"answer\": {\"segments\": [{\"text\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\".\", \"sources\": [1], \"cited\": [{\"n\": 1, \"text\": \"The right to trial by jury is a cornerstone of our liberties\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" In the debate that followed:\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" Kenneth Clarke said jury trial would be kept for serious offences.\", \"sources\": [2], \"cited\": [{\"n\": 2, \"text\": \"We will keep jury trial for serious offences\"}], \"status\": \"cited\", \"loaded\": [], \"misquotes\": []}, {\"text\": \" This was a turning point for every member in the Chamber.\", \"sources\": [], \"cited\": [], \"status\": \"unsupported\", \"loaded\": [{\"start\": 12, \"end\": 19, \"word\": \"turning\"}], \"misquotes\": []}], \"markdown\": \"Hilary Benn said that trial by jury was \\\"a cornerstone\\\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.\", \"no_records\": false, \"citations_total\": 2, \"citations_invalid\": 0, \"grounded_ratio\": 0.5, \"unsupported_segments\": 2, \"loaded_words\": 1, \"quotes_total\": 1, \"quotes_unverified\": 0}, \"model\": \"claude-sonnet-5-5\", \"stop_reason\": \"end_turn\", \"interests\": [{\"source\": 1, \"person_id\": \"uk.org.publicwhip/person/10669\", \"name\": \"Hilary Benn\", \"register\": \"Register of Members' Financial Interests\", \"link\": \"/people/10669#h-interests\", \"items\": [{\"category\": \"3 Gifts\", \"summary\": \"Bar Council - \\u00a3500.00\", \"registered\": \"2021-01-05\", \"connection\": \"The gift is from the barristers' professional body and the speech is on jury trial.\", \"kind\": \"register\", \"register\": \"commons\", \"url\": null}]}], \"interests_usage\": {\"input_tokens\": 400, \"output_tokens\": 30, \"cache_read_tokens\": 0, \"cache_write_tokens\": 0}}]",
+     null,
+     null,
+     {
+      "model": "claude-sonnet-5-5",
+      "records_up_to": "2026-11-12"
+     }
+    ]
+   ],
+   "cache": [],
+   "day_events": [],
+   "failures": [
+    [
+     "2026-11-13T12:00:04+00:00",
+     "topic",
+     "trial by jury",
+     "The model declined to answer this question."
+    ]
+   ],
+   "question_counts": [],
+   "spending": [
+    [
+     "2026-11-13T12:00:00+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T13:00:04+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T13:00:09+00:00",
+     "topic",
+     "claude-sonnet-5-5",
+     null,
+     null,
+     9000,
+     700,
+     3000,
+     2000,
+     0.0266
+    ],
+    [
+     "2026-11-13T13:00:09+00:00",
+     "topic",
+     "claude-haiku-5-5",
+     null,
+     null,
+     1200,
+     80,
+     0,
+     0,
+     0.00016
+    ],
+    [
+     "2026-11-13T13:00:13+00:00",
+     "topic",
+     "claude-sonnet-5-5",
+     null,
+     null,
+     9000,
+     700,
+     3000,
+     2000,
+     0.0266
+    ]
+   ]
+  },
+  "said": [
+   [
+    {
+     "outcome": "failed: kept the previous version (see failures on the admin page)",
+     "slug": "trial-by-jury"
+    }
+   ],
+   [
+    {
+     "outcome": "rewritten (briefingaa)",
+     "slug": "trial-by-jury"
+    },
+    {
+     "outcome": "rewritten (briefingab)",
+     "slug": "rural-buses"
+    }
+   ]
+  ],
+  "versions": [
+   [
+    "rural-buses",
+    "briefingab",
+    "2026-11-13T13:00:13+00:00",
+    "2026-11-12"
+   ],
+   [
+    "trial-by-jury",
+    "briefingaa",
+    "2026-11-13T13:00:09+00:00",
+    "2026-11-12"
+   ]
+  ]
+ }
+}

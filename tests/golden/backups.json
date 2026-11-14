@@ -1,0 +1,991 @@
+{
+ "after": {
+  "files": [
+   "settings.local.toml",
+   "state.sqlite",
+   "state.sqlite.before-restore"
+  ],
+  "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+  "state.sqlite": {
+   "briefings": [],
+   "kv": [
+    [
+     "marker",
+     "repacked by hand"
+    ]
+   ],
+   "manifest": [],
+   "reports": [],
+   "sync_log": [],
+   "usage": []
+  }
+ },
+ "alerts": [
+  {
+   "alerts": [],
+   "case": "no backups folder"
+  },
+  {
+   "alerts": [
+    {
+     "level": "warning",
+     "text": "No backups have been made yet."
+    },
+    {
+     "level": "warning",
+     "text": "Backups are kept on this server only: no off-site copy is set up."
+    }
+   ],
+   "case": "an empty folder, no off-site copy set up"
+  },
+  {
+   "alerts": [
+    {
+     "level": "warning",
+     "text": "No backups have been made yet."
+    }
+   ],
+   "case": "an empty folder, off-site set up"
+  },
+  {
+   "alerts": [
+    {
+     "level": "error",
+     "text": "The last backup was made over two days ago (where-they-stand-2026-11-01.tar.gz)."
+    },
+    {
+     "level": "warning",
+     "text": "No off-site copy has been made yet; one is made with the next backup."
+    }
+   ],
+   "case": "a backup three days old, no off-site copy yet"
+  },
+  {
+   "alerts": [
+    {
+     "level": "error",
+     "text": "The last backup was made over two days ago (where-they-stand-2026-11-01.tar.gz)."
+    },
+    {
+     "level": "warning",
+     "text": "Backups are kept on this server only: no off-site copy is set up."
+    }
+   ],
+   "case": "a backup three days old, on this server only"
+  },
+  {
+   "alerts": [
+    {
+     "level": "warning",
+     "text": "No off-site copy has been made yet; one is made with the next backup."
+    }
+   ],
+   "case": "a backup exactly fifty hours old"
+  },
+  {
+   "alerts": [
+    {
+     "level": "error",
+     "text": "The last off-site copy failed (2026-11-06T03:00): Backblaze did not accept the key"
+    }
+   ],
+   "case": "the last off-site copy failed"
+  },
+  {
+   "alerts": [
+    {
+     "level": "error",
+     "text": "The last off-site copy was over two days ago (2026-11-02)."
+    }
+   ],
+   "case": "the last off-site copy is four days old"
+  },
+  {
+   "alerts": [],
+   "case": "all is well"
+  },
+  {
+   "alerts": [
+    {
+     "level": "warning",
+     "text": "No off-site copy has been made yet; one is made with the next backup."
+    }
+   ],
+   "case": "a record of the off-site copy that cannot be read"
+  }
+ ],
+ "commands": [
+  {
+   "args": [
+    "backup",
+    "--to",
+    "<tmp>/backups"
+   ],
+   "backups": [],
+   "case": "a new site has nothing to back up",
+   "exit": 0,
+   "output": "Nothing to back up yet: there is no state database.\n"
+  },
+  {
+   "args": [
+    "offsite"
+   ],
+   "backups": [],
+   "case": "the off-site check, not set up",
+   "exit": 0,
+   "output": "{\n  \"ok\": false,\n  \"error\": \"not set up: add HANSARD_B2_BUCKET, HANSARD_B2_KEY_ID and HANSARD_B2_APPLICATION_KEY to deploy/.env\"\n}\n"
+  },
+  {
+   "args": [
+    "backup",
+    "--to",
+    "<tmp>/backups",
+    "--keep",
+    "2"
+   ],
+   "backups": [
+    {
+     "holds": {
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 0"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-01.tar.gz"
+    }
+   ],
+   "case": "a backup on 2026-11-01, keeping two",
+   "exit": 0,
+   "output": "Backed up to <tmp>/backups/where-they-stand-2026-11-01.tar.gz\nOff-site copy: not set up\n"
+  },
+  {
+   "args": [
+    "backup",
+    "--to",
+    "<tmp>/backups",
+    "--keep",
+    "2"
+   ],
+   "backups": [
+    {
+     "holds": {
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 0"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-01.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 1"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    }
+   ],
+   "case": "a backup on 2026-11-02, keeping two",
+   "exit": 0,
+   "output": "Backed up to <tmp>/backups/where-they-stand-2026-11-02.tar.gz\nOff-site copy: not set up\n"
+  },
+  {
+   "args": [
+    "backup",
+    "--to",
+    "<tmp>/backups",
+    "--keep",
+    "2"
+   ],
+   "backups": [
+    {
+     "holds": {
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 0"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-01.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    }
+   ],
+   "case": "a backup on 2026-11-02, keeping two",
+   "exit": 0,
+   "output": "Backed up to <tmp>/backups/where-they-stand-2026-11-02.tar.gz\nOff-site copy: not set up\n"
+  },
+  {
+   "args": [
+    "backup",
+    "--to",
+    "<tmp>/backups",
+    "--keep",
+    "2"
+   ],
+   "backups": [
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "a backup on 2026-11-03, keeping two",
+   "exit": 0,
+   "output": "Backed up to <tmp>/backups/where-they-stand-2026-11-03.tar.gz\nOff-site copy: not set up\n"
+  },
+  {
+   "args": [
+    "backup",
+    "--to",
+    "<tmp>/backups"
+   ],
+   "backups": [
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "a backup with nothing said of how many to keep",
+   "exit": 0,
+   "output": "Backed up to <tmp>/backups/where-they-stand-2026-11-03.tar.gz\nOff-site copy: not set up\n"
+  },
+  {
+   "args": [
+    "restore",
+    "<tmp>/backups/where-they-stand-2026-11-02.tar.gz"
+   ],
+   "backups": [
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "restore, refused at the question",
+   "exit": 1,
+   "output": "This replaces the current saved briefings, reports and usage records. Continue? [y/N]:Aborted.\n "
+  },
+  {
+   "args": [
+    "restore",
+    "<tmp>/backups/where-they-stand-2026-11-02.tar.gz",
+    "--yes"
+   ],
+   "backups": [
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "restore a backup",
+   "exit": 0,
+   "output": "Restored. Start the site again. The database it replaced is kept as <tmp>/data/state.sqlite.before-restore.\n"
+  },
+  {
+   "args": [
+    "restore",
+    "<tmp>/backups/where-they-stand-2026-11-03.tar.gz",
+    "--yes"
+   ],
+   "backups": [
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "a second restore never writes over the kept copy",
+   "exit": 1,
+   "output": "Not restored: <tmp>/data/state.sqlite.before-restore is still there from an earlier restore: move or delete it first.\n"
+  },
+  {
+   "args": [
+    "restore",
+    "<tmp>/backups/missing.tar.gz",
+    "--yes"
+   ],
+   "backups": [
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "a backup that is not there",
+   "exit": 2,
+   "output": "Usage: root restore [OPTIONS] {archive}\nTry 'root restore --help' for help.\n╭─ Error ──────────────────────────────────────────────────────────────────────╮\n│ Invalid value for 'archive': File                                            │\n│ '<tmp>/backups/missing.tar.gz' does not exist.            │\n╰──────────────────────────────────────────────────────────────────────────────╯\n"
+  },
+  {
+   "args": [
+    "restore",
+    "<tmp>/backups/damaged.tar.gz",
+    "--yes"
+   ],
+   "backups": [
+    {
+     "holds": "ReadError",
+     "mode": "0o644",
+     "name": "damaged.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "a damaged backup",
+   "exit": 1,
+   "output": "Not restored: damaged.tar.gz could not be read: file could not be opened successfully:\n- method gz: ReadError('not a gzip file')\n- method bz2: ReadError('not a bzip2 file')\n- method xz: ReadError('not an lzma file')\n- method tar: ReadError('truncated header')\n"
+  },
+  {
+   "args": [
+    "restore",
+    "<tmp>/backups/no-database.tar.gz",
+    "--yes"
+   ],
+   "backups": [
+    {
+     "holds": "ReadError",
+     "mode": "0o644",
+     "name": "damaged.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\n"
+     },
+     "mode": "0o644",
+     "name": "no-database.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "a backup with no database in it",
+   "exit": 1,
+   "output": "Not restored: no-database.tar.gz is not a backup of this site: it has no state.sqlite\n"
+  },
+  {
+   "args": [
+    "restore",
+    "<tmp>/backups/text.tar.gz",
+    "--yes"
+   ],
+   "backups": [
+    {
+     "holds": "ReadError",
+     "mode": "0o644",
+     "name": "damaged.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\n"
+     },
+     "mode": "0o644",
+     "name": "no-database.tar.gz"
+    },
+    {
+     "holds": "DatabaseError",
+     "mode": "0o644",
+     "name": "text.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "a backup whose database is not one",
+   "exit": 1,
+   "output": "Not restored: text.tar.gz is not a database: file is not a database\n"
+  },
+  {
+   "args": [
+    "restore",
+    "<tmp>/backups/foreign.tar.gz",
+    "--yes"
+   ],
+   "backups": [
+    {
+     "holds": "ReadError",
+     "mode": "0o644",
+     "name": "damaged.tar.gz"
+    },
+    {
+     "holds": {
+      "state.sqlite": {
+       "something": []
+      }
+     },
+     "mode": "0o644",
+     "name": "foreign.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\n"
+     },
+     "mode": "0o644",
+     "name": "no-database.tar.gz"
+    },
+    {
+     "holds": "DatabaseError",
+     "mode": "0o644",
+     "name": "text.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "another database altogether",
+   "exit": 1,
+   "output": "Not restored: foreign.tar.gz is not a backup of this site's state database\n"
+  },
+  {
+   "args": [
+    "restore",
+    "<tmp>/backups/repacked.tar.gz",
+    "--yes"
+   ],
+   "backups": [
+    {
+     "holds": "ReadError",
+     "mode": "0o644",
+     "name": "damaged.tar.gz"
+    },
+    {
+     "holds": {
+      "state.sqlite": {
+       "something": []
+      }
+     },
+     "mode": "0o644",
+     "name": "foreign.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\n"
+     },
+     "mode": "0o644",
+     "name": "no-database.tar.gz"
+    },
+    {
+     "holds": {
+      "./state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "repacked by hand"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o644",
+     "name": "repacked.tar.gz"
+    },
+    {
+     "holds": "DatabaseError",
+     "mode": "0o644",
+     "name": "text.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 2"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-02.tar.gz"
+    },
+    {
+     "holds": {
+      "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+      "state.sqlite": {
+       "briefings": [],
+       "kv": [
+        [
+         "marker",
+         "backup 3"
+        ]
+       ],
+       "manifest": [],
+       "reports": [],
+       "sync_log": [],
+       "usage": []
+      }
+     },
+     "mode": "0o600",
+     "name": "where-they-stand-2026-11-03.tar.gz"
+    }
+   ],
+   "case": "a backup repacked by hand",
+   "exit": 0,
+   "output": "Restored. Start the site again. The database it replaced is kept as <tmp>/data/state.sqlite.before-restore.\n"
+  }
+ ],
+ "restored": {
+  "files": [
+   "settings.local.toml",
+   "state.sqlite",
+   "state.sqlite.before-restore"
+  ],
+  "kept": {
+   "briefings": [],
+   "kv": [
+    [
+     "marker",
+     "in the log only"
+    ]
+   ],
+   "manifest": [],
+   "reports": [],
+   "sync_log": [],
+   "usage": []
+  },
+  "mode": "0o600",
+  "settings.local.toml": "[archive]\nstart_date = \"2015-01-01\"\n",
+  "state.sqlite": {
+   "briefings": [],
+   "kv": [
+    [
+     "marker",
+     "backup 2"
+    ]
+   ],
+   "manifest": [],
+   "reports": [],
+   "sync_log": [],
+   "usage": []
+  }
+ }
+}

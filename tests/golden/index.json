@@ -1,0 +1,1086 @@
+{
+ "engine": [
+  {
+   "candidates": 103,
+   "houses": [],
+   "no_records": false,
+   "query": "trial by jury",
+   "records": [
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.4",
+     1.196
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.8",
+     1.1158
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.3",
+     1.0739
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.6",
+     1.042
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.5",
+     0.7505
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.7",
+     0.1053
+    ]
+   ],
+   "semantic": true
+  },
+  {
+   "candidates": 16,
+   "houses": [
+    "lords"
+   ],
+   "no_records": false,
+   "query": "trial by jury",
+   "records": [
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.7",
+     0.2228
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.9",
+     0.1839
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2",
+     0.1673
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.4",
+     0.1517
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.5",
+     0.122
+    ]
+   ],
+   "semantic": true
+  },
+  {
+   "candidates": 103,
+   "houses": [],
+   "no_records": false,
+   "query": "Northern Ireland security",
+   "records": [
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.9",
+     0.3723
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.0",
+     0.3634
+    ],
+    [
+     "uk.org.publicwhip/westminhall/2026-09-15b.508.0",
+     0.3483
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.7",
+     0.3317
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.8",
+     0.3317
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.1",
+     0.3219
+    ]
+   ],
+   "semantic": true
+  },
+  {
+   "candidates": 16,
+   "houses": [
+    "lords"
+   ],
+   "no_records": false,
+   "query": "Northern Ireland security",
+   "records": [
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1266.0",
+     0.6196
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.6",
+     0.056
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.3",
+     0.0544
+    ]
+   ],
+   "semantic": true
+  },
+  {
+   "candidates": 103,
+   "houses": [],
+   "no_records": false,
+   "query": "Finance Bill",
+   "records": [
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.35.8",
+     0.9153
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.43.1",
+     0.7556
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.2",
+     0.6207
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.4",
+     0.6005
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.42.8",
+     0.5321
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.5",
+     0.2527
+    ]
+   ],
+   "semantic": true
+  },
+  {
+   "candidates": 16,
+   "houses": [
+    "lords"
+   ],
+   "no_records": false,
+   "query": "Finance Bill",
+   "records": [
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.5",
+     0.5054
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1266.1",
+     0.4307
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.1",
+     0.0873
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2",
+     0.081
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1772.1",
+     0.0728
+    ]
+   ],
+   "semantic": true
+  },
+  {
+   "candidates": 103,
+   "houses": [],
+   "no_records": false,
+   "query": "high speed rail",
+   "records": [
+    [
+     "uk.org.publicwhip/westminhall/2026-09-15b.509.0",
+     0.5069
+    ],
+    [
+     "uk.org.publicwhip/westminhall/2026-09-15b.511.2",
+     0.3204
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0",
+     0.3199
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws346.0",
+     0.2789
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.0",
+     0.0929
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.6",
+     0.0491
+    ]
+   ],
+   "semantic": true
+  },
+  {
+   "candidates": 16,
+   "houses": [
+    "lords"
+   ],
+   "no_records": false,
+   "query": "high speed rail",
+   "records": [
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2",
+     0.2214
+    ]
+   ],
+   "semantic": true
+  }
+ ],
+ "meaning": [
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.4#0",
+     0.425
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.8#0",
+     0.4405
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.3#0",
+     0.487
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.6#0",
+     0.512
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.6#0",
+     0.5589
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.7#0",
+     0.6432
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.9#0",
+     0.6528
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.43.3#0",
+     0.659
+    ]
+   ],
+   "query": "trial by jury",
+   "where": null
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2#0",
+     0.7733
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.4#0",
+     0.7944
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.5#0",
+     0.8347
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.7#0",
+     0.8921
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-16.hlws361.0#0",
+     0.9109
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.9#0",
+     0.911
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1266.1#0",
+     0.9462
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.6#0",
+     0.9747
+    ]
+   ],
+   "query": "trial by jury",
+   "where": "house = 'lords'"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.5#0",
+     0.7383
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.5#0",
+     0.7665
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2#0",
+     0.7733
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws346.0#0",
+     0.7856
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.4#0",
+     0.7944
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.8#0",
+     0.7994
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.2#0",
+     0.8117
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0#0",
+     0.8241
+    ]
+   ],
+   "query": "trial by jury",
+   "where": "year >= 2012 AND is_gov = true"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.7#0",
+     0.476
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.8#0",
+     0.476
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.9#0",
+     0.5588
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.0#0",
+     0.5783
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.0#0",
+     0.592
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.2#0",
+     0.6017
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.1#0",
+     0.6317
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.5#0",
+     0.6886
+    ]
+   ],
+   "query": "Northern Ireland security",
+   "where": null
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.3#0",
+     0.8156
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.6#0",
+     0.8483
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2#0",
+     0.9433
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.4#0",
+     0.9486
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.5#0",
+     0.9669
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-16.hlws361.0#0",
+     0.9777
+    ]
+   ],
+   "query": "Northern Ireland security",
+   "where": "house = 'lords'"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.9#0",
+     0.5588
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.1#0",
+     0.6317
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.5#0",
+     0.6886
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.3#0",
+     0.7592
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.8#0",
+     0.7994
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.7#0",
+     0.8258
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.11#0",
+     0.8388
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.5#0",
+     0.843
+    ]
+   ],
+   "query": "Northern Ireland security",
+   "where": "year >= 2012 AND is_gov = true"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.35.8#0",
+     0.6851
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.5#0",
+     0.6941
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1266.1#0",
+     0.7915
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.2#0",
+     0.8151
+    ],
+    [
+     "uk.org.publicwhip/wrans/2026-09-01.25966.q0#0",
+     0.8157
+    ],
+    [
+     "uk.org.publicwhip/westminhall/2026-09-15b.505.1#2",
+     0.824
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.43.1#0",
+     0.8497
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.1#0",
+     0.8521
+    ]
+   ],
+   "query": "Finance Bill",
+   "where": null
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.5#0",
+     0.6941
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1266.1#0",
+     0.7915
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.1#0",
+     0.8521
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2#0",
+     0.8902
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1772.1#0",
+     0.9013
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1266.0#0",
+     0.9621
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1772.0#0",
+     1.0
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.6#0",
+     1.0653
+    ]
+   ],
+   "query": "Finance Bill",
+   "where": "house = 'lords'"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1266.1#0",
+     0.7915
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2#0",
+     0.8902
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1772.1#0",
+     0.9013
+    ],
+    [
+     "uk.org.publicwhip/wrans/2026-09-01.25966.r0#0",
+     0.9293
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.2#0",
+     0.9595
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.4#0",
+     1.0
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.8#0",
+     1.0431
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0#1",
+     1.0461
+    ]
+   ],
+   "query": "Finance Bill",
+   "where": "year >= 2012 AND is_gov = true"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.6#0",
+     0.8336
+    ],
+    [
+     "uk.org.publicwhip/westminhall/2026-09-15b.508.1#1",
+     0.8578
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.10#0",
+     0.8738
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.4#0",
+     0.8837
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.42.3#0",
+     0.9052
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0#2",
+     0.9078
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.5#0",
+     0.9089
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.9#0",
+     0.911
+    ]
+   ],
+   "query": "high speed rail",
+   "where": null
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.9#0",
+     0.911
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.5#0",
+     1.0
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.7#0",
+     1.0
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.6#0",
+     1.0506
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.6#0",
+     1.0626
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.3#0",
+     1.0738
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.8#0",
+     1.1145
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.5#0",
+     1.1322
+    ]
+   ],
+   "query": "high speed rail",
+   "where": "house = 'lords'"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0#2",
+     0.9078
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.5#0",
+     0.9089
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1265.9#0",
+     0.911
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0#0",
+     0.9372
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws346.0#2",
+     0.9377
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.6#0",
+     0.9631
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1559.3#0",
+     0.9678
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.2#0",
+     0.9686
+    ]
+   ],
+   "query": "high speed rail",
+   "where": "year >= 2012 AND is_gov = true"
+  }
+ ],
+ "passages_for": {
+  "uk.org.publicwhip/debate/2012-03-07a.827.7#0": {
+   "date": "2012-03-07",
+   "heading": "NORTHERN IRELAND — Security Situation",
+   "house": "commons",
+   "record_id": "uk.org.publicwhip/debate/2012-03-07a.827.7",
+   "source_key": "debates2012-03-07"
+  },
+  "uk.org.publicwhip/debate/2012-03-07a.827.8#0": {
+   "date": "2012-03-07",
+   "heading": "NORTHERN IRELAND — Security Situation",
+   "house": "commons",
+   "record_id": "uk.org.publicwhip/debate/2012-03-07a.827.8",
+   "source_key": "debates2012-03-07"
+  },
+  "uk.org.publicwhip/debate/2012-03-07a.827.9#0": {
+   "date": "2012-03-07",
+   "heading": "NORTHERN IRELAND — Security Situation",
+   "house": "commons",
+   "record_id": "uk.org.publicwhip/debate/2012-03-07a.827.9",
+   "source_key": "debates2012-03-07"
+  }
+ },
+ "rows_for_keys": {
+  "keys": [
+   "daylord2012-03-07",
+   "daylord2026-09-17"
+  ],
+  "passages": [
+   "uk.org.publicwhip/lords/2012-03-07a.1771.1#0",
+   "uk.org.publicwhip/lords/2012-03-07a.1771.2#0",
+   "uk.org.publicwhip/lords/2012-03-07a.1771.3#0",
+   "uk.org.publicwhip/lords/2012-03-07a.1771.4#0",
+   "uk.org.publicwhip/lords/2012-03-07a.1771.5#0",
+   "uk.org.publicwhip/lords/2012-03-07a.1771.6#0",
+   "uk.org.publicwhip/lords/2012-03-07a.1772.0#0",
+   "uk.org.publicwhip/lords/2012-03-07a.1772.1#0",
+   "uk.org.publicwhip/lords/2012-03-07a.1772.2#0",
+   "uk.org.publicwhip/lords/2026-09-17b.1265.5#0",
+   "uk.org.publicwhip/lords/2026-09-17b.1265.6#0",
+   "uk.org.publicwhip/lords/2026-09-17b.1265.7#0",
+   "uk.org.publicwhip/lords/2026-09-17b.1265.8#0",
+   "uk.org.publicwhip/lords/2026-09-17b.1265.9#0",
+   "uk.org.publicwhip/lords/2026-09-17b.1266.0#0",
+   "uk.org.publicwhip/lords/2026-09-17b.1266.1#0"
+  ]
+ },
+ "similarities": {
+  "uk.org.publicwhip/debate/2012-03-07a.827.7#0": 0.1747,
+  "uk.org.publicwhip/debate/2012-03-07a.827.8#0": 0.1747,
+  "uk.org.publicwhip/debate/2012-03-07a.827.9#0": 0.1654,
+  "uk.org.publicwhip/debate/2012-03-07a.828.0#0": 0.2379,
+  "uk.org.publicwhip/debate/2012-03-07a.828.1#0": 0.1315,
+  "uk.org.publicwhip/debate/2012-03-07a.828.5#0": 0.2335,
+  "uk.org.publicwhip/debate/2026-09-15c.1557.4#0": 0.575,
+  "uk.org.publicwhip/debate/2026-09-15c.1557.5#0": 0.1518,
+  "uk.org.publicwhip/debate/2026-09-15c.1557.9#0": 0.3472,
+  "uk.org.publicwhip/debate/2026-09-15c.1558.2#0": 0.1883,
+  "uk.org.publicwhip/debate/2026-09-15c.1558.3#0": 0.513,
+  "uk.org.publicwhip/debate/2026-09-15c.1558.5#0": 0.2617,
+  "uk.org.publicwhip/lords/2012-03-07a.1771.2#0": 0.2267,
+  "uk.org.publicwhip/lords/2026-09-17b.1266.0#0": -0.0586,
+  "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.38.0#0": 0.1639,
+  "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.0#0": 0.0359,
+  "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.4#0": -0.1362,
+  "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.41.0#0": 0.1057,
+  "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.43.3#0": 0.341,
+  "uk.org.publicwhip/westminhall/2026-09-15b.509.0#2": 0.0997,
+  "uk.org.publicwhip/westminhall/2026-09-15b.509.0#4": 0.1255,
+  "uk.org.publicwhip/wms/2026-09-15.hcws353.0#2": 0.1075,
+  "uk.org.publicwhip/wms/2026-09-16.hlws361.0#0": 0.0891,
+  "uk.org.publicwhip/wrans/2026-09-08.HL3268.r0#0": -0.0717,
+  "uk.org.publicwhip/wrans/2026-09-08.HL3269.r0#0": -0.0711
+ },
+ "stats": {
+  "passages": 123,
+  "vectors": 123
+ },
+ "unmerged": 0,
+ "vector_type": "halffloat",
+ "words": [
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.9#0",
+     7.4623
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.4#0",
+     7.2703
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.3#0",
+     6.5683
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.8#0",
+     6.496
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.6#0",
+     6.496
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.5#0",
+     5.7947
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.1#0",
+     5.6385
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.6#0",
+     5.3429
+    ]
+   ],
+   "query": "trial by jury",
+   "where": null
+  },
+  {
+   "hits": [],
+   "query": "trial by jury",
+   "where": "house = 'lords'"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.5#0",
+     5.7947
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.2#0",
+     5.23
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.5#0",
+     5.0082
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.7#0",
+     4.4428
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1558.0#0",
+     4.377
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1559.0#0",
+     4.1942
+    ]
+   ],
+   "query": "trial by jury",
+   "where": "year >= 2012 AND is_gov = true"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.7#0",
+     8.2783
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.8#0",
+     8.2783
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.9#0",
+     7.8354
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.0#0",
+     7.7717
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.0#0",
+     7.5317
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.2#0",
+     7.3253
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.1#0",
+     6.956
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.10#0",
+     6.9125
+    ]
+   ],
+   "query": "Northern Ireland security",
+   "where": null
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/wms/2026-09-16.hlws361.0#0",
+     1.8876
+    ],
+    [
+     "uk.org.publicwhip/lords/2026-09-17b.1266.0#0",
+     1.6997
+    ]
+   ],
+   "query": "Northern Ireland security",
+   "where": "house = 'lords'"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.9#0",
+     7.8354
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.1#0",
+     6.956
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.5#0",
+     6.8959
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.827.11#0",
+     6.3061
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.1#0",
+     5.8533
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.7#0",
+     5.8154
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.3#0",
+     5.6674
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.829.3#0",
+     5.6198
+    ]
+   ],
+   "query": "Northern Ireland security",
+   "where": "year >= 2012 AND is_gov = true"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.43.3#0",
+     2.9421
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.41.0#0",
+     2.8927
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.38.0#0",
+     2.8916
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.4#0",
+     2.8548
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.43.1#0",
+     2.8548
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.35.8#0",
+     2.8072
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.2#0",
+     2.782
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.42.1#0",
+     2.6351
+    ]
+   ],
+   "query": "Finance Bill",
+   "where": null
+  },
+  {
+   "hits": [],
+   "query": "Finance Bill",
+   "where": "house = 'lords'"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.4#0",
+     2.8548
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0#2",
+     2.6033
+    ],
+    [
+     "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.39.0#0",
+     2.5311
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0#1",
+     2.1829
+    ],
+    [
+     "uk.org.publicwhip/debate/2026-09-15c.1557.5#0",
+     1.9046
+    ]
+   ],
+   "query": "Finance Bill",
+   "where": "year >= 2012 AND is_gov = true"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/westminhall/2026-09-15b.509.0#2",
+     4.7084
+    ],
+    [
+     "uk.org.publicwhip/westminhall/2026-09-15b.509.0#4",
+     3.6975
+    ],
+    [
+     "uk.org.publicwhip/debate/2012-03-07a.828.0#0",
+     3.5279
+    ],
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2#0",
+     3.2147
+    ],
+    [
+     "uk.org.publicwhip/westminhall/2026-09-15b.511.2#0",
+     3.047
+    ],
+    [
+     "uk.org.publicwhip/westminhall/2026-09-15b.511.2#2",
+     2.9341
+    ],
+    [
+     "uk.org.publicwhip/wrans/2026-09-08.HL3268.r0#0",
+     2.0227
+    ],
+    [
+     "uk.org.publicwhip/wrans/2026-09-08.HL3269.r0#0",
+     2.0125
+    ]
+   ],
+   "query": "high speed rail",
+   "where": null
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2#0",
+     3.2147
+    ],
+    [
+     "uk.org.publicwhip/wrans/2026-09-08.HL3268.r0#0",
+     2.0227
+    ],
+    [
+     "uk.org.publicwhip/wrans/2026-09-08.HL3269.r0#0",
+     2.0125
+    ]
+   ],
+   "query": "high speed rail",
+   "where": "house = 'lords'"
+  },
+  {
+   "hits": [
+    [
+     "uk.org.publicwhip/lords/2012-03-07a.1771.2#0",
+     3.2147
+    ],
+    [
+     "uk.org.publicwhip/wrans/2026-09-08.HL3268.r0#0",
+     2.0227
+    ],
+    [
+     "uk.org.publicwhip/wrans/2026-09-08.HL3269.r0#0",
+     2.0125
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0#0",
+     1.71
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws346.0#0",
+     1.6329
+    ],
+    [
+     "uk.org.publicwhip/wms/2026-09-15.hcws353.0#1",
+     1.5686
+    ]
+   ],
+   "query": "high speed rail",
+   "where": "year >= 2012 AND is_gov = true"
+  }
+ ]
+}

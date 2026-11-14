@@ -1,0 +1,128 @@
+{
+ "an answer with nothing parsed in it": {
+  "asked": [
+   {
+    "max_tokens": 6000,
+    "messages": [
+     {
+      "content": "The briefing's question: What has been said about trial by jury?\n\nMember A: Alice Example (MP)\nRegister entries:\n  A1: Bar Council - £1,920.00 — Payment Description: Dinner at Middle Temple (registered 2026-07-02)\nContribution 1 (2026-09-10, entries that applied: A1): Trial by jury: Juries must stay, as the Bar says.\n\nMember B: Bob Example (MP)\nRegister entries:\n  B1: Agricultural in County Fermanagh (registered 2020-01-10)\nContribution 2 (2026-09-10, entries that applied: B1): Farming: Farms need help with the price of feed.",
+      "role": "user"
+     }
+    ],
+    "model": "claude-haiku-5-5",
+    "output_config": {
+     "effort": "low"
+    },
+    "output_format": "Matches",
+    "system": [
+     {
+      "cache_control": {
+       "type": "ephemeral"
+      },
+      "text": "You check whether members of the UK Parliament had a registered interest that relates directly to what they\nsaid in a particular contribution. You are given each member's register entries that applied on the day, and their\ncontributions.\n\nAn interest is relevant only if it concerns the same organisation, industry, profession, place or specific subject as\nthe contribution: for example a gift of hospitality from the Betting and Gaming Council and a speech on gambling\nregulation; a paid role with an energy company and a speech on energy prices; owning farmland and a speech on\ninheritance tax on farms; a directorship of a football club and a speech on football regulation; a trusteeship of a\ncharity and a speech on that charity's cause.\n\nNot relevant: posts in government, Parliament or a party (a minister's or whip's salary, a committee chair, a\nparty role), which are the member's public job, not an outside interest; interests that share only a broad area (a theatre ticket and a speech on BBC funding); memberships,\nfellowships, honorary or unpaid roles in broad professional, learned or medical bodies (a royal college, a faculty,\na professional institute, a university) unless the body exists for the specific subject of the contribution; the\nmember's own profession on its own (a doctor speaking about the NHS, unless they are paid by the body concerned);\ndonations or support for general political, campaign or constituency work; hospitality at unrelated events; family\nmembers employed in the member's office; property that is only the member's home or rented out with no link to the\nsubject; and anything you are unsure about. When in doubt, leave it out: most contributions have no relevant\ninterest.\n\nDonations to the member from the Electoral Commission's register are relevant only when the donor is an\norganisation in the industry or cause the contribution concerns (a donation from a betting company and a speech on\ngambling), or the register describes the donor that way. A donation from a private individual, a trade union on a\nsubject that is not about its members' work, or a business unrelated to the subject is not relevant.\n\nList only the relevant ones, each with relevant set to true; do not list an interest in order to explain why it\ndoes not count. Write each connection as one plain, neutral sentence describing the link only, for example \"The register lists a\npaid role as adviser to an energy supplier; the contribution concerned energy prices.\" Never suggest that the\ninterest influenced the member, that they should have declared it, or any wrongdoing or motive.",
+      "type": "text"
+     }
+    ]
+   }
+  ],
+  "flags": [],
+  "usage": {
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "input_tokens": 400,
+   "output_tokens": 30
+  }
+ },
+ "matches, kept only where they are real": {
+  "asked": [
+   {
+    "max_tokens": 6000,
+    "messages": [
+     {
+      "content": "The briefing's question: What has been said about trial by jury?\n\nMember A: Alice Example (MP)\nRegister entries:\n  A1: Bar Council - £1,920.00 — Payment Description: Dinner at Middle Temple (registered 2026-07-02)\nContribution 1 (2026-09-10, entries that applied: A1): Trial by jury: Juries must stay, as the Bar says.\n\nMember B: Bob Example (MP)\nRegister entries:\n  B1: Agricultural in County Fermanagh (registered 2020-01-10)\nContribution 2 (2026-09-10, entries that applied: B1): Farming: Farms need help with the price of feed.",
+      "role": "user"
+     }
+    ],
+    "model": "claude-haiku-5-5",
+    "output_config": {
+     "effort": "low"
+    },
+    "output_format": "Matches",
+    "system": [
+     {
+      "cache_control": {
+       "type": "ephemeral"
+      },
+      "text": "You check whether members of the UK Parliament had a registered interest that relates directly to what they\nsaid in a particular contribution. You are given each member's register entries that applied on the day, and their\ncontributions.\n\nAn interest is relevant only if it concerns the same organisation, industry, profession, place or specific subject as\nthe contribution: for example a gift of hospitality from the Betting and Gaming Council and a speech on gambling\nregulation; a paid role with an energy company and a speech on energy prices; owning farmland and a speech on\ninheritance tax on farms; a directorship of a football club and a speech on football regulation; a trusteeship of a\ncharity and a speech on that charity's cause.\n\nNot relevant: posts in government, Parliament or a party (a minister's or whip's salary, a committee chair, a\nparty role), which are the member's public job, not an outside interest; interests that share only a broad area (a theatre ticket and a speech on BBC funding); memberships,\nfellowships, honorary or unpaid roles in broad professional, learned or medical bodies (a royal college, a faculty,\na professional institute, a university) unless the body exists for the specific subject of the contribution; the\nmember's own profession on its own (a doctor speaking about the NHS, unless they are paid by the body concerned);\ndonations or support for general political, campaign or constituency work; hospitality at unrelated events; family\nmembers employed in the member's office; property that is only the member's home or rented out with no link to the\nsubject; and anything you are unsure about. When in doubt, leave it out: most contributions have no relevant\ninterest.\n\nDonations to the member from the Electoral Commission's register are relevant only when the donor is an\norganisation in the industry or cause the contribution concerns (a donation from a betting company and a speech on\ngambling), or the register describes the donor that way. A donation from a private individual, a trade union on a\nsubject that is not about its members' work, or a business unrelated to the subject is not relevant.\n\nList only the relevant ones, each with relevant set to true; do not list an interest in order to explain why it\ndoes not count. Write each connection as one plain, neutral sentence describing the link only, for example \"The register lists a\npaid role as adviser to an energy supplier; the contribution concerned energy prices.\" Never suggest that the\ninterest influenced the member, that they should have declared it, or any wrongdoing or motive.",
+      "type": "text"
+     }
+    ]
+   }
+  ],
+  "flags": [
+   {
+    "items": [
+     {
+      "category": "Gifts, benefits and hospitality from UK sources",
+      "connection": "The gift is from the barristers' body and the speech is on jury trial.",
+      "kind": "register",
+      "register": "Register of Members' Financial Interests",
+      "registered": "2026-07-02",
+      "summary": "Bar Council - £1,920.00",
+      "url": null
+     }
+    ],
+    "link": "/people/1#h-interests",
+    "name": "Alice Example",
+    "person_id": "uk.org.publicwhip/person/1",
+    "register": "Register of Members' Financial Interests",
+    "source": 1
+   }
+  ],
+  "usage": {
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "input_tokens": 400,
+   "output_tokens": 30
+  }
+ },
+ "nobody quoted has an entry: the model is not asked": {
+  "asked": [],
+  "flags": [],
+  "usage": null
+ },
+ "the model finds none": {
+  "asked": [
+   {
+    "max_tokens": 6000,
+    "messages": [
+     {
+      "content": "The briefing's question: What has been said about trial by jury?\n\nMember A: Alice Example (MP)\nRegister entries:\n  A1: Bar Council - £1,920.00 — Payment Description: Dinner at Middle Temple (registered 2026-07-02)\nContribution 1 (2026-09-10, entries that applied: A1): Trial by jury: Juries must stay, as the Bar says.\n\nMember B: Bob Example (MP)\nRegister entries:\n  B1: Agricultural in County Fermanagh (registered 2020-01-10)\nContribution 2 (2026-09-10, entries that applied: B1): Farming: Farms need help with the price of feed.",
+      "role": "user"
+     }
+    ],
+    "model": "claude-haiku-5-5",
+    "output_config": {
+     "effort": "low"
+    },
+    "output_format": "Matches",
+    "system": [
+     {
+      "cache_control": {
+       "type": "ephemeral"
+      },
+      "text": "You check whether members of the UK Parliament had a registered interest that relates directly to what they\nsaid in a particular contribution. You are given each member's register entries that applied on the day, and their\ncontributions.\n\nAn interest is relevant only if it concerns the same organisation, industry, profession, place or specific subject as\nthe contribution: for example a gift of hospitality from the Betting and Gaming Council and a speech on gambling\nregulation; a paid role with an energy company and a speech on energy prices; owning farmland and a speech on\ninheritance tax on farms; a directorship of a football club and a speech on football regulation; a trusteeship of a\ncharity and a speech on that charity's cause.\n\nNot relevant: posts in government, Parliament or a party (a minister's or whip's salary, a committee chair, a\nparty role), which are the member's public job, not an outside interest; interests that share only a broad area (a theatre ticket and a speech on BBC funding); memberships,\nfellowships, honorary or unpaid roles in broad professional, learned or medical bodies (a royal college, a faculty,\na professional institute, a university) unless the body exists for the specific subject of the contribution; the\nmember's own profession on its own (a doctor speaking about the NHS, unless they are paid by the body concerned);\ndonations or support for general political, campaign or constituency work; hospitality at unrelated events; family\nmembers employed in the member's office; property that is only the member's home or rented out with no link to the\nsubject; and anything you are unsure about. When in doubt, leave it out: most contributions have no relevant\ninterest.\n\nDonations to the member from the Electoral Commission's register are relevant only when the donor is an\norganisation in the industry or cause the contribution concerns (a donation from a betting company and a speech on\ngambling), or the register describes the donor that way. A donation from a private individual, a trade union on a\nsubject that is not about its members' work, or a business unrelated to the subject is not relevant.\n\nList only the relevant ones, each with relevant set to true; do not list an interest in order to explain why it\ndoes not count. Write each connection as one plain, neutral sentence describing the link only, for example \"The register lists a\npaid role as adviser to an energy supplier; the contribution concerned energy prices.\" Never suggest that the\ninterest influenced the member, that they should have declared it, or any wrongdoing or motive.",
+      "type": "text"
+     }
+    ]
+   }
+  ],
+  "flags": [],
+  "usage": {
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "input_tokens": 400,
+   "output_tokens": 30
+  }
+ }
+}

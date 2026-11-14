@@ -1,0 +1,2523 @@
+{
+ "admin": [
+  {
+   "case": "close a report with a public note",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "close a report with no public note",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "close a report there is not",
+   "json": {
+    "detail": "No such report."
+   },
+   "status": 404
+  },
+  {
+   "case": "close a report with an outcome there is not",
+   "json": {
+    "detail": [
+     {
+      "ctx": {
+       "expected": "'resolved' or 'dismissed'"
+      },
+      "input": "ignored",
+      "loc": [
+       "body",
+       "status"
+      ],
+      "msg": "Input should be 'resolved' or 'dismissed'",
+      "type": "literal_error"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "close a report with no token",
+   "json": {
+    "detail": "Admins only."
+   },
+   "status": 403
+  },
+  {
+   "case": "withdraw a briefing",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "withdraw a briefing there is not",
+   "json": {
+    "detail": "There is no briefing at this address."
+   },
+   "status": 404
+  },
+  {
+   "case": "publish with a note of spaces",
+   "json": {
+    "detail": "Please say how you confirmed who sent it: it is kept privately."
+   },
+   "status": 400
+  },
+  {
+   "case": "publish the fifth statement from the owner's page",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "publish it again from the owner's page",
+   "json": {
+    "detail": "No such statement, or it can't be changed in that way now."
+   },
+   "status": 404
+  },
+  {
+   "case": "take down a published statement from the owner's page",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "decline with a reason of spaces",
+   "json": {
+    "detail": "Please give the reason: it is sent to the author."
+   },
+   "status": 400
+  },
+  {
+   "case": "update it from the owner's page",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "update it with too few words",
+   "json": {
+    "detail": "Please write the statement: a sentence or more."
+   },
+   "status": 400
+  },
+  {
+   "case": "take its link off",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "decline one there is not",
+   "json": {
+    "detail": "No such statement, or it can't be changed in that way now."
+   },
+   "status": 404
+  },
+  {
+   "case": "withdraw one already withdrawn",
+   "json": {
+    "detail": "No such statement, or it can't be changed in that way now."
+   },
+   "status": 404
+  },
+  {
+   "case": "withdraw the fifth from the owner's page",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  }
+ ],
+ "after": [
+  {
+   "case": "the published statement beside its briefing",
+   "json": {
+    "statements": []
+   },
+   "status": 200
+  },
+  {
+   "case": "the same by the briefing's full address",
+   "json": {
+    "statements": []
+   },
+   "status": 200
+  },
+  {
+   "case": "a member's statements",
+   "json": {
+    "statements": []
+   },
+   "status": 200
+  },
+  {
+   "case": "a briefing's and a member's together",
+   "json": {
+    "statements": []
+   },
+   "status": 200
+  },
+  {
+   "case": "another member's",
+   "json": {
+    "statements": []
+   },
+   "status": 200
+  },
+  {
+   "case": "a briefing with no statement shown",
+   "json": {
+    "statements": []
+   },
+   "status": 200
+  },
+  {
+   "case": "the corrections log, with a note and two withdrawn",
+   "json": {
+    "corrections": [
+     {
+      "briefing_id": "briefingab",
+      "date": "2026-11-13",
+      "kind": "withdrawn",
+      "note": "It gave the wrong date for a debate.",
+      "question": "And what did peers say?"
+     },
+     {
+      "briefing_id": "briefingac",
+      "date": "2026-11-13",
+      "kind": "withdrawn",
+      "note": "It quoted the wrong debate.",
+      "question": "An older question?"
+     },
+     {
+      "briefing_id": "briefingaa",
+      "date": "2026-11-13",
+      "kind": "correction",
+      "note": "A briefing gave the wrong date for a debate and has been withdrawn.",
+      "question": null
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "the corrections feed",
+   "status": 200,
+   "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n<channel>\n<title>Corrections — Where MPs Stand</title>\n<link>http://testserver/corrections</link>\n<description>Withdrawn briefings and published corrections.</description>\n<language>en-gb</language>\n<atom:link href=\"http://testserver/feeds/corrections.xml\" rel=\"self\" type=\"application/rss+xml\" />\n<lastBuildDate>Fri, 13 Nov 2026 12:00:00 +0000</lastBuildDate>\n<item>\n<title>Briefing withdrawn</title>\n<link>http://testserver/corrections</link>\n<description>And what did peers say? It gave the wrong date for a debate.</description>\n<pubDate>Fri, 13 Nov 2026 12:00:00 +0000</pubDate>\n<guid isPermaLink=\"false\">http://testserver/corrections#2026-11-13-0</guid>\n</item>\n<item>\n<title>Briefing withdrawn</title>\n<link>http://testserver/corrections</link>\n<description>An older question? It quoted the wrong debate.</description>\n<pubDate>Fri, 13 Nov 2026 12:00:00 +0000</pubDate>\n<guid isPermaLink=\"false\">http://testserver/corrections#2026-11-13-1</guid>\n</item>\n<item>\n<title>Correction</title>\n<link>http://testserver/corrections</link>\n<description>A briefing gave the wrong date for a debate and has been withdrawn.</description>\n<pubDate>Fri, 13 Nov 2026 12:00:00 +0000</pubDate>\n<guid isPermaLink=\"false\">http://testserver/corrections#2026-11-13-2</guid>\n</item>\n</channel>\n</rss>"
+  },
+  {
+   "case": "the briefing withdrawn just now",
+   "json": {
+    "detail": "This briefing has been withdrawn."
+   },
+   "status": 410
+  },
+  {
+   "case": "the owner's list of reports, now",
+   "json": {
+    "reports": [
+     {
+      "at": "2026-11-13T12:06:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": "named@example.org",
+      "id": 3,
+      "kind": "takedown",
+      "message": "Please remove my name from this page.",
+      "page": "/debates/2021-03-04/commons/trial-by-jury",
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:20:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 10,
+      "kind": "correction",
+      "message": "Report number 10.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:19:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 9,
+      "kind": "correction",
+      "message": "Report number 9.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:18:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 8,
+      "kind": "correction",
+      "message": "Report number 8.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:14:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 7,
+      "kind": "correction",
+      "message": "",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:09:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 6,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:08:00+00:00",
+      "briefing_id": "briefingab",
+      "closed_at": null,
+      "contact": null,
+      "id": 5,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:07:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 4,
+      "kind": "general",
+      "message": "Something else entirely.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:05:00+00:00",
+      "briefing_id": null,
+      "closed_at": "2026-11-13T13:32:00+00:00",
+      "contact": null,
+      "id": 2,
+      "kind": "complaint",
+      "message": "A loaded word about a member.",
+      "page": "/people/10669/hilary-benn",
+      "public_note": null,
+      "resolution": "The word is the member's own.",
+      "status": "dismissed"
+     },
+     {
+      "at": "2026-11-13T12:04:00+00:00",
+      "briefing_id": "briefingaa",
+      "closed_at": "2026-11-13T13:31:00+00:00",
+      "contact": null,
+      "id": 1,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": "A briefing gave the wrong date for a debate and has been withdrawn.",
+      "resolution": "The date was wrong; the briefing is withdrawn.",
+      "status": "resolved"
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "the owner's list of closed reports",
+   "json": {
+    "reports": [
+     {
+      "at": "2026-11-13T12:04:00+00:00",
+      "briefing_id": "briefingaa",
+      "closed_at": "2026-11-13T13:31:00+00:00",
+      "contact": null,
+      "id": 1,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": "A briefing gave the wrong date for a debate and has been withdrawn.",
+      "resolution": "The date was wrong; the briefing is withdrawn.",
+      "status": "resolved"
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "the owner's list of statements, now",
+   "json": {
+    "statements": [
+     {
+      "at": "2026-11-13T12:47:00+00:00",
+      "checked": "Replied from their office.",
+      "closed_at": "2026-11-13T13:48:00+00:00",
+      "email": "office@example.org",
+      "id": 5,
+      "item_path": "/b/briefingaa",
+      "link": null,
+      "name": "Fifth Sender",
+      "person": 10669,
+      "published_at": "2026-11-13T13:45:00+00:00",
+      "reason": "Asked by telephone.",
+      "role": "MP for Leeds  South",
+      "status": "withdrawn",
+      "text": "New words from the owner's page, as sent.",
+      "updated_at": "2026-11-13T13:45:00+00:00"
+     },
+     {
+      "at": "2026-11-13T12:25:00+00:00",
+      "checked": "Replied from their office.",
+      "closed_at": "2026-11-13T13:27:00+00:00",
+      "email": "office@example.org",
+      "id": 4,
+      "item_path": "/debates/2021-03-04/commons/trial-by-jury",
+      "link": null,
+      "name": "Fourth Sender",
+      "person": null,
+      "published_at": "2026-11-13T13:26:00+00:00",
+      "reason": "It names a private person.",
+      "role": "MP for Leeds  South",
+      "status": "declined",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:24:00+00:00",
+      "checked": null,
+      "closed_at": "2026-11-13T13:12:00+00:00",
+      "email": "office@example.org",
+      "id": 3,
+      "item_path": "/b/briefingab",
+      "link": null,
+      "name": "Third Sender",
+      "person": null,
+      "published_at": null,
+      "reason": "It is about another member's conduct.",
+      "role": "MP for Leeds  South",
+      "status": "declined",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:23:00+00:00",
+      "checked": "Telephoned the office.",
+      "closed_at": "2026-11-13T13:24:00+00:00",
+      "email": "office@example.org",
+      "id": 2,
+      "item_path": "/people/10669",
+      "link": "https://hansard.parliament.uk/commons/2021-03-04",
+      "name": "Second Sender",
+      "person": 10669,
+      "published_at": "2026-11-13T13:23:00+00:00",
+      "reason": "Asked by email on 14 November.",
+      "role": "MP for Leeds  South",
+      "status": "withdrawn",
+      "text": "Five words are just enough.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:22:00+00:00",
+      "checked": "Replied from their parliament.uk address, 14 November.",
+      "closed_at": "2026-11-13T13:41:00+00:00",
+      "email": "office@example.org",
+      "id": 1,
+      "item_path": "/b/briefingaa",
+      "link": null,
+      "name": "Hilary Benn MP",
+      "person": 10669,
+      "published_at": "2026-11-13T13:21:00+00:00",
+      "reason": "It names a private person.",
+      "role": "MP for Leeds South",
+      "status": "declined",
+      "text": "These are the author's new words, sent by email, exactly as written.",
+      "updated_at": "2026-11-13T13:21:00+00:00"
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "the owner's list of declined statements",
+   "json": {
+    "statements": [
+     {
+      "at": "2026-11-13T12:25:00+00:00",
+      "checked": "Replied from their office.",
+      "closed_at": "2026-11-13T13:27:00+00:00",
+      "email": "office@example.org",
+      "id": 4,
+      "item_path": "/debates/2021-03-04/commons/trial-by-jury",
+      "link": null,
+      "name": "Fourth Sender",
+      "person": null,
+      "published_at": "2026-11-13T13:26:00+00:00",
+      "reason": "It names a private person.",
+      "role": "MP for Leeds  South",
+      "status": "declined",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:24:00+00:00",
+      "checked": null,
+      "closed_at": "2026-11-13T13:12:00+00:00",
+      "email": "office@example.org",
+      "id": 3,
+      "item_path": "/b/briefingab",
+      "link": null,
+      "name": "Third Sender",
+      "person": null,
+      "published_at": null,
+      "reason": "It is about another member's conduct.",
+      "role": "MP for Leeds  South",
+      "status": "declined",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:22:00+00:00",
+      "checked": "Replied from their parliament.uk address, 14 November.",
+      "closed_at": "2026-11-13T13:41:00+00:00",
+      "email": "office@example.org",
+      "id": 1,
+      "item_path": "/b/briefingaa",
+      "link": null,
+      "name": "Hilary Benn MP",
+      "person": 10669,
+      "published_at": "2026-11-13T13:21:00+00:00",
+      "reason": "It names a private person.",
+      "role": "MP for Leeds South",
+      "status": "declined",
+      "text": "These are the author's new words, sent by email, exactly as written.",
+      "updated_at": "2026-11-13T13:21:00+00:00"
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "the owner's list of saved briefings, now",
+   "json": {
+    "briefings": [
+     {
+      "created_at": "2026-11-13T12:02:00+00:00",
+      "id": "briefingac",
+      "question": "An older question?",
+      "withdrawn_at": "2026-11-13T12:03:00+00:00",
+      "withdrawn_reason": "It quoted the wrong debate."
+     },
+     {
+      "created_at": "2026-11-13T12:01:00+00:00",
+      "id": "briefingab",
+      "question": "And what did peers say?",
+      "withdrawn_at": "2026-11-13T13:36:00+00:00",
+      "withdrawn_reason": "It gave the wrong date for a debate."
+     },
+     {
+      "created_at": "2026-11-13T12:00:00+00:00",
+      "id": "briefingaa",
+      "question": "What has been said about trial by jury since 2020?",
+      "withdrawn_at": null,
+      "withdrawn_reason": null
+     }
+    ]
+   },
+   "status": 200
+  }
+ ],
+ "cli": [
+  {
+   "args": [
+    "statements",
+    "list"
+   ],
+   "case": "the statements waiting",
+   "exit": 0,
+   "output": "#5  pending  received 2026-11-13\n  From: Fifth Sender, MP for Leeds  South  <office@example.org>\n  About: /b/briefingaa  (no member set)\n  I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n  \n  Second paragraph.\n\n#4  pending  received 2026-11-13\n  From: Fourth Sender, MP for Leeds  South  <office@example.org>\n  About: /debates/2021-03-04/commons/trial-by-jury  (no member set)\n  I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n  \n  Second paragraph.\n\n#3  pending  received 2026-11-13\n  From: Third Sender, MP for Leeds  South  <office@example.org>\n  About: /b/briefingab  (no member set)\n  I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n  \n  Second paragraph.\n\n#2  pending  received 2026-11-13\n  From: Second Sender, MP for Leeds  South  <office@example.org>\n  About: /people/10669  (member 10669)\n  Link: https://hansard.parliament.uk/commons/2021-03-04\n  Five words are just enough.\n\n#1  pending  received 2026-11-13\n  From: Hilary   Benn, MP for Leeds  South  <office@example.org>\n  About: /b/briefingaa  (no member set)\n  I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n  \n  Second paragraph.\n\n"
+  },
+  {
+   "args": [
+    "statements",
+    "publish",
+    "1"
+   ],
+   "case": "publish with nothing said of how the sender was confirmed",
+   "exit": 2,
+   "output": "Missing option '--checked'."
+  },
+  {
+   "args": [
+    "statements",
+    "publish",
+    "1",
+    "--checked",
+    "  "
+   ],
+   "case": "publish with an empty note",
+   "exit": 1,
+   "output": "Please say how you confirmed who sent it: it is kept privately.\n"
+  },
+  {
+   "args": [
+    "statements",
+    "publish",
+    "1",
+    "--checked",
+    "Replied from their parliament.uk address, 14 November.",
+    "--person",
+    "10669"
+   ],
+   "case": "publish",
+   "exit": 0,
+   "output": "published #1\n"
+  },
+  {
+   "args": [
+    "statements",
+    "publish",
+    "1",
+    "--checked",
+    "Again."
+   ],
+   "case": "publish it again",
+   "exit": 1,
+   "output": "No such statement, or it can't be changed in that way now (see `hansard statements list`).\n"
+  },
+  {
+   "args": [
+    "statements",
+    "publish",
+    "99",
+    "--checked",
+    "x"
+   ],
+   "case": "publish one there is not",
+   "exit": 1,
+   "output": "No such statement, or it can't be changed in that way now (see `hansard statements list`).\n"
+  },
+  {
+   "args": [
+    "statements",
+    "decline",
+    "3",
+    "--reason",
+    "It is about another member's conduct."
+   ],
+   "case": "decline",
+   "exit": 0,
+   "output": "declined #3: tell the author why; their email address is deleted in three months\n"
+  },
+  {
+   "args": [
+    "statements",
+    "decline",
+    "4"
+   ],
+   "case": "decline with no reason",
+   "exit": 2,
+   "output": "Missing option '--reason'."
+  },
+  {
+   "args": [
+    "statements",
+    "decline",
+    "4",
+    "--reason",
+    " "
+   ],
+   "case": "decline with a reason of spaces",
+   "exit": 1,
+   "output": "Please give the reason: it is sent to the author.\n"
+  },
+  {
+   "args": [
+    "statements",
+    "decline",
+    "3",
+    "--reason",
+    "Again."
+   ],
+   "case": "decline one already declined",
+   "exit": 1,
+   "output": "No such statement, or it can't be changed in that way now (see `hansard statements list`).\n"
+  },
+  {
+   "args": [
+    "statements",
+    "update",
+    "1",
+    "--text-file",
+    "<words>"
+   ],
+   "case": "update the words of a published statement",
+   "exit": 0,
+   "output": "updated #1\n"
+  },
+  {
+   "args": [
+    "statements",
+    "update",
+    "1",
+    "--text-file",
+    "<long>"
+   ],
+   "case": "update with too many words",
+   "exit": 1,
+   "output": "A statement can be up to 150 words. This one is 151.\n"
+  },
+  {
+   "args": [
+    "statements",
+    "update",
+    "1",
+    "--name",
+    "Hilary Benn MP",
+    "--role",
+    "MP for Leeds South",
+    "--link",
+    "https://hansard.parliament.uk/commons/2021-03-05"
+   ],
+   "case": "update the name, the role and the link",
+   "exit": 0,
+   "output": "updated #1\n"
+  },
+  {
+   "args": [
+    "statements",
+    "update",
+    "1",
+    "--link",
+    "ftp://example.org/x"
+   ],
+   "case": "update with a bad link",
+   "exit": 1,
+   "output": "The link to the record should be a full web address, starting https://.\n"
+  },
+  {
+   "args": [
+    "statements",
+    "update",
+    "1",
+    "--link",
+    ""
+   ],
+   "case": "take the link off",
+   "exit": 0,
+   "output": "updated #1\n"
+  },
+  {
+   "args": [
+    "statements",
+    "update",
+    "1"
+   ],
+   "case": "update with nothing to change",
+   "exit": 0,
+   "output": "updated #1\n"
+  },
+  {
+   "args": [
+    "statements",
+    "update",
+    "3",
+    "--name",
+    "Someone Else"
+   ],
+   "case": "update a declined statement",
+   "exit": 1,
+   "output": "No such statement, or it can't be changed in that way now (see `hansard statements list`).\n"
+  },
+  {
+   "args": [
+    "statements",
+    "publish",
+    "2",
+    "--checked",
+    "Telephoned the office."
+   ],
+   "case": "publish the second, which is by the member's own page",
+   "exit": 0,
+   "output": "published #2\n"
+  },
+  {
+   "args": [
+    "statements",
+    "withdraw",
+    "2",
+    "--note",
+    "Asked by email on 14 November."
+   ],
+   "case": "withdraw a statement, at its author's request",
+   "exit": 0,
+   "output": "withdrawn #2; the email address is deleted in three months\n"
+  },
+  {
+   "args": [
+    "statements",
+    "withdraw",
+    "2"
+   ],
+   "case": "withdraw it again",
+   "exit": 1,
+   "output": "No such statement, or it can't be changed in that way now (see `hansard statements list`).\n"
+  },
+  {
+   "args": [
+    "statements",
+    "publish",
+    "4",
+    "--checked",
+    "Replied from their office."
+   ],
+   "case": "publish the fourth",
+   "exit": 0,
+   "output": "published #4\n"
+  },
+  {
+   "args": [
+    "statements",
+    "decline",
+    "4",
+    "--reason",
+    "It names a private person."
+   ],
+   "case": "take down a published statement that breaks the rules, as it was typed before wts-core",
+   "exit": 0,
+   "output": "declined #4: tell the author why; their email address is deleted in three months\n"
+  },
+  {
+   "args": [
+    "statements",
+    "list"
+   ],
+   "case": "the statements waiting, now",
+   "exit": 0,
+   "output": "#5  pending  received 2026-11-13\n  From: Fifth Sender, MP for Leeds  South  <office@example.org>\n  About: /b/briefingaa  (no member set)\n  I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n  \n  Second paragraph.\n\n"
+  },
+  {
+   "args": [
+    "statements",
+    "list",
+    "--status",
+    "published"
+   ],
+   "case": "the published statements",
+   "exit": 0,
+   "output": "#1  published  received 2026-11-13  published 2026-11-13\n  From: Hilary Benn MP, MP for Leeds South  <office@example.org>\n  About: /b/briefingaa  (member 10669)\n  Checked: Replied from their parliament.uk address, 14 November.\n  These are the author's new words, sent by email, exactly as written.\n\n"
+  },
+  {
+   "args": [
+    "statements",
+    "list",
+    "--status",
+    "all"
+   ],
+   "case": "every statement",
+   "exit": 0,
+   "output": "#5  pending  received 2026-11-13\n  From: Fifth Sender, MP for Leeds  South  <office@example.org>\n  About: /b/briefingaa  (no member set)\n  I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n  \n  Second paragraph.\n\n#4  declined  received 2026-11-13  published 2026-11-13  closed 2026-11-13\n  From: Fourth Sender, MP for Leeds  South  <office@example.org>\n  About: /debates/2021-03-04/commons/trial-by-jury  (no member set)\n  Checked: Replied from their office.\n  Reason: It names a private person.\n  I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n  \n  Second paragraph.\n\n#3  declined  received 2026-11-13  closed 2026-11-13\n  From: Third Sender, MP for Leeds  South  <office@example.org>\n  About: /b/briefingab  (no member set)\n  Reason: It is about another member's conduct.\n  I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n  \n  Second paragraph.\n\n#2  withdrawn  received 2026-11-13  published 2026-11-13  closed 2026-11-13\n  From: Second Sender, MP for Leeds  South  <office@example.org>\n  About: /people/10669  (member 10669)\n  Link: https://hansard.parliament.uk/commons/2021-03-04\n  Checked: Telephoned the office.\n  Reason: Asked by email on 14 November.\n  Five words are just enough.\n\n#1  published  received 2026-11-13  published 2026-11-13\n  From: Hilary Benn MP, MP for Leeds South  <office@example.org>\n  About: /b/briefingaa  (member 10669)\n  Checked: Replied from their parliament.uk address, 14 November.\n  These are the author's new words, sent by email, exactly as written.\n\n"
+  }
+ ],
+ "http": [
+  {
+   "case": "a report of something wrong in a briefing",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a report about a page of the site",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a takedown request",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a report about a page of another site: the page is not kept",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a report with a briefing and a page: the briefing is kept",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a report with a briefing id that is not one",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a report from a robot, which fills the hidden field",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a report of a kind there is not",
+   "json": {
+    "detail": [
+     {
+      "ctx": {
+       "expected": "'correction', 'complaint', 'takedown' or 'general'"
+      },
+      "input": "praise",
+      "loc": [
+       "body",
+       "kind"
+      ],
+      "msg": "Input should be 'correction', 'complaint', 'takedown' or 'general'",
+      "type": "literal_error"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "a report with no kind",
+   "json": {
+    "detail": [
+     {
+      "input": {
+       "message": "Something is wrong here."
+      },
+      "loc": [
+       "body",
+       "kind"
+      ],
+      "msg": "Field required",
+      "type": "missing"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "a report too short",
+   "json": {
+    "detail": [
+     {
+      "ctx": {
+       "min_length": 10
+      },
+      "input": "No",
+      "loc": [
+       "body",
+       "message"
+      ],
+      "msg": "String should have at least 10 characters",
+      "type": "string_too_short"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "a report of spaces",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a report too long",
+   "json": {
+    "detail": [
+     {
+      "ctx": {
+       "max_length": 4000
+      },
+      "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "loc": [
+       "body",
+       "message"
+      ],
+      "msg": "String should have at most 4000 characters",
+      "type": "string_too_long"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "a report with a contact too long",
+   "json": {
+    "detail": [
+     {
+      "ctx": {
+       "max_length": 200
+      },
+      "input": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "loc": [
+       "body",
+       "contact"
+      ],
+      "msg": "String should have at most 200 characters",
+      "type": "string_too_long"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "a report with a page too long",
+   "json": {
+    "detail": [
+     {
+      "ctx": {
+       "max_length": 300
+      },
+      "input": "/pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+      "loc": [
+       "body",
+       "page"
+      ],
+      "msg": "String should have at most 300 characters",
+      "type": "string_too_long"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "report 8 of the day",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "report 9 of the day",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "report 10 of the day",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "the eleventh report of the day",
+   "json": {
+    "detail": "Thank you, we have your reports. Please email us if there is more to add."
+   },
+   "status": 429
+  },
+  {
+   "case": "a statement beside a briefing",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a statement by a member's page, with its name and a link",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a statement by an address with no scheme",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a statement beside a debate, which is not looked up",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a statement from a robot, which fills the hidden field",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "a statement with no address",
+   "json": {
+    "detail": "That address isn't a page a statement can sit beside: please give the address of a member's page, a briefing or another page that names them."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement beside another site's page",
+   "json": {
+    "detail": "Please give the address of the page on wherempsstand.com that the statement is about."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement beside a page no statement can sit beside",
+   "json": {
+    "detail": "That address isn't a page a statement can sit beside: please give the address of a member's page, a briefing or another page that names them."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement beside a briefing there is not",
+   "json": {
+    "detail": "There is no briefing at that address: please check the address of the briefing the statement is about."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement beside a withdrawn briefing",
+   "json": {
+    "detail": "That briefing has been withdrawn, so a statement can't sit beside it."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement beside a member's page there is not",
+   "json": {
+    "detail": "There is no member's page at that address: please check the address of the page the statement is about."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement with a name of one letter",
+   "json": {
+    "detail": "Please give the name the statement is from."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement with no role",
+   "json": {
+    "detail": "Please give their role, for example \"MP for Leeds Central\" or \"Chief of staff to …\"."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement with no words",
+   "json": {
+    "detail": "Please write the statement: a sentence or more."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement of four words",
+   "json": {
+    "detail": "Please write the statement: a sentence or more."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement of 151 words",
+   "json": {
+    "detail": "A statement can be up to 150 words. This one is 151."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement within 150 words, of long ones",
+   "json": {
+    "detail": [
+     {
+      "ctx": {
+       "max_length": 2000
+      },
+      "input": "extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily extraordinarily",
+      "loc": [
+       "body",
+       "text"
+      ],
+      "msg": "String should have at most 2000 characters",
+      "type": "string_too_long"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "a statement with a link that is not a web address",
+   "json": {
+    "detail": "The link to the record should be a full web address, starting https://."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement with a link with a quote in it",
+   "json": {
+    "detail": "The link to the record should be a full web address, starting https://."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement with no email address",
+   "json": {
+    "detail": "Please give an email address, so we can confirm who the statement is from."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement with two things wrong: the name and the words",
+   "json": {
+    "detail": "Please give the name the statement is from."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement with two things wrong: the address and the words",
+   "json": {
+    "detail": "A statement can be up to 150 words. This one is 151."
+   },
+   "status": 400
+  },
+  {
+   "case": "a statement with a name too long for the form",
+   "json": {
+    "detail": [
+     {
+      "ctx": {
+       "max_length": 120
+      },
+      "input": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+      "loc": [
+       "body",
+       "name"
+      ],
+      "msg": "String should have at most 120 characters",
+      "type": "string_too_long"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "a statement with text too long for the form",
+   "json": {
+    "detail": [
+     {
+      "ctx": {
+       "max_length": 2000
+      },
+      "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "loc": [
+       "body",
+       "text"
+      ],
+      "msg": "String should have at most 2000 characters",
+      "type": "string_too_long"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "a statement with a field missing",
+   "json": {
+    "detail": [
+     {
+      "input": {
+       "item": "/b/briefingaa",
+       "link": "",
+       "name": "  Hilary   Benn ",
+       "role": "MP for Leeds  South",
+       "text": "  I have always supported the right to trial by jury, and the record of my speeches shows it in full.\r\n\r\n\r\nSecond paragraph.  "
+      },
+      "loc": [
+       "body",
+       "email"
+      ],
+      "msg": "Field required",
+      "type": "missing"
+     }
+    ]
+   },
+   "status": 422
+  },
+  {
+   "case": "the fifth statement of the day",
+   "json": {
+    "ok": true
+   },
+   "status": 200
+  },
+  {
+   "case": "the sixth statement of the day",
+   "json": {
+    "detail": "Thank you, we have your statements. Please email us if there is more to add."
+   },
+   "status": 429
+  },
+  {
+   "case": "no statement is shown while it waits",
+   "json": {
+    "statements": []
+   },
+   "status": 200
+  },
+  {
+   "case": "statements asked for with nothing said",
+   "json": {
+    "statements": []
+   },
+   "status": 200
+  },
+  {
+   "case": "statements beside something that is not an item",
+   "json": {
+    "statements": []
+   },
+   "status": 200
+  },
+  {
+   "case": "a saved briefing",
+   "json": {
+    "answer": {
+     "citations_invalid": 0,
+     "citations_total": 2,
+     "grounded_ratio": 0.68,
+     "loaded_words": 0,
+     "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+     "no_records": false,
+     "quotes_total": 1,
+     "quotes_unverified": 0,
+     "segments": [
+      {
+       "cited": [
+        {
+         "n": 1,
+         "text": "The right to trial by jury is a cornerstone of our liberties"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "connective",
+       "text": " In the debate that followed:"
+      },
+      {
+       "cited": [
+        {
+         "n": 2,
+         "text": "We will keep jury trial for serious offences"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        2
+       ],
+       "status": "cited",
+       "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " This was a turning point for every member in the Chamber."
+      }
+     ],
+     "unsupported_segments": 1
+    },
+    "candidates": 12,
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "evidence": {
+     "records": 2
+    },
+    "id": "briefingaa",
+    "interests": [
+     {
+      "items": [
+       {
+        "category": "3 Gifts",
+        "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2021-01-05",
+        "summary": "Bar Council - £500.00",
+        "url": null
+       }
+      ],
+      "link": "/people/10669#h-interests",
+      "name": "Hilary Benn",
+      "person_id": "uk.org.publicwhip/person/10669",
+      "register": "Register of Members' Financial Interests",
+      "source": 1
+     }
+    ],
+    "plan": {
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-11-12",
+    "semantic": true,
+    "settings": {
+     "mode": "summary"
+    },
+    "sources": [
+     {
+      "group": "opposition",
+      "kind": "record",
+      "n": 1,
+      "title": "Hilary Benn, House of Commons, 4 March 2021"
+     },
+     {
+      "group": "government",
+      "kind": "record",
+      "n": 2,
+      "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "a withdrawn briefing",
+   "json": {
+    "detail": "This briefing has been withdrawn."
+   },
+   "status": 410
+  },
+  {
+   "case": "a briefing there is not",
+   "json": {
+    "detail": "There is no briefing at this address."
+   },
+   "status": 404
+  },
+  {
+   "case": "an address that is not a briefing's",
+   "json": {
+    "detail": "There is no briefing at this address."
+   },
+   "status": 404
+  },
+  {
+   "case": "the corrections log",
+   "json": {
+    "corrections": [
+     {
+      "briefing_id": "briefingac",
+      "date": "2026-11-13",
+      "kind": "withdrawn",
+      "note": "It quoted the wrong debate.",
+      "question": "An older question?"
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "a saved briefing's page",
+   "description": [
+    "<meta name=\"description\" content=\"Hilary Benn said that trial by jury was &quot;a cornerstone&quot;. In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.\" />"
+   ],
+   "noindex": true,
+   "status": 200,
+   "title": "<title>What has been said about trial by jury since 2020? — Where MPs Stand</title>"
+  },
+  {
+   "case": "a withdrawn briefing's page",
+   "description": [
+    "<meta name=\"description\" content=\"This briefing is no longer available.\" />"
+   ],
+   "noindex": true,
+   "status": 410,
+   "title": "<title>Briefing withdrawn — Where MPs Stand</title>"
+  },
+  {
+   "case": "the page of a briefing there is not",
+   "description": [
+    "<meta name=\"description\" content=\"There is no briefing at this address.\" />"
+   ],
+   "noindex": true,
+   "status": 404,
+   "title": "<title>Briefing not found — Where MPs Stand</title>"
+  },
+  {
+   "case": "the owner's list of statements, with no token",
+   "json": {
+    "detail": "Admins only."
+   },
+   "status": 403
+  },
+  {
+   "case": "the owner's list of statements",
+   "json": {
+    "statements": [
+     {
+      "at": "2026-11-13T12:47:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 5,
+      "item_path": "/b/briefingaa",
+      "link": null,
+      "name": "Fifth Sender",
+      "person": null,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:25:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 4,
+      "item_path": "/debates/2021-03-04/commons/trial-by-jury",
+      "link": null,
+      "name": "Fourth Sender",
+      "person": null,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:24:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 3,
+      "item_path": "/b/briefingab",
+      "link": null,
+      "name": "Third Sender",
+      "person": null,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:23:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 2,
+      "item_path": "/people/10669",
+      "link": "https://hansard.parliament.uk/commons/2021-03-04",
+      "name": "Second Sender",
+      "person": 10669,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "Five words are just enough.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:22:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 1,
+      "item_path": "/b/briefingaa",
+      "link": null,
+      "name": "Hilary   Benn",
+      "person": null,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "the owner's list of statements waiting",
+   "json": {
+    "statements": [
+     {
+      "at": "2026-11-13T12:47:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 5,
+      "item_path": "/b/briefingaa",
+      "link": null,
+      "name": "Fifth Sender",
+      "person": null,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:25:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 4,
+      "item_path": "/debates/2021-03-04/commons/trial-by-jury",
+      "link": null,
+      "name": "Fourth Sender",
+      "person": null,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:24:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 3,
+      "item_path": "/b/briefingab",
+      "link": null,
+      "name": "Third Sender",
+      "person": null,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:23:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 2,
+      "item_path": "/people/10669",
+      "link": "https://hansard.parliament.uk/commons/2021-03-04",
+      "name": "Second Sender",
+      "person": 10669,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "Five words are just enough.",
+      "updated_at": null
+     },
+     {
+      "at": "2026-11-13T12:22:00+00:00",
+      "checked": null,
+      "closed_at": null,
+      "email": "office@example.org",
+      "id": 1,
+      "item_path": "/b/briefingaa",
+      "link": null,
+      "name": "Hilary   Benn",
+      "person": null,
+      "published_at": null,
+      "reason": null,
+      "role": "MP for Leeds  South",
+      "status": "pending",
+      "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+      "updated_at": null
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "the owner's list of reports",
+   "json": {
+    "reports": [
+     {
+      "at": "2026-11-13T12:06:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": "named@example.org",
+      "id": 3,
+      "kind": "takedown",
+      "message": "Please remove my name from this page.",
+      "page": "/debates/2021-03-04/commons/trial-by-jury",
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:20:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 10,
+      "kind": "correction",
+      "message": "Report number 10.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:19:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 9,
+      "kind": "correction",
+      "message": "Report number 9.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:18:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 8,
+      "kind": "correction",
+      "message": "Report number 8.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:14:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 7,
+      "kind": "correction",
+      "message": "",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:09:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 6,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:08:00+00:00",
+      "briefing_id": "briefingab",
+      "closed_at": null,
+      "contact": null,
+      "id": 5,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:07:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 4,
+      "kind": "general",
+      "message": "Something else entirely.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:05:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 2,
+      "kind": "complaint",
+      "message": "A loaded word about a member.",
+      "page": "/people/10669/hilary-benn",
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:04:00+00:00",
+      "briefing_id": "briefingaa",
+      "closed_at": null,
+      "contact": "reader@example.org",
+      "id": 1,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "the owner's list of open reports",
+   "json": {
+    "reports": [
+     {
+      "at": "2026-11-13T12:06:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": "named@example.org",
+      "id": 3,
+      "kind": "takedown",
+      "message": "Please remove my name from this page.",
+      "page": "/debates/2021-03-04/commons/trial-by-jury",
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:20:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 10,
+      "kind": "correction",
+      "message": "Report number 10.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:19:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 9,
+      "kind": "correction",
+      "message": "Report number 9.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:18:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 8,
+      "kind": "correction",
+      "message": "Report number 8.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:14:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 7,
+      "kind": "correction",
+      "message": "",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:09:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 6,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:08:00+00:00",
+      "briefing_id": "briefingab",
+      "closed_at": null,
+      "contact": null,
+      "id": 5,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:07:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 4,
+      "kind": "general",
+      "message": "Something else entirely.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:05:00+00:00",
+      "briefing_id": null,
+      "closed_at": null,
+      "contact": null,
+      "id": 2,
+      "kind": "complaint",
+      "message": "A loaded word about a member.",
+      "page": "/people/10669/hilary-benn",
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     },
+     {
+      "at": "2026-11-13T12:04:00+00:00",
+      "briefing_id": "briefingaa",
+      "closed_at": null,
+      "contact": "reader@example.org",
+      "id": 1,
+      "kind": "correction",
+      "message": "The date of the debate is wrong.",
+      "page": null,
+      "public_note": null,
+      "resolution": null,
+      "status": "open"
+     }
+    ]
+   },
+   "status": 200
+  },
+  {
+   "case": "the owner's list of saved briefings",
+   "json": {
+    "briefings": [
+     {
+      "created_at": "2026-11-13T12:02:00+00:00",
+      "id": "briefingac",
+      "question": "An older question?",
+      "withdrawn_at": "2026-11-13T12:03:00+00:00",
+      "withdrawn_reason": "It quoted the wrong debate."
+     },
+     {
+      "created_at": "2026-11-13T12:01:00+00:00",
+      "id": "briefingab",
+      "question": "And what did peers say?",
+      "withdrawn_at": null,
+      "withdrawn_reason": null
+     },
+     {
+      "created_at": "2026-11-13T12:00:00+00:00",
+      "id": "briefingaa",
+      "question": "What has been said about trial by jury since 2020?",
+      "withdrawn_at": null,
+      "withdrawn_reason": null
+     }
+    ]
+   },
+   "status": 200
+  }
+ ],
+ "kept": {
+  "briefings": [
+   {
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "id": "briefingaa",
+    "question": "What has been said about trial by jury since 2020?",
+    "withdrawn_at": null,
+    "withdrawn_reason": null
+   },
+   {
+    "created_at": "2026-11-13T12:01:00+00:00",
+    "id": "briefingab",
+    "question": "And what did peers say?",
+    "withdrawn_at": "2026-11-13T13:36:00+00:00",
+    "withdrawn_reason": "It gave the wrong date for a debate."
+   },
+   {
+    "created_at": "2026-11-13T12:02:00+00:00",
+    "id": "briefingac",
+    "question": "An older question?",
+    "withdrawn_at": "2026-11-13T12:03:00+00:00",
+    "withdrawn_reason": "It quoted the wrong debate."
+   }
+  ],
+  "reports": [
+   {
+    "at": "2026-11-13T12:04:00+00:00",
+    "briefing_id": "briefingaa",
+    "closed_at": "2026-11-13T13:31:00+00:00",
+    "contact": null,
+    "id": 1,
+    "kind": "correction",
+    "message": "The date of the debate is wrong.",
+    "page": null,
+    "public_note": "A briefing gave the wrong date for a debate and has been withdrawn.",
+    "resolution": "The date was wrong; the briefing is withdrawn.",
+    "status": "resolved",
+    "visitor": null
+   },
+   {
+    "at": "2026-11-13T12:05:00+00:00",
+    "briefing_id": null,
+    "closed_at": "2026-11-13T13:32:00+00:00",
+    "contact": null,
+    "id": 2,
+    "kind": "complaint",
+    "message": "A loaded word about a member.",
+    "page": "/people/10669/hilary-benn",
+    "public_note": null,
+    "resolution": "The word is the member's own.",
+    "status": "dismissed",
+    "visitor": null
+   },
+   {
+    "at": "2026-11-13T12:06:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": "named@example.org",
+    "id": 3,
+    "kind": "takedown",
+    "message": "Please remove my name from this page.",
+    "page": "/debates/2021-03-04/commons/trial-by-jury",
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:07:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 4,
+    "kind": "general",
+    "message": "Something else entirely.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:08:00+00:00",
+    "briefing_id": "briefingab",
+    "closed_at": null,
+    "contact": null,
+    "id": 5,
+    "kind": "correction",
+    "message": "The date of the debate is wrong.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:09:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 6,
+    "kind": "correction",
+    "message": "The date of the debate is wrong.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:14:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 7,
+    "kind": "correction",
+    "message": "",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:18:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 8,
+    "kind": "correction",
+    "message": "Report number 8.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:19:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 9,
+    "kind": "correction",
+    "message": "Report number 9.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:20:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 10,
+    "kind": "correction",
+    "message": "Report number 10.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   }
+  ],
+  "statements": [
+   {
+    "at": "2026-11-13T12:22:00+00:00",
+    "checked": "Replied from their parliament.uk address, 14 November.",
+    "closed_at": "2026-11-13T13:41:00+00:00",
+    "email": "office@example.org",
+    "id": 1,
+    "item_path": "/b/briefingaa",
+    "link": null,
+    "name": "Hilary Benn MP",
+    "person": 10669,
+    "published_at": "2026-11-13T13:21:00+00:00",
+    "reason": "It names a private person.",
+    "role": "MP for Leeds South",
+    "status": "declined",
+    "text": "These are the author's new words, sent by email, exactly as written.",
+    "updated_at": "2026-11-13T13:21:00+00:00",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:23:00+00:00",
+    "checked": "Telephoned the office.",
+    "closed_at": "2026-11-13T13:24:00+00:00",
+    "email": "office@example.org",
+    "id": 2,
+    "item_path": "/people/10669",
+    "link": "https://hansard.parliament.uk/commons/2021-03-04",
+    "name": "Second Sender",
+    "person": 10669,
+    "published_at": "2026-11-13T13:23:00+00:00",
+    "reason": "Asked by email on 14 November.",
+    "role": "MP for Leeds  South",
+    "status": "withdrawn",
+    "text": "Five words are just enough.",
+    "updated_at": null,
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:24:00+00:00",
+    "checked": null,
+    "closed_at": "2026-11-13T13:12:00+00:00",
+    "email": "office@example.org",
+    "id": 3,
+    "item_path": "/b/briefingab",
+    "link": null,
+    "name": "Third Sender",
+    "person": null,
+    "published_at": null,
+    "reason": "It is about another member's conduct.",
+    "role": "MP for Leeds  South",
+    "status": "declined",
+    "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+    "updated_at": null,
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:25:00+00:00",
+    "checked": "Replied from their office.",
+    "closed_at": "2026-11-13T13:27:00+00:00",
+    "email": "office@example.org",
+    "id": 4,
+    "item_path": "/debates/2021-03-04/commons/trial-by-jury",
+    "link": null,
+    "name": "Fourth Sender",
+    "person": null,
+    "published_at": "2026-11-13T13:26:00+00:00",
+    "reason": "It names a private person.",
+    "role": "MP for Leeds  South",
+    "status": "declined",
+    "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+    "updated_at": null,
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:47:00+00:00",
+    "checked": "Replied from their office.",
+    "closed_at": "2026-11-13T13:48:00+00:00",
+    "email": "office@example.org",
+    "id": 5,
+    "item_path": "/b/briefingaa",
+    "link": null,
+    "name": "Fifth Sender",
+    "person": 10669,
+    "published_at": "2026-11-13T13:45:00+00:00",
+    "reason": "Asked by telephone.",
+    "role": "MP for Leeds  South",
+    "status": "withdrawn",
+    "text": "New words from the owner's page, as sent.",
+    "updated_at": "2026-11-13T13:45:00+00:00",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   }
+  ]
+ },
+ "kept_after_the_forms": {
+  "briefings": [
+   {
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "id": "briefingaa",
+    "question": "What has been said about trial by jury since 2020?",
+    "withdrawn_at": null,
+    "withdrawn_reason": null
+   },
+   {
+    "created_at": "2026-11-13T12:01:00+00:00",
+    "id": "briefingab",
+    "question": "And what did peers say?",
+    "withdrawn_at": null,
+    "withdrawn_reason": null
+   },
+   {
+    "created_at": "2026-11-13T12:02:00+00:00",
+    "id": "briefingac",
+    "question": "An older question?",
+    "withdrawn_at": "2026-11-13T12:03:00+00:00",
+    "withdrawn_reason": "It quoted the wrong debate."
+   }
+  ],
+  "reports": [
+   {
+    "at": "2026-11-13T12:04:00+00:00",
+    "briefing_id": "briefingaa",
+    "closed_at": null,
+    "contact": "reader@example.org",
+    "id": 1,
+    "kind": "correction",
+    "message": "The date of the debate is wrong.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:05:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 2,
+    "kind": "complaint",
+    "message": "A loaded word about a member.",
+    "page": "/people/10669/hilary-benn",
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:06:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": "named@example.org",
+    "id": 3,
+    "kind": "takedown",
+    "message": "Please remove my name from this page.",
+    "page": "/debates/2021-03-04/commons/trial-by-jury",
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:07:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 4,
+    "kind": "general",
+    "message": "Something else entirely.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:08:00+00:00",
+    "briefing_id": "briefingab",
+    "closed_at": null,
+    "contact": null,
+    "id": 5,
+    "kind": "correction",
+    "message": "The date of the debate is wrong.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:09:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 6,
+    "kind": "correction",
+    "message": "The date of the debate is wrong.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:14:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 7,
+    "kind": "correction",
+    "message": "",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:18:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 8,
+    "kind": "correction",
+    "message": "Report number 8.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:19:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 9,
+    "kind": "correction",
+    "message": "Report number 9.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:20:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 10,
+    "kind": "correction",
+    "message": "Report number 10.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open",
+    "visitor": "8477f5602fc12a9348d44ac7"
+   }
+  ],
+  "statements": [
+   {
+    "at": "2026-11-13T12:22:00+00:00",
+    "checked": null,
+    "closed_at": null,
+    "email": "office@example.org",
+    "id": 1,
+    "item_path": "/b/briefingaa",
+    "link": null,
+    "name": "Hilary   Benn",
+    "person": null,
+    "published_at": null,
+    "reason": null,
+    "role": "MP for Leeds  South",
+    "status": "pending",
+    "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+    "updated_at": null,
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:23:00+00:00",
+    "checked": null,
+    "closed_at": null,
+    "email": "office@example.org",
+    "id": 2,
+    "item_path": "/people/10669",
+    "link": "https://hansard.parliament.uk/commons/2021-03-04",
+    "name": "Second Sender",
+    "person": 10669,
+    "published_at": null,
+    "reason": null,
+    "role": "MP for Leeds  South",
+    "status": "pending",
+    "text": "Five words are just enough.",
+    "updated_at": null,
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:24:00+00:00",
+    "checked": null,
+    "closed_at": null,
+    "email": "office@example.org",
+    "id": 3,
+    "item_path": "/b/briefingab",
+    "link": null,
+    "name": "Third Sender",
+    "person": null,
+    "published_at": null,
+    "reason": null,
+    "role": "MP for Leeds  South",
+    "status": "pending",
+    "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+    "updated_at": null,
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:25:00+00:00",
+    "checked": null,
+    "closed_at": null,
+    "email": "office@example.org",
+    "id": 4,
+    "item_path": "/debates/2021-03-04/commons/trial-by-jury",
+    "link": null,
+    "name": "Fourth Sender",
+    "person": null,
+    "published_at": null,
+    "reason": null,
+    "role": "MP for Leeds  South",
+    "status": "pending",
+    "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+    "updated_at": null,
+    "visitor": "8477f5602fc12a9348d44ac7"
+   },
+   {
+    "at": "2026-11-13T12:47:00+00:00",
+    "checked": null,
+    "closed_at": null,
+    "email": "office@example.org",
+    "id": 5,
+    "item_path": "/b/briefingaa",
+    "link": null,
+    "name": "Fifth Sender",
+    "person": null,
+    "published_at": null,
+    "reason": null,
+    "role": "MP for Leeds  South",
+    "status": "pending",
+    "text": "I have always supported the right to trial by jury, and the record of my speeches shows it in full.\n\nSecond paragraph.",
+    "updated_at": null,
+    "visitor": "8477f5602fc12a9348d44ac7"
+   }
+  ]
+ }
+}
