@@ -16,9 +16,8 @@ from datetime import date
 from typing import Any
 from urllib.parse import urlsplit
 
+from hansard.rag.checks import shown_again
 from hansard.rag.interests import without_public_office
-from hansard.rag.neutral import still_loaded
-from hansard.rag.verify import recheck_flags
 from hansard.store.state import StateDB, utcnow
 
 # no 0/o or 1/l, so an address read aloud or retyped is not misread; 10 characters is about 50 bits
@@ -139,7 +138,7 @@ def public_view(b: dict[str, Any]) -> dict[str, Any]:
         "candidates": sources.get("candidates"),
         "semantic": sources.get("semantic"),
         "evidence": sources.get("evidence"),
-        "answer": still_loaded(recheck_flags(final.get("answer"))),
+        "answer": shown_again(final.get("answer")),
         "interests": without_public_office(final.get("interests")),
     }
 

@@ -1,6 +1,7 @@
 """Raw Hansard files stored gzipped (owner's decision 14): compressing the mirror parses nothing again, while
 corrections and new days still arrive."""
 
+import dataclasses
 import gzip
 import os
 import time
@@ -230,8 +231,8 @@ def test_auto_transport_is_https_when_storing_gzipped(settings, monkeypatch):
     monkeypatch.setattr(twfy.HttpsMirror, "plan", lambda self, dirs, since: calls.append("https") or [])
     assert cli.fetch_xml(settings)["transport"] == "https" and calls == ["https"]
 
-    off = settings.__class__(raw={**settings.raw, "sources": {**settings.sources, "compress_raw_xml": False}},
-                             data_dir=settings.data_dir, config_path=settings.config_path)
+    off = dataclasses.replace(settings, raw={**settings.raw,
+                                             "sources": {**settings.sources, "compress_raw_xml": False}})
     calls.clear()
     assert cli.fetch_xml(off)["transport"] == "rsync" and calls == ["rsync"]
 

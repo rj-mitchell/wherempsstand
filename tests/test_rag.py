@@ -7,11 +7,11 @@ from types import SimpleNamespace as NS
 
 from hansard.embed.base import HashingEmbedder
 from hansard.engine import Engine, Filters, Scope
+from hansard.rag.checks import VERIFIER
 from hansard.rag.pipeline import AskRequest, Pipeline, answer_once
 from hansard.rag.prompts import NO_RECORDS
 from hansard.rag.query_parse import parse_offline
 from hansard.rag.sources import Source
-from hansard.rag.verify import verify
 
 TODAY = date(2026, 10, 1)
 GROUPS = {"northern": ["North East", "North West", "Yorkshire and The Humber"]}
@@ -41,6 +41,29 @@ def test_offline_parse_northern_dissent_example():
 
 def src(n, *blocks):
     return Source(n, "record", f"Source {n}", f"https://example/{n}", list(blocks))
+
+
+verify = VERIFIER.verify
+recheck_flags = VERIFIER.recheck
+_QUOTED = "It has failed."
+
+
+def _classify_uncited(text, next_is_cited):
+    """How the verifier judges one uncited block of the model's, which is or is not followed by a cited one: its
+    pieces, as ``verify`` gives them."""
+    blocks = [{"text": text}]
+    if next_is_cited:
+        blocks.append({"text": f'"{_QUOTED}"', "citations": [{"search_result_index": 0, "cited_text": _QUOTED}]})
+    segments = verify(blocks, [src(1, _QUOTED)]).segments
+    return segments[:-1] if next_is_cited else segments
+
+
+def as_saved(parts, quotation='"it has failed"'):
+    """A briefing as it was saved before the checking rules were stamped on each answer, so that showing it again
+    judges it again: the verifier's pieces, then a cited quotation."""
+    return {"segments": [*({"text": p.text, "status": p.status} for p in parts),
+                         {"text": quotation, "status": "cited"}],
+            "unsupported_segments": sum(p.status == "unsupported" for p in parts), "grounded_ratio": 0.3}
 
 
 def test_verify_marks_cited_unsupported_and_invalid():
@@ -227,8 +250,9 @@ def test_briefing_instructions_require_neutral_wording():
 
 
 def test_quotations_are_checked_word_for_word():
-    from hansard.rag.sources import Source
-    from hansard.rag.verify import Segment, Verification, check_quotes
+    from wts_core.checks import Segment, Verification
+
+    check_quotes = VERIFIER.check_quotes
 
     src = [Source(1, "record", "t", "u", ["I very much support renewable energy, but we now have our fair share of "
                                           "onshore wind. I warmly welcome the hon. and learned Gentleman's point."], {})]
@@ -245,11 +269,14 @@ def test_quotations_are_checked_word_for_word():
 
 
 def test_a_word_printed_twice_in_the_record_does_not_make_a_misquote():
-    from hansard.rag.verify import _found, _words
+    from wts_core.checks import Segment, Verification
 
-    record = _words("but more with the positioning of of that company, where its profits are made")
-    assert _found("more with the positioning of that company", record)
-    assert not _found("the positioning of the company", record)
+    record = [src(1, "but more with the positioning of of that company, where its profits are made")]
+    segs = [Segment('He said it was "more with the positioning of that company".', [1]),
+            Segment(' He spoke of "the positioning of the company".', [1])]
+    report = Verification(segs, False, 2, 0, 0, 10)
+    assert VERIFIER.check_quotes(report, record) == 1
+    assert not segs[0].misquotes and [m["text"] for m in segs[1].misquotes] == ["the positioning of the company"]
 
 
 def test_pipeline_reports_checked_quotations(indexed_settings):
@@ -258,8 +285,6 @@ def test_pipeline_reports_checked_quotations(indexed_settings):
 
 
 def test_the_closing_note_about_the_evidence_is_not_a_claim():
-    from hansard.rag.verify import _classify_uncited
-
     note = _classify_uncited("\n**About the evidence:** the records span 2013 to 2026 and include no divisions.\n", False)
     assert [s.status for s in note] == ["connective"]
     note = _classify_uncited("\nAbout the evidence: the records show what was said, but nothing said by Hilary Benn "
@@ -271,8 +296,6 @@ def test_the_closing_note_about_the_evidence_is_not_a_claim():
 
 
 def test_a_lead_in_after_an_uncited_sentence_is_not_flagged_but_the_sentence_is():
-    from hansard.rag.verify import _classify_uncited
-
     segs = _classify_uncited("Labour MPs criticised the government. Jane Smith said on 4 May that ", True)
     assert [(s.status, s.text) for s in segs] == [("unsupported", "Labour MPs criticised the government. "),
                                                    ("connective", "Jane Smith said on 4 May that ")]
@@ -280,8 +303,6 @@ def test_a_lead_in_after_an_uncited_sentence_is_not_flagged_but_the_sentence_is(
 
 
 def test_the_date_after_a_citation_is_not_flagged():
-    from hansard.rag.verify import _classify_uncited
-
     for when in (" (16 September 2025).\n", " (March 2024)", " (2019),\n", " on 12 November 2025.\n",
                  " (written answer, 12 October 2026).\n"):
         assert [s.status for s in _classify_uncited(when, False)] == ["connective"], when
@@ -290,8 +311,9 @@ def test_the_date_after_a_citation_is_not_flagged():
 
 
 def test_openers_about_the_records_are_dropped():
-    from hansard.rag.verify import Segment, drop_preambles
+    from wts_core.checks import Segment
 
+    drop_preambles = VERIFIER.drop_preambles
     segs = [Segment("Across the records retrieved, ministers defended the policy."),
             Segment("**In brief**\n- In the records supplied, Labour MPs criticised it."),
             Segment("In 2019 the minister said so.")]
@@ -324,8 +346,6 @@ def test_local_contributions_are_scored_down_not_dropped():
 
 
 def test_saved_briefings_are_rechecked_by_the_current_rules():
-    from hansard.rag.verify import recheck_flags
-
     answer = {"segments": [{"text": "X said it worked", "status": "cited"},
                            {"text": " (16 September 2025).\n", "status": "unsupported"},
                            {"text": "Prices rose by 4% in the year to March, the fastest rise since 1992.",
@@ -338,8 +358,6 @@ def test_saved_briefings_are_rechecked_by_the_current_rules():
 
 
 def test_the_devolution_note_is_not_a_point_to_check():
-    from hansard.rag.verify import _classify_uncited
-
     for note in ("These bodies decide many of these subjects for their own nations. ",
                  "These bodies decide many matters for their own nations and are not the UK Parliament. ",
                  "The Senedd is a separate parliament that decides education for Wales. ",
@@ -376,8 +394,6 @@ def test_a_follow_up_is_read_with_the_earlier_answer(indexed_settings):
 
 def test_a_citation_across_two_paragraphs_is_accepted():
     from hansard.rag.sources import Source
-    from hansard.rag.verify import verify
-
     src = Source(1, "record", "A member", "u", ["(3) The assessment must estimate the cost of—",
                                                 "(a) implementation of this Act, and", "(b) the cap."])
     block = {"text": "It sought a cost estimate", "citations": [{"search_result_index": 0, "cited_text":
@@ -402,8 +418,6 @@ def test_client_has_an_explicit_timeout(monkeypatch):
 
 
 def test_an_honorifics_full_stop_ends_no_sentence():
-    from hansard.rag.verify import _classify_uncited
-
     # "Mr. " no longer reads as the end of a sentence, so the whole line leads in to the quotation after it
     segs = _classify_uncited("- Giving evidence to the Transport Committee on the northern legs, Mr. Smith said ", True)
     assert [s.status for s in segs] == ["connective"]
@@ -428,8 +442,6 @@ def test_a_lead_in_written_in_pieces_is_not_a_claim():
 
 
 def test_notes_that_data_was_not_supplied_are_not_claims():
-    from hansard.rag.verify import _classify_uncited
-
     for note in ("No recorded-vote data was available for any of the debates on this subject. ",
                  "Division lists for the debates in the Lords in this period were not supplied. ",
                  "The votes on the second reading were not supplied, so how members voted is unknown. "):
@@ -437,8 +449,6 @@ def test_notes_that_data_was_not_supplied_are_not_claims():
 
 
 def test_saved_briefings_with_a_lead_in_in_pieces_are_cleared():
-    from hansard.rag.verify import recheck_flags
-
     answer = {"segments": [{"text": "- Witnesses from the industry differed sharply on the timetable, as when Mr. ",
                             "status": "unsupported"},
                            {"text": "Stephens said ", "status": "connective"},
@@ -450,28 +460,20 @@ def test_saved_briefings_with_a_lead_in_in_pieces_are_cleared():
 
 
 def test_a_short_claim_stays_a_point_to_check_when_a_saved_briefing_is_shown_again():
-    from hansard.rag.verify import _classify_uncited, recheck_flags
-
     # verify() splits a whole sentence off a lead-in and marks it as a claim, however short it is
     parts = _classify_uncited("Labour MPs criticised the government. Jane Smith said on 4 May that ", True)
     assert [p.status for p in parts] == ["unsupported", "connective"]
-    answer = {"segments": [*({"text": p.text, "status": p.status} for p in parts),
-                           {"text": "\"it has failed\"", "status": "cited"}],
-              "unsupported_segments": 1, "grounded_ratio": 0.3}
+    answer = as_saved(parts)
     # shown again, it is judged without that knowledge: being short must not clear it
     assert recheck_flags(answer) is answer
 
 
 def test_a_claim_above_a_lead_in_stays_a_point_to_check_when_shown_again():
-    from hansard.rag.verify import _classify_uncited, recheck_flags
-
     for block in ("- Spending on the scheme rose by 40% under the last administration\n- Jane Smith said ",
                   "Was the funding cut by 40% in real terms? Jane Smith said ",
                   "The scheme was cut by 40% in real terms! Jane Smith said "):
         parts = _classify_uncited(block, True)
         assert [p.status for p in parts] == ["unsupported", "connective"], block
-        answer = {"segments": [*({"text": p.text, "status": p.status} for p in parts),
-                               {"text": "\"it has failed\"", "status": "cited"}],
-                  "unsupported_segments": 1, "grounded_ratio": 0.3}
+        answer = as_saved(parts)
         # judged again without the block it was written in, it must not pass for the opening of the quotation
         assert recheck_flags(answer) is answer, block

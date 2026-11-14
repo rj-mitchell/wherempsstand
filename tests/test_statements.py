@@ -277,7 +277,8 @@ def test_nothing_that_searches_or_writes_briefings_reads_statements():
     """Statements are read only by their own module, the web app's statement endpoints, the owner's commands and the
     clean-up in the update; never by the briefing pipeline, the search, the index or the record's pages and feeds."""
     src = Path(__file__).resolve().parents[1] / "src" / "hansard"
-    allowed = {"api/statements.py", "api/app.py", "cli.py", "sync.py", "store/state.py"}
+    # store/wts.py: the one-off import of the old table's rows into the shared package's
+    allowed = {"api/statements.py", "api/app.py", "cli.py", "sync.py", "store/state.py", "store/wts.py"}
     table = re.compile(r"\b(FROM|JOIN|INTO|UPDATE|TABLE IF NOT EXISTS)\s+statements\b", re.I)
     for path in src.rglob("*.py"):
         rel = path.relative_to(src).as_posix()

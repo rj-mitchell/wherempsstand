@@ -19,11 +19,12 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
 
+from wts_core.checks import to_british
+
 from hansard.config import Settings
 from hansard.engine import Engine, Filters, Scope
 from hansard.groups import group_names
-from hansard.rag.british import britishise_segments, to_british
-from hansard.rag.neutral import flag_loaded
+from hansard.rag.checks import checked
 from hansard.rag.prompts import NO_RECORDS
 from hansard.rag.query_parse import (
     QueryPlan,
@@ -33,7 +34,6 @@ from hansard.rag.query_parse import (
     resolve_speakers,
 )
 from hansard.rag.sources import build_sources
-from hansard.rag.verify import check_quotes, drop_preambles, verify
 from hansard.sources.demographics import AGE_BAND_LABEL, GENDER_LABEL
 from hansard.sources.elections import MAJORITY_BAND_LABEL, TENURE_LABEL, runner_up_name
 from hansard.votes import VoteFinder
@@ -641,14 +641,13 @@ class Pipeline:
                     yield {"type": "interests", "interests": flags[0]}
         finally:
             pool.shutdown(wait=False)
-        report = verify(final["blocks"], sources)
-        drop_preambles(report.segments)       # "Across the records retrieved, ..." openers
-        britishise_segments(report.segments)  # the model's own words only; quotations stay verbatim
-        flag_loaded(report.segments)          # judgemental words in its own voice are highlighted, not hidden
-        check_quotes(report, sources)         # quotations not found word for word in their sources are marked
+        # Every check, in the family's one order (rag/checks.py): each citation looked up in its source; "Across the
+        # records retrieved, ..." openers dropped; the model's own words made British (quotations stay verbatim);
+        # judgemental words in its own voice highlighted, not hidden; quotations not found word for word marked.
+        answer = checked(final["blocks"], sources)
         from hansard.rag.answer import usage_dict
 
-        yield {"type": "final", "answer": report.to_dict(), "usage": final["usage"], "model": final["model"],
+        yield {"type": "final", "answer": answer, "usage": final["usage"], "model": final["model"],
                "stop_reason": final["stop_reason"], "interests": (flags or ([], None))[0],
                "interests_usage": usage_dict(flags[1]) if flags and flags[1] is not None else None}
 
