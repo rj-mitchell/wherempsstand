@@ -8,17 +8,19 @@ also the record to consult if someone later questions what the site published. A
 
 from __future__ import annotations
 
+import dataclasses
 import html
 import json
 import re
-import secrets
 from datetime import date
 from typing import Any
 from urllib.parse import urlsplit
 
+from wts_core.ports import SYSTEM_RANDOM, Random
+from wts_core.usage import BriefingArchive, SavedBriefing, SavedBriefings, alphabet_id
+
+from hansard.rag.checks import shown_again
 from hansard.rag.interests import without_public_office
-from hansard.rag.neutral import still_loaded
-from hansard.rag.verify import recheck_flags
 from hansard.store.state import StateDB, utcnow
 
 # no 0/o or 1/l, so an address read aloud or retyped is not misread; 10 characters is about 50 bits
@@ -26,44 +28,38 @@ _ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789"
 ID_PATTERN = re.compile(r"^[a-km-z2-9]{10}$")
 
 
-def new_id() -> str:
-    return "".join(secrets.choice(_ALPHABET) for _ in range(10))
+def new_briefing_id(chance: Random = SYSTEM_RANDOM) -> str:
+    """A saved briefing's address: ten characters of the site's own alphabet."""
+    return alphabet_id(_ALPHABET, 10, random=chance)
 
 
-def store_briefing(state: StateDB, question: str, settings: dict[str, Any], events: list[dict[str, Any]],
-                   records_up_to: str | None, model: str | None) -> dict[str, str]:
-    """Keep a briefing; returns its id and creation time."""
-    created = utcnow()
-    with state.connect() as con:
-        for _ in range(5):
-            bid = new_id()
-            try:
-                con.execute("INSERT INTO briefings (id, created_at, question, settings, events, records_up_to, model) "
-                            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                            (bid, created, question, json.dumps(settings, default=str),
-                             json.dumps(events, default=str), records_up_to, model))
-                return {"id": bid, "created_at": created}
-            except Exception as exc:  # an id collision is astronomically unlikely; try another
-                if "UNIQUE" not in str(exc):
-                    raise
-    raise RuntimeError("could not allocate a briefing id")
+def as_row(b: SavedBriefing) -> dict[str, Any]:
+    """A saved briefing under the names the site's pages and tools have always read: what was asked with it is its
+    ``settings``, and the newest record's date and the model sit beside them."""
+    return {"id": b.id, "created_at": b.created_at, "question": b.question, "settings": b.options,
+            "events": b.events, "records_up_to": b.extra.get("records_up_to"), "model": b.extra.get("model"),
+            "withdrawn_at": b.withdrawn_at, "withdrawn_reason": b.withdrawn_reason}
 
 
-def keep(state: StateDB, question: str, settings: dict[str, Any], kept: list[dict[str, Any]],
-         final: dict[str, Any]) -> dict[str, Any]:
-    """Keep a just-written briefing from its stream events; returns its id, preparation time and record date."""
+def keep(archive: SavedBriefings, state: StateDB, question: str, settings: dict[str, Any],
+         kept: list[dict[str, Any]], final: dict[str, Any]) -> dict[str, Any]:
+    """Keep a just-written briefing from its stream events; returns its id, preparation time and record date.
+    What is kept is the plan, the sources and the final event (no text event, no token counts, and nothing that
+    was for one reader only)."""
     records_up_to = state.latest_record_date()
     events = [e for e in kept if e["type"] in ("plan", "sources")] + [
         {k: v for k, v in final.items() if k not in ("usage", "briefing_key", "support_reminder")}]
-    meta = store_briefing(state, question, settings, events, records_up_to, final.get("model"))
-    return {"briefing_id": meta["id"], "prepared_at": meta["created_at"], "records_up_to": records_up_to}
+    saved = archive.save(question, settings, events,
+                         extra={"records_up_to": records_up_to, "model": final.get("model")})
+    return {"briefing_id": saved.id, "prepared_at": saved.created_at, "records_up_to": records_up_to}
 
 
 # ---- featured briefings ------------------------------------------------------------------------------------------
 
 
-def feature(state: StateDB, bid: str, title: str | None = None, blurb: str | None = None) -> bool:
-    b = get_briefing(state, bid)
+def feature(archive: SavedBriefings, state: StateDB, bid: str, title: str | None = None,
+            blurb: str | None = None) -> bool:
+    b = get_briefing(archive, bid)
     if b is None or b["withdrawn_at"]:
         return False
     with state.connect() as con:
@@ -82,46 +78,50 @@ def is_featured(state: StateDB, bid: str) -> bool:
         return con.execute("SELECT 1 FROM featured WHERE briefing_id = ?", (bid,)).fetchone() is not None
 
 
-def featured_list(state: StateDB) -> list[dict[str, Any]]:
+def featured_list(archive: SavedBriefings, state: StateDB) -> list[dict[str, Any]]:
     """Featured briefings, newest first, with a short summary; withdrawn ones are left out."""
     with state.connect() as con:
-        rows = con.execute("SELECT f.briefing_id, f.title, f.blurb, f.featured_at, b.question, b.created_at, "
-                           "b.records_up_to, b.events FROM featured f JOIN briefings b ON b.id = f.briefing_id "
-                           "WHERE b.withdrawn_at IS NULL ORDER BY f.featured_at DESC").fetchall()
+        rows = con.execute("SELECT briefing_id, title, blurb, featured_at FROM featured "
+                           "ORDER BY featured_at DESC").fetchall()
     out = []
     for r in rows:
-        final = next((e for e in json.loads(r["events"]) if e.get("type") == "final"), {})
-        out.append({"id": r["briefing_id"], "title": r["title"] or r["question"], "question": r["question"],
-                    "blurb": r["blurb"] or summary_text(final.get("answer")), "prepared_at": r["created_at"],
-                    "records_up_to": r["records_up_to"], "featured_at": r["featured_at"]})
+        b = archive.get(r["briefing_id"])
+        if b is None or b.withdrawn_at:
+            continue
+        final = next((e for e in b.events if e.get("type") == "final"), {})
+        out.append({"id": b.id, "title": r["title"] or b.question, "question": b.question,
+                    "blurb": r["blurb"] or summary_text(final.get("answer")), "prepared_at": b.created_at,
+                    "records_up_to": b.extra.get("records_up_to"), "featured_at": r["featured_at"]})
     return out
 
 
-def get_briefing(state: StateDB, bid: str) -> dict[str, Any] | None:
+class ShownOnly:
+    """The saved briefings without those hidden while a concern about each is decided: for the lists the public
+    reads (topics, featured briefings, the site map, the feeds). A hidden briefing is not there to be listed, as
+    a withdrawn one is not; its own address says why (the route answers for it)."""
+
+    def __init__(self, archive: SavedBriefings, hidden: set[str]) -> None:
+        self._archive, self._hidden = archive, hidden
+
+    def get(self, id: str) -> Any:
+        return None if id in self._hidden else self._archive.get(id)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._archive, name)
+
+
+def get_briefing(archive: SavedBriefings, bid: str) -> dict[str, Any] | None:
     if not ID_PATTERN.match(bid):
         return None
-    with state.connect() as con:
-        row = con.execute("SELECT * FROM briefings WHERE id = ?", (bid,)).fetchone()
-    if row is None:
-        return None
-    out = dict(row)
-    out["settings"] = json.loads(out["settings"])
-    out["events"] = json.loads(out["events"])
-    return out
+    b = archive.get(bid)
+    return as_row(b) if b else None
 
 
-def withdraw_briefing(state: StateDB, bid: str, reason: str) -> bool:
-    with state.connect() as con:
-        cur = con.execute("UPDATE briefings SET withdrawn_at = ?, withdrawn_reason = ? WHERE id = ?",
-                          (utcnow(), reason, bid))
-    return cur.rowcount > 0
-
-
-def recent_briefings(state: StateDB, limit: int = 50) -> list[dict[str, Any]]:
-    with state.connect() as con:
-        rows = con.execute("SELECT id, created_at, question, withdrawn_at, withdrawn_reason FROM briefings "
-                           "ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
-    return [dict(r) for r in rows]
+def recent_briefings(archive: BriefingArchive, limit: int = 50) -> list[dict[str, Any]]:
+    """The newest saved briefings, for the owner's list: newest first, and of two saved in the same second the one
+    saved later first, as the list has always been (the shared package's own listing, which keeps that order from
+    wts-core 0.3.0)."""
+    return [dataclasses.asdict(b) for b in archive.recent(limit)]
 
 
 def public_view(b: dict[str, Any]) -> dict[str, Any]:
@@ -139,7 +139,7 @@ def public_view(b: dict[str, Any]) -> dict[str, Any]:
         "candidates": sources.get("candidates"),
         "semantic": sources.get("semantic"),
         "evidence": sources.get("evidence"),
-        "answer": still_loaded(recheck_flags(final.get("answer"))),
+        "answer": shown_again(final.get("answer")),
         "interests": without_public_office(final.get("interests")),
     }
 

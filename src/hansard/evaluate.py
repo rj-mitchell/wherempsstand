@@ -12,6 +12,12 @@ Three stages, each saved under ``eval/runs/`` and summarised on screen:
    found in their sources, unsupported sentences, loaded words) and a blind side-by-side judgement.
 
 Every model call's cost is added up and reported.
+
+``HansardEval``, at the end, is this site as the Where They Stand sites' shared evaluation harness sees it
+(wts-core, ``wts_core.eval``): `hansard eval run` asks the questions of the whole pipeline, each briefing written,
+and saves the run in the data folder (``<data>/eval/runs/``: on the server ``/data/eval/runs/``, the one place a
+command there can write and have kept); `hansard eval compare` sets two runs side by side; `hansard eval replay`
+runs the checks again over briefings a run kept, free and with no model.
 """
 
 from __future__ import annotations
@@ -23,18 +29,20 @@ import random
 import time
 import tomllib
 from collections import Counter
-from collections.abc import Callable
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Literal
 
 from pydantic import BaseModel
+from wts_core.eval import Case, Recording, load_cases, read_as_if
+from wts_core.events import Event
+from wts_core.ports import ModelClient, ModelRequest, NoStructuredAnswer, Usage
+from wts_core.usage import PriceTable
 
-from hansard.api.usage import cost_usd
 from hansard.config import Settings
 from hansard.engine import Engine, Scope
-from hansard.rag.answer import usage_dict
 from hansard.rag.pipeline import AskRequest, Pipeline, rerank_query
 from hansard.rag.query_parse import QueryPlan, parse_model, parse_offline, parse_with_model
 from hansard.rank.evidence import demographic_group, speaker_group
@@ -151,19 +159,40 @@ def run_plans(settings: Settings, questions: list[Question], today: date, client
             error = None
         except Exception as exc:  # recorded as a failure on every field
             plan, usage, error = None, None, f"{type(exc).__name__}: {exc}"
+            if isinstance(exc, NoStructuredAnswer):  # answered and paid for: its cost is counted (wts-core 0.3.0)
+                usage, error = exc.usage, f"RuntimeError: {exc}"
         secs = time.perf_counter() - t0
-        u = usage_dict(usage) if usage else None
+        u = usage.as_stored() if usage else None
         got = plan_values(plan) if plan else None
         fields = score_plan(q.expect, got) if got else {f: False for f in [*PLAN_FIELDS, "portfolios"]}
         filters_ok = all(v for k, v in fields.items() if k != "portfolios")
         rows.append({"id": q.id, "category": q.category, "question": q.question, "got": got, "fields": fields,
                      "filters_ok": filters_ok, "error": error, "seconds": round(secs, 2), "usage": u,
-                     "cost": cost_usd(u, settings.usage, model), "plan": plan.to_dict() if plan else None,
+                     "cost": cost_usd(u, settings, model), "plan": plan.to_dict() if plan else None,
                      "search_text": plan.search_text if plan else None})
         progress(f"  {q.id:22} {'ok ' if filters_ok else 'MISS'} {secs:5.1f}s "
                  + ("" if filters_ok else ", ".join(k for k, v in fields.items() if not v and k != "portfolios")))
     return {"stage": "plans", "model": model, "effort": s.answer.get("query_parse_effort"), "today": today,
             "rows": rows, "summary": summarise_plans(rows)}
+
+
+def cost_usd(usage: dict[str, Any] | None, settings: Settings, model: str | None) -> float:
+    """What one model call cost, by the prices in ``[usage]`` (the shared package's price table)."""
+    if not usage:
+        return 0.0
+    return PriceTable.from_settings(settings.usage, file=settings.config_path).cost(Usage.from_mapping(usage), model)
+
+
+def asked(client: ModelClient, request: ModelRequest, schema: type[Any]) -> tuple[Any, Usage]:
+    """A judge's answer in ``schema`` and what it cost; None for an answer that cannot be used (the shared model
+    client raises ``NoStructuredAnswer`` for one, and a judge that says nothing is passed over, as it always was).
+    That call was paid for all the same, and its cost is counted with the rest (wts-core 0.3.0: the error carries
+    it). From 0.3.0 the same error is raised for an answer cut off or one that does not fit, which on the
+    provider's own client stopped the command before."""
+    try:
+        return client.structured(request, schema)
+    except NoStructuredAnswer as exc:
+        return None, exc.usage
 
 
 def summarise_plans(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -246,7 +275,7 @@ def run_sources(settings: Settings, plans: dict[str, dict[str, Any]], questions:
         row = {"id": q.id, "seconds": round(secs, 2), "candidates": res.candidates,
                "no_records": res.no_records, "records": recs}
         if meaning and engine.has_vectors() and engine.embedder is not None:
-            hits = engine.index.vector(engine.embedder.embed_query(plan.search_text), None, meaning,
+            hits = engine.index.search_meaning(engine.embedder.embed_query(plan.search_text), None, meaning,
                                        nprobes=s.ranking.get("vector_nprobes"),
                                        refine_factor=s.ranking.get("vector_refine_factor"), columns=["passage_id"])
             row["meaning"] = [[h["passage_id"], round(1.0 - float(h["_distance"]), 6)] for h in hits]
@@ -322,6 +351,7 @@ def judge_sources(settings: Settings, client, questions: list[Question], runs: l
                   model: str, progress: Callable[[str], None] = print, batch: int = 20) -> dict[str, Any]:
     """Grade every chosen passage not already graded; append the grades to ``path``."""
     known = judgments_load(path)
+    prices = PriceTable.from_settings(settings.usage, file=settings.config_path)
     by_q = {q.id: q for q in questions}
     todo: dict[str, dict[str, dict[str, Any]]] = {}
     for run in runs:
@@ -339,12 +369,11 @@ def judge_sources(settings: Settings, client, questions: list[Question], runs: l
             listing = "\n\n".join(f"[{n}] {r.get('heading') or ''}\n{r['excerpt'][:1200]}"
                                   for n, r in enumerate(chunk, 1))
             topic = q.question + (f" (follow-up to: {'; '.join(q.history)})" if q.history else "")
-            resp = client.messages.parse(
-                model=model, max_tokens=4000, system=JUDGE_SYSTEM,
-                messages=[{"role": "user", "content": f"Question: {topic}\n\nPassages:\n\n{listing}"}],
-                output_config={"effort": "low"}, output_format=Grades)
-            spent += cost_usd(usage_dict(resp.usage), settings.usage, model)
-            grades = {g.n: g.grade for g in (resp.parsed_output.grades if resp.parsed_output else [])}
+            judged, used = asked(client, ModelRequest(
+                model=model, max_tokens=4000, instructions=JUDGE_SYSTEM, effort="low", cache_instructions="off",
+                question=f"Question: {topic}\n\nPassages:\n\n{listing}"), Grades)
+            spent += prices.cost(used, model)
+            grades = {g.n: g.grade for g in (judged.grades if judged else [])}
             with path.open("a", encoding="utf-8") as fh:
                 for n, r in enumerate(chunk, 1):
                     if n in grades:
@@ -428,7 +457,7 @@ def run_briefings(settings: Settings, plans: dict[str, dict[str, Any]], question
         cited = {n for sg in segs for n in sg.get("sources", []) or []}
         rows.append({
             "id": q.id, "question": q.question, "seconds": round(secs, 1), "usage": u,
-            "cost": cost_usd(u, settings.usage, model), "error": (out.get("error") or {}).get("message"),
+            "cost": cost_usd(u, settings, model), "error": (out.get("error") or {}).get("message"),
             "markdown": ans.get("markdown", ""), "grounded_ratio": ans.get("grounded_ratio"),
             "citations_total": ans.get("citations_total"), "citations_invalid": ans.get("citations_invalid"),
             "unsupported_segments": ans.get("unsupported_segments"),
@@ -465,6 +494,7 @@ def compare_briefings(settings: Settings, client, a: dict[str, Any], b: dict[str
                       progress: Callable[[str], None] = print, seed: int = 7) -> dict[str, Any]:
     """Blind side-by-side judgement of two briefing runs on the same questions (order shuffled per question)."""
     rng = random.Random(seed)
+    prices = PriceTable.from_settings(settings.usage, file=settings.config_path)
     rb = {r["id"]: r for r in b["rows"]}
     tally: dict[str, Counter] = {k: Counter() for k in ("accuracy", "balance", "coverage", "clarity", "overall")}
     rows, spent = [], 0.0
@@ -475,13 +505,11 @@ def compare_briefings(settings: Settings, client, a: dict[str, Any], b: dict[str
         swap = rng.random() < 0.5
         first, second = (other, ra) if swap else (ra, other)
         sources = "\n\n".join(f"[Source {x['n']}] {x['speaker'] or ''}\n{x['text']}" for x in ra["source_text"])
-        resp = client.messages.parse(
-            model=judge, max_tokens=3000, system=COMPARE_SYSTEM,
-            messages=[{"role": "user", "content": f"Question: {ra['question']}\n\nSources:\n\n{sources}\n\n"
-                       f"Briefing A:\n\n{first['markdown']}\n\nBriefing B:\n\n{second['markdown']}"}],
-            output_config={"effort": "medium"}, output_format=Verdict)
-        spent += cost_usd(usage_dict(resp.usage), settings.usage, judge)
-        v = resp.parsed_output
+        v, used = asked(client, ModelRequest(
+            model=judge, max_tokens=3000, instructions=COMPARE_SYSTEM, effort="medium", cache_instructions="off",
+            question=f"Question: {ra['question']}\n\nSources:\n\n{sources}\n\n"
+                     f"Briefing A:\n\n{first['markdown']}\n\nBriefing B:\n\n{second['markdown']}"), Verdict)
+        spent += prices.cost(used, judge)
         if v is None:
             continue
         verdict = {}
@@ -495,3 +523,67 @@ def compare_briefings(settings: Settings, client, a: dict[str, Any], b: dict[str
         progress(f"  {ra['id']:22} overall: {verdict['overall']}")
     return {"stage": "compare", "a": a["model"], "b": b["model"], "judge": judge, "rows": rows,
             "tally": {k: dict(c) for k, c in tally.items()}, "cost_usd": round(spent, 4)}
+
+
+# =========================================================================== the shared harness
+
+
+class HansardEval:
+    """This site as the shared package's evaluation harness sees it (``wts_core.eval.EvalSite``): its questions, a
+    way to ask one of the real pipeline, and the group a source belongs to. It also gives the harness the site's
+    own score of how each question was read (``score``) and what the model was given and wrote (``recording``), so
+    a briefing written in a run can be kept and the checks run over it again later."""
+
+    def __init__(self, settings: Settings, pipeline: Pipeline | None = None, path: Path | None = None) -> None:
+        self.settings = settings
+        self.path = Path(path or "eval/questions.toml")
+        self.today = read_as_if(self.path)  # the date the questions are read as if it were
+        self._pipeline = pipeline
+        self._kept: dict[str, Recording] = {}
+
+    @property
+    def pipeline(self) -> Pipeline:
+        if self._pipeline is None:
+            self._pipeline = Pipeline(self.settings, today=self.today)
+        return self._pipeline
+
+    def cases(self) -> Sequence[Case]:
+        return load_cases(self.path)
+
+    def ask(self, case: Case, config: Mapping[str, Any]) -> Iterator[Event]:
+        """Ask one question of the pipeline itself: never through the briefing desk, so never from the answer
+        cache, never counted against a reader's limits and never saved as a briefing. ``config`` is the
+        configuration the settings give, which is what the pipeline runs with."""
+        self._kept.pop(case.id, None)
+
+        def keep(documents: Any, blocks: Any, headings: Any) -> None:
+            self._kept[case.id] = Recording(tuple(documents), tuple(blocks), tuple(headings))
+
+        return self.pipeline.run(AskRequest(question=case.question), keep=keep)
+
+    def group_of(self, source: Mapping[str, Any]) -> str:
+        """The group the evidence was balanced across (government, opposition, a party, a region; "Votes")."""
+        return str(source.get("group") or "")
+
+    def score(self, case: Case, plan: Mapping[str, Any] | None,
+              sources: Sequence[Mapping[str, Any]]) -> Mapping[str, bool]:
+        """The site's own expectations of how a question is read, each met or not (as `hansard eval plans`): every
+        filter, compared with the one a careful reader would choose. A question with nothing expected of it (the
+        sample questions) is scored on nothing."""
+        expect = {k: v for k, v in case.expect.items() if k != "category"}
+        if plan is None or not expect:
+            return {}
+        return score_plan(expect, plan_values(QueryPlan.from_dict({"question": case.question, **plan})))
+
+    def recording(self, case: Case) -> Recording | None:
+        """What the model was given and what it wrote for the question just asked, where a briefing was written."""
+        return self._kept.get(case.id)
+
+    def usages(self, event: Mapping[str, Any]) -> list[tuple[str, str | None, Any]]:
+        """The third model call of a briefing, beside the two the harness counts itself: the check of the quoted
+        members' registered interests, which the pipeline reports on the final event (``wts_core.eval.Spends``).
+        The same call, at the same model, as the briefing desk records for a reader (hansard/api/app.py,
+        ``SiteHooks.usages``), so a run costs what the briefings it measures cost."""
+        if event.get("type") == "final" and event.get("interests_usage"):
+            return [("interests", parse_model(self.settings), event["interests_usage"])]
+        return []

@@ -5,24 +5,16 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from wts_core.replies import Refused, months_before
+from wts_core.testing import FixedClock
 
-from hansard.api.statements import (
-    MAX_WORDS,
-    StatementError,
-    add_statement,
-    forget_old_emails,
-    item_path,
-    list_statements,
-    months_ago,
-    publish_statement,
-    published,
-)
-from hansard.store.state import StateDB
+from hansard.owner import replies_for
+from hansard.replies import MAX_WORDS, as_listed, item_path, published
 
 from .test_api import events, make_app
 
@@ -45,6 +37,12 @@ def site(indexed_settings, tmp_path, monkeypatch):
     return TestClient(app), state, client
 
 
+def list_statements(client):
+    """Every statement as the owner sees it, under the names the admin page reads."""
+    replies = client.app.state.replies
+    return [as_listed(replies, row) for row in replies.statements()]
+
+
 # ---- what is accepted ----------------------------------------------------------------------------------------------
 
 def test_item_addresses_are_paths_on_this_site():
@@ -54,14 +52,14 @@ def test_item_addresses_are_paths_on_this_site():
     assert item_path("wherempsstand.com/groups/commons/socialist-campaign-group/") == "/groups/commons/socialist-campaign-group"
     assert item_path("/debates/2008-06-11/commons/counter-terrorism-bill") == "/debates/2008-06-11/commons/counter-terrorism-bill"
     for bad in ("https://example.org/people/10669", "/about", "/", "javascript:alert(1)", "/people/abc", ""):
-        with pytest.raises(StatementError):
+        with pytest.raises(Refused):
             item_path(bad)
 
 
 def test_a_statement_is_stored_as_pending_and_not_shown(site):
     client, state, _ = site
     assert client.post("/api/statements", json=statement()).json() == {"ok": True}
-    [s] = list_statements(state)
+    [s] = list_statements(client)
     assert s["status"] == "pending" and s["item_path"] == "/people/10669" and s["person"] == BENN
     assert s["email"] == "hilary.benn.mp@parliament.uk"
     assert client.get(f"/api/statements?person={BENN}").json() == {"statements": []}  # not until published
@@ -80,7 +78,7 @@ def test_statements_are_checked(site, over, said):
     client, state, _ = site
     r = client.post("/api/statements", json=statement(**over))
     assert r.status_code == 400 and said in r.json()["detail"]
-    assert list_statements(state) == []
+    assert list_statements(client) == []
 
 
 def test_a_statement_is_only_accepted_beside_an_item_that_exists(site):
@@ -90,23 +88,22 @@ def test_a_statement_is_only_accepted_beside_an_item_that_exists(site):
     assert gone.status_code == 400 and "There is no briefing at that address" in gone.json()["detail"]
     nobody = client.post("/api/statements", json=statement(item="https://wherempsstand.com/people/99999999/no-one"))
     assert nobody.status_code == 400 and "There is no member's page at that address" in nobody.json()["detail"]
-    assert list_statements(state) == []
+    assert list_statements(client) == []
     assert client.post("/api/statements", json=statement(item=f"/b/{bid}")).status_code == 200
     assert client.post("/api/statements", json=statement(item=f"/people/{BENN}")).status_code == 200
     # the other kinds of page are not looked up: the owner sees the address before publishing
     assert client.post("/api/statements", json=statement(item="/groups/commons/no-such-group")).status_code == 200
-    assert {s["item_path"] for s in list_statements(state)} == {f"/b/{bid}", f"/people/{BENN}",
+    assert {s["item_path"] for s in list_statements(client)} == {f"/b/{bid}", f"/people/{BENN}",
                                                                 "/groups/commons/no-such-group"}
     # a withdrawn briefing takes no new statements
     assert client.post(f"/api/admin/briefings/{bid}/withdraw", headers=ADMIN,
                        json={"reason": "It misattributed a quotation."}).status_code == 200
     withdrawn = client.post("/api/statements", json=statement(item=f"/b/{bid}"))
     assert withdrawn.status_code == 400 and "has been withdrawn" in withdrawn.json()["detail"]
-    assert len(list_statements(state)) == 3
-    # the other checks still come first, and the function alone (the owner's tools, tests) asks nothing
+    assert len(list_statements(client)) == 3
+    # the other checks still come first
     first = client.post("/api/statements", json=statement(item="/b/abcdefghjk", text="Too short."))
     assert "a sentence or more" in first.json()["detail"]
-    assert add_statement(state, **statement(item="/b/abcdefghjk"))
 
 
 def test_exactly_150_words_is_accepted_and_required_fields_are_required(site):
@@ -117,13 +114,13 @@ def test_exactly_150_words_is_accepted_and_required_fields_are_required(site):
         del body[field]
         assert client.post("/api/statements", json=body).status_code == 422, field
     assert client.post("/api/statements", json=statement(link=None)).status_code == 200  # the link is optional
-    assert len(list_statements(state)) == 2
+    assert len(list_statements(client)) == 2
 
 
 def test_the_trap_field_keeps_nothing_and_there_is_a_daily_limit(site):
     client, state, _ = site
     assert client.post("/api/statements", json=statement(website="http://spam.example")).json() == {"ok": True}
-    assert list_statements(state) == []
+    assert list_statements(client) == []
     codes = [client.post("/api/statements", json=statement()).status_code for _ in range(6)]
     assert codes == [200] * 5 + [429]
 
@@ -198,49 +195,90 @@ def test_the_statements_commands(settings, monkeypatch, tmp_path):
     from hansard import cli
 
     monkeypatch.setattr(cli, "_settings", lambda: settings)
-    state = StateDB(settings.state_db)
-    sid = add_statement(state, **{k: v for k, v in statement().items()})
+    replies = replies_for(settings)
+    sid = replies.submit(**statement())
     run = CliRunner().invoke
     listed = run(cli.app, ["statements", "list"])
     assert listed.exit_code == 0 and f"#{sid}  pending" in listed.output and "hilary.benn.mp@parliament.uk" in listed.output
     assert run(cli.app, ["statements", "publish", str(sid)]).exit_code != 0  # --checked is required
     unsaid = run(cli.app, ["statements", "publish", str(sid), "--checked", " "])  # and must say something
     assert unsaid.exit_code == 1 and "how you confirmed who sent it" in unsaid.output
-    assert published(state, person=BENN) == []
+    assert published(replies, person=BENN) == []
     assert run(cli.app, ["statements", "publish", str(sid), "--checked", "Replied from parliament.uk"]).exit_code == 0
-    assert published(state, person=BENN)[0]["id"] == sid
+    assert published(replies, person=BENN)[0]["id"] == sid
     words = tmp_path / "new.txt"
     words.write_text("These are the author's new words, sent by email, exactly as written.\n", encoding="utf-8")
     assert run(cli.app, ["statements", "update", str(sid), "--text-file", str(words)]).exit_code == 0
-    assert published(state, person=BENN)[0]["text"] == "These are the author's new words, sent by email, exactly as written."
-    no_reason = run(cli.app, ["statements", "decline", str(sid), "--reason", " "])
-    assert no_reason.exit_code == 1 and "Please give the reason" in no_reason.output and "Traceback" not in no_reason.output
+    assert published(replies, person=BENN)[0]["text"] == "These are the author's new words, sent by email, exactly as written."
+    # a published statement is not declined: one that breaks the rules is removed, and `decline` says so
+    declined = run(cli.app, ["statements", "decline", str(sid), "--reason", "It breaks the rules."])
+    assert declined.exit_code == 1 and "is published, not pending" in declined.output
+    no_reason = run(cli.app, ["statements", "remove", str(sid), "--reason", " "])
+    assert no_reason.exit_code == 1 and "give the reason" in no_reason.output and "Traceback" not in no_reason.output
     assert no_reason.exception is None or isinstance(no_reason.exception, SystemExit)
-    assert published(state, person=BENN)[0]["id"] == sid  # still shown
+    assert published(replies, person=BENN)[0]["id"] == sid  # still shown
+    shown = run(cli.app, ["statements", "show", str(sid)])
+    assert "Checked: Replied from parliament.uk" in shown.output and "text was: I have always supported" in shown.output
     assert run(cli.app, ["statements", "withdraw", str(sid)]).exit_code == 0
-    assert published(state, person=BENN) == []
+    assert published(replies, person=BENN) == []
     assert run(cli.app, ["statements", "decline", str(sid), "--reason", "too late"]).exit_code == 1  # already withdrawn
-    assert "withdrawn" in run(cli.app, ["statements", "list", "--status", "all"]).output
+    everything = run(cli.app, ["statements", "list", "--status", "all"]).output
+    assert "withdrawn" in everything and "Reason: Withdrawn by the author." in everything
+    # a published statement that breaks the rules is removed, with the reason
+    again = replies.submit(**statement())
+    replies.publish(again, checked="ok")
+    removed = run(cli.app, ["statements", "remove", str(again), "--reason", "It names a private person."])
+    assert removed.exit_code == 0 and f"removed #{again}" in removed.output
+    assert f"#{again}  removed" in run(cli.app, ["statements", "list", "--status", "removed"]).output
+
+
+def test_the_reports_commands(settings, monkeypatch):
+    from typer.testing import CliRunner
+
+    from hansard import cli
+
+    monkeypatch.setattr(cli, "_settings", lambda: settings)
+    replies = replies_for(settings)
+    rid = replies.report(kind="takedown", page="/debates/2021-03-04/commons/trial-by-jury",
+                         message="Please remove my name from this page.", contact="named@example.org")
+    run = CliRunner().invoke
+    listed = run(cli.app, ["reports", "list"])
+    assert listed.exit_code == 0 and f"#{rid}  open" in listed.output and "named@example.org" in listed.output
+    assert "A private person's name or details to remove" in listed.output
+    closed = run(cli.app, ["reports", "close", str(rid), "--note", "Name removed from the page.",
+                           "--public-note", "A private person's name was removed from a debate page."])
+    assert closed.exit_code == 0 and f"closed report #{rid} as resolved" in closed.output
+    assert run(cli.app, ["reports", "list"]).output == ""  # none open now
+    after = run(cli.app, ["reports", "list", "--all"]).output
+    assert "named@example.org" not in after and "Reply to: (no contact details)" in after
+    assert "What was done: Name removed from the page." in after
+    again = run(cli.app, ["reports", "close", str(rid)])
+    assert again.exit_code == 1 and f"no open report {rid}" in again.output
 
 
 # ---- how long the email address is kept ------------------------------------------------------------------------------
 
 def test_the_email_is_deleted_three_months_after_a_statement_is_withdrawn_or_declined(settings):
-    state = StateDB(settings.state_db)
-    ids = [add_statement(state, **statement()) for _ in range(4)]
-    publish_statement(state, ids[0], checked="ok")  # shown: kept
-    closed = datetime(2026, 8, 12, 9, 0, tzinfo=UTC)
-    with state.connect() as con:
-        con.execute("UPDATE statements SET status = 'withdrawn', closed_at = ? WHERE id = ?",
-                    (closed.isoformat(timespec="seconds"), ids[1]))
-        con.execute("UPDATE statements SET status = 'declined', closed_at = ? WHERE id = ?",
-                    ((closed + timedelta(days=2)).isoformat(timespec="seconds"), ids[2]))
-    # ids[3] is still pending: kept
-    assert forget_old_emails(state, now=datetime(2026, 11, 12, 8, 59, tzinfo=UTC)) == 0  # not quite three months
-    assert forget_old_emails(state, now=datetime(2026, 11, 12, 9, 1, tzinfo=UTC)) == 1
-    emails = {s["id"]: s["email"] for s in list_statements(state)}
+    clock = FixedClock("2026-08-12T09:00:00+00:00")
+    replies = replies_for(settings, clock)
+    ids = [replies.submit(**statement()) for _ in range(3)]
+    replies.publish(ids[0], checked="ok")  # shown: kept
+    replies.withdraw(ids[1])
+    clock.advance(days=2)
+    replies.decline(ids[2], "It is about another member's conduct.")
+    ids.append(replies.submit(**statement()))  # still pending: kept
+    clock.set("2026-11-12T08:59:00+00:00")
+    assert replies.forget_old_emails() == 0  # not quite three months
+    clock.set("2026-11-12T09:01:00+00:00")
+    assert replies.forget_old_emails() == 1
+    emails = {s["id"]: s["email"] for s in replies.statements()}
     assert emails[ids[1]] is None and emails[ids[2]] and emails[ids[0]] and emails[ids[3]]
-    assert months_ago(datetime(2026, 5, 31, tzinfo=UTC), 3) == datetime(2026, 2, 28, tzinfo=UTC)
+    assert months_before(datetime(2026, 5, 31, tzinfo=UTC), 3) == datetime(2026, 2, 28, tzinfo=UTC)
+    # a statement nobody decides in three months lapses, and its address goes at once (wts-core docs/adr/0008)
+    clock.set("2026-11-14T09:00:01+00:00")
+    assert replies.lapse_undecided() == (1, 0)
+    lapsed = replies.statement(ids[3])
+    assert lapsed["status"] == "declined" and lapsed["email"] is None and lapsed["reason"] == "No decision was made in time; please send it again."
 
 
 # ---- never the model's, the record's or the search's -----------------------------------------------------------------
@@ -252,8 +290,8 @@ def test_statements_never_reach_the_model_the_record_or_the_search(site):
     text = f"{MARKER}: I said this about juries and I would say it again today in the House."
     for item in (f"/b/{bid}", f"/people/{BENN}"):
         client.post("/api/statements", json=statement(item=item, text=text))
-    for s in list_statements(state):
-        publish_statement(state, s["id"], person=BENN, checked="ok")
+    for s in list_statements(client):
+        client.app.state.replies.publish(s["id"], about=str(BENN), checked="ok")
     assert len(client.get(f"/api/statements?path=/b/{bid}").json()["statements"]) == 1
 
     fake.calls.clear()
@@ -274,19 +312,61 @@ def test_statements_never_reach_the_model_the_record_or_the_search(site):
 
 
 def test_nothing_that_searches_or_writes_briefings_reads_statements():
-    """Statements are read only by their own module, the web app's statement endpoints, the owner's commands and the
-    clean-up in the update; never by the briefing pipeline, the search, the index or the record's pages and feeds."""
+    """Statements are read only by the site's reports-and-statements module, the web app's statement endpoints, the
+    owner's commands and the clean-up in the update; never by the briefing pipeline, the search, the index or the
+    record's pages and feeds. (The table is the shared package's, ``wts_statements``; ``store/wts.py`` names the
+    site's old one once, to bring its rows across.)"""
     src = Path(__file__).resolve().parents[1] / "src" / "hansard"
-    allowed = {"api/statements.py", "api/app.py", "cli.py", "sync.py", "store/state.py"}
-    table = re.compile(r"\b(FROM|JOIN|INTO|UPDATE|TABLE IF NOT EXISTS)\s+statements\b", re.I)
+    allowed = {"replies.py", "owner.py", "api/app.py", "cli.py", "sync.py", "store/wts.py"}
+    table = re.compile(r"\b(FROM|JOIN|INTO|UPDATE|TABLE IF NOT EXISTS)\s+(wts_)?statements?(_log)?\b", re.I)
     for path in src.rglob("*.py"):
         rel = path.relative_to(src).as_posix()
         code = path.read_text(encoding="utf-8")
         if rel in allowed:
             continue
-        assert "hansard.api.statements" not in code and "api.statements" not in code, rel
+        assert "hansard.replies" not in code and "hansard.owner" not in code and "wts_core.replies" not in code, rel
         assert not table.search(code), rel
     app = (src / "api" / "app.py").read_text(encoding="utf-8")
     # in the web app, statements are only used by the statement endpoints
-    users = [line for line in app.splitlines() if re.search(r"\b(published|list_statements|add_statement)\(", line)]
+    users = [line for line in app.splitlines()
+             if re.search(r"\b(published|replies\.statements|replies\.submit)\(", line)]
     assert len(users) == 3
+
+
+def test_the_forms_let_through_no_more_than_the_rules_allow_so_no_too_long_refusal_is_ever_reached(
+        settings, tmp_path, monkeypatch):
+    """wts-core 0.3.0 lets a site leave out the six "too long" messages its own forms make unreachable, saying in
+    ``ReplyRules.form_max`` what the forms let through. The figures are the request bodies' own (the web pages'
+    fields have the same), and each is within the rule. Sent through the form, a field one character longer is
+    refused by the form, as it always was, before the right of reply sees it. The owner's own update, which comes
+    through no form, is told the limit in the package's words for the owner (O)."""
+    from typer.testing import CliRunner
+
+    from hansard import cli
+    from hansard.api.app import ReportBody, StatementBody
+    from hansard.replies import REPLY_MESSAGES, REPLY_RULES
+
+    def longest(model, field: str) -> int:
+        return next(m.max_length for m in model.model_fields[field].metadata if hasattr(m, "max_length"))
+
+    from_forms = {"text": longest(StatementBody, "text"), "name": longest(StatementBody, "name"),
+                  "role": longest(StatementBody, "role"), "link": longest(StatementBody, "link"),
+                  "report": longest(ReportBody, "message"), "contact": longest(ReportBody, "contact")}
+    assert dict(REPLY_RULES.form_max) == from_forms
+    limits = {"text": "max_chars", "name": "name_max", "role": "role_max", "link": "link_max",
+              "report": "report_max", "contact": "contact_max"}
+    for part, most in from_forms.items():
+        assert most <= getattr(REPLY_RULES, limits[part]), part
+    for left_out in ("too_many_chars", "name_too_long", "role_too_long", "link_too_long", "report_too_long",
+                     "contact_too_long"):
+        assert getattr(REPLY_MESSAGES, left_out) is None, left_out
+
+    monkeypatch.setattr(cli, "_settings", lambda: settings)
+    replies = replies_for(settings)
+    sid = replies.submit(**statement())
+    words = tmp_path / "long.txt"
+    words.write_text("word " + "x" * 2100, encoding="utf-8")
+    said = CliRunner().invoke(cli.app, ["statements", "update", str(sid), "--name", "N" * 121])
+    assert said.exit_code == 1 and "the new name is too long: the most is 120 characters" in said.output
+    said = CliRunner().invoke(cli.app, ["statements", "update", str(sid), "--text-file", str(words)])
+    assert said.exit_code == 1 and "Traceback" not in said.output

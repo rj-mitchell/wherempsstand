@@ -47,12 +47,14 @@ for svc in app caddy; do
 done
 key_result="$(docker compose exec -T app python -c "
 import anthropic
-from hansard.rag.answer import api_key, make_client
-if not api_key():
+from hansard.adapters import has_model, model_client
+from hansard.config import load_settings
+settings = load_settings()
+if not has_model(settings):
     print('none')
 else:
     try:
-        make_client().models.list(limit=1)
+        model_client(settings).client.models.list(limit=1)  # one free call, to check the key
         print('ok')
     except anthropic.AuthenticationError:
         print('rejected')
@@ -71,6 +73,23 @@ if docker compose exec -T app python -c "import urllib.request; urllib.request.u
 else
   bad "the app does not answer" "docker compose logs --tail 50 app"
 fi
+# Search by meaning: fine when it is on, and when the site has never embedded anything; a fault when the index has
+# vectors that are being refused (made with another embedding model than the one in use), since search has then
+# fallen back to words alone for every reader
+meaning="$(docker compose exec -T app hansard meaning-check 2>&1)"
+status=$?
+# the line before the last says what may be done with the models folder (data/models): on a server set up before
+# the shared package, nothing in it may be moved until the index has been opened on this version
+# (docs/OPERATIONS.md, "The models folder")
+if [[ "$meaning" == *$'\n'* ]]; then
+  folder_line="${meaning%$'\n'*}"
+  note "${folder_line##*$'\n'}"
+fi
+case $status in
+  0) ok "${meaning##*$'\n'}";;
+  1) bad "${meaning##*$'\n'}" "docker compose logs app | grep 'search by meaning'; then see docs/OPERATIONS.md, \"If search by meaning is off\"";;
+  *) note "could not check search by meaning (the site may be on a version without the check, or not running)";;
+esac
 if [[ -n "$DOMAIN" ]]; then
   proxied=""
   grep -qi '^server: cloudflare' <<<"$(curl -sI --max-time 20 "https://$DOMAIN/" 2>/dev/null)" && proxied=1
@@ -164,7 +183,7 @@ if [[ -n "$(swapon --show --noheadings 2>/dev/null)" ]]; then
 else
   note "no swap space: a large update can run out of memory (to add it: bash $DIR/deploy/swap.sh)"
 fi
-for t in hansard-sync.timer hansard-backup.timer; do
+for t in hansard-sync.timer hansard-backup.timer hansard-backup-check.timer hansard-weekly-report.timer; do
   if systemctl is-enabled --quiet "$t" 2>/dev/null; then
     ok "$t is on (next: $(systemctl show "$t" -p NextElapseUSecRealtime --value 2>/dev/null))"
   else

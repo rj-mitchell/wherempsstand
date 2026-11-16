@@ -104,6 +104,9 @@ interests_check = true
 max_tokens = 16000
 # Server-side refusal fallback (beta). Disable if your account or platform rejects it.
 use_fallbacks = true
+# The instructions to the model are the same for every request (apart from the date), so they are sent to be kept
+# in the provider's prompt cache: "short" (five minutes, as always), "long" (an hour, dearer to write) or "off".
+cache_instructions = "short"
 
 [embedding]
 # "fastembed" (local ONNX model; weights fetched once from Hugging Face and pinned)
@@ -116,6 +119,10 @@ dim = 384
 passage_words = 250
 # Small batches: same CPU throughput as 64, a fifth of the memory (ONNX attention buffers).
 batch_size = 8
+# How alike two questions must be to count as one theme in the weekly report (cosine similarity, for this model,
+# which scores unrelated text around 0.5 and a strong match around 0.85). A first figure, to be looked at again
+# once there are a few weeks' worth of questions.
+theme_similarity = 0.8
 
 [usage]
 # The site is public; each new model-written briefing costs money.
@@ -140,7 +147,17 @@ price_output_per_mtok = 20.0
 price_cache_read_per_mtok = 0.2
 cache_write_multiplier = 1.25
 
-# Prices for other models, where they differ from the above (Claude Opus 5.5).
+# Prices for each model the settings may name. Every model named in [answer] must have its entry here: the site
+# will not start with a model it has no prices for, so that none is costed at another's and the caps bite on time.
+# A model named in data/settings.local.toml needs its entry too; write it there as a table of its own
+# ([usage.models."<name>"], with its three prices): it is added beside these, which stay as they are. A model
+# whose name begins with one of these names is costed at that one's prices.
+[usage.models."claude-opus-5-5"]
+# the larger model the base prices above are for, should briefings be moved to it
+price_input_per_mtok = 4.0
+price_output_per_mtok = 20.0
+price_cache_read_per_mtok = 0.2
+
 [usage.models."claude-sonnet-5-5"]
 price_input_per_mtok = 2.0
 price_output_per_mtok = 10.0
@@ -183,3 +200,28 @@ unchanged_overlap = 0.8     # not rewritten when this share of the sources is th
 # special purposes exemption for research and journalism (the charity's policies/special-category-data.md, section 3).
 # Set to false to stop showing them at once, e.g. after a complaint or legal advice.
 show_ipsa = true
+
+[logs]
+# The structured log of briefings (data/logs/briefings.jsonl): one line for each stage a briefing reaches and one
+# for how it ended, never a reader's words. Kept for 14 days or 50 MB, whichever is less (wts-core docs/adr/0012).
+max_bytes = 3000000
+keep = 15
+days = 14
+
+[alerts]
+# What the weekly report and `hansard stats --check` warn about. Thresholds start unset: the first weekly
+# report proposes them from that week's figures, and the owner writes them here (or in data/settings.local.toml).
+# The names are p95_full_briefing_ms, error_rate, check_failure_rate, not_useful_rate and daily_cost_usd. An alert
+# never comes from a number nobody chose.
+
+[eval]
+# The most a run of the test questions may spend on the model, in US dollars (`hansard eval run`, which has each
+# briefing written): no run starts without a limit, and it stops cleanly once spending reaches it.
+max_cost_usd = 3.0
+
+[eval.thresholds]
+# What a run is held to (a threshold is min_ or max_ and the name of a figure). Citations and quotations must all
+# check and nothing may fail; the rest are left until the first run on the server's record gives a baseline.
+max_invalid_citations = 0
+max_unverified_quotations = 0
+max_errors = 0

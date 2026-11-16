@@ -1,40 +1,45 @@
+# Checks every push and pull request: lint and the tests (offline: the model is faked), the web app (types, tests,
+# build), that the family kit's copy in web/public/family/ is the version this site was last synced to, that the
+# server image builds and the site starts inside it on the sample data, and every page for accessibility problems
+# (scripts/a11y.mjs).
+#
+# The jobs that are the same on every Where They Stand site are the shared workflows of wts-core, called at the tag
+# of the package this site installs (pyproject.toml): the two are raised together, by hand, in one change
+# (wts-core docs/adr/0010; tests/test_dependencies.py checks they agree, and Dependabot is told to leave them).
 name: CI
 
 on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
+  # uv sync --frozen, ruff, pytest, with the family's Python and uv
   python:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-        with:
-          version: "0.11.32"
-      - run: uv python install 3.12
-      - run: uv sync --frozen --python 3.12
-      - run: uv run ruff check src tests scripts
-      - run: uv run pytest
+    uses: rj-mitchell/wts-core/.github/workflows/python.yml@v0.3.0
+    with:
+      lint-paths: "src tests scripts"
 
+  # npm ci, the type check, the tests and the build, with the family's Node
   web:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: web
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: web/package-lock.json
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
+    uses: rj-mitchell/wts-core/.github/workflows/web.yml@v0.3.0
+    with:
+      working-directory: web
 
-  # The server image must build, and the site must start inside it (on the offline sample data).
+  # The Where They Stand family kit version last synced into web/public/family/. Raise it in the same change as a
+  # new sync.
+  kit:
+    uses: rj-mitchell/wts-core/.github/workflows/kit.yml@v0.3.0
+    with:
+      version: "1.4.0"
+      site: mps
+      path: web/public/family
+
+  # The server image must build, and the site must start inside it (on the offline sample data). This job is the
+  # site's own: it starts the image as the server does and reads its pages, which the shared Docker workflow
+  # (build, and one command) does not.
   docker:
     runs-on: ubuntu-latest
     steps:
@@ -64,17 +69,20 @@ jobs:
           curl -fsS http://localhost:8000/api/status | grep -q "latest_record"
           curl -fsS -X POST http://localhost:8000/api/search -H "Content-Type: application/json" \
             -d '{"question": "trial by jury"}' | grep -q '"sources"'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Accessibility check (axe, WCAG 2.2 AA, light and dark, desktop and phone)
+      - name: The owner's commands run in the image, and the nightly housekeeping on the sample data
         run: |
-          mkdir -p /tmp/a11y && cp scripts/a11y.mjs /tmp/a11y/
-          cd /tmp/a11y
-          npm init -y > /dev/null
-          npm install --no-audit --no-fund playwright@1.63.0 axe-core@4.14.0
-          npx playwright install --with-deps chromium
-          node a11y.mjs http://localhost:8000
+          docker exec wts hansard check-settings
+          docker exec wts hansard meaning-check
+          docker exec wts hansard stats --since 7d
+          docker exec wts hansard tidy
+          docker exec wts hansard eval replay eval/fixtures
+      - name: Accessibility check (axe, WCAG 2.2 AA, light and dark, desktop and phone)
+        uses: rj-mitchell/wts-core/.github/actions/a11y@v0.3.0
+        with:
+          url: http://localhost:8000
       - name: Show the container log if anything failed
         if: failure()
         run: docker logs wts || true
+      - name: Stop the site
+        if: always()
+        run: docker rm -f wts || true

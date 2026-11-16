@@ -20,6 +20,7 @@ import { SameQuestion } from "./components/SameQuestion";
 import { SiteFooter } from "./components/SiteFooter";
 import { WhyChatbot } from "./components/WhyChatbot";
 import { followUpsFor } from "./followups";
+import { briefingGone } from "./gone";
 import { COMPARE_HANDOVER, MENUS, NAV } from "./nav";
 import type {
   Answer,
@@ -285,15 +286,12 @@ export default function App() {
         setTurns([
           {
             id,
-            question: e instanceof ApiError && e.status === 410 ? "Briefing withdrawn" : "Briefing not found",
+            question: briefingGone(e).question,
             settings,
             sources: [],
             streamText: "",
             status: "error",
-            error:
-              e instanceof ApiError && e.status === 410
-                ? "This briefing has been withdrawn."
-                : "There is no briefing at this address. It may have been mistyped.",
+            error: briefingGone(e).error,
           },
         ]),
       );

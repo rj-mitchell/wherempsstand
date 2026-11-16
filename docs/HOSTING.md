@@ -25,6 +25,9 @@ for all of them**, in Where MPs Stand's checkout at `/opt/hansardgpt` (its origi
 | Where Landlords Stand | `/opt/wherelandlordsstand` | `landlords-update.service` | Thursdays at 11.40am (UK time) |
 
 Each site also has its own nightly backup (`hansard-backup`, `councils-backup`, `wcs-backup`, `landlords-backup`).
+Where MPs Stand's backup is followed by its nightly housekeeping (`hansard tidy`), and it has two more timers: a
+check each morning that backups are still being made (`hansard-backup-check`, 9.40am) and the weekly report on how
+briefings went (`hansard-weekly-report`, Mondays at 6.10am); [OPERATIONS.md](OPERATIONS.md), "How briefings went".
 Never put the server's address in this or any other public repository, letters included: the sites sit behind
 Cloudflare, and the server turns away connections that don't come through it.
 Where Lives Stand, the charity's own site (wheretheystand.uk) and the game Understudy: Lumaya run on Cloudflare
@@ -221,7 +224,7 @@ if something was put right) and withdraw a briefing. A withdrawal reason is show
 |---|---|
 | See usage, spend, visits and feedback | the admin page, or the `curl` command printed at the end of setup |
 | See the update history | `curl -H "Authorization: Bearer YOUR_ADMIN_TOKEN" https://wherempsstand.com/api/admin/sync` |
-| Install a new version of the site | merge the latest changes into `main` on GitHub (step 1), then on the server: `bash /opt/hansardgpt/deploy/update.sh` (it finishes with the health check) |
+| Install a new version of the site | merge the latest changes into `main` on GitHub (step 1), then on the server: `bash /opt/hansardgpt/deploy/update.sh` (it finishes with the health check). Not in the hours the timers run, and with no `hansard` command of the new version run by hand first: [OPERATIONS.md](OPERATIONS.md), "New code". The version of November 2026 moves the state database: read "At deploy" there first |
 | Restart the site | `cd /opt/hansardgpt/deploy && docker compose restart` |
 | Change the API key | the command below |
 | Change the "Support this site" link (it points to the charity's Donate page, https://wheretheystand.uk/donate) | add `HANSARD_DONATE_URL=https://…` to `/opt/hansardgpt/deploy/.env`, then `docker compose up -d` in the same folder |
@@ -250,6 +253,8 @@ if something was put right) and withdraw a briefing. A withdrawal reason is show
 | Check that early day motions can be read from Parliament (free) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard edms --check` |
 | Collect all early day motions since 1997 in one go, in the background (free; about 8–10 hours the first time, one request at a time) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard edms --months 400 --signatures 60000` |
 | Add, change or remove a topic | edit `config/topics.toml` in the code, then install it as a new version. Never change a published topic's `slug`: it is its address |
+| Hide a briefing while a complaint about it is looked into, and show it again | `docker compose exec app hansard hide /b/THE_ID --note "This briefing is not shown while a concern about it is looked into."`; `docker compose exec app hansard unhide /b/THE_ID`; `hansard hidden` lists what is hidden ([OPERATIONS.md](OPERATIONS.md), "Hiding a briefing") |
+| See how briefings went this week | `docker compose exec app hansard stats --since 7d`; the weekly reports are in `/data/logs/reports/` |
 | Withdraw a briefing (after a complaint, say) | `curl -X POST -H "Authorization: Bearer YOUR_ADMIN_TOKEN" -H "Content-Type: application/json" -d '{"reason": "complaint about attribution"}' https://wherempsstand.com/api/admin/briefings/THE_ID/withdraw` |
 
 Your admin token is in `/opt/hansardgpt/deploy/.env` (`HANSARD_ADMIN_TOKEN=`).
@@ -701,7 +706,8 @@ within B2's free 10 GB).
 4. Make a backup now, which also sends it off-site:
    `docker compose run --rm -T app hansard backup --to /backups`. It should end "Off-site copy: stored in …".
 
-From then on it happens every night. The admin page shows a warning if a backup or its off-site copy fails.
+From then on it happens every night. The admin page shows a warning if a backup or its off-site copy fails. Each morning
+`hansard-backup-check` looks as well, and the alerts address is emailed if a backup or its off-site copy has stopped.
 
 To get a backup back from B2 (if the server is lost): in the Backblaze website, open the bucket, download the
 newest `where-they-stand-….tar.gz`, copy it into `/opt/hansardgpt/deploy/backups/` on the new server, and restore it

@@ -1,12 +1,37 @@
 # Open items
 
-What is still to do for Where MPs Stand, as of 6 November 2026 (updated the same day). Tick items off or delete
+What is still to do for Where MPs Stand, as of 6 November 2026 (updated 16 November 2026). Tick items off or delete
 them when done.
 
 Most of these were in two files of the pre-public repository, `rj-mitchell/hansardgpt` (`docs/ROADMAP.md` of
 11 October and `docs/FOLLOW_UP.md` of 12–19 October), which is being archived. Everything there that was done or
 overtaken has been left behind. Items that concern the whole family (uptime monitoring, the server's routine, name
 and trade mark checks, legal review) are in the charity's plan (rj-mitchell/wheretheystand-charity, `plans/family/STATUS.md`).
+
+## The shared engine (after the move onto wts-core, November 2026)
+
+- [ ] **Deploy the move**, reading [OPERATIONS.md](OPERATIONS.md), "At deploy", first: the look at the old
+  database beforehand, a deploy away from the timers' hours, and what to look at afterwards.
+- [ ] **Set the alert thresholds** once the first weekly report has proposed them (`[alerts]`; OPERATIONS.md, "How
+  briefings went"). Until then no alert about briefings is sent.
+- [ ] **A first `hansard eval run` on the server**, for the baseline the thresholds in `[eval.thresholds]` are held
+  to ([EVALUATION.md](EVALUATION.md)).
+- [ ] **1 February 2027: the old tables are dropped** by the nightly tidy, and `deploy/undo-wts-core.sql` stops
+  being a way back. Nothing to do if all is well; after it, `OLD_TABLES` and the one-off import can be taken out
+  of the code in the release after the last backup from before the move has aged out.
+- [x] **Move to wts-core 0.3.0** (16 November 2026), before the move onto the shared package is merged and
+  deployed. Both things it waited for are in that version: an answer of the interests check with nothing in it is
+  recorded for what it cost and counted against the caps, and the record of each briefing keeps the hour it was
+  asked in, while a spending row keeps its day, and no account or visitor, once the day is over.
+- [ ] **The models folder, after the deploy**: once `hansard meaning-check` says anything else in `/data/models`
+  may be moved, the re-ranker's old files there can be deleted to free their space (OPERATIONS.md, "The models
+  folder"). Nothing goes wrong if they are left.
+- [ ] **A follow-up question is not yet marked on the earlier briefing's record.** The page sends the question it
+  follows, not the briefing's address, and the API was given no new field for it. A follow-up's own record says
+  it was one.
+- [ ] **Pages of the official record cannot be hidden**, only saved briefings (OPERATIONS.md, "Hiding a briefing").
+  If the charity's policy needs a debate or a member's page hidden while a concern is decided, that is a change
+  to those pages, to be designed.
 
 ## Licences
 

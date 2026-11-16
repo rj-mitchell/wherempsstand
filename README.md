@@ -39,6 +39,16 @@ passed to the charity. The repository was renamed from `wheretheystand` on 6 Nov
 adapted its briefing engine for the United Nations, and Where Councils Stand adapted Where Countries Stand's, with
 some parts taken directly from this one (same licence).
 
+**The shared engine.** What this site does in the same way as its sister sites is not written here but taken from
+**wts-core**, the Where They Stand sites' shared package
+([rj-mitchell/wts-core](https://github.com/rj-mitchell/wts-core), AGPL-3.0; the version is fixed in
+`pyproject.toml`, and CI calls its workflows at the same tag): settings, limits and spending caps, the answer
+cache and saved briefings, the checks on every briefing, the flow of a question, the model client, the embedder
+and the index's tables, reports and the right of reply, backups, the record of how each briefing went, and the
+evaluation harness. What follows Parliament's record is here: reading and searching Hansard, members and their
+roles on the day, ranking and balance, votes, interests, the pages, and every sentence a reader is shown
+([docs/DECISIONS.md](docs/DECISIONS.md), 33).
+
 **Where it runs.** On the charity's shared server in London, beside Where Councils Stand, Where Landlords Stand and
 Where Countries Stand. This repository's `deploy/` is the front door for every site there (Caddy, email from the
 server, alerts, the watchdog, disk checks and the update lock), so the other sites' deployment guides link to
@@ -71,7 +81,7 @@ under its [licence](LICENSE).
 | [ATTRIBUTION.md](ATTRIBUTION.md) | The data: every source, its licence and how it is credited |
 | [docs/METHOD.md](docs/METHOD.md) | How the record is read and searched, how evidence is chosen and ranked, and how briefings stay grounded |
 | [docs/DESIGN.md](docs/DESIGN.md) | The look, colour and type, the family binding, and the links to sister sites |
-| [docs/OPERATIONS.md](docs/OPERATIONS.md) | Running it locally or on a server, day-to-day commands, spending controls, backups and tests |
+| [docs/OPERATIONS.md](docs/OPERATIONS.md) | Running it locally or on a server, day-to-day commands, spending controls, backups, the state database, deploying new code, and tests |
 | [docs/HOSTING.md](docs/HOSTING.md) | Putting it online, and the shared server's front door for every site on it |
 | [docs/COSTS.md](docs/COSTS.md) | What costs money, and how spending is controlled |
 | [docs/EVALUATION.md](docs/EVALUATION.md) | The 62-question test set, what it showed, and measured performance |

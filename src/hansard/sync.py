@@ -32,7 +32,7 @@ import pyarrow.parquet as pq
 
 from hansard.config import STATIC_DIR, Settings
 from hansard.index.build import Indexer, embed_pending
-from hansard.index.lance import SearchIndex
+from hansard.index.lance import IndexOutOfDate, ensure_portfolio_indices, search_index
 from hansard.ingest import ingest
 from hansard.reference.build import (
     REFERENCE_VERSION,
@@ -209,10 +209,12 @@ def install_reference(settings: Settings, state: StateDB, ref: ReferenceData, sh
 def refresh_topics_safely(settings: Settings, state: StateDB) -> list[dict[str, Any]] | str:
     """Refresh the topic briefings that are due; a failure here never fails the sync."""
     try:
+        from hansard.api.usage import desk
         from hansard.rag.pipeline import Pipeline
+        from hansard.store.wts import open_core
         from hansard.topics import refresh_topics
 
-        return refresh_topics(settings, state, Pipeline(settings))
+        return refresh_topics(settings, state, Pipeline(settings), desk(settings, open_core(settings, path=state.path)))
     except Exception as exc:
         log.warning("topic briefings were not refreshed: %s", exc)
         return f"error: {type(exc).__name__}: {exc}"
@@ -246,16 +248,23 @@ def run_sync(settings: Settings, **kwargs: Any) -> dict[str, Any]:
 def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | None = 60.0,
               members_dir: Path | None = None, embedder=None, workers: int = 3,
               today: date | None = None) -> dict[str, Any]:
+    from hansard.store.wts import check_before_opening
+
+    # the settings, and that the old code has not written to a moved database: before the database is opened
+    check_before_opening(settings)
     state = StateDB(settings.state_db)
     stopped = state.close_unfinished_runs()
     if stopped:
         log.warning("%d earlier update(s) stopped before finishing (the server may have run out of memory)", stopped)
-    from hansard.api.statements import forget_old_emails
+    from hansard.owner import tidy_replies
 
-    forget_old_emails(state)  # statements' email addresses, three months after they are withdrawn or declined
+    # statements' email addresses, three months after they are withdrawn, declined or removed; and what nobody
+    # decided in three months
+    tidy_replies(settings, path=state.path)
     run_id = state.start_run("sync")
     started = time.time()
     stats: dict[str, Any] = {}
+    meaning_off = ""  # set when the search index refuses the embedding model in use
     try:
         t = time.time()
         stats["reference"] = refresh_reference(settings, state, members_dir)
@@ -278,24 +287,25 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
             log.exception("1997-2001 votes not loaded")
             stats["votes_1997"] = {"error": repr(exc)}
 
-        idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+        # opened as it stands: adding passages and searching by words need no embedding model
+        idx = search_index(settings.index_dir)
         indexer = Indexer(settings, idx, state)
         t = time.time()
         first_build = not idx.has_data()
         passages = indexer.index_pending()
         if idx.ensure_vector_ids():
             log.info("built the vectors table's passage index")
-        if idx.ensure_portfolio_indices():
+        if ensure_portfolio_indices(idx):
             log.info("built the passages' portfolio indices")
         log.info("checking for passages waiting to be merged into the search indices")
         waiting = 0 if first_build else idx.unmerged()  # includes rows an earlier, stopped update added
         if first_build and passages:
-            idx.build_indices()
+            idx.build_indexes()
         elif passages or waiting:
             # before updating speaker details below: those updates find passages through these indices
             log.info("merging %d new passages into the search indices", waiting or passages)
             t_merge = time.time()
-            idx.optimize()  # merges new rows into the BM25 and scalar indices incrementally
+            idx.tidy()  # merges new rows into the BM25 and scalar indices incrementally
             log.info("merged in %.0fs", time.time() - t_merge)
         people = pending_people(state)
         reenriched = 0
@@ -304,7 +314,7 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
             reenriched = indexer.reenrich_people(people)
             log.info("speaker details changed on %d passages", reenriched)
             if reenriched:
-                idx.optimize()
+                idx.tidy()
         state.set(PENDING_PEOPLE, "[]")
         stats["index"] = {"passages_written": passages, "passages_reenriched": reenriched,
                           "people_reenriched": len(people), "seconds": round(time.time() - t, 1), **idx.stats()}
@@ -510,18 +520,29 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
         stats["reranker"] = ensure_reranker(settings)
 
         if settings.embedding.get("enabled", True) and (embed_minutes is None or embed_minutes > 0):
-            from hansard.embed.base import get_embedder
+            from hansard.adapters import get_embedder
 
             t = time.time()
             emb = embedder or get_embedder(settings)
-            n = embed_pending(settings, idx, state, emb,
-                              max_seconds=embed_minutes * 60 if embed_minutes else None)
-            stats["embed"] = {"passages_embedded": n, "files_remaining": len(state.unembedded()),
-                              "seconds": round(time.time() - t, 1)}
+            try:  # the index says which model its vectors were made with, and takes no other's
+                n = embed_pending(settings, search_index(settings.index_dir, emb), state, emb,
+                                  max_seconds=embed_minutes * 60 if embed_minutes else None)
+                stats["embed"] = {"passages_embedded": n, "files_remaining": len(state.unembedded()),
+                                  "seconds": round(time.time() - t, 1)}
+            except IndexOutOfDate as exc:
+                n = 0
+                log.error("no new passages embedded: %s", exc)
+                stats["embed"] = {"error": f"the embedding model has changed since the search index was built ({exc}): "
+                                           "search is by words alone until `hansard embed --start-again` has made "
+                                           "the vectors again", "files_remaining": len(state.unembedded())}
+                # The rest of the update is carried through (new records are read in and found by words), but the
+                # run ends as failed, so that the alert goes out: search by meaning is off for every reader, and
+                # nobody would otherwise be told.
+                meaning_off = "search by meaning is OFF: " + stats["embed"]["error"]
             if n:  # index the new vectors now, so later look-ups by passage never read them all into memory
                 idx.ensure_vector_ids()
                 log.info("indexing %d new vectors", n)
-                idx.optimize()
+                idx.tidy()
 
             t = time.time()
             try:  # witnesses' answers to committees, for meaning-based search, within their own time allowance
@@ -547,7 +568,11 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
         cutoff = ((today or date.today()) - timedelta(days=COMPACT_AFTER_DAYS)).isoformat()
         stats["compact"] = {**compact(settings.parquet_dir, cutoff), "seconds": round(time.time() - t, 1)}
         stats["seconds"] = round(time.time() - started, 1)
-        state.finish_run(run_id, stats)
+        if meaning_off:
+            stats["error"] = meaning_off
+            state.finish_run(run_id, stats, error=meaning_off)
+        else:
+            state.finish_run(run_id, stats)
     except Exception as exc:
         stats["seconds"] = round(time.time() - started, 1)
         stats["error"] = f"{type(exc).__name__}: {exc}"

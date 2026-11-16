@@ -143,7 +143,8 @@ def test_answers_must_name_something_particular_to_the_question(tmp_path):
 
 
 def test_briefings_can_include_committee_evidence(indexed_settings):
-    from hansard.embed.base import HashingEmbedder
+    from wts_core.adapters.hashing import HashingEmbedder
+
     from hansard.engine import Engine, Scope
     from hansard.rag.pipeline import AskRequest, Pipeline
     from hansard.rag.query_parse import parse_offline
@@ -182,7 +183,8 @@ def test_evidence_is_also_found_by_meaning(indexed_settings):
     """Answers are embedded and found by meaning: an answer without every word of the question still turns up."""
     import shutil
 
-    from hansard.embed.base import HashingEmbedder
+    from wts_core.adapters.hashing import HashingEmbedder
+
     from hansard.engine import Engine
     from hansard.index.evidence import EvidenceVectors, embed_evidence
     from hansard.rag.pipeline import Pipeline, merge_ranked

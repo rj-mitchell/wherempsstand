@@ -1,0 +1,2412 @@
+{
+ "admin_briefings": {
+  "briefings": [
+   {
+    "created_at": "2026-11-06T12:00:00+00:00",
+    "id": "briefingac",
+    "question": "An older question?",
+    "withdrawn_at": "2026-11-07T09:00:00+00:00",
+    "withdrawn_reason": "It quoted the wrong debate."
+   },
+   {
+    "created_at": "2026-11-05T12:00:00+00:00",
+    "id": "briefingab",
+    "question": "And what did peers say?",
+    "withdrawn_at": null,
+    "withdrawn_reason": null
+   },
+   {
+    "created_at": "2026-11-03T07:15:20+00:00",
+    "id": "briefingad",
+    "question": "trial by jury",
+    "withdrawn_at": null,
+    "withdrawn_reason": null
+   },
+   {
+    "created_at": "2026-10-25T12:00:00+00:00",
+    "id": "briefingaa",
+    "question": "What has been said about trial by jury since 2020?",
+    "withdrawn_at": null,
+    "withdrawn_reason": null
+   }
+  ]
+ },
+ "admin_reports": {
+  "reports": [
+   {
+    "at": "2026-11-11T09:00:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": "named@example.org",
+    "id": 3,
+    "kind": "takedown",
+    "message": "Please remove my name.",
+    "page": "/debates/2021-03-04/commons/trial-by-jury",
+    "public_note": null,
+    "resolution": null,
+    "status": "open"
+   },
+   {
+    "at": "2026-11-12T11:00:00+00:00",
+    "briefing_id": null,
+    "closed_at": "2026-11-12T15:00:00+00:00",
+    "contact": null,
+    "id": 6,
+    "kind": "general",
+    "message": "Dismissed the same day.",
+    "page": null,
+    "public_note": null,
+    "resolution": "Nothing to change.",
+    "status": "dismissed"
+   },
+   {
+    "at": "2026-11-12T10:00:00+00:00",
+    "briefing_id": "briefingab",
+    "closed_at": "2026-11-12T15:00:00+00:00",
+    "contact": null,
+    "id": 5,
+    "kind": "correction",
+    "message": "Closed the same day.",
+    "page": null,
+    "public_note": "A briefing gave the wrong date; corrected.",
+    "resolution": "The briefing was corrected.",
+    "status": "resolved"
+   },
+   {
+    "at": "2026-11-12T09:00:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": null,
+    "id": 4,
+    "kind": "complaint",
+    "message": "A loaded word about a member.",
+    "page": "/people/10669",
+    "public_note": null,
+    "resolution": null,
+    "status": "open"
+   },
+   {
+    "at": "2026-11-10T09:00:00+00:00",
+    "briefing_id": "briefingaa",
+    "closed_at": null,
+    "contact": "reader@example.org",
+    "id": 2,
+    "kind": "correction",
+    "message": "The date of the debate is wrong.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open"
+   },
+   {
+    "at": "2026-07-01T09:00:00+00:00",
+    "briefing_id": null,
+    "closed_at": null,
+    "contact": "old@example.org",
+    "id": 1,
+    "kind": "general",
+    "message": "An old report, never closed.",
+    "page": null,
+    "public_note": null,
+    "resolution": null,
+    "status": "open"
+   }
+  ]
+ },
+ "admin_statements": {
+  "statements": [
+   {
+    "at": "2026-11-12T09:00:00+00:00",
+    "checked": null,
+    "closed_at": null,
+    "email": "office@example.org",
+    "id": 2,
+    "item_path": "/people/10669",
+    "link": null,
+    "name": "Still Waiting",
+    "person": 10669,
+    "published_at": null,
+    "reason": null,
+    "role": "MP for Leeds South",
+    "status": "pending",
+    "text": "A statement not yet decided at all.",
+    "updated_at": null
+   },
+   {
+    "at": "2026-11-11T09:00:00+00:00",
+    "checked": "Replied from their parliament.uk address.",
+    "closed_at": null,
+    "email": "office@example.org",
+    "id": 8,
+    "item_path": "/people/10669",
+    "link": null,
+    "name": "Shown With No Link",
+    "person": 10669,
+    "published_at": "2026-11-11T15:00:00+00:00",
+    "reason": null,
+    "role": "MP for Leeds South",
+    "status": "published",
+    "text": "Published as written, no link.",
+    "updated_at": null
+   },
+   {
+    "at": "2026-11-08T09:00:00+00:00",
+    "checked": "Replied from their parliament.uk address, 9 November.",
+    "closed_at": null,
+    "email": "office@example.org",
+    "id": 1,
+    "item_path": "/b/briefingaa",
+    "link": "https://hansard.parliament.uk/commons/2021-03-04",
+    "name": "Hilary Benn",
+    "person": 10669,
+    "published_at": "2026-11-10T09:00:00+00:00",
+    "reason": null,
+    "role": "MP for Leeds South",
+    "status": "published",
+    "text": "New words, exactly as the author sent them.",
+    "updated_at": "2026-11-10T09:00:00+00:00"
+   },
+   {
+    "at": "2026-11-01T09:00:00+00:00",
+    "checked": null,
+    "closed_at": "2026-11-02T09:00:00+00:00",
+    "email": "office@example.org",
+    "id": 3,
+    "item_path": "/b/briefingab",
+    "link": null,
+    "name": "Declined Lately",
+    "person": null,
+    "published_at": null,
+    "reason": "It is about another member's conduct.",
+    "role": "MP for Leeds South",
+    "status": "declined",
+    "text": "This is about another member entirely.",
+    "updated_at": null
+   },
+   {
+    "at": "2026-07-05T09:00:00+00:00",
+    "checked": "Replied from their own address.",
+    "closed_at": "2026-11-06T09:00:00+00:00",
+    "email": "office@example.org",
+    "id": 5,
+    "item_path": "/b/briefingab",
+    "link": null,
+    "name": "Taken Down Lately",
+    "person": 10115,
+    "published_at": "2026-07-06T09:00:00+00:00",
+    "reason": "It broke the rules: it named a private person.",
+    "role": "MP for Leeds South",
+    "status": "declined",
+    "text": "Shown until last week, when it was taken down.",
+    "updated_at": null
+   },
+   {
+    "at": "2026-07-01T09:00:00+00:00",
+    "checked": "Telephoned the office.",
+    "closed_at": "2026-08-01T10:00:00+00:00",
+    "email": null,
+    "id": 4,
+    "item_path": "/people/10669",
+    "link": null,
+    "name": "Withdrawn Long Ago",
+    "person": 10669,
+    "published_at": "2026-07-02T09:00:00+00:00",
+    "reason": "Withdrawn by the author.",
+    "role": "MP for Leeds South",
+    "status": "withdrawn",
+    "text": "Shown for a while, then not.",
+    "updated_at": null
+   },
+   {
+    "at": "2026-07-01T09:00:00+00:00",
+    "checked": null,
+    "closed_at": null,
+    "email": "waiting@example.org",
+    "id": 7,
+    "item_path": "/b/briefingac",
+    "link": null,
+    "name": "Waiting Too Long",
+    "person": null,
+    "published_at": null,
+    "reason": null,
+    "role": "MP for Leeds South",
+    "status": "pending",
+    "text": "Nobody decided this one in four months.",
+    "updated_at": null
+   },
+   {
+    "at": "2026-06-01T09:00:00+00:00",
+    "checked": null,
+    "closed_at": "2026-06-02T09:00:00+00:00",
+    "email": null,
+    "id": 6,
+    "item_path": "/debates/2021-03-04/commons/trial-by-jury",
+    "link": null,
+    "name": "Declined Long Ago",
+    "person": null,
+    "published_at": null,
+    "reason": "Not from the member.",
+    "role": "MP for Leeds South",
+    "status": "declined",
+    "text": "Never shown, and declined in June.",
+    "updated_at": null
+   }
+  ]
+ },
+ "admin_usage": {
+  "alerts": [
+   {
+    "level": "error",
+    "text": "4 briefings failed in the last 24 hours (latest: briefing, xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx). See Recent failures."
+   }
+  ],
+  "by_user": [
+   {
+    "calls": 7,
+    "cost_usd": 0.4817,
+    "email": "(public)",
+    "visitors": 3
+   },
+   {
+    "calls": 3,
+    "cost_usd": 0.0308,
+    "email": "(system)",
+    "visitors": 0
+   },
+   {
+    "calls": 2,
+    "cost_usd": 0.008,
+    "email": "researcher@example.org",
+    "visitors": 0
+   }
+  ],
+  "failures": [
+   {
+    "at": "2026-11-13T11:31:00+00:00",
+    "error": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "kind": "briefing",
+    "question": ""
+   },
+   {
+    "at": "2026-11-13T11:30:00+00:00",
+    "error": "The model declined to answer this question.",
+    "kind": "briefing",
+    "question": "And what did peers say?"
+   },
+   {
+    "at": "2026-11-13T07:15:00+00:00",
+    "error": "no briefing was written",
+    "kind": "topic",
+    "question": "trial by jury"
+   },
+   {
+    "at": "2026-11-12T23:00:00+00:00",
+    "error": "AuthenticationError: bad key",
+    "kind": "question reading",
+    "question": "What has been said about trial by jury since 2020?"
+   },
+   {
+    "at": "2026-08-01T00:00:00+00:00",
+    "error": "RuntimeError: an old failure",
+    "kind": "briefing",
+    "question": "An old question?"
+   }
+  ],
+  "month": "2026-11",
+  "popular_questions": [
+   {
+    "last": "2026-11-13",
+    "question": "what has been said about trial by jury since 2020?",
+    "times": 1
+   }
+  ],
+  "tasks": {
+   "ask": {
+    "pct": 100,
+    "visitors": 1
+   },
+   "days": 30,
+   "follow_up": {
+    "pct": 0,
+    "visitors": 0
+   },
+   "source": {
+    "pct": 0,
+    "visitors": 0
+   },
+   "useful": {
+    "pct": 50,
+    "rated": 2,
+    "yes": 1
+   },
+   "visitors": 1
+  },
+  "today_calls": 7,
+  "today_usd": 0.0694,
+  "total_usd": 0.5205,
+  "visits": {
+   "by_day": [
+    {
+     "day": "2026-11-13",
+     "views": 1,
+     "visitors": 1
+    }
+   ],
+   "days": 30,
+   "feedback": {
+    "recent_not_useful": [
+     {
+      "at": "2026-11-13T11:40:00+00:00",
+      "question": "And what did peers say?"
+     }
+    ],
+    "total": 2,
+    "useful": 1
+   },
+   "top_pages": [
+    {
+     "path": "/people/10669",
+     "views": 1
+    }
+   ],
+   "top_referrers": [
+    {
+     "host": "example.org",
+     "views": 1
+    }
+   ]
+  }
+ },
+ "alerts": [
+  {
+   "level": "error",
+   "text": "4 briefings failed in the last 24 hours (latest: briefing, xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx). See Recent failures."
+  },
+  {
+   "level": "error",
+   "text": "Spending today is $0.07, 139% of the $0 cap. New briefings pause at the cap."
+  }
+ ],
+ "briefings": {
+  "briefingaa": {
+   "created_at": "2026-10-25T12:00:00+00:00",
+   "events": [
+    {
+     "plan": {
+      "question": "What has been said about trial by jury since 2020?"
+     },
+     "type": "plan",
+     "usage": null
+    },
+    {
+     "candidates": 12,
+     "evidence": {
+      "records": 2
+     },
+     "semantic": true,
+     "sources": [
+      {
+       "group": "opposition",
+       "kind": "record",
+       "n": 1,
+       "title": "Hilary Benn, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "government",
+       "kind": "record",
+       "n": 2,
+       "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+      }
+     ],
+     "type": "sources"
+    },
+    {
+     "answer": {
+      "citations_invalid": 0,
+      "citations_total": 2,
+      "grounded_ratio": 0.5,
+      "loaded_words": 1,
+      "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+      "no_records": false,
+      "quotes_total": 1,
+      "quotes_unverified": 0,
+      "segments": [
+       {
+        "cited": [
+         {
+          "n": 1,
+          "text": "The right to trial by jury is a cornerstone of our liberties"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         1
+        ],
+        "status": "cited",
+        "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " In the debate that followed:"
+       },
+       {
+        "cited": [
+         {
+          "n": 2,
+          "text": "We will keep jury trial for serious offences"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         2
+        ],
+        "status": "cited",
+        "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+       },
+       {
+        "cited": [],
+        "loaded": [
+         {
+          "end": 19,
+          "start": 12,
+          "word": "turning"
+         }
+        ],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " This was a turning point for every member in the Chamber."
+       }
+      ],
+      "unsupported_segments": 2
+     },
+     "interests": [
+      {
+       "items": [
+        {
+         "category": "3 Gifts",
+         "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2021-01-05",
+         "summary": "Bar Council - £500.00",
+         "url": null
+        },
+        {
+         "category": "1 Employment",
+         "connection": "A post in the department.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2020-02-01",
+         "summary": "Parliamentary Under-Secretary of State, Ministry of Justice",
+         "url": null
+        }
+       ],
+       "link": "/people/10669#h-interests",
+       "name": "Hilary Benn",
+       "person_id": "uk.org.publicwhip/person/10669",
+       "register": "Register of Members' Financial Interests",
+       "source": 1
+      },
+      {
+       "items": [
+        {
+         "category": "1 Employment",
+         "connection": "A post in the Government.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2020-02-01",
+         "summary": "Salary as Lord Chancellor",
+         "url": null
+        }
+       ],
+       "link": "/people/10115#h-interests",
+       "name": "Kenneth Clarke",
+       "person_id": "uk.org.publicwhip/person/10115",
+       "register": "Register of Members' Financial Interests",
+       "source": 2
+      }
+     ],
+     "model": "claude-sonnet-5-5",
+     "stop_reason": "end_turn",
+     "type": "final"
+    }
+   ],
+   "id": "briefingaa",
+   "model": "claude-sonnet-5-5",
+   "question": "What has been said about trial by jury since 2020?",
+   "records_up_to": "2026-10-24",
+   "settings": {
+    "compare": [],
+    "follows": null,
+    "mode": "summary",
+    "plan": null,
+    "recency": null,
+    "role_weight": null,
+    "scope": {
+     "devolved": true,
+     "edms": true,
+     "evidence": true,
+     "pbc": true,
+     "votes": true,
+     "written": true
+    },
+    "sources_only": false
+   },
+   "withdrawn_at": null,
+   "withdrawn_reason": null
+  },
+  "briefingab": {
+   "created_at": "2026-11-05T12:00:00+00:00",
+   "events": [
+    {
+     "plan": {
+      "question": "And what did peers say?"
+     },
+     "type": "plan",
+     "usage": null
+    },
+    {
+     "candidates": 12,
+     "evidence": {
+      "records": 2
+     },
+     "semantic": true,
+     "sources": [
+      {
+       "group": "opposition",
+       "kind": "record",
+       "n": 1,
+       "title": "Hilary Benn, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "government",
+       "kind": "record",
+       "n": 2,
+       "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+      }
+     ],
+     "type": "sources"
+    },
+    {
+     "answer": {
+      "citations_invalid": 0,
+      "citations_total": 2,
+      "grounded_ratio": 0.5,
+      "loaded_words": 1,
+      "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+      "no_records": false,
+      "quotes_total": 1,
+      "quotes_unverified": 0,
+      "segments": [
+       {
+        "cited": [
+         {
+          "n": 1,
+          "text": "The right to trial by jury is a cornerstone of our liberties"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         1
+        ],
+        "status": "cited",
+        "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " In the debate that followed:"
+       },
+       {
+        "cited": [
+         {
+          "n": 2,
+          "text": "We will keep jury trial for serious offences"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         2
+        ],
+        "status": "cited",
+        "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+       },
+       {
+        "cited": [],
+        "loaded": [
+         {
+          "end": 19,
+          "start": 12,
+          "word": "turning"
+         }
+        ],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " This was a turning point for every member in the Chamber."
+       }
+      ],
+      "unsupported_segments": 2
+     },
+     "interests": [
+      {
+       "items": [
+        {
+         "category": "3 Gifts",
+         "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2021-01-05",
+         "summary": "Bar Council - £500.00",
+         "url": null
+        },
+        {
+         "category": "1 Employment",
+         "connection": "A post in the department.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2020-02-01",
+         "summary": "Parliamentary Under-Secretary of State, Ministry of Justice",
+         "url": null
+        }
+       ],
+       "link": "/people/10669#h-interests",
+       "name": "Hilary Benn",
+       "person_id": "uk.org.publicwhip/person/10669",
+       "register": "Register of Members' Financial Interests",
+       "source": 1
+      },
+      {
+       "items": [
+        {
+         "category": "1 Employment",
+         "connection": "A post in the Government.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2020-02-01",
+         "summary": "Salary as Lord Chancellor",
+         "url": null
+        }
+       ],
+       "link": "/people/10115#h-interests",
+       "name": "Kenneth Clarke",
+       "person_id": "uk.org.publicwhip/person/10115",
+       "register": "Register of Members' Financial Interests",
+       "source": 2
+      }
+     ],
+     "model": "claude-sonnet-5-5",
+     "stop_reason": "end_turn",
+     "type": "final"
+    }
+   ],
+   "id": "briefingab",
+   "model": "claude-opus-5-5",
+   "question": "And what did peers say?",
+   "records_up_to": "2026-11-04",
+   "settings": {
+    "compare": [],
+    "follows": null,
+    "mode": "comprehensive",
+    "plan": null,
+    "recency": null,
+    "role_weight": null,
+    "scope": {
+     "devolved": true,
+     "edms": true,
+     "evidence": true,
+     "pbc": true,
+     "votes": true,
+     "written": true
+    },
+    "sources_only": false
+   },
+   "withdrawn_at": null,
+   "withdrawn_reason": null
+  },
+  "briefingac": {
+   "created_at": "2026-11-06T12:00:00+00:00",
+   "events": [
+    {
+     "plan": {
+      "question": "An older question?"
+     },
+     "type": "plan",
+     "usage": null
+    },
+    {
+     "candidates": 12,
+     "evidence": {
+      "records": 2
+     },
+     "semantic": true,
+     "sources": [
+      {
+       "group": "opposition",
+       "kind": "record",
+       "n": 1,
+       "title": "Hilary Benn, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "government",
+       "kind": "record",
+       "n": 2,
+       "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+      }
+     ],
+     "type": "sources"
+    },
+    {
+     "answer": {
+      "citations_invalid": 0,
+      "citations_total": 2,
+      "grounded_ratio": 0.5,
+      "loaded_words": 1,
+      "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+      "no_records": false,
+      "quotes_total": 1,
+      "quotes_unverified": 0,
+      "segments": [
+       {
+        "cited": [
+         {
+          "n": 1,
+          "text": "The right to trial by jury is a cornerstone of our liberties"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         1
+        ],
+        "status": "cited",
+        "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " In the debate that followed:"
+       },
+       {
+        "cited": [
+         {
+          "n": 2,
+          "text": "We will keep jury trial for serious offences"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         2
+        ],
+        "status": "cited",
+        "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+       },
+       {
+        "cited": [],
+        "loaded": [
+         {
+          "end": 19,
+          "start": 12,
+          "word": "turning"
+         }
+        ],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " This was a turning point for every member in the Chamber."
+       }
+      ],
+      "unsupported_segments": 2
+     },
+     "interests": [
+      {
+       "items": [
+        {
+         "category": "3 Gifts",
+         "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2021-01-05",
+         "summary": "Bar Council - £500.00",
+         "url": null
+        },
+        {
+         "category": "1 Employment",
+         "connection": "A post in the department.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2020-02-01",
+         "summary": "Parliamentary Under-Secretary of State, Ministry of Justice",
+         "url": null
+        }
+       ],
+       "link": "/people/10669#h-interests",
+       "name": "Hilary Benn",
+       "person_id": "uk.org.publicwhip/person/10669",
+       "register": "Register of Members' Financial Interests",
+       "source": 1
+      },
+      {
+       "items": [
+        {
+         "category": "1 Employment",
+         "connection": "A post in the Government.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2020-02-01",
+         "summary": "Salary as Lord Chancellor",
+         "url": null
+        }
+       ],
+       "link": "/people/10115#h-interests",
+       "name": "Kenneth Clarke",
+       "person_id": "uk.org.publicwhip/person/10115",
+       "register": "Register of Members' Financial Interests",
+       "source": 2
+      }
+     ],
+     "model": "claude-sonnet-5-5",
+     "stop_reason": "end_turn",
+     "type": "final"
+    }
+   ],
+   "id": "briefingac",
+   "model": null,
+   "question": "An older question?",
+   "records_up_to": null,
+   "settings": {},
+   "withdrawn_at": "2026-11-07T09:00:00+00:00",
+   "withdrawn_reason": "It quoted the wrong debate."
+  },
+  "briefingad": {
+   "created_at": "2026-11-03T07:15:20+00:00",
+   "events": [
+    {
+     "plan": {
+      "question": "trial by jury"
+     },
+     "type": "plan",
+     "usage": null
+    },
+    {
+     "candidates": 12,
+     "evidence": {
+      "records": 2
+     },
+     "semantic": true,
+     "sources": [
+      {
+       "group": "opposition",
+       "kind": "record",
+       "n": 1,
+       "title": "Hilary Benn, House of Commons, 4 March 2021"
+      },
+      {
+       "group": "government",
+       "kind": "record",
+       "n": 2,
+       "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+      }
+     ],
+     "type": "sources"
+    },
+    {
+     "answer": {
+      "citations_invalid": 0,
+      "citations_total": 2,
+      "grounded_ratio": 0.5,
+      "loaded_words": 1,
+      "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+      "no_records": false,
+      "quotes_total": 1,
+      "quotes_unverified": 0,
+      "segments": [
+       {
+        "cited": [
+         {
+          "n": 1,
+          "text": "The right to trial by jury is a cornerstone of our liberties"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         1
+        ],
+        "status": "cited",
+        "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+       },
+       {
+        "cited": [],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " In the debate that followed:"
+       },
+       {
+        "cited": [
+         {
+          "n": 2,
+          "text": "We will keep jury trial for serious offences"
+         }
+        ],
+        "loaded": [],
+        "misquotes": [],
+        "sources": [
+         2
+        ],
+        "status": "cited",
+        "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+       },
+       {
+        "cited": [],
+        "loaded": [
+         {
+          "end": 19,
+          "start": 12,
+          "word": "turning"
+         }
+        ],
+        "misquotes": [],
+        "sources": [],
+        "status": "unsupported",
+        "text": " This was a turning point for every member in the Chamber."
+       }
+      ],
+      "unsupported_segments": 2
+     },
+     "interests": [
+      {
+       "items": [
+        {
+         "category": "3 Gifts",
+         "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2021-01-05",
+         "summary": "Bar Council - £500.00",
+         "url": null
+        },
+        {
+         "category": "1 Employment",
+         "connection": "A post in the department.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2020-02-01",
+         "summary": "Parliamentary Under-Secretary of State, Ministry of Justice",
+         "url": null
+        }
+       ],
+       "link": "/people/10669#h-interests",
+       "name": "Hilary Benn",
+       "person_id": "uk.org.publicwhip/person/10669",
+       "register": "Register of Members' Financial Interests",
+       "source": 1
+      },
+      {
+       "items": [
+        {
+         "category": "1 Employment",
+         "connection": "A post in the Government.",
+         "kind": "register",
+         "register": "commons",
+         "registered": "2020-02-01",
+         "summary": "Salary as Lord Chancellor",
+         "url": null
+        }
+       ],
+       "link": "/people/10115#h-interests",
+       "name": "Kenneth Clarke",
+       "person_id": "uk.org.publicwhip/person/10115",
+       "register": "Register of Members' Financial Interests",
+       "source": 2
+      }
+     ],
+     "model": "claude-sonnet-5-5",
+     "stop_reason": "end_turn",
+     "type": "final"
+    }
+   ],
+   "id": "briefingad",
+   "model": "claude-sonnet-5-5",
+   "question": "trial by jury",
+   "records_up_to": "2026-11-02",
+   "settings": {
+    "mode": "summary",
+    "topic": "trial-by-jury"
+   },
+   "withdrawn_at": null,
+   "withdrawn_reason": null
+  },
+  "briefingzz": null
+ },
+ "briefings_today": {
+  "a1a1a1a1a1a1a1a1a1a1a1a1": 2,
+  "b2b2b2b2b2b2b2b2b2b2b2b2": 1,
+  "nobody": 0
+ },
+ "cached": {
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": [
+   {
+    "plan": {
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "type": "plan",
+    "usage": null
+   },
+   {
+    "candidates": 12,
+    "evidence": {
+     "records": 2
+    },
+    "semantic": true,
+    "sources": [
+     {
+      "group": "opposition",
+      "kind": "record",
+      "n": 1,
+      "title": "Hilary Benn, House of Commons, 4 March 2021"
+     },
+     {
+      "group": "government",
+      "kind": "record",
+      "n": 2,
+      "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+     }
+    ],
+    "type": "sources"
+   },
+   {
+    "text": "Hilary Benn said…",
+    "type": "text"
+   },
+   {
+    "answer": {
+     "citations_invalid": 0,
+     "citations_total": 2,
+     "grounded_ratio": 0.5,
+     "loaded_words": 1,
+     "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+     "no_records": false,
+     "quotes_total": 1,
+     "quotes_unverified": 0,
+     "segments": [
+      {
+       "cited": [
+        {
+         "n": 1,
+         "text": "The right to trial by jury is a cornerstone of our liberties"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " In the debate that followed:"
+      },
+      {
+       "cited": [
+        {
+         "n": 2,
+         "text": "We will keep jury trial for serious offences"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        2
+       ],
+       "status": "cited",
+       "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+      },
+      {
+       "cited": [],
+       "loaded": [
+        {
+         "end": 19,
+         "start": 12,
+         "word": "turning"
+        }
+       ],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " This was a turning point for every member in the Chamber."
+      }
+     ],
+     "unsupported_segments": 2
+    },
+    "briefing_id": "briefingaa",
+    "briefing_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "cached": true,
+    "interests": [
+     {
+      "items": [
+       {
+        "category": "3 Gifts",
+        "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2021-01-05",
+        "summary": "Bar Council - £500.00",
+        "url": null
+       },
+       {
+        "category": "1 Employment",
+        "connection": "A post in the department.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2020-02-01",
+        "summary": "Parliamentary Under-Secretary of State, Ministry of Justice",
+        "url": null
+       }
+      ],
+      "link": "/people/10669#h-interests",
+      "name": "Hilary Benn",
+      "person_id": "uk.org.publicwhip/person/10669",
+      "register": "Register of Members' Financial Interests",
+      "source": 1
+     },
+     {
+      "items": [
+       {
+        "category": "1 Employment",
+        "connection": "A post in the Government.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2020-02-01",
+        "summary": "Salary as Lord Chancellor",
+        "url": null
+       }
+      ],
+      "link": "/people/10115#h-interests",
+      "name": "Kenneth Clarke",
+      "person_id": "uk.org.publicwhip/person/10115",
+      "register": "Register of Members' Financial Interests",
+      "source": 2
+     }
+    ],
+    "model": "claude-sonnet-5-5",
+    "prepared_at": "2026-10-25T12:00:00+00:00",
+    "records_up_to": "2026-10-24",
+    "stop_reason": "end_turn",
+    "type": "final",
+    "usage": null
+   }
+  ],
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": null,
+  "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": [
+   {
+    "plan": {
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "type": "plan",
+    "usage": null
+   },
+   {
+    "candidates": 12,
+    "evidence": {
+     "records": 2
+    },
+    "semantic": true,
+    "sources": [
+     {
+      "group": "opposition",
+      "kind": "record",
+      "n": 1,
+      "title": "Hilary Benn, House of Commons, 4 March 2021"
+     },
+     {
+      "group": "government",
+      "kind": "record",
+      "n": 2,
+      "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+     }
+    ],
+    "type": "sources"
+   },
+   {
+    "text": "Hilary Benn said…",
+    "type": "text"
+   },
+   {
+    "answer": {
+     "citations_invalid": 0,
+     "citations_total": 2,
+     "grounded_ratio": 0.5,
+     "loaded_words": 1,
+     "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+     "no_records": false,
+     "quotes_total": 1,
+     "quotes_unverified": 0,
+     "segments": [
+      {
+       "cited": [
+        {
+         "n": 1,
+         "text": "The right to trial by jury is a cornerstone of our liberties"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " In the debate that followed:"
+      },
+      {
+       "cited": [
+        {
+         "n": 2,
+         "text": "We will keep jury trial for serious offences"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        2
+       ],
+       "status": "cited",
+       "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+      },
+      {
+       "cited": [],
+       "loaded": [
+        {
+         "end": 19,
+         "start": 12,
+         "word": "turning"
+        }
+       ],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " This was a turning point for every member in the Chamber."
+      }
+     ],
+     "unsupported_segments": 2
+    },
+    "cached": true,
+    "interests": [
+     {
+      "items": [
+       {
+        "category": "3 Gifts",
+        "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2021-01-05",
+        "summary": "Bar Council - £500.00",
+        "url": null
+       },
+       {
+        "category": "1 Employment",
+        "connection": "A post in the department.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2020-02-01",
+        "summary": "Parliamentary Under-Secretary of State, Ministry of Justice",
+        "url": null
+       }
+      ],
+      "link": "/people/10669#h-interests",
+      "name": "Hilary Benn",
+      "person_id": "uk.org.publicwhip/person/10669",
+      "register": "Register of Members' Financial Interests",
+      "source": 1
+     },
+     {
+      "items": [
+       {
+        "category": "1 Employment",
+        "connection": "A post in the Government.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2020-02-01",
+        "summary": "Salary as Lord Chancellor",
+        "url": null
+       }
+      ],
+      "link": "/people/10115#h-interests",
+      "name": "Kenneth Clarke",
+      "person_id": "uk.org.publicwhip/person/10115",
+      "register": "Register of Members' Financial Interests",
+      "source": 2
+     }
+    ],
+    "model": "claude-sonnet-5-5",
+    "stop_reason": "end_turn",
+    "type": "final",
+    "usage": null
+   }
+  ]
+ },
+ "corrections": [
+  {
+   "briefing_id": "briefingab",
+   "date": "2026-11-12",
+   "kind": "correction",
+   "note": "A briefing gave the wrong date; corrected.",
+   "question": null
+  },
+  {
+   "briefing_id": "briefingac",
+   "date": "2026-11-07",
+   "kind": "withdrawn",
+   "note": "It quoted the wrong debate.",
+   "question": "An older question?"
+  }
+ ],
+ "failures": [
+  {
+   "at": "2026-11-13T11:31:00+00:00",
+   "error": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "kind": "briefing",
+   "question": ""
+  },
+  {
+   "at": "2026-11-13T11:30:00+00:00",
+   "error": "The model declined to answer this question.",
+   "kind": "briefing",
+   "question": "And what did peers say?"
+  },
+  {
+   "at": "2026-11-13T07:15:00+00:00",
+   "error": "no briefing was written",
+   "kind": "topic",
+   "question": "trial by jury"
+  },
+  {
+   "at": "2026-11-12T23:00:00+00:00",
+   "error": "AuthenticationError: bad key",
+   "kind": "question reading",
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  {
+   "at": "2026-08-01T00:00:00+00:00",
+   "error": "RuntimeError: an old failure",
+   "kind": "briefing",
+   "question": "An old question?"
+  }
+ ],
+ "featured": [
+  {
+   "blurb": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+   "featured_at": "2026-11-07T09:00:00+00:00",
+   "id": "briefingaa",
+   "prepared_at": "2026-10-25T12:00:00+00:00",
+   "question": "What has been said about trial by jury since 2020?",
+   "records_up_to": "2026-10-24",
+   "title": "Trial by jury since 2020"
+  }
+ ],
+ "open_reports": [
+  {
+   "at": "2026-11-11T09:00:00+00:00",
+   "briefing_id": null,
+   "closed_at": null,
+   "contact": "named@example.org",
+   "id": 3,
+   "kind": "takedown",
+   "message": "Please remove my name.",
+   "page": "/debates/2021-03-04/commons/trial-by-jury",
+   "public_note": null,
+   "resolution": null,
+   "status": "open"
+  },
+  {
+   "at": "2026-11-12T09:00:00+00:00",
+   "briefing_id": null,
+   "closed_at": null,
+   "contact": null,
+   "id": 4,
+   "kind": "complaint",
+   "message": "A loaded word about a member.",
+   "page": "/people/10669",
+   "public_note": null,
+   "resolution": null,
+   "status": "open"
+  },
+  {
+   "at": "2026-11-10T09:00:00+00:00",
+   "briefing_id": "briefingaa",
+   "closed_at": null,
+   "contact": "reader@example.org",
+   "id": 2,
+   "kind": "correction",
+   "message": "The date of the debate is wrong.",
+   "page": null,
+   "public_note": null,
+   "resolution": null,
+   "status": "open"
+  },
+  {
+   "at": "2026-07-01T09:00:00+00:00",
+   "briefing_id": null,
+   "closed_at": null,
+   "contact": "old@example.org",
+   "id": 1,
+   "kind": "general",
+   "message": "An old report, never closed.",
+   "page": null,
+   "public_note": null,
+   "resolution": null,
+   "status": "open"
+  }
+ ],
+ "published": {
+  "/b/briefingaa": [
+   {
+    "date": "2026-11-10",
+    "id": 1,
+    "item": "/b/briefingaa",
+    "link": "https://hansard.parliament.uk/commons/2021-03-04",
+    "name": "Hilary Benn",
+    "person": 10669,
+    "role": "MP for Leeds South",
+    "text": "New words, exactly as the author sent them."
+   }
+  ],
+  "/b/briefingab": [],
+  "/people/10669": [
+   {
+    "date": "2026-11-11",
+    "id": 8,
+    "item": "/people/10669",
+    "link": null,
+    "name": "Shown With No Link",
+    "person": 10669,
+    "role": "MP for Leeds South",
+    "text": "Published as written, no link."
+   }
+  ]
+ },
+ "published_for_members": {
+  "10115": [],
+  "10669": [
+   {
+    "date": "2026-11-10",
+    "id": 1,
+    "item": "/b/briefingaa",
+    "link": "https://hansard.parliament.uk/commons/2021-03-04",
+    "name": "Hilary Benn",
+    "person": 10669,
+    "role": "MP for Leeds South",
+    "text": "New words, exactly as the author sent them."
+   },
+   {
+    "date": "2026-11-11",
+    "id": 8,
+    "item": "/people/10669",
+    "link": null,
+    "name": "Shown With No Link",
+    "person": 10669,
+    "role": "MP for Leeds South",
+    "text": "Published as written, no link."
+   }
+  ]
+ },
+ "recent": [
+  {
+   "created_at": "2026-11-06T12:00:00+00:00",
+   "id": "briefingac",
+   "question": "An older question?",
+   "withdrawn_at": "2026-11-07T09:00:00+00:00",
+   "withdrawn_reason": "It quoted the wrong debate."
+  },
+  {
+   "created_at": "2026-11-05T12:00:00+00:00",
+   "id": "briefingab",
+   "question": "And what did peers say?",
+   "withdrawn_at": null,
+   "withdrawn_reason": null
+  },
+  {
+   "created_at": "2026-11-03T07:15:20+00:00",
+   "id": "briefingad",
+   "question": "trial by jury",
+   "withdrawn_at": null,
+   "withdrawn_reason": null
+  },
+  {
+   "created_at": "2026-10-25T12:00:00+00:00",
+   "id": "briefingaa",
+   "question": "What has been said about trial by jury since 2020?",
+   "withdrawn_at": null,
+   "withdrawn_reason": null
+  }
+ ],
+ "refused": {
+  "('a1a1a1a1a1a1a1a1a1a1a1a1', None)": "You have reached today's limit for new briefings. It resets at midnight UTC; briefings others have already asked for still load.",
+  "('b2b2b2b2b2b2b2b2b2b2b2b2', None)": null,
+  "('nobody', None)": null,
+  "(None, 1)": "You have reached today's question limit. It resets at midnight UTC.",
+  "(None, 99)": null
+ },
+ "reminder_due": {
+  "a1a1a1a1a1a1a1a1a1a1a1a1": 2,
+  "b2b2b2b2b2b2b2b2b2b2b2b2": 0,
+  "null": 0
+ },
+ "reports": [
+  {
+   "at": "2026-11-11T09:00:00+00:00",
+   "briefing_id": null,
+   "closed_at": null,
+   "contact": "named@example.org",
+   "id": 3,
+   "kind": "takedown",
+   "message": "Please remove my name.",
+   "page": "/debates/2021-03-04/commons/trial-by-jury",
+   "public_note": null,
+   "resolution": null,
+   "status": "open"
+  },
+  {
+   "at": "2026-11-12T11:00:00+00:00",
+   "briefing_id": null,
+   "closed_at": "2026-11-12T15:00:00+00:00",
+   "contact": null,
+   "id": 6,
+   "kind": "general",
+   "message": "Dismissed the same day.",
+   "page": null,
+   "public_note": null,
+   "resolution": "Nothing to change.",
+   "status": "dismissed"
+  },
+  {
+   "at": "2026-11-12T10:00:00+00:00",
+   "briefing_id": "briefingab",
+   "closed_at": "2026-11-12T15:00:00+00:00",
+   "contact": null,
+   "id": 5,
+   "kind": "correction",
+   "message": "Closed the same day.",
+   "page": null,
+   "public_note": "A briefing gave the wrong date; corrected.",
+   "resolution": "The briefing was corrected.",
+   "status": "resolved"
+  },
+  {
+   "at": "2026-11-12T09:00:00+00:00",
+   "briefing_id": null,
+   "closed_at": null,
+   "contact": null,
+   "id": 4,
+   "kind": "complaint",
+   "message": "A loaded word about a member.",
+   "page": "/people/10669",
+   "public_note": null,
+   "resolution": null,
+   "status": "open"
+  },
+  {
+   "at": "2026-11-10T09:00:00+00:00",
+   "briefing_id": "briefingaa",
+   "closed_at": null,
+   "contact": "reader@example.org",
+   "id": 2,
+   "kind": "correction",
+   "message": "The date of the debate is wrong.",
+   "page": null,
+   "public_note": null,
+   "resolution": null,
+   "status": "open"
+  },
+  {
+   "at": "2026-07-01T09:00:00+00:00",
+   "briefing_id": null,
+   "closed_at": null,
+   "contact": "old@example.org",
+   "id": 1,
+   "kind": "general",
+   "message": "An old report, never closed.",
+   "page": null,
+   "public_note": null,
+   "resolution": null,
+   "status": "open"
+  }
+ ],
+ "salt": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+ "shown": {
+  "briefingaa": [
+   200,
+   {
+    "answer": {
+     "citations_invalid": 0,
+     "citations_total": 2,
+     "grounded_ratio": 0.68,
+     "loaded_words": 0,
+     "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+     "no_records": false,
+     "quotes_total": 1,
+     "quotes_unverified": 0,
+     "segments": [
+      {
+       "cited": [
+        {
+         "n": 1,
+         "text": "The right to trial by jury is a cornerstone of our liberties"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "connective",
+       "text": " In the debate that followed:"
+      },
+      {
+       "cited": [
+        {
+         "n": 2,
+         "text": "We will keep jury trial for serious offences"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        2
+       ],
+       "status": "cited",
+       "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " This was a turning point for every member in the Chamber."
+      }
+     ],
+     "unsupported_segments": 1
+    },
+    "candidates": 12,
+    "created_at": "2026-10-25T12:00:00+00:00",
+    "evidence": {
+     "records": 2
+    },
+    "id": "briefingaa",
+    "interests": [
+     {
+      "items": [
+       {
+        "category": "3 Gifts",
+        "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2021-01-05",
+        "summary": "Bar Council - £500.00",
+        "url": null
+       }
+      ],
+      "link": "/people/10669#h-interests",
+      "name": "Hilary Benn",
+      "person_id": "uk.org.publicwhip/person/10669",
+      "register": "Register of Members' Financial Interests",
+      "source": 1
+     }
+    ],
+    "plan": {
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-10-24",
+    "semantic": true,
+    "settings": {
+     "compare": [],
+     "follows": null,
+     "mode": "summary",
+     "plan": null,
+     "recency": null,
+     "role_weight": null,
+     "scope": {
+      "devolved": true,
+      "edms": true,
+      "evidence": true,
+      "pbc": true,
+      "votes": true,
+      "written": true
+     },
+     "sources_only": false
+    },
+    "sources": [
+     {
+      "group": "opposition",
+      "kind": "record",
+      "n": 1,
+      "title": "Hilary Benn, House of Commons, 4 March 2021"
+     },
+     {
+      "group": "government",
+      "kind": "record",
+      "n": 2,
+      "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+     }
+    ]
+   }
+  ],
+  "briefingab": [
+   200,
+   {
+    "answer": {
+     "citations_invalid": 0,
+     "citations_total": 2,
+     "grounded_ratio": 0.68,
+     "loaded_words": 0,
+     "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+     "no_records": false,
+     "quotes_total": 1,
+     "quotes_unverified": 0,
+     "segments": [
+      {
+       "cited": [
+        {
+         "n": 1,
+         "text": "The right to trial by jury is a cornerstone of our liberties"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "connective",
+       "text": " In the debate that followed:"
+      },
+      {
+       "cited": [
+        {
+         "n": 2,
+         "text": "We will keep jury trial for serious offences"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        2
+       ],
+       "status": "cited",
+       "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " This was a turning point for every member in the Chamber."
+      }
+     ],
+     "unsupported_segments": 1
+    },
+    "candidates": 12,
+    "created_at": "2026-11-05T12:00:00+00:00",
+    "evidence": {
+     "records": 2
+    },
+    "id": "briefingab",
+    "interests": [
+     {
+      "items": [
+       {
+        "category": "3 Gifts",
+        "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2021-01-05",
+        "summary": "Bar Council - £500.00",
+        "url": null
+       }
+      ],
+      "link": "/people/10669#h-interests",
+      "name": "Hilary Benn",
+      "person_id": "uk.org.publicwhip/person/10669",
+      "register": "Register of Members' Financial Interests",
+      "source": 1
+     }
+    ],
+    "plan": {
+     "question": "And what did peers say?"
+    },
+    "question": "And what did peers say?",
+    "records_up_to": "2026-11-04",
+    "semantic": true,
+    "settings": {
+     "compare": [],
+     "follows": null,
+     "mode": "comprehensive",
+     "plan": null,
+     "recency": null,
+     "role_weight": null,
+     "scope": {
+      "devolved": true,
+      "edms": true,
+      "evidence": true,
+      "pbc": true,
+      "votes": true,
+      "written": true
+     },
+     "sources_only": false
+    },
+    "sources": [
+     {
+      "group": "opposition",
+      "kind": "record",
+      "n": 1,
+      "title": "Hilary Benn, House of Commons, 4 March 2021"
+     },
+     {
+      "group": "government",
+      "kind": "record",
+      "n": 2,
+      "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+     }
+    ]
+   }
+  ],
+  "briefingac": [
+   410,
+   {
+    "detail": "This briefing has been withdrawn."
+   }
+  ],
+  "briefingad": [
+   200,
+   {
+    "answer": {
+     "citations_invalid": 0,
+     "citations_total": 2,
+     "grounded_ratio": 0.68,
+     "loaded_words": 0,
+     "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+     "no_records": false,
+     "quotes_total": 1,
+     "quotes_unverified": 0,
+     "segments": [
+      {
+       "cited": [
+        {
+         "n": 1,
+         "text": "The right to trial by jury is a cornerstone of our liberties"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "connective",
+       "text": " In the debate that followed:"
+      },
+      {
+       "cited": [
+        {
+         "n": 2,
+         "text": "We will keep jury trial for serious offences"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        2
+       ],
+       "status": "cited",
+       "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " This was a turning point for every member in the Chamber."
+      }
+     ],
+     "unsupported_segments": 1
+    },
+    "candidates": 12,
+    "created_at": "2026-11-03T07:15:20+00:00",
+    "evidence": {
+     "records": 2
+    },
+    "id": "briefingad",
+    "interests": [
+     {
+      "items": [
+       {
+        "category": "3 Gifts",
+        "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2021-01-05",
+        "summary": "Bar Council - £500.00",
+        "url": null
+       }
+      ],
+      "link": "/people/10669#h-interests",
+      "name": "Hilary Benn",
+      "person_id": "uk.org.publicwhip/person/10669",
+      "register": "Register of Members' Financial Interests",
+      "source": 1
+     }
+    ],
+    "plan": {
+     "question": "trial by jury"
+    },
+    "question": "trial by jury",
+    "records_up_to": "2026-11-02",
+    "semantic": true,
+    "settings": {
+     "mode": "summary",
+     "topic": "trial-by-jury"
+    },
+    "sources": [
+     {
+      "group": "opposition",
+      "kind": "record",
+      "n": 1,
+      "title": "Hilary Benn, House of Commons, 4 March 2021"
+     },
+     {
+      "group": "government",
+      "kind": "record",
+      "n": 2,
+      "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+     }
+    ]
+   }
+  ],
+  "briefingzz": [
+   404,
+   {
+    "detail": "There is no briefing at this address."
+   }
+  ]
+ },
+ "spent": {
+  "2026-11": 0.520461,
+  "2026-11-13": 0.06935999999999999
+ },
+ "statements": [
+  {
+   "at": "2026-11-12T09:00:00+00:00",
+   "checked": null,
+   "closed_at": null,
+   "email": "office@example.org",
+   "id": 2,
+   "item_path": "/people/10669",
+   "link": null,
+   "name": "Still Waiting",
+   "person": 10669,
+   "published_at": null,
+   "reason": null,
+   "role": "MP for Leeds South",
+   "status": "pending",
+   "text": "A statement not yet decided at all.",
+   "updated_at": null
+  },
+  {
+   "at": "2026-11-11T09:00:00+00:00",
+   "checked": "Replied from their parliament.uk address.",
+   "closed_at": null,
+   "email": "office@example.org",
+   "id": 8,
+   "item_path": "/people/10669",
+   "link": null,
+   "name": "Shown With No Link",
+   "person": 10669,
+   "published_at": "2026-11-11T15:00:00+00:00",
+   "reason": null,
+   "role": "MP for Leeds South",
+   "status": "published",
+   "text": "Published as written, no link.",
+   "updated_at": null
+  },
+  {
+   "at": "2026-11-08T09:00:00+00:00",
+   "checked": "Replied from their parliament.uk address, 9 November.",
+   "closed_at": null,
+   "email": "office@example.org",
+   "id": 1,
+   "item_path": "/b/briefingaa",
+   "link": "https://hansard.parliament.uk/commons/2021-03-04",
+   "name": "Hilary Benn",
+   "person": 10669,
+   "published_at": "2026-11-10T09:00:00+00:00",
+   "reason": null,
+   "role": "MP for Leeds South",
+   "status": "published",
+   "text": "New words, exactly as the author sent them.",
+   "updated_at": "2026-11-10T09:00:00+00:00"
+  },
+  {
+   "at": "2026-11-01T09:00:00+00:00",
+   "checked": null,
+   "closed_at": "2026-11-02T09:00:00+00:00",
+   "email": "office@example.org",
+   "id": 3,
+   "item_path": "/b/briefingab",
+   "link": null,
+   "name": "Declined Lately",
+   "person": null,
+   "published_at": null,
+   "reason": "It is about another member's conduct.",
+   "role": "MP for Leeds South",
+   "status": "declined",
+   "text": "This is about another member entirely.",
+   "updated_at": null
+  },
+  {
+   "at": "2026-07-05T09:00:00+00:00",
+   "checked": "Replied from their own address.",
+   "closed_at": "2026-11-06T09:00:00+00:00",
+   "email": "office@example.org",
+   "id": 5,
+   "item_path": "/b/briefingab",
+   "link": null,
+   "name": "Taken Down Lately",
+   "person": 10115,
+   "published_at": "2026-07-06T09:00:00+00:00",
+   "reason": "It broke the rules: it named a private person.",
+   "role": "MP for Leeds South",
+   "status": "declined",
+   "text": "Shown until last week, when it was taken down.",
+   "updated_at": null
+  },
+  {
+   "at": "2026-07-01T09:00:00+00:00",
+   "checked": "Telephoned the office.",
+   "closed_at": "2026-08-01T10:00:00+00:00",
+   "email": null,
+   "id": 4,
+   "item_path": "/people/10669",
+   "link": null,
+   "name": "Withdrawn Long Ago",
+   "person": 10669,
+   "published_at": "2026-07-02T09:00:00+00:00",
+   "reason": "Withdrawn by the author.",
+   "role": "MP for Leeds South",
+   "status": "withdrawn",
+   "text": "Shown for a while, then not.",
+   "updated_at": null
+  },
+  {
+   "at": "2026-07-01T09:00:00+00:00",
+   "checked": null,
+   "closed_at": null,
+   "email": "waiting@example.org",
+   "id": 7,
+   "item_path": "/b/briefingac",
+   "link": null,
+   "name": "Waiting Too Long",
+   "person": null,
+   "published_at": null,
+   "reason": null,
+   "role": "MP for Leeds South",
+   "status": "pending",
+   "text": "Nobody decided this one in four months.",
+   "updated_at": null
+  },
+  {
+   "at": "2026-06-01T09:00:00+00:00",
+   "checked": null,
+   "closed_at": "2026-06-02T09:00:00+00:00",
+   "email": null,
+   "id": 6,
+   "item_path": "/debates/2021-03-04/commons/trial-by-jury",
+   "link": null,
+   "name": "Declined Long Ago",
+   "person": null,
+   "published_at": null,
+   "reason": "Not from the member.",
+   "role": "MP for Leeds South",
+   "status": "declined",
+   "text": "Never shown, and declined in June.",
+   "updated_at": null
+  }
+ ],
+ "statements_command": [
+  0,
+  "#2  pending  received 2026-11-12\n  From: Still Waiting, MP for Leeds South  <office@example.org>\n  About: /people/10669  (member 10669)\n  A statement not yet decided at all.\n\n#8  published  received 2026-11-11  published 2026-11-11\n  From: Shown With No Link, MP for Leeds South  <office@example.org>\n  About: /people/10669  (member 10669)\n  Checked: Replied from their parliament.uk address.\n  Published as written, no link.\n\n#1  published  received 2026-11-08  published 2026-11-10\n  From: Hilary Benn, MP for Leeds South  <office@example.org>\n  About: /b/briefingaa  (member 10669)\n  Link: https://hansard.parliament.uk/commons/2021-03-04\n  Checked: Replied from their parliament.uk address, 9 November.\n  New words, exactly as the author sent them.\n\n#3  declined  received 2026-11-01  closed 2026-11-02\n  From: Declined Lately, MP for Leeds South  <office@example.org>\n  About: /b/briefingab  (no member set)\n  Reason: It is about another member's conduct.\n  This is about another member entirely.\n\n#5  declined  received 2026-07-05  published 2026-07-06  closed 2026-11-06\n  From: Taken Down Lately, MP for Leeds South  <office@example.org>\n  About: /b/briefingab  (member 10115)\n  Checked: Replied from their own address.\n  Reason: It broke the rules: it named a private person.\n  Shown until last week, when it was taken down.\n\n#4  withdrawn  received 2026-07-01  published 2026-07-02  closed 2026-08-01\n  From: Withdrawn Long Ago, MP for Leeds South  <email deleted>\n  About: /people/10669  (member 10669)\n  Checked: Telephoned the office.\n  Reason: Withdrawn by the author.\n  Shown for a while, then not.\n\n#7  pending  received 2026-07-01\n  From: Waiting Too Long, MP for Leeds South  <waiting@example.org>\n  About: /b/briefingac  (no member set)\n  Nobody decided this one in four months.\n\n#6  declined  received 2026-06-01  closed 2026-06-02\n  From: Declined Long Ago, MP for Leeds South  <email deleted>\n  About: /debates/2021-03-04/commons/trial-by-jury  (no member set)\n  Reason: Not from the member.\n  Never shown, and declined in June.\n\n"
+ ],
+ "status": [
+  200,
+  {
+   "archive_start": "1997-05-01",
+   "briefings": "available",
+   "briefings_note": null,
+   "last_update": {
+    "finished_at": "2026-11-13T11:40:00+00:00",
+    "status": "ok"
+   },
+   "latest_record": "2026-11-12",
+   "latest_vote": null,
+   "meaning_search_coverage": 0.5,
+   "passages": 123456
+  }
+ ],
+ "summary": {
+  "by_user": [
+   {
+    "calls": 7,
+    "cost_usd": 0.4817,
+    "email": "(public)",
+    "visitors": 3
+   },
+   {
+    "calls": 3,
+    "cost_usd": 0.0308,
+    "email": "(system)",
+    "visitors": 0
+   },
+   {
+    "calls": 2,
+    "cost_usd": 0.008,
+    "email": "researcher@example.org",
+    "visitors": 0
+   }
+  ],
+  "month": "2026-11",
+  "today_calls": 7,
+  "today_usd": 0.0694,
+  "total_usd": 0.5205
+ },
+ "topic": [
+  200,
+  {
+   "briefing": {
+    "answer": {
+     "citations_invalid": 0,
+     "citations_total": 2,
+     "grounded_ratio": 0.68,
+     "loaded_words": 0,
+     "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+     "no_records": false,
+     "quotes_total": 1,
+     "quotes_unverified": 0,
+     "segments": [
+      {
+       "cited": [
+        {
+         "n": 1,
+         "text": "The right to trial by jury is a cornerstone of our liberties"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "connective",
+       "text": " In the debate that followed:"
+      },
+      {
+       "cited": [
+        {
+         "n": 2,
+         "text": "We will keep jury trial for serious offences"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        2
+       ],
+       "status": "cited",
+       "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " This was a turning point for every member in the Chamber."
+      }
+     ],
+     "unsupported_segments": 1
+    },
+    "candidates": 12,
+    "created_at": "2026-11-03T07:15:20+00:00",
+    "evidence": {
+     "records": 2
+    },
+    "id": "briefingad",
+    "interests": [
+     {
+      "items": [
+       {
+        "category": "3 Gifts",
+        "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2021-01-05",
+        "summary": "Bar Council - £500.00",
+        "url": null
+       }
+      ],
+      "link": "/people/10669#h-interests",
+      "name": "Hilary Benn",
+      "person_id": "uk.org.publicwhip/person/10669",
+      "register": "Register of Members' Financial Interests",
+      "source": 1
+     }
+    ],
+    "plan": {
+     "question": "trial by jury"
+    },
+    "question": "trial by jury",
+    "records_up_to": "2026-11-02",
+    "semantic": true,
+    "settings": {
+     "mode": "summary",
+     "topic": "trial-by-jury"
+    },
+    "sources": [
+     {
+      "group": "opposition",
+      "kind": "record",
+      "n": 1,
+      "title": "Hilary Benn, House of Commons, 4 March 2021"
+     },
+     {
+      "group": "government",
+      "kind": "record",
+      "n": 2,
+      "title": "Kenneth Clarke, House of Commons, 4 March 2021"
+     }
+    ]
+   },
+   "topic": {
+    "area": "Justice",
+    "description": "Jury trials and the courts.",
+    "question": "trial by jury",
+    "refresh_days": 7,
+    "slug": "trial-by-jury",
+    "title": "Trial by jury"
+   },
+   "versions": [
+    {
+     "briefing_id": "briefingad",
+     "prepared_at": "2026-11-03T07:15:20+00:00",
+     "records_up_to": "2026-11-02"
+    }
+   ]
+  }
+ ],
+ "topics": [
+  200,
+  {
+   "featured": [
+    {
+     "blurb": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+     "featured_at": "2026-11-07T09:00:00+00:00",
+     "id": "briefingaa",
+     "prepared_at": "2026-10-25T12:00:00+00:00",
+     "question": "What has been said about trial by jury since 2020?",
+     "records_up_to": "2026-10-24",
+     "title": "Trial by jury since 2020"
+    }
+   ],
+   "topics": [
+    {
+     "area": "Justice",
+     "current": {
+      "briefing_id": "briefingad",
+      "prepared_at": "2026-11-03T07:15:20+00:00",
+      "records_up_to": "2026-11-02",
+      "summary": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber."
+     },
+     "description": "Jury trials and the courts.",
+     "question": "trial by jury",
+     "refresh_days": 7,
+     "slug": "trial-by-jury",
+     "title": "Trial by jury",
+     "versions": 1
+    },
+    {
+     "area": "Transport",
+     "current": null,
+     "description": "",
+     "question": "bus services in rural areas",
+     "refresh_days": 7,
+     "slug": "rural-buses",
+     "title": "Rural bus services",
+     "versions": 0
+    }
+   ]
+  }
+ ]
+}

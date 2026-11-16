@@ -1,0 +1,11 @@
+[Unit]
+Description=Where MPs Stand: the weekly report, every Monday (UK time)
+
+[Timer]
+# Monday morning, once the week before is whole: after the night's backup (3.30am) and before the morning's
+# update (7.15am)
+OnCalendar=Mon *-*-* 06:10:00 Europe/London
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -14,6 +14,7 @@ from datetime import date, timedelta
 from typing import Any
 
 import httpx
+from wts_core.adapters.duckdb import shared
 
 from hansard.config import Settings
 from hansard.debates import debate_path
@@ -22,7 +23,6 @@ from hansard.reference.profiles import ProfileResolver, attach_reference
 from hansard.sources.demographics import USER_AGENT, age_on, assumed_birth
 from hansard.sources.elections import election_label, majority_band
 from hansard.store.parquet import attach_store
-from hansard.store.shared import shared
 from hansard.vote_types import vote_types
 
 log = logging.getLogger(__name__)

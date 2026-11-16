@@ -16,10 +16,11 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from wts_core.adapters.duckdb import shared
+
 from hansard.config import Settings
 from hansard.reference.profiles import attach_reference
 from hansard.store.parquet import attach_store
-from hansard.store.shared import shared
 
 PHRASE = re.compile(r"^[\w][\w '’\-]{1,58}[\w]$")
 BY = ("all", "house", "party", "nation")

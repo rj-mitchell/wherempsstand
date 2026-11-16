@@ -17,10 +17,10 @@ from typing import Any
 import duckdb
 import pyarrow as pa
 import pyarrow.compute as pc
+from wts_core.ports import Embedder
 
 from hansard.config import Settings
-from hansard.embed.base import Embedder
-from hansard.index.lance import FILTER_FIELDS, VECTORS, SearchIndex, sql_str
+from hansard.index.lance import FILTER_FIELDS, VECTORS, LanceIndex, sql_str
 from hansard.reference.profiles import ENRICH_SQL, attach_reference, office_columns
 from hansard.store.parquet import attach_store, read_partition_rows
 from hansard.store.state import StateDB
@@ -114,7 +114,7 @@ def passage_rows(records: list[dict[str, Any]], enrich: dict[str, dict[str, Any]
 
 
 class Indexer:
-    def __init__(self, settings: Settings, index: SearchIndex, state: StateDB):
+    def __init__(self, settings: Settings, index: LanceIndex, state: StateDB):
         self.settings = settings
         self.index = index
         self.state = state
@@ -191,7 +191,7 @@ class Indexer:
             part = keys[i:i + batch]
             records, stale = self._newest_copies(self._records(part))
             rows = passage_rows(records, self._enrich(records), max_words) if records else []
-            self.index.replace_keys([k for _, k in part], rows)
+            self.index.replace([k for _, k in part], rows)
             if stale:
                 self.index.delete_copies(stale)
             self.state.mark_indexed(part)
@@ -257,7 +257,7 @@ class Indexer:
         if not person_ids:
             return 0
         tbl = self.index.passages()
-        has_vectors = VECTORS in self.index._names()
+        has_vectors = VECTORS in self.index.names()
         speaker_cols = ["speaker_name", "party", "party_id", "region", "constituency", "member_house",
                         "is_gov", "is_shadow", "is_chair", "gov_portfolios", "shadow_portfolios", "chair_portfolios"]
         vector_cols = [c for c in speaker_cols if c in {name for name, _ in FILTER_FIELDS}]
@@ -337,9 +337,10 @@ def _same(new: Any, old: Any) -> bool:
     return new == old
 
 
-def embed_pending(settings: Settings, index: SearchIndex, state: StateDB, embedder: Embedder, *,
+def embed_pending(settings: Settings, index: LanceIndex, state: StateDB, embedder: Embedder, *,
                   max_files: int | None = None, max_seconds: float | None = None, batch_files: int = 20) -> int:
-    """Embed passages of indexed-but-unembedded files, newest first. Returns passages embedded."""
+    """Embed passages of indexed-but-unembedded files, newest first. Returns passages embedded. ``index`` is the
+    index opened for this embedder (``search_index(path, embedder)``): one opened without adds no vectors."""
     keys = state.unembedded(newest_first=True)
     if max_files is not None:
         keys = keys[:max_files]

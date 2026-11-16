@@ -1,8 +1,15 @@
-"""Operational state in SQLite (WAL): file manifest, sync log, users, sessions, usage, answer cache.
+"""The site's own operational state in SQLite (WAL): the files of the record read in, the update history, accounts
+and sessions, question and visit counts, feedback, topic versions, featured briefings and the site's own keys.
 
 SQLite rather than DuckDB because the web app and the scheduled sync are
 separate processes that both write here; DuckDB permits one writing process.
 Analytical queries use DuckDB over the Parquet store instead.
+
+The same file holds the Where They Stand sites' shared package's tables (``wts_…``: spending, the answer cache,
+saved briefings, notes of failures, reports, statements, the record of each briefing), which hansard/store/wts.py
+opens. Before the shared package the site kept those in tables of its own here (``usage``, ``answer_cache``,
+``briefings``, ``failures``, ``reports``, ``statements``): a database from then still has them, their rows are
+copied across once, and this module no longer makes or reads them.
 """
 
 from __future__ import annotations
@@ -56,78 +63,6 @@ CREATE TABLE IF NOT EXISTS sessions (
     created_at TEXT NOT NULL,
     expires_at TEXT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS usage (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id       INTEGER,
-    at            TEXT NOT NULL,
-    kind          TEXT NOT NULL,
-    model         TEXT,
-    input_tokens  INTEGER NOT NULL DEFAULT 0,
-    output_tokens INTEGER NOT NULL DEFAULT 0,
-    cache_read_tokens INTEGER NOT NULL DEFAULT 0,
-    cache_write_tokens INTEGER NOT NULL DEFAULT 0,
-    cost_usd      REAL NOT NULL DEFAULT 0
-);
-CREATE INDEX IF NOT EXISTS usage_user_at ON usage(user_id, at);
-CREATE TABLE IF NOT EXISTS answer_cache (
-    key        TEXT PRIMARY KEY,
-    created_at TEXT NOT NULL,
-    events     TEXT NOT NULL
-);
--- every completed briefing, kept at an unguessable address so it can be shared and cited
-CREATE TABLE IF NOT EXISTS briefings (
-    id             TEXT PRIMARY KEY,
-    created_at     TEXT NOT NULL,
-    question       TEXT NOT NULL,
-    settings       TEXT NOT NULL,
-    events         TEXT NOT NULL,
-    records_up_to  TEXT,
-    model          TEXT,
-    withdrawn_at   TEXT,
-    withdrawn_reason TEXT
-);
-CREATE INDEX IF NOT EXISTS briefings_created ON briefings(created_at);
--- "Was this briefing useful?" answers
--- "Report a problem": corrections, complaints and general messages. Contact details are optional and are
--- deleted when a report is closed; only the public note (if any) is ever shown on the site.
-CREATE TABLE IF NOT EXISTS reports (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    at           TEXT NOT NULL,
-    kind         TEXT NOT NULL,
-    briefing_id  TEXT,
-    page         TEXT,
-    message      TEXT NOT NULL,
-    contact      TEXT,
-    visitor      TEXT,
-    status       TEXT NOT NULL DEFAULT 'open',
-    closed_at    TEXT,
-    resolution   TEXT,
-    public_note  TEXT
-);
-CREATE INDEX IF NOT EXISTS reports_status ON reports(status, at);
--- statements beside items, under the right of reply (src/hansard/api/statements.py). Never part of the record:
--- nothing that searches the record or writes briefings reads this table. The email address only confirms who sent
--- it, and is deleted three months after the statement is withdrawn or declined.
-CREATE TABLE IF NOT EXISTS statements (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    at           TEXT NOT NULL,
-    name         TEXT NOT NULL,
-    role         TEXT NOT NULL,
-    item_path    TEXT NOT NULL,
-    person       INTEGER,
-    text         TEXT NOT NULL,
-    link         TEXT,
-    email        TEXT,
-    visitor      TEXT,
-    status       TEXT NOT NULL DEFAULT 'pending',
-    published_at TEXT,
-    updated_at   TEXT,
-    closed_at    TEXT,
-    reason       TEXT,
-    checked      TEXT
-);
-CREATE INDEX IF NOT EXISTS statements_item ON statements(status, item_path);
-CREATE INDEX IF NOT EXISTS statements_person ON statements(status, person);
 -- how often each question is asked, per day (the text and a count only; nothing about who asked)
 CREATE TABLE IF NOT EXISTS question_counts (
     day       TEXT NOT NULL,
@@ -156,14 +91,7 @@ CREATE TABLE IF NOT EXISTS featured (
     blurb        TEXT,
     featured_at  TEXT NOT NULL
 );
--- briefings that failed (bad API key, refusals, errors), shown as alerts on the admin page
-CREATE TABLE IF NOT EXISTS failures (
-    id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    at        TEXT NOT NULL,
-    kind      TEXT NOT NULL,
-    question  TEXT,
-    error     TEXT NOT NULL
-);
+-- "Was this briefing useful?" answers
 CREATE TABLE IF NOT EXISTS feedback (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     at           TEXT NOT NULL,
@@ -211,14 +139,6 @@ CREATE TABLE IF NOT EXISTS event_totals (
 );
 """
 
-# Columns added after the first release; created on open if missing.
-MIGRATIONS = [
-    ("usage", "visitor", "ALTER TABLE usage ADD COLUMN visitor TEXT"),
-    ("usage", "cache_write_tokens", "ALTER TABLE usage ADD COLUMN cache_write_tokens INTEGER NOT NULL DEFAULT 0"),
-    ("reports", "page", "ALTER TABLE reports ADD COLUMN page TEXT"),  # the page a report is about, if not a briefing
-]
-
-
 def utcnow() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
 
@@ -230,10 +150,6 @@ class StateDB:
         self._local = threading.local()
         with self.connect() as con:
             con.executescript(SCHEMA)
-            for table, column, sql in MIGRATIONS:
-                if column not in {r[1] for r in con.execute(f"PRAGMA table_info({table})")}:
-                    con.execute(sql)
-            con.execute("CREATE INDEX IF NOT EXISTS usage_visitor_at ON usage(visitor, at)")
 
     def _conn(self) -> sqlite3.Connection:
         con = getattr(self._local, "con", None)

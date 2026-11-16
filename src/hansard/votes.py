@@ -14,12 +14,12 @@ from datetime import date
 from typing import Any
 
 import duckdb
+from wts_core.adapters.duckdb import shared
 
 from hansard.config import Settings
 from hansard.engine import Filters
 from hansard.reference.profiles import attach_reference
 from hansard.store.parquet import attach_store
-from hansard.store.shared import shared
 from hansard.vote_types import vote_types
 
 _STOP = set(["a", "an", "and", "are", "as", "at", "be", "by", "did", "do", "does", "for", "from", "had", "has", "have", "how", "i", "in", "into", "is", "it", "its", "me", "mps", "mp", "members", "member", "lords", "lord", "of", "on", "or", "our", "over", "parliament", "said", "say", "says", "the", "their", "them", "they", "this", "to", "vote", "voted", "votes", "voting", "was", "were", "what", "when", "where", "which", "who", "why", "will", "with", "between", "since", "during", "about", "against", "dissent", "dissented", "rebel", "rebels", "rebelled", "rebellion", "bill", "bills", "northern", "southern", "government", "ministers", "minister", "debate", "debates"])

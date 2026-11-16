@@ -1,3 +1,15 @@
+# Nightly copy of the one thing that cannot be rebuilt: the state database (saved briefings, reports, statements,
+# feedback, usage). Installed by deploy/update.sh with hansard-backup.timer. Copies land in
+# /opt/hansardgpt/deploy/backups (the last 14; the off-site bucket keeps 60). Before it copies, the backup forgets in
+# the database what the tidy forgets of the days before today (visitors' codes, accounts and times of day on
+# spending rows, old visitor secrets: wts-core 0.3.0), so that no backup holds the day before as it was; the site has
+# always opened the database on its version first (deploy/update.sh installs this unit after it is up), or the
+# backup says so and fails. Then the nightly housekeeping
+# (hansard tidy): what the privacy notice says is deleted in time is deleted then, whether or not anyone visits
+# (the record of each briefing after 13 months, a visitor's code after its day, a statement's confirming address
+# three months after it ends), and the database file is written out afresh so that nothing deleted is left in it.
+# It runs whether or not the backup worked (ExecStopPost), so a failing backup never puts the deleting off; if
+# either fails, the alert email is sent.
 [Unit]
 Description=Where MPs Stand daily backup (saved briefings, reports, usage)
 After=docker.service
@@ -8,5 +20,11 @@ OnFailure=alert@%n.service
 Type=oneshot
 WorkingDirectory=/opt/hansardgpt/deploy
 ExecStart=/usr/bin/docker compose run --rm -T app hansard backup --to /backups --keep 14
+ExecStopPost=/usr/bin/docker compose run --rm --no-deps -T app hansard tidy
 TimeoutStartSec=30min
+# ExecStopPost is timed by this, not by TimeoutStartSec, and systemd's own default is 90 seconds: the housekeeping
+# (which ends by writing the database out afresh) would be killed part-way on a slow night, and what is due to be
+# deleted would stay. Killed part-way it loses nothing (each step is its own transaction), but it must be let
+# finish.
+TimeoutStopSec=30min
 Nice=10

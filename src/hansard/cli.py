@@ -12,10 +12,25 @@ from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import typer
+from wts_core.cli import (
+    BackupCheckWords,
+    BackupWords,
+    OpsWording,
+    RestoreWords,
+    eval_commands,
+    ops_commands,
+    replies_tidy,
+    stats_commands,
+)
+from wts_core.observe import config_id
+from wts_core.ports import SYSTEM_CLOCK, Clock
 
-from hansard.config import STATIC_DIR, Settings, load_settings
+from hansard import owner
+from hansard.config import SITE, STATIC_DIR, Settings, load_settings
+from hansard.store.wts import BACKUP_ALERTS, BACKUPS
 
 app = typer.Typer(add_completion=False, no_args_is_help=True, help="Where MPs Stand: sourced briefings on the record of the UK Parliament.")
 user_app = typer.Typer(no_args_is_help=True, help="Manage invite-only user accounts.")
@@ -24,13 +39,11 @@ topics_app = typer.Typer(no_args_is_help=True, help="Topic briefings (config/top
 app.add_typer(topics_app, name="topics")
 eval_app = typer.Typer(no_args_is_help=True, help="Score the site against the test set (eval/questions.toml).")
 app.add_typer(eval_app, name="eval")
-statements_app = typer.Typer(no_args_is_help=True, help="Statements beside items (the right of reply): list, publish, "
-                             "decline, update and withdraw them.")
-app.add_typer(statements_app, name="statements")
 
 log = logging.getLogger("hansard")
 
 EVAL_DIR = Path("eval")  # the test set (relative: run from the repository, or /app in the container)
+CLOCK: Clock = SYSTEM_CLOCK  # the time the shared commands go by (a backup's name, a decision's date); tests set it
 
 
 def _settings() -> Settings:
@@ -191,52 +204,77 @@ def index(rebuild_fts: bool = typer.Option(True, help="(re)build the BM25 index 
 
 def index_pending(settings: Settings, rebuild_fts: bool = True, dedupe: bool = False) -> dict:
     from hansard.index.build import Indexer
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import search_index
     from hansard.store.state import StateDB
 
-    idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+    idx = search_index(settings.index_dir)
     t = time.time()
     indexer = Indexer(settings, idx, StateDB(settings.state_db))
     out = indexer.dedupe() if dedupe else {}
     n = indexer.index_pending()
     if rebuild_fts and (n or dedupe):
-        idx.build_indices()
+        idx.build_indexes()
     elif n:
-        idx.optimize()
+        idx.tidy()
     return {"passages_written": n, **out, "seconds": round(time.time() - t, 1), **idx.stats()}
 
 
 @app.command()
 def embed(max_files: int = typer.Option(None, help="stop after this many files"),
-          max_minutes: float = typer.Option(None, help="stop after this many minutes (resumable)")):
+          max_minutes: float = typer.Option(None, help="stop after this many minutes (resumable)"),
+          start_again: bool = typer.Option(False, "--start-again", help="after the embedding model has changed: "
+                                           "throw the vectors away and make them all again with the model in the "
+                                           "settings (search is by words alone until they are made)")):
     """Embed passages for semantic search, newest first (resumable)."""
     _setup_logging()
     settings = _settings()
-    typer.echo(json.dumps(embed_pending_cmd(settings, max_files, max_minutes), indent=2))
+    typer.echo(json.dumps(embed_pending_cmd(settings, max_files, max_minutes, start_again=start_again), indent=2))
 
 
-def embed_pending_cmd(settings: Settings, max_files=None, max_minutes=None) -> dict:
-    from hansard.embed.base import get_embedder, model_fingerprint
+MODEL_CHANGED = ("embedding model weights changed since the index was built; restore the pinned model, or make "
+                 "the vectors again with `hansard embed --start-again`")
+
+
+def embed_pending_cmd(settings: Settings, max_files=None, max_minutes=None, start_again: bool = False) -> dict:
+    from wts_core.adapters.fastembed import model_fingerprint
+
+    from hansard.adapters import get_embedder, models_dir
     from hansard.index.build import embed_pending
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import IndexOutOfDate, search_index
     from hansard.store.state import StateDB
 
     state = StateDB(settings.state_db)
-    idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
     embedder = get_embedder(settings)
-    if settings.embedding.get("backend") == "fastembed":
-        fp = model_fingerprint(settings.data_dir / "models")
+    fastembed = settings.embedding.get("backend") == "fastembed"
+    if start_again:
+        # the vectors go, the index records the new model, and every file is marked as waiting to be embedded
+        search_index(settings.index_dir).start_again(embedder, number_type="float16")
+        with state.connect() as con:
+            con.execute("UPDATE manifest SET embedded_at = NULL")
+            con.execute("DELETE FROM kv WHERE key = 'embedding_model_sha256'")
+    if fastembed:
+        # The weights the vectors were made with, as the index's own note has them from wts-core 0.3.0: the
+        # embedding model's own files (or, where they cannot be told from another model's, the whole folder's).
+        # The note this site kept before covered every model file in the folder, the re-ranker's too on a server
+        # set up before the package: that is accepted, once, and noted again below, as the index accepts its own
+        # earlier id. Nothing in the folder is to be moved before then (hansard.adapters.models_folder).
+        fp = embedder.fingerprint
         prev = state.get("embedding_model_sha256")
-        if prev and prev != fp:
-            raise typer.Exit("embedding model weights changed since the index was built; "
-                             "rebuild vectors or restore the pinned model")
+        if prev and prev not in (fp, model_fingerprint(models_dir(settings))):
+            raise typer.Exit(MODEL_CHANGED)
+    try:  # the index says which model its vectors were made with, and is not opened for another
+        idx = search_index(settings.index_dir, embedder)
+    except IndexOutOfDate as exc:
+        log.error("%s", exc)
+        raise typer.Exit(MODEL_CHANGED) from None
+    if fastembed:
         state.set("embedding_model_sha256", fp)
         state.set("embedding_model", embedder.name)
     t = time.time()
     n = embed_pending(settings, idx, state, embedder, max_files=max_files,
                       max_seconds=max_minutes * 60 if max_minutes else None)
     if n and idx.stats()["vectors"] >= 10_000:
-        idx.build_indices()
+        idx.build_indexes()
     return {"passages_embedded": n, "seconds": round(time.time() - t, 1), **idx.stats()}
 
 
@@ -250,14 +288,14 @@ def reindex_vectors(rows_per_partition: int = typer.Option(8192, help="vectors p
     Takes a while on the full record (tens of minutes, most of it comparing every vector to measure how many of the
     nearest passages each index finds); the site keeps working on the old index meanwhile, and the twice-daily
     update waits for it to finish."""
-    from hansard.embed.base import get_embedder
-    from hansard.index.lance import SearchIndex
+    from hansard.adapters import get_embedder
+    from hansard.index.lance import search_index
     from hansard.index.retune import rebuild
     from hansard.sync import update_lock
 
     _setup_logging()
     settings = _settings()
-    idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+    idx = search_index(settings.index_dir)
     with update_lock(settings):
         current = {"nprobes": settings.ranking.get("vector_nprobes"),
                    "refine_factor": settings.ranking.get("vector_refine_factor")}
@@ -303,14 +341,14 @@ def groups_scan(everything: bool = typer.Option(False, "--all", help="read the w
 def index_status(text: bool = typer.Option(False, "--text", help="print only the sentence for the monthly report")):
     """How many passages are searched by meaning now, against the number when the index was last rebuilt
     (index/vector-index.json), and whether it is time to rebuild it (20% more). Reads no vectors: quick at any time."""
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import search_index
     from hansard.index.retune import status as index_status_of
 
     settings = _settings()
     if not settings.index_dir.exists():
         out = index_status_of(settings.index_dir, 0)
     else:
-        idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+        idx = search_index(settings.index_dir)
         out = index_status_of(settings.index_dir, idx.stats()["vectors"])
     typer.echo(out["reminder"] if text else json.dumps(out, indent=2))
 
@@ -346,7 +384,7 @@ def vectors_f16(dry_run: bool = typer.Option(False, "--dry-run", help="report si
     on both), then swaps it in place of the old one in one step and deletes the old one. The site keeps searching
     throughout. Safe to stop and run again: it carries on where it stopped. Run under the server's update lock
     (docs/HOSTING.md, "Disk space"); restart the app afterwards if it says so."""
-    from hansard.embed.base import get_embedder
+    from hansard.adapters import get_embedder
     from hansard.index.float16 import convert, evidence_target, passages_target
     from hansard.sync import SyncRunning, evidence_index_path, update_lock
 
@@ -400,13 +438,13 @@ def vectors_f16(dry_run: bool = typer.Option(False, "--dry-run", help="report si
 @app.command()
 def status():
     """Show data, index and sync status."""
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import search_index
     from hansard.store.state import StateDB
 
     settings = _settings()
     state = StateDB(settings.state_db)
     manifest = state.manifest()
-    idx = SearchIndex(settings.index_dir, int(settings.embedding.get("dim", 384)))
+    idx = search_index(settings.index_dir)
     out = {
         "data_dir": str(settings.data_dir),
         "files_ingested": len(manifest),
@@ -502,7 +540,7 @@ def evidence(sessions: int = typer.Option(10000, help="transcripts to fetch in t
     with _one_at_a_time():
         import sqlite3
 
-        from hansard.embed.base import get_embedder
+        from hansard.adapters import get_embedder
         from hansard.index.evidence import EvidenceVectors, embed_evidence
         from hansard.sources.evidence import SINCE, EvidenceStore, sync_transcripts
         from hansard.sync import committees_path, evidence_index_path, evidence_path
@@ -666,13 +704,78 @@ def bootstrap(sample: bool = typer.Option(False, help="offline demo using bundle
 # --------------------------------------------------------------------------- web
 
 
+@app.command("meaning-check")
+def meaning_check(look: bool = typer.Option(
+        False, "--look", help="read only the index's note and the models folder, loading no model: for before a "
+                              "deploy, on the new image, while the old site is still serving")):
+    """Whether search by meaning is at work, and which case the models folder is in (whether anything in it may be
+    moved yet: hansard.adapters.models_folder). Ends with status 1 only when the index has vectors that are being
+    refused (they were made with another embedding model than the one in use): search has then fallen back to
+    words alone for every reader. `deploy/check.sh` runs this; the last line is the state of search by meaning."""
+    from hansard.adapters import models_dir, models_folder
+
+    settings = _settings()
+    fastembed = settings.embedding.get("backend", "fastembed") == "fastembed"
+    if look:
+        from wts_core.adapters.fastembed import model_fingerprints
+        from wts_core.adapters.lancedb import stored_meta
+
+        model = str(settings.embedding.get("model", ""))
+        now, earlier, unclear = model_fingerprints(models_dir(settings), model) if fastembed else ("", (), "")
+        stamped = stored_meta(settings.index_dir)
+        typer.echo("The index is stamped: " + (stamped.embedder_id if stamped else
+                                                "nothing (it is stamped when first opened)"))
+        typer.echo("This version opens it as: " + (f"{model}@{now[:16]}" if now else model))
+        typer.echo("and accepts, once: " + (", ".join(f"{model}@{was[:16]}" for was in earlier) or "no other id"))
+        typer.echo(unclear or "The model's own files were found.")
+        if fastembed:
+            typer.echo(models_folder(settings)[1])
+        return
+    from hansard.engine import Engine
+
+    engine = Engine(settings)
+    state_of_it, said = engine.meaning_search()
+    embedder = engine.embedder if fastembed and state_of_it != "none yet" else None
+    if embedder is not None and hasattr(embedder, "fingerprint"):
+        typer.echo(models_folder(settings, embedder.fingerprint, embedder.unclear, embedder.id)[1])
+    typer.echo(said, err=state_of_it == "refused")
+    if state_of_it == "refused":
+        raise typer.Exit(1)
+
+
+
+@app.command("check-settings")
+def check_settings_cmd():
+    """Check the settings and look at the state database, changing nothing: what `deploy/update.sh` runs on a
+    newly built version before the site is restarted on it. Ends with status 1 if the site would refuse to start."""
+    from wts_core.settings import SettingsError
+
+    from hansard.startup import check_settings, models_named
+    from hansard.store.wts import written_since_the_move
+
+    try:
+        settings = _settings()
+        check_settings(settings)
+    except SettingsError as exc:
+        typer.echo(f"The site would not start with these settings: {exc}", err=True)
+        raise typer.Exit(1) from None
+    conflict = written_since_the_move(settings.state_db)
+    if conflict is not None:
+        typer.echo(str(conflict), err=True)
+        raise typer.Exit(1)
+    typer.echo(f"The settings are complete ({settings.files}): every limit, cap and message, and prices for "
+               f"{' and '.join(models_named(settings))}. Nothing was changed.")
+
+
 @app.command("set-key")
 def set_key(key: str = typer.Option(..., prompt="Paste your Anthropic API key (it will not be shown)",
                                     hide_input=True)):
     """Save the Anthropic API key in the data folder (handy when running on your own computer)."""
     import os
 
-    from hansard.rag.answer import KEY_FILE, make_client
+    from wts_core.adapters.anthropic import KEY_FILE
+
+    from hansard.adapters import model_client
 
     key = key.strip()
     if not key.startswith("sk-ant-"):
@@ -688,7 +791,7 @@ def set_key(key: str = typer.Option(..., prompt="Paste your Anthropic API key (i
 
     try:
         os.environ["HANSARD_ANTHROPIC_API_KEY"] = key
-        make_client().models.list(limit=1)
+        model_client(_settings()).client.models.list(limit=1)  # the SDK's own client: one free call, to check the key
     except anthropic.AuthenticationError:
         path.unlink()
         typer.echo("Anthropic did not accept that key, so it was not kept. Check it and run this again.")
@@ -707,59 +810,106 @@ def serve(host: str = "127.0.0.1", port: int = 8000, reload: bool = False,
     """Run the web application."""
     import uvicorn
 
+    from hansard.api.app import start_logging
+
     _setup_logging()
+    start_logging(_settings())  # the structured log of briefings: stages and milliseconds, never a reader's words
     os.environ.setdefault("HANSARD_WARM_UP", "1")  # load the search models at start, not on the first question
     uvicorn.run("hansard.api.app:create_app", host=host, port=port, factory=True, reload=reload,
                 proxy_headers=behind_proxy, forwarded_allow_ips="*" if behind_proxy else None,
                 access_log=access_log)
 
 
-@app.command()
-def backup(to: Path = typer.Option(None, help="folder for backups (default: <data>/backups)"),
-           keep: int = typer.Option(14, help="how many daily backups to keep")):
-    """Back up what cannot be rebuilt: saved briefings, reports, feedback, usage and visit counts."""
-    from hansard.backup import make_backup
-    from hansard.offsite import OffsiteError, send
+# ---- backups (wts-core, ``wts_core.cli.ops_commands``): `hansard backup`, `restore`, `offsite`, `backup-check` ----
+#
+# The commands are the Where They Stand sites' shared ones, under the names, with the options and printing the
+# lines this site has always had. What a backup is called and holds is in hansard/store/wts.py (``BACKUPS``).
+# `backup-check` is new with them: the alerts the admin page shows, for a timer to email.
 
-    _setup_logging()
-    archive = make_backup(_settings(), to, keep)
-    if archive is None:  # a new site: nothing has been saved yet
-        typer.echo("Nothing to back up yet: there is no state database.")
-        return
-    typer.echo(f"Backed up to {archive}")
-    try:  # and a copy off the server, when a Backblaze B2 bucket is set up
-        out = send(archive)
-    except OffsiteError as exc:
-        typer.echo(f"The off-site copy failed: {exc}", err=True)
-        raise typer.Exit(1) from exc
-    typer.echo("Off-site copy: " + (f"stored in {out['bucket']} ({out['stored']} kept there)"
-                                    if out.get("ok") else out["offsite"]))
+OPS_WORDING = OpsWording(
+    backup=BackupWords(
+        folder="backups", keep=BACKUPS.keep,
+        nothing_to_back_up="Nothing to back up yet: there is no state database.",
+        backed_up="Backed up to {archive}", failed=None,
+        offsite_stored="Off-site copy: stored in {bucket} ({stored} kept there)",
+        offsite_not_set_up="Off-site copy: not set up", offsite_failed="The off-site copy failed: {error}",
+        help="Back up what cannot be rebuilt: saved briefings, reports, feedback, usage and visit counts.",
+        to_help="folder for backups (default: <data>/backups)", keep_help="how many daily backups to keep"),
+    restore=RestoreWords(
+        archive_must_exist=True, says_aborted=True,
+        confirm="This replaces the current saved briefings, reports and usage records. Continue?",
+        restored="Restored. Start the site again.", replaced=" The database it replaced is kept as {kept}.",
+        not_restored="Not restored: {error}",
+        help="Put a backup back (stop the site first). Replaces the current saved briefings, reports and usage. "
+             "The backup is checked before anything is replaced, and the database it replaces is kept as "
+             "state.sqlite.before-restore.",
+        yes_help="do not ask for confirmation"),
+    backup_check=BackupCheckWords(
+        folder="/backups", no_folder="There is no backups folder at {folder}.", alert="{level}: {text}",
+        up_to_date="Backups are up to date.", alerts=BACKUP_ALERTS,
+        help="Check that the nightly backup and its off-site copy are being made: what the admin page says of "
+             "them. Ends with status 1 if either has stopped, so that its timer emails the owner.",
+        folder_help="the backups folder"),
+    errors_to_stderr=True,
+    offsite_help="Check the off-site backup bucket: whether the key works, and how many backups are stored there.")
+
+app.add_typer(ops_commands(SITE, lambda: _settings(), BACKUPS, OPS_WORDING, clock=lambda: CLOCK,
+                           before=lambda: _setup_logging()))
 
 
-@app.command()
-def offsite():
-    """Check the off-site backup bucket: whether the key works, and how many backups are stored there."""
-    from hansard.offsite import check
+# ---- how briefings went: statistics, the weekly report, the nightly tidy (wts-core docs/adr/0012) ---------------
+#
+# `hansard stats --since 7d` (and --json, --themes, --check), `hansard weekly-report`, `hansard tidy`: the Where
+# They Stand sites' shared commands (``wts_core.cli.stats_commands``) over the record of each briefing.
+# (`hansard status` is another thing: what is loaded and indexed.)
+#
+# `hansard tidy` is the nightly housekeeping, run by the backup's timer after the backup. It deletes what the
+# privacy notice says is deleted in time, whether or not anyone visits: a briefing's record after 13 months, the
+# question of a failed one after 90 days, a visitor's code and a signed-in account on a spending row after its
+# day (with the row's time of day) and the secret the code was made with, cached answers past their week, weekly
+# reports after 13 months, the copy of the database made before the move onto the shared package once it is older
+# than the backups; then the right of reply's (a statement's confirming address three months after it ends, what
+# nobody decided in three months). While the site's old tables are still in the file it keeps them to the same
+# promises, and drops them on their day (hansard/store/wts.py, OLD_TABLES). Last, the file is written out afresh,
+# and the command says plainly when it could not be. `hansard propose-questions` writes, for the owner to approve,
+# test questions proposed from real use (docs/EVALUATION.md).
 
-    _setup_logging()
-    typer.echo(json.dumps(check(), indent=2))
+def _core() -> Any:
+    from hansard.store.wts import open_core
+
+    return open_core(_settings(), CLOCK)
 
 
-@app.command()
-def restore(archive: Path = typer.Argument(..., exists=True, dir_okay=False),
-            yes: bool = typer.Option(False, "--yes", help="do not ask for confirmation")):
-    """Put a backup back (stop the site first). Replaces the current saved briefings, reports and usage. The backup
-    is checked before anything is replaced, and the database it replaces is kept as state.sqlite.before-restore."""
-    from hansard.backup import restore_backup
+def _prices() -> Any:
+    from wts_core.usage import PriceTable
 
-    if not yes:
-        typer.confirm("This replaces the current saved briefings, reports and usage records. Continue?", abort=True)
-    try:
-        kept = restore_backup(_settings(), archive)
-    except (OSError, RuntimeError) as exc:
-        typer.echo(f"Not restored: {exc}", err=True)
-        raise typer.Exit(1) from exc
-    typer.echo("Restored. Start the site again." + (f" The database it replaced is kept as {kept}." if kept else ""))
+    s = _settings()
+    return PriceTable.from_settings(s.usage, file=s.files)
+
+
+def _embedder() -> Any:
+    from hansard.adapters import get_embedder
+
+    return get_embedder(_settings())
+
+
+app.add_typer(stats_commands(
+    SITE, lambda: _core(),
+    thresholds=lambda: _settings().section("alerts"),  # empty until the owner sets them
+    folder=lambda: _settings().reports_dir,
+    # readers' questions are grouped into themes by meaning with the site's own embedding model, on the server
+    embedder=lambda: _embedder(), similarity=lambda: float(_settings().embedding["theme_similarity"]),
+    pricing=lambda: _prices(),
+    backup_days=BACKUPS.keep,  # the copy made before the move is kept as long as a backup on the server: 14 days
+    # The right of reply's deletions are the one step that is the site's to give. The command does the rest
+    # itself, in this order: its own deletions (old records, visitor codes and accounts of days gone by, notes of
+    # failed briefings, old visitor secrets, cached answers past their hours, old and unfinished copies); then
+    # this step; then the old tables, after it; and last the file written out afresh.
+    also_tidy=[replies_tidy(lambda: owner.replies_for(_settings(), CLOCK), owner.WORDING)],
+    cache_hours=lambda: float(_settings().usage["answer_cache_hours"]),
+    # no question of a briefing that is hidden while a concern about it is decided is proposed as a test question
+    proposals_leave_out=lambda briefing: owner.replies_for(_settings(), CLOCK).hidden(f"/b/{briefing}") is not None,
+    clock=lambda: CLOCK))
 
 
 @user_app.command("add")
@@ -792,98 +942,13 @@ def user_disable(email: str):
     typer.echo(f"disabled {email}")
 
 
-# ---- statements beside items (the right of reply) -------------------------------------------------------------------
+# ---- reports and statements beside items (the right of reply) ------------------------------------------------------
+#
+# The commands are the Where They Stand sites' shared ones (wts-core, ``wts_core.cli``), under the names and with
+# the lines this site has always had for statements; the commands for reports are new with them. hansard/owner.py
+# holds every line they print.
 
-
-def _statements_state():
-    from hansard.store.state import StateDB
-
-    return StateDB(_settings().state_db)
-
-
-def _statement_done(done: bool, what: str) -> None:
-    if not done:
-        typer.echo("No such statement, or it can't be changed in that way now (see `hansard statements list`).", err=True)
-        raise typer.Exit(1)
-    typer.echo(what)
-
-
-@statements_app.command("list")
-def statements_list(status: str = typer.Option("pending", help="pending, published, declined, withdrawn or all")):
-    """Statements and their state, with the email address to confirm who sent each (pending first by default)."""
-    from hansard.api.statements import list_statements
-
-    for s in list_statements(_statements_state(), None if status == "all" else status):
-        typer.echo(f"#{s['id']}  {s['status']}  received {s['at'][:10]}"
-                   + (f"  published {s['published_at'][:10]}" if s["published_at"] else "")
-                   + (f"  closed {s['closed_at'][:10]}" if s["closed_at"] else ""))
-        typer.echo(f"  From: {s['name']}, {s['role']}  <{s['email'] or 'email deleted'}>")
-        typer.echo(f"  About: {s['item_path']}" + (f"  (member {s['person']})" if s["person"] else "  (no member set)"))
-        if s["link"]:
-            typer.echo(f"  Link: {s['link']}")
-        if s["checked"]:
-            typer.echo(f"  Checked: {s['checked']}")
-        if s["reason"]:
-            typer.echo(f"  Reason: {s['reason']}")
-        typer.echo("  " + s["text"].replace("\n", "\n  ") + "\n")
-
-
-@statements_app.command("publish")
-def statements_publish(sid: int = typer.Argument(..., help="the statement's number, from `list`"),
-                       checked: str = typer.Option(..., help="how you confirmed who sent it, e.g. \"replied from their "
-                                                             "parliament.uk address\" (kept privately)"),
-                       person: int = typer.Option(None, help="the member it is about (their number, as in "
-                                                             "/people/<number>), when its address isn't their page")):
-    """Publish a pending statement as written, once you have confirmed who sent it."""
-    from hansard.api.statements import StatementError, publish_statement
-
-    try:
-        done = publish_statement(_statements_state(), sid, person=person, checked=checked)
-    except StatementError as exc:  # --checked "" says nothing
-        typer.echo(str(exc), err=True)
-        raise typer.Exit(1) from None
-    _statement_done(done, f"published #{sid}")
-
-
-@statements_app.command("decline")
-def statements_decline(sid: int, reason: str = typer.Option(..., help="why: sent to the author, never shown")):
-    """Decline a pending statement, or take down a published one that breaks the rules, with the reason."""
-    from hansard.api.statements import StatementError, decline_statement
-
-    try:
-        done = decline_statement(_statements_state(), sid, reason)
-    except StatementError as exc:  # no reason given
-        typer.echo(str(exc), err=True)
-        raise typer.Exit(1) from None
-    _statement_done(done, f"declined #{sid}: tell the author why; their email address is deleted in three months")
-
-
-@statements_app.command("update")
-def statements_update(sid: int,
-                      text_file: Path = typer.Option(None, exists=True, dir_okay=False,
-                                                     help="a file holding the author's new words, exactly as sent"),
-                      name: str = typer.Option(None), role: str = typer.Option(None),
-                      link: str = typer.Option(None, help="a new link to the record; \"\" removes it")):
-    """Replace a statement at its author's request (published ones are shown with the new date)."""
-    from hansard.api.statements import StatementError, update_statement
-
-    text = text_file.read_text(encoding="utf-8") if text_file else None
-    try:
-        done = update_statement(_statements_state(), sid, text=text, name=name, role=role, link=link or None,
-                                clear_link=link == "")
-    except StatementError as exc:
-        typer.echo(str(exc), err=True)
-        raise typer.Exit(1) from None
-    _statement_done(done, f"updated #{sid}")
-
-
-@statements_app.command("withdraw")
-def statements_withdraw(sid: int, note: str = typer.Option(None, help="a private note, e.g. the date they asked")):
-    """Take a statement down at its author's request."""
-    from hansard.api.statements import withdraw_statement
-
-    _statement_done(withdraw_statement(_statements_state(), sid, note),
-                    f"withdrawn #{sid}; the email address is deleted in three months")
+app.add_typer(owner.reply_commands(lambda: _settings(), lambda: CLOCK))
 
 
 # ---- topic briefings ----------------------------------------------------------------------------------------------
@@ -892,10 +957,14 @@ def statements_withdraw(sid: int, note: str = typer.Option(None, help="a private
 @topics_app.command("list")
 def topics_list():
     """Each topic, its current version and when it was last checked."""
+    from hansard.api.usage import desk
     from hansard.store.state import StateDB
+    from hansard.store.wts import open_core
     from hansard.topics import topic_listing
 
-    for t in topic_listing(_settings(), StateDB(_settings().state_db)):
+    settings = _settings()
+    archive = desk(settings, open_core(settings, CLOCK), CLOCK).archive
+    for t in topic_listing(settings, StateDB(settings.state_db), archive):
         cur = t["current"]
         chk = t["last_check"]
         typer.echo(f"{t['slug']:32} {('written ' + cur['prepared_at'][:10]) if cur else 'not written yet':22} "
@@ -907,18 +976,77 @@ def topics_refresh(only: list[str] = typer.Option(None, help="just these topics 
                    force: bool = typer.Option(False, help="rewrite even if not due or the evidence is unchanged"),
                    limit: int = typer.Option(None, help="at most this many rewrites (default: max_per_run)")):
     """Rewrite the topic briefings that are due. Each rewrite costs about 11p."""
+    from hansard.api.usage import desk
     from hansard.rag.pipeline import Pipeline
     from hansard.store.state import StateDB
+    from hansard.store.wts import open_core
     from hansard.topics import refresh_topics
 
     settings = _settings()
     _setup_logging()
-    res = refresh_topics(settings, StateDB(settings.state_db), Pipeline(settings), only=only or None, force=force,
-                         limit=limit, progress=typer.echo)
+    parts = desk(settings, open_core(settings))  # first: it checks the settings before the database is opened
+    res = refresh_topics(settings, StateDB(settings.state_db), Pipeline(settings), parts,
+                         only=only or None, force=force, limit=limit, progress=typer.echo)
     typer.echo(f"{sum(1 for r in res if r['outcome'].startswith('rewritten'))} rewritten")
 
 
 # ---- the test set ------------------------------------------------------------------------------------------------
+#
+# `hansard eval plans|sources|retrieval|briefings` are the site's own, as they always were: how questions are read,
+# what evidence is chosen, and briefings by several models judged side by side (src/hansard/evaluate.py).
+#
+# `hansard eval run`, `eval compare` and `eval replay` are the Where They Stand sites' shared commands
+# (``wts_core.cli.eval_commands``), added to the same group. `eval run` asks every question in eval/questions.toml
+# of the real pipeline, each briefing written (it spends money: no more than [eval] max_cost_usd unless --max-cost
+# says otherwise), saves the run in the data folder (<data>/eval/runs/: on the server /data/eval/runs/, the one
+# place a command there can write and have kept) and holds it to [eval.thresholds]; `eval compare` sets two saved
+# runs side by side; `eval replay` runs the checks again over briefings a run kept (--record-fixtures), free and
+# with no model. HANSARD_EVAL_QUESTIONS names another file of questions (eval/sample-questions.toml, for the
+# bundled sample data).
+#
+# What a run spends is its own: the questions go to the pipeline directly, not through the flow readers' questions
+# take, so nothing is written to the spending record. It is not on the admin page and counts towards neither cap;
+# the run has its own limit, says so as it starts, and reports what it spent. Its cost counts each of a
+# briefing's three model calls, the check of registered interests among them (``HansardEval.usages``). (wts-core
+# 0.3.0 could record a run in the site's spending, where the caps would count it: ``eval_commands(spending=…)``.
+# On this site a run on the archive costs a few dollars against a daily cap of ten, so readers could be paused for
+# the rest of the day; it is not given, and that is for the owner to decide.)
+
+NOT_IN_USAGE = ("What this run spends is not in the admin page's spending and counts towards neither the daily nor "
+                "the monthly cap: it stops at its own limit ([eval] max_cost_usd, or --max-cost), and says below "
+                "what it spent.")
+
+
+def _eval_site() -> Any:
+    from hansard.evaluate import HansardEval
+
+    typer.echo(NOT_IN_USAGE, err=True)
+    return HansardEval(_settings(), path=Path(os.environ.get("HANSARD_EVAL_QUESTIONS") or EVAL_DIR / "questions.toml"))
+
+
+def _configuration() -> Any:
+    """What an evaluation run is a run of: the configuration the settings give as they stand, with the same id the
+    record of briefings gives it. Nothing is kept by asking (a run is not a reader's briefing)."""
+    from hansard.api.app import configuration
+
+    return configuration(_settings(), None).settings
+
+
+def _checks(name: str) -> Any:
+    from hansard.rag import checks
+
+    return getattr(checks, name)
+
+
+eval_app.add_typer(eval_commands(
+    lambda: _eval_site(),  # looked up when a command runs, so a test can stand another in its place
+    config=_configuration, config_id=config_id,  # the id the record of briefings gives the same parts
+    pricing=lambda: _prices(),
+    thresholds=lambda: _settings().section("eval")["thresholds"],
+    runs=lambda: _settings().data_dir / "eval" / "runs",
+    max_cost_usd=lambda: float(_settings().section("eval")["max_cost_usd"]),  # no run starts without a limit
+    verifier=lambda: _checks("VERIFIER"), loaded_words=lambda: _checks("LOADED_WORDS"),
+    group=None, clock=lambda: CLOCK))
 
 
 
@@ -933,9 +1061,9 @@ def _eval_setup(questions: Path, only: str | None):
 
 
 def _client():
-    from hansard.rag.answer import make_client
+    from hansard.adapters import model_client
 
-    return make_client()
+    return model_client(_settings())
 
 
 def _load_plans(path: Path) -> dict[str, dict]:

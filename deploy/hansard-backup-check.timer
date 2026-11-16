@@ -1,0 +1,10 @@
+[Unit]
+Description=Check Where MPs Stand's backups every morning (UK time)
+
+[Timer]
+# after the night's backup (3.30am) and the morning's update (7.15am)
+OnCalendar=*-*-* 09:40:00 Europe/London
+Persistent=true
+
+[Install]
+WantedBy=timers.target

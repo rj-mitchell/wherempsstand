@@ -39,7 +39,7 @@ def test_comparison_briefing_has_balanced_labelled_sources(indexed_settings):
     assert [s["id"] for s in plan["compare"]] == parties and not plan["filters"]["parties"]
     groups = [s["group"] for s in out["sources"]["sources"] if s["kind"] == "record"]
     assert set(groups) <= {"Labour", "Conservative"} and groups
-    sent = p.client.calls[-1]["messages"][0]["content"]
+    sent = p.client.client.calls[-1]["messages"][0]["content"]  # what the faked SDK was sent
     assert "Each search result title begins with the side" in sent[-1]["text"]
     assert any(b.get("title", "").startswith(("Labour", "Conservative")) for b in sent if b["type"] == "search_result")
     assert out["final"]["answer"]

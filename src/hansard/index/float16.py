@@ -453,15 +453,15 @@ def passages_target(index_dir: Path, dim: int, rows_per_partition: int = 8192,
                     tolerance: float = 0.02) -> Target:
     """The passages' vectors. With an ``embedder`` (for the sample searches), the new index is measured and its
     settings recommended as ``hansard reindex-vectors`` does."""
-    from hansard.index.lance import VECTORS, SearchIndex
+    from hansard.index.lance import VECTORS, search_index
 
     def build(dst) -> None:  # as hansard reindex-vectors builds it
-        SearchIndex(index_dir, dim, vectors_name=dst.name).rebuild_vector_index(rows_per_partition)
+        search_index(index_dir, vectors_name=dst.name).rebuild_vector_index(rows_per_partition)
 
     def tune(dst) -> dict[str, Any]:  # as hansard reindex-vectors measures it
         from hansard.index.retune import measure
 
-        return measure(SearchIndex(index_dir, dim), SearchIndex(index_dir, dim, vectors_name=dst.name), embedder,
+        return measure(search_index(index_dir), search_index(index_dir, vectors_name=dst.name), embedder,
                        rows_per_partition, current=search_options, tolerance=tolerance)
 
     return Target("passages", Path(index_dir), VECTORS, ("passage_id",), build, search_options or {},

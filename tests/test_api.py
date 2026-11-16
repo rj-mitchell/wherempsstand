@@ -8,15 +8,15 @@ import json
 
 import pytest
 from fastapi.testclient import TestClient
+from wts_core.adapters.hashing import HashingEmbedder
 
 from hansard.api.app import create_app
 from hansard.api.auth import create_user
-from hansard.api.usage import cost_usd, record_usage
-from hansard.embed.base import HashingEmbedder
 from hansard.engine import Engine
 from hansard.rag.pipeline import Pipeline
 from hansard.store.state import StateDB
 
+from .conftest import model_of
 from .test_rag import TODAY, FakeClient
 
 
@@ -28,7 +28,8 @@ def make_app(indexed_settings, tmp_path, *, auth: bool, **usage):
         "usage": {**indexed_settings.raw["usage"], "per_user_daily_questions": 2, "per_visitor_daily_questions": 2,
                   **usage}})
     client = FakeClient()
-    pipeline = Pipeline(s, Engine(s, embedder=HashingEmbedder(64), today=TODAY), client=client, today=TODAY)
+    pipeline = Pipeline(s, Engine(s, embedder=HashingEmbedder(64), today=TODAY), client=model_of(client),
+                        today=TODAY)
     state = StateDB(tmp_path / "state.sqlite")
     return create_app(s, pipeline, state), state, client
 
@@ -53,6 +54,16 @@ def login(client, email="researcher@example.org", password="correct horse batter
     r = client.post("/api/auth/login", json={"email": email, "password": password})
     assert r.status_code == 200, r.text
     return r
+
+
+def spend(app, kind, model, usage, visitor=None):
+    """One model call in the spending record, as the flow of a briefing records it."""
+    return app.state.parts.spending.add(kind, model, usage, visitor=visitor)
+
+
+def answers_recorded(state, column="count(*)"):
+    with state.connect() as con:
+        return con.execute(f"SELECT {column} FROM wts_spending WHERE kind = 'answer'").fetchone()[0]
 
 
 def events(resp):
@@ -107,8 +118,7 @@ def test_ask_streams_plan_sources_text_and_verified_answer(api):
     assert types[-2] == "progress"  # checking the citations, after the writing
     final = evs[-1]["answer"]
     assert "[Source 1]" in final["markdown"] and final["citations_invalid"] == 0
-    with state.connect() as con:
-        assert con.execute("SELECT count(*) FROM usage WHERE kind = 'answer'").fetchone()[0] == 1
+    assert answers_recorded(state) == 1
 
 
 def sources_but_no_briefing(evs, word):
@@ -150,13 +160,27 @@ def test_admin_usage_is_admin_only(api):
     assert client.get("/api/admin/usage").status_code == 403
     admin = TestClient(client.app)
     login(admin, "admin@example.org", "admin password 123")
-    record_usage(state, None, "answer", "claude-opus-5-5", {"input_tokens": 10_000, "output_tokens": 1_000}, {})
+    spend(client.app, "answer", "claude-opus-5-5", {"input_tokens": 10_000, "output_tokens": 1_000})
     assert admin.get("/api/admin/usage").json()["total_usd"] > 0
 
 
+def prices(**usage):
+    from wts_core.usage import PriceTable
+
+    return PriceTable.from_settings({"price_input_per_mtok": 4.0, "price_output_per_mtok": 20.0,
+                                     "price_cache_read_per_mtok": 0.2, "cache_write_multiplier": 1.25, **usage})
+
+
+def cost_usd(usage, table=None, model=None):
+    """What a call costs by the site's prices, from token counts in either of the forms the site has stored."""
+    from wts_core.ports import Usage
+
+    return (table or prices()).cost(Usage.from_mapping(usage), model)
+
+
 def test_cost_calculation():
-    assert cost_usd({"input_tokens": 1_000_000, "output_tokens": 100_000, "cache_read_tokens": 0},
-                    {"price_input_per_mtok": 4.0, "price_output_per_mtok": 20.0}) == pytest.approx(6.0)
+    assert cost_usd({"input_tokens": 1_000_000, "output_tokens": 100_000, "cache_read_tokens": 0}) == \
+        pytest.approx(6.0)
 
 
 # ---- public mode (the default) -------------------------------------------------------------------
@@ -168,8 +192,7 @@ def test_public_site_needs_no_sign_in(public):
     assert client.get("/api/meta").status_code == 200
     evs = events(client.post("/api/ask", json={"question": "What has been said about trial by jury?"}))
     assert evs[-1]["type"] == "final" and evs[-1]["answer"]["citations_total"] == 1
-    with state.connect() as con:
-        visitor = con.execute("SELECT visitor FROM usage WHERE kind = 'answer'").fetchone()[0]
+    visitor = answers_recorded(state, "visitor")
     assert visitor and "testclient" not in visitor  # a salted hash, never the address
 
 
@@ -183,8 +206,7 @@ def test_repeat_questions_come_from_the_cache_and_cost_nothing(public):
     other = events(client.post("/api/ask", json={"question": "What has been said about trial by jury?",
                                                  "mode": "comprehensive"}))
     assert len(model.calls) == 2 and "cached" not in other[-1]
-    with state.connect() as con:
-        assert con.execute("SELECT count(*) FROM usage WHERE kind = 'answer'").fetchone()[0] == 2
+    assert answers_recorded(state) == 2
 
 
 def test_each_visitor_has_a_daily_limit_but_cached_answers_still_load(public):
@@ -200,7 +222,7 @@ def test_each_visitor_has_a_daily_limit_but_cached_answers_still_load(public):
 
 def test_site_wide_daily_budget(public):
     client, state, _ = public
-    record_usage(state, None, "answer", "claude-opus-5-5", {"input_tokens": 3_000_000}, {})
+    spend(client.app, "answer", "claude-opus-5-5", {"input_tokens": 3_000_000})
     evs = events(client.post("/api/ask", json={"question": "trial by jury"}))
     assert sources_but_no_briefing(evs, "budget")
 
@@ -275,7 +297,7 @@ def test_public_status(public):
     client, state, _ = public
     st = client.get("/api/status").json()
     assert st["briefings"] == "available" and st["archive_start"]
-    record_usage(state, None, "answer", "claude-opus-5-5", {"input_tokens": 3_000_000}, {})
+    spend(client.app, "answer", "claude-opus-5-5", {"input_tokens": 3_000_000})
     st = client.get("/api/status").json()
     assert st["briefings"] == "paused" and "budget" in st["briefings_note"]
 
@@ -418,22 +440,23 @@ def test_reports_are_private_until_closed_with_a_public_note(indexed_settings, t
     assert withdrawn["note"] == "Misquoted a minister." and withdrawn["briefing_id"] == bid
 
 
-def test_open_takedown_requests_are_listed_first(tmp_path):
-    from hansard.api.reports import close_report, list_reports
+def test_open_takedown_requests_are_listed_first(settings):
+    from wts_core.testing import FixedClock
 
-    state = StateDB(tmp_path / "state.sqlite")
-    rows = [("2026-11-01T09:00:00+00:00", "takedown", "open"), ("2026-11-02T09:00:00+00:00", "correction", "open"),
-            ("2026-11-03T09:00:00+00:00", "takedown", "open"), ("2026-11-04T09:00:00+00:00", "complaint", "open"),
-            ("2026-11-05T09:00:00+00:00", "takedown", "resolved")]
-    with state.connect() as con:
-        con.executemany("INSERT INTO reports (at, kind, status, message) VALUES (?, ?, ?, 'Please look at this.')", rows)
-    listed = [(r["kind"], r["at"][8:10]) for r in list_reports(state, "open")]
+    from hansard.owner import replies_for
+
+    clock = FixedClock("2026-11-01T09:00:00+00:00")
+    replies = replies_for(settings, clock)
+    for kind in ("takedown", "correction", "takedown", "complaint", "takedown"):
+        replies.report(kind=kind, page=None, message="Please look at this.")
+        clock.advance(days=1)
+    replies.close(5, outcome="resolved")
+    listed = [(r["kind"], r["at"][8:10]) for r in replies.reports()]
     assert listed == [("takedown", "03"), ("takedown", "01"), ("complaint", "04"), ("correction", "02")]
-    assert [r["kind"] for r in list_reports(state, "open", limit=2)] == ["takedown", "takedown"]  # never cut off
-    # with closed reports too: the open requests first, then everything else newest first
-    assert [r["at"][8:10] for r in list_reports(state)] == ["03", "01", "05", "04", "02"]
-    assert close_report(state, list_reports(state)[0]["id"], "resolved", "Name removed.", None)
-    assert [r["at"][8:10] for r in list_reports(state)] == ["01", "05", "04", "03", "02"]
+    # with closed reports too: the open requests first, then everything else newest first; and never cut off
+    assert [r["at"][8:10] for r in replies.reports(open_only=False)] == ["03", "01", "05", "04", "02"]
+    replies.close(replies.reports()[0]["id"], outcome="resolved", note="Name removed.")
+    assert [r["at"][8:10] for r in replies.reports(open_only=False)] == ["01", "05", "04", "03", "02"]
 
 
 def test_reports_are_limited_per_visitor(indexed_settings, tmp_path):
@@ -460,33 +483,43 @@ def test_donate_link_is_hidden_until_set(indexed_settings, tmp_path, monkeypatch
         assert client.get("/api/site").json() == {"donate_url": None}
 
 
-def test_visitor_codes_change_daily_and_old_secrets_are_deleted(tmp_path):
-    from hansard.api.usage import visitor_key
+def test_visitor_codes_change_daily_and_old_secrets_are_deleted(settings):
+    from wts_core.testing import FixedClock
 
-    state = StateDB(tmp_path / "state.sqlite")
-    state.set("visitor_salt", "an-old-permanent-salt")
-    monday = visitor_key(state, "203.0.113.5", day="2026-10-12")
-    assert visitor_key(state, "203.0.113.5", day="2026-10-12") == monday
-    assert visitor_key(state, "198.51.100.7", day="2026-10-12") != monday
-    tuesday = visitor_key(state, "203.0.113.5", day="2026-10-13")
+    from hansard.api.usage import visitor_key
+    from hansard.store.wts import open_core
+
+    clock = FixedClock("2026-10-12T10:00:00+00:00")
+    core = open_core(settings, clock)
+    core.set("visitor_salt", "an-old-permanent-salt")
+    monday = visitor_key(core, "203.0.113.5", clock)
+    assert visitor_key(core, "203.0.113.5", clock) == monday
+    assert visitor_key(core, "198.51.100.7", clock) != monday
+    clock.advance(days=1)
+    tuesday = visitor_key(core, "203.0.113.5", clock)
     assert tuesday != monday
-    with state.connect() as con:
-        keys = [r[0] for r in con.execute("SELECT key FROM kv WHERE key LIKE 'visitor_salt%'")]
+    with core.connect() as con:
+        keys = [r[0] for r in con.execute("SELECT key FROM wts_kv WHERE key LIKE 'visitor_salt%'")]
     assert keys == ["visitor_salt:2026-10-13"]
 
 
-def test_failures_and_spending_show_as_alerts(tmp_path):
-    from hansard.api.usage import alerts, recent_failures, record_failure
+def test_failures_and_spending_show_as_alerts(settings):
+    import dataclasses
 
-    state = StateDB(tmp_path / "state.sqlite")
-    caps = {"daily_spend_cap_usd": 10, "monthly_spend_cap_usd": 150, "price_input_per_mtok": 4.0}
-    assert alerts(state, caps) == []
-    record_failure(state, "question reading", "Q?", "AuthenticationError: invalid x-api-key")
-    a = alerts(state, caps)
+    from hansard.api.usage import alerts, desk, recent_failures
+    from hansard.store.wts import open_core
+
+    capped = dataclasses.replace(settings, raw={**settings.raw, "usage": {
+        **settings.usage, "daily_spend_cap_usd": 10, "monthly_spend_cap_usd": 150}})
+    parts = desk(capped, open_core(capped))
+    state = StateDB(capped.state_db)
+    assert alerts(parts, state) == []
+    parts.failures.note("question reading", "Q?", "AuthenticationError: invalid x-api-key")
+    a = alerts(parts, state)
     assert len(a) == 1 and "1 briefing failed" in a[0]["text"] and "invalid x-api-key" in a[0]["text"]
-    assert recent_failures(state)[0]["kind"] == "question reading"
-    record_usage(state, None, "answer", "m", {"input_tokens": 2_000_000}, caps, "v")  # $8 of a $10 day
-    texts = " ".join(x["text"] for x in alerts(state, caps))
+    assert recent_failures(parts.failures)[0]["kind"] == "question reading"
+    parts.spending.add("answer", "claude-opus-5-5", {"input_tokens": 2_000_000}, visitor="v")  # $8 of a $10 day
+    texts = " ".join(x["text"] for x in alerts(parts, state))
     assert "80% of the $10 cap" in texts
 
 
@@ -509,60 +542,43 @@ def test_failed_briefing_is_logged_and_readers_see_plain_words(indexed_settings,
                                               "last": usage["popular_questions"][0]["last"]}
 
 
-def test_cache_writes_and_reads_are_priced(tmp_path):
-    prices = {"price_input_per_mtok": 4.0, "price_output_per_mtok": 20.0, "price_cache_read_per_mtok": 0.2}
-    assert cost_usd({"input_tokens": 1_000_000, "cache_write_tokens": 1_000_000}, prices) == 5.0
-    assert cost_usd({"input_tokens": 0, "cache_read_tokens": 1_000_000}, prices) == 0.2
+def test_cache_writes_and_reads_are_priced():
+    assert cost_usd({"input_tokens": 1_000_000, "cache_write_tokens": 1_000_000}) == 5.0
+    assert cost_usd({"input_tokens": 0, "cache_read_tokens": 1_000_000}) == 0.2
 
 
-def test_raw_sdk_token_names_are_priced_and_cache_writes_recorded(tmp_path):
-    from types import SimpleNamespace as NS
+def test_raw_sdk_token_names_are_priced_and_cache_writes_recorded(settings):
+    from wts_core.ports import Usage
 
-    from hansard.rag.answer import usage_dict
-    from hansard.store.state import StateDB
+    from hansard.api.usage import desk
+    from hansard.store.wts import open_core
 
-    prices = {"price_input_per_mtok": 4.0, "price_output_per_mtok": 20.0, "price_cache_read_per_mtok": 0.2}
     # the SDK's own names: its input_tokens leaves out the cache writes and reads
     raw = {"input_tokens": 1_000_000, "output_tokens": 100_000, "cache_creation_input_tokens": 1_000_000,
            "cache_read_input_tokens": 1_000_000}
-    assert cost_usd(raw, prices) == pytest.approx(4.0 + 2.0 + 5.0 + 0.2)
-    # the same call through usage_dict costs the same
-    assert cost_usd(usage_dict(NS(**raw)), prices) == cost_usd(raw, prices)
+    assert cost_usd(raw) == pytest.approx(4.0 + 2.0 + 5.0 + 0.2)
+    # the same call in the site's own form costs the same
+    assert cost_usd(Usage.from_mapping(raw).as_stored()) == cost_usd(raw)
     # counts that are missing, None or not whole numbers are coped with; this site's name for cache reads comes
     # first when both are given, even at 0 (as Where Countries Stand's copy)
-    from hansard.api.usage import token_counts
 
-    assert cost_usd({"input_tokens": 1000, "cache_read_input_tokens": None}, prices) == pytest.approx(0.004)
+    def token_counts(usage):
+        return Usage.from_mapping(usage).as_stored()
+
+    assert cost_usd({"input_tokens": 1000, "cache_read_input_tokens": None}) == pytest.approx(0.004)
     assert token_counts({"input_tokens": 1000.0, "output_tokens": "20", "cache_read_tokens": 0,
                          "cache_read_input_tokens": 50}) == {"input_tokens": 1000, "output_tokens": 20,
                                                              "cache_read_tokens": 0, "cache_write_tokens": 0}
     assert all(type(v) is int for v in token_counts({"input_tokens": 7.0, "cache_write_tokens": 2.0}).values())
 
-    state = StateDB(tmp_path / "state.db")
-    record_usage(state, None, "answer", "m", raw, prices)
-    record_usage(state, None, "answer", "m", usage_dict(NS(**raw)), prices)
-    with state.connect() as con:
+    core = open_core(settings)
+    spending = desk(settings, core).spending
+    spending.add("answer", "claude-opus-5-5", raw)
+    spending.add("answer", "claude-opus-5-5", Usage.from_mapping(raw).as_stored())
+    with core.connect() as con:
         rows = [tuple(r) for r in con.execute(
-            "SELECT input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd FROM usage")]
+            "SELECT input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cost_usd FROM wts_spending")]
     assert rows == [(2_000_000, 100_000, 1_000_000, 1_000_000, 11.2)] * 2
-
-
-def test_a_usage_table_from_before_cache_writes_were_recorded_gains_the_column(tmp_path):
-    import sqlite3
-
-    from hansard.store.state import StateDB
-
-    path = tmp_path / "state.db"
-    with sqlite3.connect(path) as con:
-        con.execute("CREATE TABLE usage (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, at TEXT NOT NULL, "
-                    "kind TEXT NOT NULL, model TEXT, input_tokens INTEGER NOT NULL DEFAULT 0, output_tokens INTEGER "
-                    "NOT NULL DEFAULT 0, cache_read_tokens INTEGER NOT NULL DEFAULT 0, cost_usd REAL NOT NULL "
-                    "DEFAULT 0, visitor TEXT)")
-        con.execute("INSERT INTO usage (at, kind, cost_usd) VALUES ('2026-11-01T00:00:00+00:00', 'answer', 0.5)")
-    state = StateDB(path)
-    record_usage(state, None, "answer", "m", {"input_tokens": 10, "cache_write_tokens": 4}, {})
-    with state.connect() as con:
-        assert [r[0] for r in con.execute("SELECT cache_write_tokens FROM usage ORDER BY id")] == [0, 4]
 
 
 def test_support_reminder_every_n_new_briefings(indexed_settings, tmp_path, monkeypatch):
@@ -617,37 +633,53 @@ def test_oversized_follow_up_history_and_plans_are_bounded(public):
 
 
 def test_briefings_in_progress_count_against_the_caps():
-    from hansard.api.usage import InFlight
+    from wts_core.usage import BriefingsInProgress, busy_refusal
 
-    f = InFlight(per_key=2, total=3, estimate_usd=0.5)
-    assert f.start("a") is None and f.start("a") is None
-    assert "already being written" in f.start("a")
-    assert f.start("b") is None and "Many briefings" in f.start("c")
+    from hansard.messages import MESSAGES
+
+    f = BriefingsInProgress(per_key=2, total=3, estimate_usd=0.5)
+
+    def start(key):
+        busy = f.start(key)
+        return busy_refusal(busy, MESSAGES).message if busy else None
+
+    assert start("a") is None and start("a") is None
+    assert "already being written" in start("a")
+    assert start("b") is None and "Many briefings" in start("c")
     assert f.pending_usd() == 1.5 and f.pending_usd(besides=1) == 1.0
     assert set(f.running) == {"a", "b"}  # the refused visitor left nothing behind
     f.finish("a")
-    assert f.start("c") is None
+    assert start("c") is None
     for key in ("a", "b", "c"):
         f.finish(key)
     assert f.running == {} and f.pending_usd() == 0
 
 
-def test_the_settings_file_says_what_the_code_falls_back_to(indexed_settings):
+def test_the_settings_file_has_every_figure_the_flow_of_a_briefing_needs(indexed_settings):
     """The limits on briefings in progress, their estimated cost and the cache's life are written in
-    config/settings.toml, with the values the code uses when a key is missing."""
-    import inspect
+    config/settings.toml: the code has no fallback for them, and the site will not start without them."""
+    import dataclasses
 
-    from hansard.api.usage import InFlight
+    from wts_core.briefing import desk_settings
+    from wts_core.settings import SettingsError
+
+    from hansard.messages import MESSAGES
 
     u = indexed_settings.raw["usage"]
-    defaults = {k: p.default for k, p in inspect.signature(InFlight).parameters.items()}
-    assert (u["briefings_at_once_per_reader"], u["briefings_at_once"], u["briefing_estimate_usd"]) == \
-        (defaults["per_key"], defaults["total"], defaults["estimate_usd"]) == (2, 8, 0.15)
+    assert (u["briefings_at_once_per_reader"], u["briefings_at_once"], u["briefing_estimate_usd"]) == (2, 8, 0.15)
     assert u["answer_cache_hours"] == 168
+    read = desk_settings(indexed_settings, MESSAGES, at_once_per_visitor="briefings_at_once_per_reader",
+                         forget_over=50_000)
+    assert (read.at_once_per_visitor, read.at_once, read.estimate_usd, read.cache_hours) == (2, 8, 0.15, 168.0)
+    without = dataclasses.replace(indexed_settings, raw={**indexed_settings.raw, "usage": {
+        k: v for k, v in u.items() if k not in ("briefings_at_once_per_reader", "answer_cache_hours")}})
+    with pytest.raises(SettingsError, match="briefings_at_once_per_reader") as stopped:
+        desk_settings(without, MESSAGES, at_once_per_visitor="briefings_at_once_per_reader", forget_over=50_000)
+    assert "answer_cache_hours" in str(stopped.value)  # everything missing is named together
 
 
 def test_an_ipv6_connection_counts_as_one_visitor():
-    from hansard.api.usage import network_of
+    from wts_core.usage import network_of
 
     assert network_of("2001:db8:1:2:aaaa::1") == network_of("2001:db8:1:2:bbbb::9") == "2001:db8:1:2::/64"
     assert network_of("2001:db8:1:3::1") != network_of("2001:db8:1:2::1")
@@ -674,3 +706,125 @@ def test_pages_without_their_own_image_share_the_family_card():
                           description="D", url="https://wherempsstand.com/bills/x")
     assert page.count('property="og:image"') == 1
     assert '<meta property="og:image" content="https://wherempsstand.com/family/card.png" />' in page
+
+
+# ---- a withdrawn briefing is not played again from the answer cache ----------------------------------------------
+
+
+def test_a_withdrawn_briefing_is_not_replayed_to_the_next_reader_with_the_same_question(tmp_path, monkeypatch):
+    """Found by wts-core's independent review of the sites' adoptions, and true of this site's own code before
+    it: a briefing the owner withdrew went on being played from the answer cache to anyone who asked the same
+    question, for up to a week. Withdrawing one now drops its cached copies, and the question is written afresh."""
+    import shared
+
+    from .sides import scripted_side
+
+    side = scripted_side(tmp_path, monkeypatch, requests_per_minute=1000)
+    admin = {"Authorization": f"Bearer {shared.ADMIN_TOKEN}"}
+
+    def ask():
+        status, text = side.ask(shared.Q)
+        assert status == 200
+        return [e for e in shared.events_of(text) if isinstance(e, dict)][-1]
+
+    first = ask()
+    again = ask()
+    assert again["briefing_id"] == first["briefing_id"] and again.get("cached") and side.calls() == ["written"]
+    withdrawn = side.client.post(f"/api/admin/briefings/{first['briefing_id']}/withdraw", headers=admin,
+                                 json={"reason": "It misread a speech."})
+    assert withdrawn.status_code == 200
+    assert side.get(f"/api/briefings/{first['briefing_id']}") == [410, {"detail": "This briefing has been withdrawn."}]
+    fresh = ask()
+    assert side.calls() == ["written", "written"]  # written afresh, by the model
+    assert fresh["briefing_id"] != first["briefing_id"] and not fresh.get("cached") and fresh["answer"]
+    assert ask()["briefing_id"] == fresh["briefing_id"]  # and that one is cached in its turn
+
+    # a cached copy met all the same (its briefing withdrawn by other means): never played; the reader is sent
+    # the sources and the words the briefing's address shows, and the copy is dropped
+    side.app.state.parts.archive.withdraw(fresh["briefing_id"], "Withdrawn without the cache being told.")
+    status, text = side.ask(shared.Q)
+    sent = [e for e in shared.events_of(text) if isinstance(e, dict)]
+    assert [e["type"] for e in sent][-2:] == ["sources", "final"] and side.calls() == ["written", "written"]
+    assert sent[-1]["answer"] is None and sent[-1]["note"] == "This briefing has been withdrawn."
+    assert "Hilary Benn said" not in text
+    assert ask()["briefing_id"] not in (first["briefing_id"], fresh["briefing_id"])  # and the next is written afresh
+    assert side.calls() == ["written", "written", "written"]
+
+
+def test_the_owners_list_of_briefings_and_the_days_spending_read_as_they_always_have(tmp_path, monkeypatch):
+    """Two things the independent review found changed and that are put back: of two briefings saved in the same
+    second, the owner's list shows the one saved later first (it had them in order of their addresses); and a
+    day with no call is a whole 0 in the admin page's figures, not 0.0."""
+    import json
+
+    import shared
+
+    from .sides import scripted_side
+
+    side = scripted_side(tmp_path, monkeypatch, requests_per_minute=1000)
+    admin = {"Authorization": f"Bearer {shared.ADMIN_TOKEN}"}
+    usage = side.client.get("/api/admin/usage", headers=admin)
+    assert '"today_usd":0,' in usage.text.replace(" ", "") and usage.json()["today_calls"] == 0
+    archive = side.app.state.parts.archive
+    for bid in ("zzzzzzzzzz", "aaaaaaaaaa", "mmmmmmmmmm"):  # saved in this order, within one second
+        archive.save(f"Asked as {bid}?", {}, shared.a_saved_briefing("q"), id=bid)
+    listed = side.client.get("/api/admin/briefings", headers=admin).json()["briefings"]
+    assert [b["id"] for b in listed] == ["mmmmmmmmmm", "aaaaaaaaaa", "zzzzzzzzzz"]
+    assert len({b["created_at"] for b in listed}) == 1 and json.dumps(listed[0]).count("withdrawn") == 2
+
+
+def test_a_reading_and_an_interests_check_that_answer_nothing_are_paid_for_and_count_towards_the_caps(
+        indexed_settings, tmp_path):
+    """wts-core CHANGELOG, 0.3.0: "ModelClient.structured raises ports.NoStructuredAnswer whenever an answered
+    call cannot be read into the schema", and the error carries what the call cost. The small model answers both
+    of its calls with nothing in them: the question is read by the built-in rules and no interests are flagged,
+    as always, and each call is in the spending record once and counted by the caps."""
+    from types import SimpleNamespace as NS
+
+    from wts_core.usage import Caps
+
+    s = dataclasses.replace(indexed_settings, raw={**indexed_settings.raw, "auth": {"required": False}})
+    sdk, asked = FakeClient(), []
+
+    def nothing(**kw):
+        asked.append(kw["output_format"].__name__)
+        return NS(stop_reason="end_turn", parsed_output=None,
+                  usage=NS(input_tokens=400, output_tokens=30, cache_read_input_tokens=0,
+                           cache_creation_input_tokens=0))
+
+    sdk.messages = NS(stream=sdk._stream, parse=nothing)
+
+    class EveryoneHasLand:
+        def for_person(self, pid):
+            return {"categories": [{"type": "6", "name": "Land and property (within or outside the UK)", "items": [
+                {"summary": "Farm land", "details": [], "registered": "10 January 2000", "children": []}]}]}
+
+    class NoLords:
+        def for_person(self, pid):
+            return []
+
+    pipeline = Pipeline(s, Engine(s, embedder=HashingEmbedder(64), today=TODAY), client=model_of(sdk), today=TODAY)
+    pipeline._registers = (EveryoneHasLand(), NoLords(), None)
+    app = create_app(s, pipeline, StateDB(tmp_path / "state.sqlite"))
+    final = events(TestClient(app).post("/api/ask", json={"question": "What has been said about trial by jury?"}))[-1]
+    assert final["type"] == "final" and final["interests"] == [] and "interests_usage" not in final
+    assert asked == ["ParsedQuery", "Matches"] and len(sdk.calls) == 1
+    with app.state.core.connect() as con:
+        rows = {kind: (tokens_in, tokens_out, cost) for kind, tokens_in, tokens_out, cost in con.execute(
+            "SELECT kind, input_tokens, output_tokens, cost_usd FROM wts_spending ORDER BY id")}
+        assert con.execute("SELECT count(*) FROM wts_spending").fetchone()[0] == 3  # each call once, no more
+    assert sorted(rows) == ["answer", "interests", "parse"]
+    assert rows["parse"][:2] == rows["interests"][:2] == (400, 30) and rows["interests"][2] > 0
+    parts = app.state.parts
+    day = parts.clock.now().strftime("%Y-%m-%d")
+    cost = {kind: row[2] for kind, row in rows.items()}
+    assert parts.spending.spent_since(day) == pytest.approx(sum(cost.values()))
+
+    def paused_at(cap):
+        return Caps(parts.spending, dataclasses.replace(parts.limits, daily_cap_usd=cap), parts.messages,
+                    parts.clock).site_paused()
+
+    # a day's cap that the briefing and one of the two small calls would not reach is reached with the other
+    assert paused_at(cost["answer"] + cost["parse"] + cost["interests"] / 2).kind == "daily_cap"
+    assert paused_at(cost["answer"] + cost["interests"] + cost["parse"] / 2).kind == "daily_cap"
+    assert paused_at(sum(cost.values()) * 1.01) is None

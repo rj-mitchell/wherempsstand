@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-import queue
 import re
 import secrets
 import threading
@@ -21,12 +20,22 @@ from pathlib import Path
 from typing import Annotated, Any, Literal
 from urllib.parse import urlparse
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
+from wts_core import ops
+from wts_core.adapters import b2
+from wts_core.briefing import Ask, Hooks, TooManyRequests, current_stages, sse
+from wts_core.cli import backup_ages, check_route, last_day_figures, latest_week_figures
+from wts_core.events import Event
+from wts_core.observe import LOGGER, SqliteBriefingLog, briefing_config, json_logging
+from wts_core.ports import SYSTEM_CLOCK, SYSTEM_RANDOM, BriefingConfig, Clock, Random
+from wts_core.replies import NotDone, Refused, Replies
+from wts_core.usage import RateLimiter, cache_key, network_of
 
+from hansard.api import usage as use
 from hansard.api.auth import (
     COOKIE,
     LoginThrottle,
@@ -37,6 +46,7 @@ from hansard.api.auth import (
 )
 from hansard.api.briefings import (
     ID_PATTERN,
+    ShownOnly,
     feature,
     featured_list,
     fmt_date,
@@ -48,7 +58,6 @@ from hansard.api.briefings import (
     recent_briefings,
     summary_text,
     unfeature,
-    withdraw_briefing,
 )
 from hansard.api.cards import card_png
 from hansard.api.feeds import FEED_TYPE, rss
@@ -66,55 +75,22 @@ from hansard.api.plaintext import (
     week_text,
     with_text,
 )
-from hansard.api.reports import (
-    CLOSED,
-    DAILY_LIMIT,
-    add_report,
-    close_report,
-    corrections,
-    list_reports,
-    recent_count,
-)
-from hansard.api.statements import DAILY_LIMIT as STATEMENT_DAILY_LIMIT
-from hansard.api.statements import (
-    SITE_HOSTS,
-    StatementError,
-    add_statement,
-    decline_statement,
-    list_statements,
-    person_of,
-    publish_statement,
-    published,
-    update_statement,
-    withdraw_statement,
-)
-from hansard.api.statements import STATUSES as STATEMENT_STATUSES
-from hansard.api.statements import recent_count as statement_count
 from hansard.api.usage import (
-    InFlight,
-    RateLimiter,
     alerts,
-    cache_key,
-    cached_events,
-    check_caps,
     count_question,
     mark_supporter,
-    network_of,
     popular_questions,
     recent_failures,
     record_event,
-    record_failure,
     record_feedback,
-    record_usage,
     record_visit,
-    store_events,
     summary,
     support_reminder_due,
     task_summary,
     visit_summary,
     visitor_key,
 )
-from hansard.config import REPO_ROOT, Settings, load_settings
+from hansard.config import REPO_ROOT, SITE, Settings, load_settings
 from hansard.devolution import notes_for
 from hansard.engine import Engine, Scope
 from hansard.rag import prompts
@@ -123,7 +99,17 @@ from hansard.rag.pipeline import AskRequest, Pipeline
 from hansard.rag.query_parse import ITL1_REGIONS, QueryPlan, parse_model
 from hansard.rag.query_parse import system_prompt as query_parse_instructions
 from hansard.reference.portfolios import PORTFOLIOS
+from hansard.replies import (
+    SITE_HOSTS,
+    STATUSES,
+    as_listed,
+    corrections,
+    hidden_note,
+    open_replies,
+    published,
+)
 from hansard.store.state import StateDB
+from hansard.store.wts import BACKUP_ALERTS, BACKUPS, check_before_opening, open_core
 
 log = logging.getLogger(__name__)
 
@@ -291,62 +277,151 @@ def server_timing(timings: dict[str, float]) -> str:
     return ", ".join(f"{k};dur={v * 1000:.1f}" for k, v in timings.items())
 
 
-KEEP_ALIVE_SECONDS = 15
+STREAM_HEADERS = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
+CLOSED = ("resolved", "dismissed")  # how a report may be closed
+WITHDRAWN_BY_AUTHOR = "Withdrawn by the author."  # the note of a withdrawal, when the owner gives none
+WITHDRAWN = "This briefing has been withdrawn."  # what a withdrawn briefing's address says
+NOT_SHOWN = "Briefing not shown for now"  # the title of a briefing hidden while a concern about it is decided
 
 
-def sse(events: Iterator[dict[str, Any]], keep_alive: float = KEEP_ALIVE_SECONDS) -> Iterator[bytes]:
-    """Server-sent events, with a comment line after a few seconds of silence (while the model is thinking): proxies
-    close a response that sends nothing for too long. The events are worked out in a thread of their own, which stops
-    at the next event once the reader has gone, and closes them, so a briefing nobody is reading stops being written
-    (and paid for)."""
-    q: queue.Queue = queue.Queue()
-    gone = threading.Event()
-    end = object()
+def answer_key(settings: Settings, body: AskBody, data: Any, *, model: bool, cache_hours: float) -> str | None:
+    """The answer cache's key for a question: everything an answer depends on. The question (its case and spacing
+    apart), what the reader chose, the model, the update the record was last brought up to date by (``data``) and
+    the version of the instructions: change any of them and an answer written before is not served again. None
+    when nothing is to be cached or looked for: there is no model, or no cache."""
+    if not model or cache_hours <= 0:
+        return None
+    return cache_key({"q": " ".join(body.question.lower().split()), **body.model_dump(exclude={"question"}),
+                      "model": settings.answer.get("model"), "data": data,
+                      "instructions": INSTRUCTIONS_VERSION}, length=64)
 
-    def work() -> None:
-        try:
-            for ev in events:
-                q.put(ev)
-                if gone.is_set():
-                    break
-        except Exception as exc:  # passed on, to be raised where the response is being sent
-            q.put(exc)
-        finally:
-            if hasattr(events, "close"):
-                events.close()  # here, in the thread that ran it: the model's stream is closed with it
-            q.put(end)
 
-    threading.Thread(target=work, name="sse", daemon=True).start()
-    try:
-        while True:
-            try:
-                ev = q.get(timeout=keep_alive)
-            except queue.Empty:
-                yield b": still working\n\n"
-                continue
-            if ev is end:
-                return
-            if isinstance(ev, Exception):
-                raise ev
-            yield f"event: {ev['type']}\ndata: {json.dumps(ev, default=str)}\n\n".encode()
-    finally:
-        gone.set()
+def filters_set(body: AskBody) -> tuple[str, ...]:
+    """Which choices the reader made beyond the question, for the record of the briefing: their names, never their
+    values."""
+    chosen = [k for k, v in ((body.plan or {}).get("filters") or {}).items() if v not in (None, [], "", False)]
+    chosen += [name for name in ("recency", "role_weight") if getattr(body, name) is not None]
+    chosen += [f"scope.{k}" for k, v in body.scope.model_dump().items() if v is not getattr(ScopeBody(), k)]
+    chosen += ["compare"] if body.compare else []
+    return tuple(sorted(chosen))
+
+
+def configuration(settings: Settings, log: SqliteBriefingLog | None = None) -> BriefingConfig:
+    """Everything that could change a briefing, and the short id of it all: what goes into each briefing's record,
+    so a figure can be compared before and after a change. Never a key, and nothing about a reader. Given the record
+    of briefings, the same call keeps the settings behind the id there."""
+    answer, embedding = settings.answer, settings.embedding
+    return briefing_config(
+        log=log, model=str(answer.get("model")), parse_model=parse_model(settings),
+        instructions=INSTRUCTIONS_VERSION, site_version=SITE.version,
+        also={"ranking": dict(settings.ranking),
+              "embedding": {k: embedding.get(k) for k in ("backend", "model", "dim", "passage_words")},
+              "answer": {k: answer.get(k) for k in (
+                  "summary_sources", "comprehensive_sources", "side_sources", "comprehensive_side_sources",
+                  "summary_effort", "comprehensive_effort", "query_parse_effort", "interests_check", "max_tokens",
+                  "use_fallbacks", "cache_instructions")}})
+
+
+def start_logging(settings: Settings, clock: Clock = SYSTEM_CLOCK) -> logging.Handler:
+    """Turn the structured log on for this process: one line of JSON for each stage a briefing reaches and one for
+    how it ended, in data/logs/briefings.jsonl. A line holds the record's id, a stage's name, milliseconds and an
+    error's class name, and nothing else: never a question, an address or a visitor's code (wts-core
+    docs/adr/0012). Kept for 14 days or 50 MB, whichever is less (``[logs]``)."""
+    logs = settings.section("logs")
+    handler = json_logging(settings.log_dir / "briefings.jsonl", site=SITE, max_bytes=int(logs["max_bytes"]),
+                           keep=int(logs["keep"]), days=int(logs["days"]), clock=clock)
+    lines = logging.getLogger(LOGGER)
+    lines.addHandler(handler)
+    lines.setLevel(logging.INFO)
+    lines.propagate = False
+    return handler
+
+
+class SiteHooks(Hooks):
+    """This site's own steps in the flow of a briefing (``wts_core.briefing.Hooks``)."""
+
+    def __init__(self, settings: Settings, state: StateDB, parts: Any, replies: Replies | None = None) -> None:
+        self.settings, self.state, self.parts, self.replies = settings, state, parts, replies
+
+    def on_cached(self, ask: Ask, hit: list[Event]) -> list[Event]:
+        """A cached answer, about to be played again, is sent as it was stored: its flags are not judged again
+        (a saved briefing's are, when its own address is opened). Two things only are put right on the way out.
+
+        A briefing that has been withdrawn, or is hidden while a concern about it is decided, is never played
+        again. Withdrawing or hiding one drops its cached copies, so the next reader with the question has a
+        briefing written afresh; should a copy be met all the same (one withdrawn by an older version of the
+        site, say), it is dropped here, and this reader is sent the reading of the question, the sources, and
+        the words the briefing's own address shows."""
+        taken_down = self.taken_down(hit)
+        if taken_down is not None:
+            self.parts.cache.delete_briefing(taken_down[0])
+            return [*(e for e in hit if e.get("type") in ("plan", "sources")),
+                    {"type": "final", "answer": None, "usage": None, "note": taken_down[1]}]
+        if hit and hit[-1].get("interests"):  # saved before posts in government were left out
+            hit[-1] = {**hit[-1], "interests": without_public_office(hit[-1]["interests"])}
+        final = hit[-1]
+        if final.get("answer") and not final["answer"].get("no_records") and not final.get("briefing_id"):
+            # cached before shareable links existed: give it an address now, and remember it
+            assert ask.cache_key is not None
+            hit[-1] = {**final, **keep(self.parts.archive, self.state, ask.question, dict(ask.options), hit, final)}
+            self.parts.cache.put(ask.cache_key, hit, self.parts.cache_hours)
+        return hit
+
+    def taken_down(self, events: list[Event]) -> tuple[str, str] | None:
+        """(the briefing's id, the words shown in its place) when a cached answer's briefing is not to be shown."""
+        bid = next((e.get("briefing_id") for e in reversed(events) if e.get("type") == "final"), None)
+        saved = self.parts.archive.get(bid) if isinstance(bid, str) and ID_PATTERN.match(bid) else None
+        if saved is not None and saved.withdrawn_at:
+            return saved.id, WITHDRAWN
+        note = hidden_note(self.replies, saved.id) if saved is not None and self.replies is not None else None
+        return (saved.id, note) if saved is not None and note is not None else None
+
+    def usages(self, ask: Ask, event: Event) -> list[tuple[str, str | None, Any]]:
+        """The third model call of a briefing: the check of the quoted members' registered interests, which the
+        pipeline reports on the final event. It is recorded before the briefing's own."""
+        if event["type"] == "final" and event.get("interests_usage"):
+            return [("interests", parse_model(self.settings), event["interests_usage"])]
+        return []
+
+    def on_event(self, ask: Ask, event: Event) -> Event | None:
+        if event["type"] == "final":  # the interests check's token counts were for the spending record only
+            return {k: v for k, v in event.items() if k != "interests_usage"}
+        return event
+
+    def finish(self, ask: Ask, final: Event, kept: list[Event]) -> Event:
+        # lets the reader's feedback refer to this briefing
+        return {**final, "briefing_key": ask.cache_key} if ask.cache_key else final
+
+    def for_this_reader(self, ask: Ask, final: Event) -> Event:
+        """The note on what briefings cost, after every so many new briefings a visitor has had written today: it
+        goes to this reader only, never into saved, shared or cached copies."""
+        if not final.get("usage") or ask.account is not None or not donate_url(self.settings):
+            return final
+        remind = support_reminder_due(self.parts.spending, self.state, ask.visitor,
+                                      int(self.settings.usage.get("support_reminder_every", 10)))
+        return {**final, "support_reminder": remind} if remind else final
 
 
 def create_app(settings: Settings | None = None, pipeline: Pipeline | None = None,
-               state: StateDB | None = None) -> FastAPI:
+               state: StateDB | None = None, *, clock: Clock = SYSTEM_CLOCK,
+               random: Random = SYSTEM_RANDOM) -> FastAPI:
     settings = settings or load_settings()
-    state = state or StateDB(settings.state_db)
+    # Whatever could stop the site from starting is found first, before the state database is opened: the first
+    # opening on new code may change it for good (hansard/startup.py; hansard/store/wts.py).
+    check_before_opening(settings, state.path if state is not None else None)
+    state = state or StateDB(settings.state_db)  # the site's own tables
+    # The shared package's side of the same file: spending, the answer cache, saved briefings, failures, reports
+    # and statements (hansard/store/wts.py). The first start on a database from before it brings the old rows across.
+    core = open_core(settings, clock, path=state.path)
+    # Everything the flow of a briefing is made of, from [usage] (hansard/api/usage.py: desk). This is also the
+    # start-up check: every limit, price and message the flow needs, with whatever is missing named in one error.
+    parts = use.desk(settings, core, clock, random)
     app = FastAPI(title="Where MPs Stand", docs_url="/api/docs", openapi_url="/api/openapi.json")
     throttle = LoginThrottle()
     address_throttle = LoginThrottle(limit=20)  # failed sign-ins from one address, whatever email is tried
-    u = settings.usage
-    inflight = InFlight(int(u.get("briefings_at_once_per_reader", 2)), int(u.get("briefings_at_once", 8)),
-                        float(u.get("briefing_estimate_usd", 0.15)))
     auth_required = bool(settings.section("auth").get("required", False))
-    limiter = RateLimiter(int(settings.usage.get("requests_per_minute", 20)))
-    hit_limiter = RateLimiter(120)  # page counts: their own allowance, so browsing never uses up the one for questions
-    cache_hours = float(settings.usage.get("answer_cache_hours", 168))  # as config/settings.toml: a week
+    # page counts: their own allowance, so browsing never uses up the one for questions
+    hit_limiter = RateLimiter(120, forget_over=use.FORGET_IDLE_VISITORS_OVER, clock=clock)
     admin_token = os.environ.get("HANSARD_ADMIN_TOKEN") or None
     lock = threading.Lock()
     dist = Path(settings.section("paths").get("web_dist", REPO_ROOT / "web" / "dist"))
@@ -401,6 +476,26 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                 holder["people"] = People(settings, p.engine.resolver, p.today)
             return holder["people"]
 
+    def member_known(number: int) -> bool | None:
+        """Whether there is a member's page of this number; None when the members' data can't be read just now
+        (a statement about them is then kept, and the owner checks it)."""
+        try:
+            return bool(get_people().resolve(number))
+        except Exception:
+            log.warning("statement about /people/%s accepted without checking the member exists", number,
+                        exc_info=True)
+            return None
+
+    replies = open_replies(core, parts.archive, member_known, clock)
+    # One record for each question asked (wts-core docs/adr/0012): how long each stage took, what it cost, what
+    # the checks found and how it ended; with the question only where the site already kept it (a briefing saved
+    # or cached, or a note of a failure). `hansard briefing-stats` and the weekly report are made from it.
+    record = SqliteBriefingLog(core, clock=clock)
+    desk = parts.desk(configuration(settings, record), log=record, hooks=SiteHooks(settings, state, parts, replies),
+                      group_of=lambda card: card.get("group"))  # the record counts each briefing's sources by group
+    app.state.parts, app.state.replies, app.state.core, app.state.desk = parts, replies, core, desk
+    app.state.record = record
+
     def current_user(request: Request) -> dict[str, Any] | None:
         user = user_for_token(state, request.cookies.get(COOKIE))
         if user is None and auth_required:
@@ -415,12 +510,33 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             return None
         raise HTTPException(403, "Admins only.")
 
+    def backup_alerts(folder: Path) -> list[dict[str, str]]:
+        """For the admin page: a nightly backup that has not run, or an off-site copy that failed. Nothing is said
+        when there is no backups folder at all (a computer that is not the server)."""
+        if not folder.is_dir():
+            return []
+        found = ops.backup_alerts(folder, BACKUPS, offsite_set_up=b2.configured(SITE) is not None,
+                                  wording=BACKUP_ALERTS, clock=clock)
+        return [{"level": a.level, "text": a.text} for a in found]
+
+    def briefing_of(key: str | None) -> str | None:
+        """The saved briefing a cached answer was kept as, from the key the page was given with it (None when the
+        key is not one, or its answer is no longer cached)."""
+        if not key or not re.fullmatch(r"[0-9a-f]{16,128}", key):
+            return None
+        final = next((e for e in reversed(parts.cache.get(key, parts.cache_hours) or []) if e.get("type") == "final"),
+                     None)
+        found = (final or {}).get("briefing_id")
+        return found if isinstance(found, str) and ID_PATTERN.match(found) else None
+
     def requester(request: Request, user: dict[str, Any] | None) -> tuple[str | None, str]:
         """(visitor hash for anonymous people, rate-limit key); 429 when over the per-minute limit."""
-        visitor = None if user else visitor_key(state, request.client.host if request.client else None)
+        visitor = None if user else visitor_key(core, request.client.host if request.client else None, clock, random)
         key = f"user:{user['user_id']}" if user else f"visitor:{visitor}"
-        if not limiter.allow(key):
-            raise HTTPException(429, "Too many requests. Please wait a minute and try again.")
+        try:
+            desk.allow(key)
+        except TooManyRequests as exc:
+            raise HTTPException(429, exc.message) from None
         return visitor, key
 
     # ---- auth --------------------------------------------------------------------
@@ -499,6 +615,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     # ---- questions -----------------------------------------------------------------
     @app.post("/api/ask")
     def ask(body: AskBody, request: Request, user=Depends(current_user)):
+        """A question's whole journey is the shared briefing desk's (wts-core, ``wts_core.briefing``): the cache,
+        the caps, the places in progress, the pipeline's events, the spending record, the saved briefing. The
+        route describes the request to it and streams what it gives back."""
         visitor, who = requester(request, user)
         p = get_pipeline()
         uid = user["user_id"] if user else None
@@ -506,104 +625,26 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                          role_weight=body.role_weight, scope=Scope(**body.scope.model_dump()), plan=body.plan,
                          history=body.history_dicts(), compare=body.compare)
         model_on = p.has_model()
-        key = None
-        if model_on and cache_hours > 0:
-            last = state.runs(1)
-            key = cache_key({"q": " ".join(body.question.lower().split()), **body.model_dump(exclude={"question"}),
-                             "model": settings.answer.get("model"), "data": last[0]["run_id"] if last else None,
-                             "instructions": INSTRUCTIONS_VERSION})
+        last = state.runs(1) if model_on and parts.cache_hours > 0 else []
+        key = answer_key(settings, body, last[0]["run_id"] if last else None, model=model_on,
+                         cache_hours=parts.cache_hours)
+        # the site's own counts, as they always were: how often each question is asked, and that today's visitor
+        # asked one
         count_question(state, body.question)
         record_event(state, "ask", visitor)
         if body.history:
             record_event(state, "follow_up", visitor)
-        hit = cached_events(state, key, cache_hours) if key and not body.sources_only else None
-        blocked = (check_caps(state, uid, settings.usage, visitor)
-                   if model_on and hit is None and not body.sources_only else None)
-
-        def events() -> Iterator[dict[str, Any]]:
-            if hit is not None:
-                if hit and hit[-1].get("interests"):  # saved before posts in government were left out
-                    hit[-1] = {**hit[-1], "interests": without_public_office(hit[-1]["interests"])}
-                final = hit[-1]
-                if final.get("answer") and not final["answer"].get("no_records") and not final.get("briefing_id"):
-                    # cached before shareable links existed: give it an address now, and remember it
-                    hit[-1] = {**final, **keep_briefing(body, hit, final)}
-                    store_events(state, key, hit, cache_hours)
-                yield from hit
-                return
-            if body.sources_only:
-                yield from sources_only_events(body, "Sources only: no briefing was written. Ask again without "
-                                                     "'Sources only' for a written briefing.", uid, visitor)
-                return
-            if blocked:  # the sources still help, and cost nothing
-                yield from sources_only_events(body, f"{blocked} The sources found are shown below.", uid, visitor)
-                return
-            kept: list[dict[str, Any]] = []
-            text: list[str] = []
-            remind = 0  # > 0: show this reader the note on costs, with the number of briefings so far today
-            try:
-                for ev in p.run(req):
-                    if ev["type"] == "plan" and ev.get("parse_error"):
-                        # the model could not read the question (a bad API key, say); offline rules were used
-                        record_failure(state, "question reading", body.question, ev.pop("parse_error"))
-                    if ev["type"] == "error":
-                        record_failure(state, "briefing", body.question, ev.get("message", ""))
-                    if ev["type"] == "plan" and ev.get("usage"):
-                        record_usage(state, uid, "parse", parse_model(settings), ev["usage"], settings.usage,
-                                     visitor)
-                    if ev["type"] == "final" and ev.get("interests_usage"):
-                        record_usage(state, uid, "interests", parse_model(settings), ev["interests_usage"],
-                                     settings.usage, visitor)
-                    if ev["type"] == "final":
-                        ev = {k: v for k, v in ev.items() if k != "interests_usage"}
-                    if ev["type"] == "final" and ev.get("usage"):
-                        record_usage(state, uid, "answer", ev.get("model"), ev["usage"], settings.usage, visitor)
-                        if uid is None and donate_url(settings):
-                            remind = support_reminder_due(state, visitor,
-                                                          int(settings.usage.get("support_reminder_every", 10)))
-                    if ev["type"] == "final" and key:
-                        ev = {**ev, "briefing_key": key}  # lets the reader's feedback refer to this briefing
-                    if ev["type"] == "final" and ev.get("answer") and not ev["answer"].get("no_records"):
-                        ev = {**ev, **keep_briefing(body, kept, ev)}  # a permanent, shareable address
-                    if ev["type"] == "text":
-                        text.append(ev["text"])
-                    else:
-                        kept.append(ev)
-                    # the reminder goes to this reader only: never into saved, shared or cached copies
-                    yield {**ev, "support_reminder": remind} if ev["type"] == "final" and remind else ev
-            except Exception as exc:  # never leave the client hanging
-                log.exception("ask failed")
-                record_failure(state, "briefing", body.question, f"{type(exc).__name__}: {exc}")
-                yield {"type": "error", "message": "The briefing could not be written just now. The sources found are "
-                                                   "shown above; please try again later."}
-                return
-            final = kept[-1] if kept else {}
-            if key and final.get("type") == "final" and final.get("answer"):
-                replay = [e for e in kept if e["type"] in ("plan", "sources")]
-                replay += [{"type": "text", "text": "".join(text)}, {**final, "usage": None, "cached": True}]
-                store_events(state, key, replay, cache_hours)
-
-        def guarded() -> Iterator[dict[str, Any]]:
-            """A briefing about to be written is reserved at its estimated cost while it runs, and the caps are
-            checked again counting the others in progress, so many requests at once cannot all slip past them."""
-            if hit is not None or body.sources_only or blocked or not model_on:
-                yield from events()
-                return
-            refused = inflight.start(who)
-            if refused:
-                yield from sources_only_events(body, f"{refused} The sources found are shown below.", uid, visitor)
-                return
-            try:
-                late = check_caps(state, uid, settings.usage, visitor, inflight.pending_usd(besides=1))
-                if late:
-                    yield from sources_only_events(body, f"{late} The sources found are shown below.", uid, visitor)
-                    return
-                yield from events()
-            finally:
-                inflight.finish(who)
-
-        return StreamingResponse(sse(guarded()), media_type="text/event-stream",
-                                 headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+        asked = Ask(
+            question=body.question, visitor=visitor, account=uid, limiter_key=who,
+            write=lambda: p.run(req),
+            # the model reads the question unless the site's own budget is used up, whatever stopped this reader
+            sources_only=lambda note, free: sources_only_events(body, note, uid, visitor),
+            cache_key=key, only_sources=body.sources_only, model_available=model_on,
+            follow_up=bool(body.history), mode=body.mode, filters_set=filters_set(body),
+            options=body.model_dump(exclude={"question", "history"}))  # saved with the briefing
+        # a saved briefing here is the plan, the sources and the final event: a permanent, shareable address
+        asked.save = lambda final, kept, text: keep_briefing(body, kept, final)
+        return StreamingResponse(sse(desk.handle(asked)), media_type="text/event-stream", headers=STREAM_HEADERS)
 
     def retrieve(body: AskBody, read_with_model: bool = False, uid: int | None = None,
                  visitor: str | None = None) -> dict[str, Any]:
@@ -618,10 +659,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         elif read_with_model and p.has_model():
             plan, usage = p.make_plan(AskRequest(question=body.question, history=body.history_dicts(),
                                                  compare=body.compare))
-            if plan.parse_error:
-                record_failure(state, "question reading", body.question, plan.parse_error)
+            if plan.parse_error and parts.failures is not None:
+                parts.failures.note("question reading", body.question, plan.parse_error)
             if usage:
-                record_usage(state, uid, "parse", parse_model(settings), usage, settings.usage, visitor)
+                cost = parts.spending.add("parse", parse_model(settings), usage, visitor=visitor, account=uid)
+                current_stages().spent(usage, cost)  # for the record of this question: what its reading cost
         else:
             from hansard.rag.query_parse import parse_offline
 
@@ -641,7 +683,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def sources_only_events(body: AskBody, note: str, uid: int | None = None,
                             visitor: str | None = None) -> Iterator[dict[str, Any]]:
         # read the question with the model unless the site's own budget is used up
-        r = retrieve(body, check_caps(state, None, settings.usage, None) is None, uid, visitor)
+        r = retrieve(body, parts.caps.site_paused() is None, uid, visitor)
         yield {"type": "plan", "plan": r["plan"], "usage": None}
         yield {"type": "sources", **{k: r[k] for k in ("sources", "candidates", "semantic", "evidence")}}
         yield {"type": "final", "answer": None, "usage": None, "note": note}
@@ -655,16 +697,24 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         return JSONResponse(jsonable_encoder(body), headers={"Server-Timing": server_timing(timings)})
 
     def keep_briefing(body: AskBody, kept: list[dict[str, Any]], final: dict[str, Any]) -> dict[str, Any]:
-        return keep(state, body.question, body.model_dump(exclude={"question", "history"}), kept, final)
+        return keep(parts.archive, state, body.question, body.model_dump(exclude={"question", "history"}), kept,
+                    final)
 
     # ---- shared briefings ---------------------------------------------------------------
     def _briefing_or_error(bid: str) -> dict[str, Any]:
-        b = get_briefing(state, bid)
+        b = get_briefing(parts.archive, bid)
         if b is None:
             raise HTTPException(404, "There is no briefing at this address.")
         if b["withdrawn_at"]:
-            raise HTTPException(410, "This briefing has been withdrawn.")
+            raise HTTPException(410, WITHDRAWN)
+        note = hidden_note(replies, bid)
+        if note is not None:  # hidden while a concern about it is decided: the note stands in its place
+            raise HTTPException(423, note)
         return b
+
+    def shown() -> ShownOnly:
+        """The saved briefings as the public lists read them now: without those hidden for the time being."""
+        return ShownOnly(parts.archive, {h["item"].removeprefix("/b/") for h in replies.all_hidden()})
 
     @app.get("/api/briefings/{bid}")
     def briefing(bid: str):
@@ -683,7 +733,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         """The app, with this briefing's title and link-preview card in the page head."""
         index = dist / "index.html"
         page = index.read_text() if index.is_file() else "<!doctype html><html><head></head><body></body></html>"
-        b = get_briefing(state, bid) if ID_PATTERN.match(bid) else None
+        b = get_briefing(parts.archive, bid) if ID_PATTERN.match(bid) else None
         base = str(request.base_url).rstrip("/")
         if b is None or b["withdrawn_at"]:
             gone = b is not None
@@ -692,6 +742,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                 description="This briefing is no longer available." if gone else "There is no briefing at this address.",
                 url=f"{base}/b/{bid}", image=None)
             return Response(html_page, status_code=410 if gone else 404, media_type="text/html")
+        note = hidden_note(replies, bid)
+        if note is not None:  # hidden for now: the page says so (its script asks), and nothing of it is in the page
+            html_page = page_with_meta(page, title=f"{NOT_SHOWN} — Where MPs Stand", description=note,
+                                       url=f"{base}/b/{bid}", image=None)
+            return Response(html_page, status_code=423, media_type="text/html")
         view = public_view(b)
         description = summary_text(view["answer"]) or "A sourced briefing on the record of Parliament."
         html_page = page_with_meta(
@@ -701,14 +756,16 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
     @app.post("/api/admin/briefings/{bid}/withdraw")
     def withdraw(bid: str, body: WithdrawBody, user=Depends(admin_user)):
-        if not withdraw_briefing(state, bid, body.reason):
+        if not ID_PATTERN.match(bid) or not parts.archive.withdraw(bid, body.reason):
             raise HTTPException(404, "There is no briefing at this address.")
         (settings.data_dir / "cards" / f"{bid}.png").unlink(missing_ok=True)
+        parts.cache.delete_briefing(bid)  # and it is not played again to the next reader with the same question
+        record.mark(bid, corrected=True)  # what happened next, on that briefing's record
         return {"ok": True}
 
     @app.get("/api/admin/briefings")
     def briefings_list(limit: int = 50, user=Depends(admin_user)):
-        return {"briefings": recent_briefings(state, min(max(limit, 1), 500))}
+        return {"briefings": recent_briefings(parts.archive, min(max(limit, 1), 500))}
 
     # ---- topic briefings and featured briefings ------------------------------------------------
     def _topic(slug: str):
@@ -723,16 +780,17 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def topics_index():
         from hansard.topics import topic_listing
 
-        topics = [{k: v for k, v in t.items() if k != "last_check"} for t in topic_listing(settings, state)]
-        return {"topics": topics, "featured": featured_list(state)}
+        topics = [{k: v for k, v in t.items() if k != "last_check"}
+                  for t in topic_listing(settings, state, shown())]
+        return {"topics": topics, "featured": featured_list(shown(), state)}
 
     @app.get("/api/topics/{slug}")
     def topic_detail(slug: str):
         from hansard.topics import versions
 
         t = _topic(slug)
-        vs = versions(state, slug)
-        b = get_briefing(state, vs[0]["briefing_id"]) if vs else None
+        vs = versions(state, shown(), slug)
+        b = get_briefing(parts.archive, vs[0]["briefing_id"]) if vs else None
         return {"topic": {"slug": t.slug, "title": t.title, "area": t.area, "question": t.question,
                           "description": t.description, "refresh_days": t.refresh_days},
                 "briefing": public_view(b) if b else None, "versions": vs}
@@ -746,8 +804,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         index = dist / "index.html"
         page = index.read_text() if index.is_file() else "<!doctype html><html><head></head><body></body></html>"
         base = str(request.base_url).rstrip("/")
-        cur = current(state, slug)
-        b = get_briefing(state, cur["briefing_id"]) if cur else None
+        cur = current(state, shown(), slug)
+        b = get_briefing(parts.archive, cur["briefing_id"]) if cur else None
         description = (summary_text(public_view(b)["answer"]) if b else "") or t.description or t.question
         html_page = page_with_meta(
             page, title=f"{t.title}: where MPs and peers stand — Where MPs Stand", description=description,
@@ -761,12 +819,12 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
         base = str(request.base_url).rstrip("/")
         urls = [f"<url><loc>{base}/topics</loc><changefreq>weekly</changefreq></url>"]
-        for t in topic_listing(settings, state):
+        for t in topic_listing(settings, state, shown()):
             if t["current"]:
                 urls.append(f"<url><loc>{base}/topics/{t['slug']}</loc>"
                             f"<lastmod>{t['current']['prepared_at'][:10]}</lastmod></url>")
         urls += [f"<url><loc>{base}/b/{f['id']}</loc><lastmod>{f['prepared_at'][:10]}</lastmod></url>"
-                 for f in featured_list(state)]
+                 for f in featured_list(shown(), state)]
         return Response('<?xml version="1.0" encoding="UTF-8"?><urlset '
                         f'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{"".join(urls)}</urlset>',
                         media_type="application/xml")
@@ -775,12 +833,13 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def admin_topics(user=Depends(admin_user)):
         from hansard.topics import topic_listing
 
-        return {"topics": topic_listing(settings, state), "featured": featured_list(state)}
+        return {"topics": topic_listing(settings, state, parts.archive),
+                "featured": featured_list(parts.archive, state)}
 
     @app.post("/api/admin/featured")
     def admin_feature(body: FeatureBody, user=Depends(admin_user)):
         m = re.search(r"([a-km-z2-9]{10})/?$", body.briefing.strip())
-        if not m or not feature(state, m.group(1), body.title, body.blurb):
+        if not m or not feature(parts.archive, state, m.group(1), body.title, body.blurb):
             raise HTTPException(404, "There is no briefing at that address (or it has been withdrawn).")
         return {"ok": True, "id": m.group(1)}
 
@@ -1743,7 +1802,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         items = [{"title": f"{t['title']}: updated briefing", "link": f"{base}/topics/{t['slug']}",
                   "guid": f"{base}/b/{t['current']['briefing_id']}", "date": t["current"]["prepared_at"],
                   "description": t["current"].get("summary") or t["question"]}
-                 for t in topic_listing(settings, state) if t["current"]]
+                 for t in topic_listing(settings, state, shown()) if t["current"]]
         items.sort(key=lambda i: i["date"], reverse=True)
         return feed(request, "/feeds/topics.xml", "Topic briefings", "/topics",
                     "Each topic briefing when it is updated with new contributions.", items)
@@ -1755,8 +1814,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         t = _topic(slug)
         base = str(request.base_url).rstrip("/")
         items = []
-        for v in versions(state, slug)[:20]:
-            b = get_briefing(state, v["briefing_id"])
+        for v in versions(state, shown(), slug)[:20]:
+            b = get_briefing(parts.archive, v["briefing_id"])
             summary = summary_text(public_view(b)["answer"]) if b else ""
             items.append({"title": f"{t.title}: briefing of {fmt_date(v['prepared_at'][:10])}",
                           "link": f"{base}/b/{v['briefing_id']}", "guid": f"{base}/b/{v['briefing_id']}",
@@ -1784,7 +1843,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         items = [{"title": "Briefing withdrawn" if c["kind"] == "withdrawn" else "Correction",
                   "link": f"{base}/corrections", "guid": f"{base}/corrections#{c['date']}-{k}", "date": c["date"],
                   "description": " ".join(x for x in (c.get("question"), c.get("note")) if x)}
-                 for k, c in enumerate(corrections(state))]
+                 for k, c in enumerate(corrections(replies, parts.archive))]
         return feed(request, "/feeds/corrections.xml", "Corrections", "/corrections",
                     "Withdrawn briefings and published corrections.", items)
 
@@ -1823,123 +1882,118 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def feedback(body: FeedbackBody, request: Request, user=Depends(current_user)):
         visitor, _ = requester(request, user)
         record_feedback(state, body.briefing_key, body.question, body.useful, visitor)
+        about = briefing_of(body.briefing_key)
+        if about:
+            record.mark(about, useful=body.useful)  # on that briefing's record: the answer, and nothing of who gave it
         return {"ok": True}
 
     @app.post("/api/report")
     def report(body: ReportBody, request: Request, user=Depends(current_user)):
         visitor, _ = requester(request, user)
-        if body.website:  # a bot: say thanks, keep nothing
-            return {"ok": True}
-        if recent_count(state, visitor) >= DAILY_LIMIT:
-            raise HTTPException(429, "Thank you, we have your reports. Please email us if there is more to add.")
         bid = body.briefing_id if body.briefing_id and ID_PATTERN.match(body.briefing_id) else None
         page = None
         if body.page and not bid:  # only a path on this site is kept
             parsed = urlparse(body.page.strip())
             if parsed.hostname in (None, *SITE_HOSTS) and parsed.path.startswith("/"):
                 page = parsed.path[:200]
-        add_report(state, body.kind, body.message.strip(), bid, (body.contact or "").strip() or None, visitor, page)
+        try:  # a filled hidden field is a bot: thanked, and nothing kept
+            kept = replies.report(kind=body.kind, page=page, message=body.message, contact=body.contact,
+                                  briefing_id=bid, visitor=visitor, trap=body.website)
+        except Refused as exc:
+            raise HTTPException(429 if exc.why == "daily_reports" else 400, str(exc)) from None
+        if kept is not None and bid:
+            record.mark(bid, reported=True)  # what happened next, on that briefing's record
         return {"ok": True}
 
     # ---- statements beside items (the right of reply). Kept apart from the record: the briefing pipeline, search
     # and the pages' readable text never read them; the site fetches them on their own, to show beside the item.
-    def item_missing(path: str) -> str | None:
-        """Why a statement can't sit beside the item at this address, when it is known not to be there. Checked: a
-        briefing (it must exist and not be withdrawn) and a member's page. Not checked: topics, debates, bills, party
-        groups, early day motions, committees, inquiries, evidence and devolved sittings, each of which is looked up
-        in its own store; the owner sees the address before a statement is published."""
-        if path.startswith("/b/"):
-            b = get_briefing(state, path.removeprefix("/b/"))
-            if b is None:
-                return ("There is no briefing at that address: please check the address of the briefing the "
-                        "statement is about.")
-            if b["withdrawn_at"]:
-                return "That briefing has been withdrawn, so a statement can't sit beside it."
-        number = person_of(path)
-        if number is not None:
-            try:
-                known = bool(get_people().resolve(number))
-            except Exception:  # the members' data can't be read just now: keep the statement, the owner checks it
-                log.warning("statement about /people/%s accepted without checking the member exists", number,
-                            exc_info=True)
-                return None
-            if not known:
-                return ("There is no member's page at that address: please check the address of the page the "
-                        "statement is about.")
-        return None
-
     @app.post("/api/statements")
     def statement_add(body: StatementBody, request: Request, user=Depends(current_user)):
         visitor, _ = requester(request, user)
-        if body.website:  # a bot: say thanks, keep nothing
-            return {"ok": True}
-        if statement_count(state, visitor) >= STATEMENT_DAILY_LIMIT:
-            raise HTTPException(429, "Thank you, we have your statements. Please email us if there is more to add.")
-        try:
-            add_statement(state, name=body.name, role=body.role, item=body.item, text=body.text, link=body.link,
-                          email=body.email, visitor=visitor, missing=item_missing)
-        except StatementError as exc:
-            raise HTTPException(400, str(exc)) from None
+        try:  # a filled hidden field is a bot: thanked, and nothing kept
+            replies.submit(name=body.name, role=body.role, item=body.item, text=body.text, link=body.link,
+                           email=body.email, visitor=visitor, trap=body.website)
+        except Refused as exc:
+            raise HTTPException(429 if exc.why == "daily_statements" else 400, str(exc)) from None
         return {"ok": True}
 
     @app.get("/api/statements")
     def statements_shown(path: Annotated[list[str] | None, Query()] = None, person: int | None = None):
-        return {"statements": published(state, paths=[p[:300] for p in path or []], person=person)}
+        return {"statements": published(replies, paths=[p[:300] for p in path or []], person=person)}
 
     @app.get("/api/admin/statements")
     def statements_list(status: str | None = None, user=Depends(admin_user)):
-        return {"statements": list_statements(state, status if status in STATEMENT_STATUSES else None)}
+        rows = replies.statements(status if status in STATUSES else None)  # type: ignore[arg-type]
+        return {"statements": [as_listed(replies, row) for row in rows]}
 
-    def statement_action(done: bool) -> dict[str, bool]:
-        if not done:
-            raise HTTPException(404, "No such statement, or it can't be changed in that way now.")
+    def statement_action(act: Callable[[], None]) -> dict[str, bool]:
+        """One of the owner's actions on a statement, from the admin page. New words that break a rule are answered
+        in the site's words for them; anything else that can't be done, as it always was."""
+        try:
+            act()
+        except Refused as exc:
+            raise HTTPException(400, str(exc)) from None
+        except NotDone:
+            raise HTTPException(404, "No such statement, or it can't be changed in that way now.") from None
         return {"ok": True}
 
     @app.post("/api/admin/statements/{sid}/publish")
     def statement_publish(sid: int, body: PublishStatementBody, user=Depends(admin_user)):
-        try:
-            return statement_action(publish_statement(state, sid, person=body.person, checked=body.checked))
-        except StatementError as exc:  # how the sender was confirmed is all spaces
-            raise HTTPException(400, str(exc)) from None
+        if not body.checked.strip():  # how the sender was confirmed is all spaces
+            raise HTTPException(400, "Please say how you confirmed who sent it: it is kept privately.")
+        about = str(body.person) if body.person is not None else None
+        return statement_action(lambda: replies.publish(sid, checked=body.checked, about=about))
 
     @app.post("/api/admin/statements/{sid}/decline")
     def statement_decline(sid: int, body: DeclineStatementBody, user=Depends(admin_user)):
-        try:
-            return statement_action(decline_statement(state, sid, body.reason))
-        except StatementError as exc:  # a reason of spaces only
-            raise HTTPException(400, str(exc)) from None
+        """Decline a waiting statement, or take down a published one that breaks the rules (which the record now
+        calls removing it), with the reason its author is told."""
+        if len(body.reason.strip()) < 3:  # a reason of spaces only
+            raise HTTPException(400, "Please give the reason: it is sent to the author.")
+        shown = (replies.statement(sid) or {}).get("status") == "published"
+        return statement_action(lambda: (replies.remove if shown else replies.decline)(sid, body.reason.strip()))
 
     @app.post("/api/admin/statements/{sid}/update")
     def statement_update(sid: int, body: UpdateStatementBody, user=Depends(admin_user)):
-        try:
-            return statement_action(update_statement(state, sid, text=body.text, name=body.name, role=body.role,
-                                                     link=body.link or None, clear_link=body.link == ""))
-        except StatementError as exc:
-            raise HTTPException(400, str(exc)) from None
+        def act() -> None:
+            if (body.text, body.name, body.role, body.link) == (None, None, None, None):
+                if replies.statement(sid) is None:
+                    raise NotDone(f"no statement {sid}")
+                return  # nothing to change: answered as done, as it always was
+            replies.update(sid, text=body.text, name=body.name or None, role=body.role or None,
+                           link=body.link or None, clear_link=body.link == "")
+
+        return statement_action(act)
 
     @app.post("/api/admin/statements/{sid}/withdraw")
     def statement_withdraw(sid: int, body: WithdrawStatementBody, user=Depends(admin_user)):
-        return statement_action(withdraw_statement(state, sid, body.note))
+        return statement_action(lambda: replies.withdraw(sid, (body.note or "").strip() or WITHDRAWN_BY_AUTHOR))
 
     @app.get("/api/corrections")
     def corrections_log():
-        return {"corrections": corrections(state)}
+        return {"corrections": corrections(replies, parts.archive)}
 
     @app.get("/api/admin/reports")
     def reports_list(status: str | None = None, user=Depends(admin_user)):
-        return {"reports": list_reports(state, status if status in ("open", *CLOSED) else None)}
+        rows = replies.reports(open_only=status == "open")
+        return {"reports": [r for r in rows if status not in CLOSED or r["status"] == status]}
 
     @app.post("/api/admin/reports/{report_id}/close")
     def report_close(report_id: int, body: CloseReportBody, user=Depends(admin_user)):
-        if not close_report(state, report_id, body.status, body.resolution, body.public_note):
-            raise HTTPException(404, "No such report.")
+        about = next((r["briefing_id"] for r in replies.reports(open_only=True) if r["id"] == report_id), None)
+        try:
+            replies.close(report_id, outcome=body.status, note=body.resolution, public_note=body.public_note)
+        except NotDone:
+            raise HTTPException(404, "No such report.") from None
+        if about and body.status == "resolved" and (body.public_note or "").strip():
+            record.mark(about, corrected=True)  # a public note on a report of a briefing: it was put right
         return {"ok": True}
 
     @app.post("/api/hit")
     def hit(body: HitBody, request: Request, user=Depends(current_user)):
         """Cookie-free page counting: no identifiers are sent or stored beyond today's salted hash. Over the allowance
         the page is simply not counted (no error, so nothing shows in the reader's browser)."""
-        visitor = None if user else visitor_key(state, request.client.host if request.client else None)
+        visitor = None if user else visitor_key(core, request.client.host if request.client else None, clock, random)
         if not hit_limiter.allow(f"user:{user['user_id']}" if user else f"visitor:{visitor}"):
             return Response(status_code=204)
         if body.event:
@@ -1950,13 +2004,38 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         record_visit(state, body.path.split("?")[0], host if host and host != own else None, visitor)
         return {"ok": True}
 
+    # Counts and ages for whoever holds the family's check token, and for no one else: the address is not there
+    # at all with no token set on this site, and answers 401 for a wrong one. Never a question, a name or a word
+    # of a report.
+    check_token = SITE.env("CHECK_TOKEN")
+
+    def meaning_refused() -> int:
+        """1 when the index has vectors that are not being searched because another embedding model made them."""
+        look = getattr(get_pipeline().engine, "meaning_search", None)
+        return int(look is not None and look()[0] == "refused")
+    if (check_token or "").strip():
+        check = check_route(
+            SITE, token=check_token, replies=replies,
+            backups=lambda: backup_ages(Path(os.environ.get("HANSARD_BACKUP_DIR") or "/backups"), BACKUPS,
+                                        clock=clock),
+            # the last day's figures, and whether search by meaning has been switched off by an index made with
+            # another embedding model (1: the owner must act; docs/OPERATIONS.md, "If search by meaning is off")
+            figures=lambda: {**last_day_figures(record, clock=clock), "meaning_search_refused": meaning_refused()},
+            # the newest weekly report's totals, numbers only, for the family's weekly summary
+            weekly=lambda: latest_week_figures(core), clock=clock)
+
+        @app.get("/api/check")
+        def api_check(authorization: str | None = Header(None)):
+            status_code, answer = check(authorization)
+            return JSONResponse(answer, status_code=status_code)
+
     @app.get("/api/status")
     def status():
         p = get_pipeline()
         runs = state.runs(1)
         idx = p.engine.index.stats()
         model_on = p.has_model()
-        paused = check_caps(state, None, settings.usage, None) if model_on else None
+        paused = parts.caps.site_paused() if model_on else None
 
         def latest_vote() -> str | None:
             if not p.votes.available:
@@ -1970,19 +2049,17 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             "latest_vote": remembered("status:latest_vote", latest_vote, ttl=600),
             "last_update": _public_run(runs[0]) if runs else None,
             "briefings": "unavailable" if not model_on else ("paused" if paused else "available"),
-            "briefings_note": paused,
+            "briefings_note": paused.message if paused else None,
             "passages": idx.get("passages", 0),
             "meaning_search_coverage": round(idx["vectors"] / idx["passages"], 3) if idx.get("passages") else 0,
         }
 
     @app.get("/api/admin/usage")
     def usage(user=Depends(admin_user)):
-        from hansard.offsite import backup_alerts
-
         backups = Path(os.environ.get("HANSARD_BACKUP_DIR") or "/backups")  # set but empty: the default too
-        return {**summary(state), "visits": visit_summary(state), "tasks": task_summary(state),
-                "alerts": alerts(state, settings.usage) + backup_alerts(backups),
-                "failures": recent_failures(state), "popular_questions": popular_questions(state)}
+        return {**summary(parts.spending, state, clock), "visits": visit_summary(state), "tasks": task_summary(state),
+                "alerts": alerts(parts, state) + backup_alerts(backups),
+                "failures": recent_failures(parts.failures), "popular_questions": popular_questions(state)}
 
     @app.get("/api/admin/sync")
     def sync_log(user=Depends(admin_user)):

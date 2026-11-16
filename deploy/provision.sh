@@ -110,14 +110,17 @@ docker compose up -d --build
 echo "==> Starting the initial data load in the background (log: /var/log/hansard-bootstrap.log)"
 nohup docker compose run --rm -T app hansard bootstrap --embed-minutes 120 > /var/log/hansard-bootstrap.log 2>&1 &
 
-echo "==> Installing the sync, backup, watchdog and disk timers"
+echo "==> Installing the sync, backup, backup check, weekly report, watchdog and disk timers"
 mkdir -p backups
-cp hansard-sync.service hansard-sync.timer hansard-backup.service hansard-backup.timer alert@.service \
+cp hansard-sync.service hansard-sync.timer hansard-backup.service hansard-backup.timer \
+   hansard-backup-check.service hansard-backup-check.timer \
+   hansard-weekly-report.service hansard-weekly-report.timer alert@.service \
    wheretheystand-watchdog.service wheretheystand-watchdog.timer \
    wheretheystand-disk.service wheretheystand-disk.timer \
    wheretheystand-disk-report.service wheretheystand-disk-report.timer /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable --now hansard-sync.timer hansard-backup.timer wheretheystand-watchdog.timer \
+systemctl enable --now hansard-sync.timer hansard-backup.timer hansard-backup-check.timer \
+   hansard-weekly-report.timer wheretheystand-watchdog.timer \
    wheretheystand-disk.timer wheretheystand-disk-report.timer
 
 cat <<MSG

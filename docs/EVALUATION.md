@@ -23,6 +23,8 @@ Three things are scored:
    support, loaded words), and a blind side-by-side judgement of two models' briefings on the same sources.
 
 Run it with `hansard eval plans`, `hansard eval sources` and `hansard eval briefings` (see `hansard eval --help`).
+`hansard eval run` asks the whole set of the whole pipeline, each briefing written, and holds the run to the
+thresholds in `config/settings.toml` ([The move onto the shared package](#the-move-onto-the-shared-package-before-and-after-15-november-2026)).
 On the server, run them from `/opt/hansardgpt` inside the app container. `hansard eval retrieval` runs the searches
 alone, for free ([Retrieval only](#retrieval-only-checking-a-change-to-the-search-index)).
 
@@ -205,6 +207,66 @@ largest change in a similarity on the test set, 0.000055, is the size of 16-bit 
 then `hansard vectors-f16` measures the new index and saves its settings itself,
 and every rebuild is recorded beside the index (`index/vector-index.json`) for the monthly report's reminder
 ([HOSTING.md](HOSTING.md), "Disk space").
+
+## The move onto the shared package: before and after (15 November 2026)
+
+The site's checks, limits, model client, embedder and index now come from the Where They Stand sites' shared
+package (wts-core; [DECISIONS.md](DECISIONS.md)). The move was meant to change nothing a reader sees, and the proof
+of that is the parity tests (`tests/test_parity.py` and its neighbours: what the old code gave, recorded, compared
+with what the new code gives). This section adds a look with a real model, **on the bundled sample data only**
+(`hansard bootstrap --sample`: a few hundred speeches of 2021 to 2026 with the offline search model). It says
+nothing of the live site's figures: the archive there is millions of speeches, with the real search model. The
+whole test set was not run on the archive for this change, because nothing that decides what a briefing says
+changed; the first full `hansard eval run` on the server gives the baseline for the thresholds.
+
+**The same six questions, the same script, old code and new** (one run each; `eval/runs/20261114-sample-before-wts-core.jsonl`
+and `20261115-sample-after-wts-core.jsonl`), with the models the settings name for writing briefings and for reading
+questions.
+
+| Question | Code | Sources | First word | Finished | Cost | Citations (not found) | Quotations (not found word for word) | Grounded | Unsupported sentences |
+|---|---|---|---|---|---|---|---|---|---|
+| Trial by jury | before | 14 | 7.3 s | 14.1 s | 3.4c | 13 (0) | 13 (0) | 0.78 | 2 |
+| | after | 11 | 4.4 s | 11.5 s | 3.2c | 13 (0) | 13 (0) | 0.84 | 1 |
+| Security in Northern Ireland | before | 23 | 4.0 s | 11.8 s | 4.1c | 13 (0) | 12 (0) | 1.00 | 0 |
+| | after | 21 | 3.4 s | 11.0 s | 3.2c | 15 (0) | 13 (1) | 1.00 | 0 |
+| Making residential buildings safe | before | 19 | 3.3 s | 12.8 s | 4.4c | 17 (0) | 16 (0) | 1.00 | 0 |
+| | after | 10 | 4.0 s | 13.0 s | 4.0c | 13 (0) | 8 (0) | 0.71 | 1 |
+| Media plurality, in the Lords | before | 12 | 2.9 s | 10.6 s | 2.4c | 13 (0) | 13 (0) | 0.53 | 3 |
+| | after | 14 | 2.7 s | 10.0 s | 2.5c | 12 (0) | 13 (0) | 0.55 | 3 |
+| Money laundering and asset recovery | before | 5 | 2.2 s | 7.3 s | 1.9c | 9 (0) | 7 (0) | 0.80 | 1 |
+| | after | 7 | 2.5 s | 7.7 s | 2.0c | 9 (0) | 9 (0) | 0.50 | 4 |
+| Lighthouses on Mars | before | 23 | 3.3 s | 4.1 s | 2.2c | none: "no records" | | | |
+| | after | 23 | 3.1 s | 4.3 s | 2.3c | none: "no records" | | | |
+
+Cost is in US cents, by the site's own prices. In both runs every citation was found in its source, no judgemental
+word was flagged, and the question with nothing on the record was answered "no records" without a briefing. One
+quotation in the second run was not found word for word, and was marked for the reader as such, as the check is
+there to do.
+
+**Why the number of sources differs.** A model reads each question into a search afresh each time, and does not
+always choose the same words or filters; the briefing is then written afresh too. With the reading held still, the
+two versions find the same thing: with no model at all (the question read by the site's built-in rules), the old
+code and the new chose exactly the same sources, in the same order, for all six questions (11, 8, 16, 10, 4 and
+24). So the differences in the table are one run against another of a model, not one version of the site against
+another, and six questions are far too few to say that either column is better.
+
+**The shared harness on the same questions** (`HANSARD_EVAL_QUESTIONS=eval/sample-questions.toml hansard eval run
+--max-cost 0.5 --record-fixtures …`; `eval/runs/20261115-133604-sample-eval-d6bbd74c699d.json`): six asked, five
+briefings and one "no records", no error; 59 citations, none not found; 57 quotations, none not found word for
+word; five unsupported sentences in four of the five briefings; no loaded word; grounded 0.92 on average; the
+first word after 3.2 seconds and the end after 9.9 (medians); 15 cents. The five briefings are kept in
+`eval/fixtures/`, each with the sources the model was given and what the checks said of it: `hansard eval replay
+eval/fixtures` runs the checks over them again, free, and the tests and CI do so on every change. A change to the
+checks that says less of one of them than it said fails there.
+
+**What it cost:** 18 cents before, 17 cents after, 15 cents for the harness's run: about 51 cents in all.
+
+**On the server.** `hansard eval run` asks the whole test set (62 questions, about $2 to $3 at these prices; it stops at
+`[eval] max_cost_usd`) and saves the run in `/data/eval/runs/`, on the data volume, where it is kept between
+deploys. What it spends is not on the admin page and counts towards neither cap: the run says what it spent,
+counting each of a briefing's three model calls, the check of registered interests among them (from wts-core 0.3.0).
+`hansard eval compare A B` sets two runs side by side. The site's own `hansard eval plans`, `sources`, `retrieval`
+and `briefings` are as they were.
 
 ## Measured performance
 

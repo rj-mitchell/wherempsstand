@@ -32,6 +32,9 @@ COPY src ./src
 COPY config ./config
 COPY data_static ./data_static
 COPY tests/fixtures ./tests/fixtures
+# the test questions and the briefings recorded for `hansard eval replay` (runs are saved on the data volume)
+COPY eval/questions.toml eval/sample-questions.toml ./eval/
+COPY eval/fixtures ./eval/fixtures
 RUN --mount=type=cache,target=/root/.cache/uv \
     UV_LINK_MODE=copy uv sync --frozen --no-dev --extra embed
 COPY --from=web /web/dist ./web/dist

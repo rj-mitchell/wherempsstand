@@ -1,0 +1,17 @@
+# Writes the week's figures on how briefings went (hansard weekly-report): speed, cost, what the checks found, how
+# each ended and what readers asked that found no records, saved in /data/logs/reports as a page and as JSON.
+# Installed by deploy/update.sh with hansard-weekly-report.timer (docs/OPERATIONS.md, "How briefings went").
+[Unit]
+Description=Where MPs Stand: the weekly report on briefings
+After=docker.service
+Requires=docker.service
+OnFailure=alert@%n.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hansardgpt/deploy
+# Exits 1 when a figure is over its threshold ([alerts] in the settings), so the alert email is sent; the report is
+# saved first either way. Until thresholds are set it proposes them from the week's figures and exits 0.
+ExecStart=/usr/bin/docker compose run --rm --no-deps -T app hansard weekly-report
+TimeoutStartSec=30min
+Nice=10

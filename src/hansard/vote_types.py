@@ -19,10 +19,10 @@ from pathlib import Path
 from typing import Any
 
 import duckdb
+from wts_core.adapters.duckdb import shared
 
 from hansard.config import Settings
 from hansard.store.parquet import attach_store
-from hansard.store.shared import shared
 
 log = logging.getLogger(__name__)
 RULES = 2  # raise when classify() changes, so the cached labels are rebuilt

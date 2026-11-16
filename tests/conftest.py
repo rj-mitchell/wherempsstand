@@ -1,15 +1,28 @@
 from __future__ import annotations
 
-import shutil
-from pathlib import Path
+import os
 
-import pytest
+# A test that reads a command's help must have Typer's colours off before Typer is imported: GitHub Actions makes
+# Typer colour its help, which splits an option's name in two.
+os.environ["_TYPER_FORCE_DISABLE_TERMINAL"] = "1"
+os.environ["NO_COLOR"] = "1"
+# and a wide terminal: Typer wraps its usage errors to the terminal's width, and a long temporary folder's path in
+# one would break across lines differently from one machine to the next
+os.environ["COLUMNS"] = "200"
 
-from hansard.config import STATIC_DIR, load_settings
-from hansard.reference.build import build_reference, write_reference
-from hansard.reference.profiles import ProfileResolver
-from hansard.sources.demographics import load_demographics
-from hansard.sources.elections import load_elections
+import shutil  # noqa: E402
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+import pytest  # noqa: E402
+
+from hansard.config import STATIC_DIR, load_settings  # noqa: E402
+from hansard.reference.build import build_reference, write_reference  # noqa: E402
+from hansard.reference.profiles import ProfileResolver  # noqa: E402
+from hansard.sources.demographics import load_demographics  # noqa: E402
+from hansard.sources.elections import load_elections  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).parent / "golden"))  # tests/golden/shared.py: the scenarios the goldens hold
 
 FIXTURES = Path(__file__).parent / "fixtures"
 MEMBERS = FIXTURES / "members"
@@ -55,9 +68,10 @@ def indexed_settings(tmp_path_factory):
     import dataclasses
     from datetime import date
 
-    from hansard.embed.base import HashingEmbedder
+    from wts_core.adapters.hashing import HashingEmbedder
+
     from hansard.index.build import Indexer, embed_pending
-    from hansard.index.lance import SearchIndex
+    from hansard.index.lance import search_index
     from hansard.ingest import ingest
     from hansard.store.state import StateDB
 
@@ -69,10 +83,11 @@ def indexed_settings(tmp_path_factory):
                                     elections=load_elections(ELECTIONS, snapshot=False)), s.reference_dir)
     state = StateDB(s.state_db)
     ingest(s, workers=1, since=date(2010, 1, 1), state=state)
-    idx = SearchIndex(s.index_dir, 64)
+    embedder = HashingEmbedder(64)
+    idx = search_index(s.index_dir, embedder)
     Indexer(s, idx, state).index_pending()
-    idx.build_indices()
-    embed_pending(s, idx, state, HashingEmbedder(64))
+    idx.build_indexes()
+    embed_pending(s, idx, state, embedder)
     return s
 
 
@@ -82,3 +97,10 @@ def xml_mirror(settings) -> Path:
     dest = settings.raw_xml_dir
     shutil.copytree(XML, dest)
     return dest
+
+
+def model_of(sdk):
+    """The site's model client over a faked Anthropic SDK (``None`` stays ``None``: no model at all)."""
+    from wts_core.adapters.anthropic import BASE_URL, AnthropicClient
+
+    return None if sdk is None else AnthropicClient("test-key", base_url=BASE_URL, client=sdk)

@@ -33,6 +33,12 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+      # A start is given ten minutes before a check that fails counts against it: the search models are loaded
+      # first, and a first start on a version that moves the state database copies the file and brings its rows
+      # across before the site answers (3 seconds for 430 MB on a test machine, so room for some 9 GB at a tenth
+      # of that speed). Until then the site is "starting", and the watchdog leaves it alone. A site that answers
+      # sooner is healthy at once. deploy/update.sh waits as long.
+      start_period: 10m
 
   caddy:
     image: caddy:2.11.7

@@ -15,6 +15,7 @@ from datetime import date
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
+from wts_core.ports import ModelClient, ModelRequest, Usage
 
 from hansard.engine import Filters
 from hansard.reference.portfolios import PORTFOLIOS, portfolios_for_query
@@ -499,11 +500,11 @@ def parse_model(settings) -> str:
     return settings.answer.get("query_parse_model") or settings.answer.get("model", "claude-sonnet-5-5")
 
 
-def parse_with_model(client, settings, question: str, history: list[dict[str, str]] | None,
+def parse_with_model(client: ModelClient, settings, question: str, history: list[dict[str, str]] | None,
                      parties: list[tuple[str, str]], today: date | None = None,
-                     party_groups: list[tuple[str, str]] | None = None) -> tuple[QueryPlan, Any]:
-    from hansard.rag.answer import cached_system
-
+                     party_groups: list[tuple[str, str]] | None = None) -> tuple[QueryPlan, Usage]:
+    """The question as the model reads it, and what the reading cost. A refusal, or an answer with nothing in it,
+    raises (the shared model client's ``structured``), and the caller falls back to the built-in rules."""
     today = today or date.today()
     convo = ""
     if history:
@@ -515,17 +516,12 @@ def parse_with_model(client, settings, question: str, history: list[dict[str, st
         last = (history[-1].get("answer") or "").strip()
         if last:  # what the follow-up may refer to ("the break clause") is often named only in the answer
             convo += f"The start of the answer to the last of them:\n{last[:800]}\n\n"
-    resp = client.messages.parse(
-        model=parse_model(settings),
-        max_tokens=2000,
-        system=cached_system(system_prompt(settings.regions, parties, today, settings.archive_start, party_groups)),
-        messages=[{"role": "user", "content": f"{convo}Question: {question}"}],
-        output_config={"effort": settings.answer.get("query_parse_effort", "low")},
-        output_format=ParsedQuery,
-    )
-    if resp.stop_reason == "refusal" or resp.parsed_output is None:
-        raise RuntimeError(f"query parser returned no output (stop_reason={resp.stop_reason})")
-    p: ParsedQuery = resp.parsed_output
+    request = ModelRequest(
+        model=parse_model(settings), max_tokens=2000,
+        instructions=system_prompt(settings.regions, parties, today, settings.archive_start, party_groups),
+        question=f"{convo}Question: {question}", effort=settings.answer.get("query_parse_effort", "low"),
+        cache_instructions=settings.answer.get("cache_instructions", "short"))
+    p, usage = client.structured(request, ParsedQuery)
     known_ports = set(PORTFOLIOS)
     known_parties = {pid for pid, _ in parties}
     plan = QueryPlan(
@@ -553,7 +549,7 @@ def parse_with_model(client, settings, question: str, history: list[dict[str, st
     )
     plan.unresolved_speakers = list(p.speakers)
     plan.filters.date_from = year_start(question, plan.filters.date_from)
-    return plan, resp.usage
+    return plan, usage
 
 
 def year_start(question: str, date_from: date | None) -> date | None:

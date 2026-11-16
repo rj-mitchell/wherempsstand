@@ -112,7 +112,8 @@ def test_yearly_counts_for_the_cross_border_chart(tmp_path):
 
 
 def test_briefings_can_include_the_devolved_parliaments(indexed_settings):
-    from hansard.embed.base import HashingEmbedder
+    from wts_core.adapters.hashing import HashingEmbedder
+
     from hansard.engine import Engine, Scope
     from hansard.rag.pipeline import AskRequest, Pipeline
     from hansard.rag.query_parse import parse_offline
