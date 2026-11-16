@@ -268,6 +268,62 @@ counting each of a briefing's three model calls, the check of registered interes
 `hansard eval compare A B` sets two runs side by side. The site's own `hansard eval plans`, `sources`, `retrieval`
 and `briefings` are as they were.
 
+## The devolved parliaments' lookup (16 November 2026)
+
+**What was slow.** The first evaluation run on the real archive kept readers waiting minutes before the first word
+of a briefing whenever the question named a period, in proportion to the period's length ("coalition", 2010 to
+2015: 276 s; the last Parliament: 229 s; this year: 30 s; no dates: 14 s; the median of all questions 5 s). Timed
+step by step on the server, with the question already read, it was the lookup in the devolved parliaments'
+record (`DevolvedStore.relevant`, which `Pipeline.find` runs beside the main search): 17.5 s for "austerity"
+between 2010-05-06 and 2015-05-07, 80.7 s for "austerity public spending cuts", against 1.5 s for the main search
+and under 1.5 s for each other lookup.
+
+**Why.** For a question with dates, SQLite's query planner chose to walk every speech of the period in each
+parliament by the (legislature, date) index, and to ask the full-text index, for each one in turn, whether it
+matched. Each of those questions to the index costs a search of its own, and several words cost several (with three
+words or more, the lookup also tries every way of leaving one word out, which makes twelve phrases for four words).
+Without dates the planner did the reverse, read the matches from the full-text index and looked each one up, which
+is fast. The code is unchanged since the first release; the record has grown.
+
+**The change.** The query now says which comes first (`speech_text CROSS JOIN speeches`, which SQLite always takes
+in the order written): the matches from the full-text index, each looked up by its number, then the filters
+(parliament, a member speaking, at least 300 characters, the dates) and the ranking (bm25, with the same weights) as
+before. Nothing on the server changes: no index is rebuilt and no table altered. Ties in relevance now go to the
+earlier stored speech with or without dates; before, with dates, they went to the earlier day. Exact ties are rare
+(two speeches with the same number of words in each part and the same counts of the words searched for); the comparison below found none.
+
+**Measured** on a synthetic record of the real one's size, made with the site's own schema (1.6 million speeches:
+the Scottish Parliament from 1999, the Assembly from 1998, the Senedd from 2016; a vocabulary in which "austerity"
+is in 19,793 speeches, mostly 2010 to 2016, "public" in 243,882, "spending" in 84,536 and "cuts" in 63,835; 1.9
+GB), on a 4-vCPU test machine with the file in memory. `relevant` as the pipeline calls it for a summary (eight a
+parliament):
+
+| Lookup | Before | After | Found (the same, in the same order) |
+|---|---|---|---|
+| "austerity" | 0.11 s | 0.13 s | 24 |
+| "austerity", 2010-05-06 to 2015-05-07 | 6.6 s | 0.10 s | 16 |
+| "austerity public spending cuts" | 0.16 s | 0.17 s | 24 |
+| "austerity public spending cuts", 2010-05-06 to 2015-05-07 | 241.7 s | 0.14 s | 16 |
+
+The slowest after the change, of a few tried on the commonest words ("public"; "public services health budget
+education", with and without dates), took under a second. On the same record, the old query and the new found
+exactly the same contributions in the same order for 42 questions of one to three words drawn at random (32 with
+dates, from one month to two years, and 10 without), each with a pool of eight a parliament and of twelve: 84
+lookups, all the same, taking 619 s in all before and 16 s after ("health" over 2010 to 2015, both pool sizes: 99 s
+before, 1.3 s after). The synthetic record makes four words slower against one than the server did (37 times,
+against 4.6), because its common words are commoner; the cause is the same. On the server's disk, with less of the
+file in memory, both columns will be slower; the size of the difference is the point.
+
+**A time limit for every side lookup.** So that no lookup can hold a briefing up like this again, `Pipeline.find`
+now waits for the votes, early day motions, devolved parliaments and committee evidence only until
+`[answer] side_lookup_seconds` (6) after the search began. One still running then is left out of that briefing,
+which goes on with what the others found, and the log says so at WARNING ("side lookup 'devolved' took longer than
+6 s: the briefing goes on without it"). The lookup cannot be stopped safely, so it finishes on its own thread and
+its result is dropped. The lookups run on one pool of eight threads for the process, and while a lookup of one
+kind is still running past its limit, that kind is left out of new briefings (with its own log line) rather than
+given another thread: a slow kind holds one thread at most. The record of each briefing cannot yet say that a
+lookup was left out (the shared package's record has no field for it); the log line is the trace.
+
 ## Measured performance
 
 Moved here from the README on 6 November 2026.

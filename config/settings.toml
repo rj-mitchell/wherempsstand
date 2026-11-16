@@ -107,6 +107,10 @@ use_fallbacks = true
 # The instructions to the model are the same for every request (apart from the date), so they are sent to be kept
 # in the provider's prompt cache: "short" (five minutes, as always), "long" (an hour, dearer to write) or "off".
 cache_instructions = "short"
+# How long a briefing waits for each lookup made alongside the main search (votes, early day motions, the devolved
+# parliaments, committee evidence), in seconds from the start of the search. One still running then is left out of
+# that briefing, with a warning in the log, rather than holding the reader up; 0 waits for every lookup however long.
+side_lookup_seconds = 6
 
 [embedding]
 # "fastembed" (local ONNX model; weights fetched once from Hugging Face and pinned)

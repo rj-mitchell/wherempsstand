@@ -13,8 +13,10 @@ from __future__ import annotations
 
 import logging
 import re
+import threading
+import time
 from collections.abc import Callable, Iterator
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
@@ -142,6 +144,9 @@ _NOTHING_SAID = re.compile(r"\b((would|could) not (want to |wish to |be able to 
 FEW_EDMS, FEW_EVIDENCE, FEW_DEVOLVED = (2, 3), (3, 5), (2, 3)
 # how many may be chosen, at most, of each kind (devolved: of each parliament)
 SIDE_CAPS = {False: {"edms": 3, "evidence": 6, "devolved": 8}, True: {"edms": 4, "evidence": 8, "devolved": 12}}
+# Threads for the side lookups (votes, motions, the devolved parliaments, committee evidence): one pool for the
+# process, of a fixed size, so that lookups which overrun their time limit cannot pile up threads under load
+SIDE_WORKERS = 8
 
 
 def first_few(side: dict[str, list], comprehensive: bool) -> dict[str, list]:
@@ -174,6 +179,9 @@ class Pipeline:
         self._evidence_vectors = None
         self._size: tuple[float, int] | None = None
         self._registers = None
+        self._side_pool: ThreadPoolExecutor | None = None
+        self._side_lock = threading.Lock()
+        self._overrunning: dict[str, Future] = {}  # a lookup of each kind still running after its time limit
 
     @property
     def client(self) -> ModelClient:
@@ -272,16 +280,16 @@ class Pipeline:
                    "edms": lambda: self.compared("edms", self.find_edms(plan, req), plan),
                    "devolved": lambda: self.compared("devolved", self.find_devolved(plan, req), plan),
                    "evidence": lambda: self.compared("evidence", self.find_evidence(plan, req), plan)}
-        with ThreadPoolExecutor(max_workers=4) as pool:
-            pending = {k: pool.submit(lookups[k]) for k, wanted in side.items() if wanted}
-            if plan.compare:
-                result = self._compare_search(plan, req, limit, rq)
-            else:
-                result = self.engine.search(plan.search_text, plan.filters, req.scope, plan.portfolios,
-                                            req.recency, req.role_weight, limit, diversify=True,
-                                            group_by=plan.group_by, rerank_query=rq,
-                                            local_question=self.local_question(plan))
-            found = {k: f.result() for k, f in pending.items()}
+        started = time.monotonic()
+        pending = self.start_side({k: lookups[k] for k, wanted in side.items() if wanted})
+        if plan.compare:
+            result = self._compare_search(plan, req, limit, rq)
+        else:
+            result = self.engine.search(plan.search_text, plan.filters, req.scope, plan.portfolios,
+                                        req.recency, req.role_weight, limit, diversify=True,
+                                        group_by=plan.group_by, rerank_query=rq,
+                                        local_question=self.local_question(plan))
+        found = self.side_results(pending, started)
         divisions = found.get("votes", [])
         if req.scope.votes and not plan.wants_votes and not result.records:
             divisions = self.votes.find(plan.search_text, plan.filters, limit=4)
@@ -290,6 +298,46 @@ class Pipeline:
         return result, divisions, build_sources(result.records, divisions, plan_facets(plan), plan.group_by,
                                                 side_found["edms"], side_found["devolved"], side_found["evidence"],
                                                 only_groups=plan.filters.groups)
+
+    def start_side(self, lookups: dict[str, Callable[[], Any]]) -> dict[str, Future]:
+        """The side lookups, started on the process's pool. A kind whose last lookup is still running after its time
+        limit is left out until that one finishes, so that one slow kind holds at most one thread."""
+        with self._side_lock:
+            if self._side_pool is None:
+                self._side_pool = ThreadPoolExecutor(max_workers=SIDE_WORKERS, thread_name_prefix="side-lookup")
+            pool, busy = self._side_pool, set(self._overrunning)
+        for kind in busy & set(lookups):
+            log.warning("side lookup %r left out: the last one is still running after its time limit", kind)
+        return {kind: pool.submit(look) for kind, look in lookups.items() if kind not in busy}
+
+    def side_results(self, pending: dict[str, Future], started: float) -> dict[str, Any]:
+        """What the side lookups found, waiting for them until ``answer.side_lookup_seconds`` after ``started`` at
+        most. One still running then is left to finish on its thread (it cannot be stopped safely), and the briefing
+        goes on without it; one not yet begun (the pool was busy) never begins."""
+        seconds = float(self.settings.answer.get("side_lookup_seconds", 6))
+        if pending and seconds > 0:
+            wait(pending.values(), timeout=max(0.0, started + seconds - time.monotonic()))
+        elif pending:
+            wait(pending.values())
+        found = {}
+        for kind, future in pending.items():
+            if future.done():
+                found[kind] = future.result()
+                continue
+            if future.cancel():
+                log.warning("side lookup %r had not begun after %g s (every thread busy): the briefing goes on "
+                            "without it", kind, seconds)
+                continue
+            log.warning("side lookup %r took longer than %g s: the briefing goes on without it", kind, seconds)
+            with self._side_lock:
+                self._overrunning[kind] = future
+            future.add_done_callback(lambda f, kind=kind: self._side_finished(kind, f))
+        return found
+
+    def _side_finished(self, kind: str, future: Future) -> None:
+        with self._side_lock:
+            if self._overrunning.get(kind) is future:
+                del self._overrunning[kind]
 
     def compared(self, kind: str, items: list[dict[str, Any]], plan: QueryPlan) -> list[dict[str, Any]]:
         """Each item with its closeness in meaning to the question (``_sim``), worked out while the main search runs.

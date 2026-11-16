@@ -20,7 +20,10 @@ from hansard.config import REPO_ROOT, load_settings, save_local_settings
 # setting of something new: the recorded settings are the same but for these.
 ADDED_SETTINGS: dict[str, dict[str, Any]] = {
     # how the instructions to the model are cached: "short", as the code always did (wts-core docs/MIGRATION.md 1.5)
-    "answer": {"cache_instructions": "short"},
+    "answer": {"cache_instructions": "short",
+               # how long a briefing waits for each side lookup (docs/EVALUATION.md, "The devolved parliaments'
+               # lookup"): before, it waited however long they took
+               "side_lookup_seconds": 6},
     # how alike two questions are to count as one theme in the weekly report (wts-core docs/adr/0012)
     "embedding": {"theme_similarity": 0.8},
 }

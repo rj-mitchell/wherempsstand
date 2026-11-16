@@ -245,6 +245,11 @@ removed after 90 days); records are kept 13 months, each with the hour it was as
 * `data/logs/briefings.jsonl` is a line of JSON for each stage a briefing reaches and for how it ended: an id,
   a stage's name, milliseconds, an error's class name. Never a question, an address or a visitor's code. Kept 14
   days or 50 MB, whichever is less.
+* A lookup made beside the search (votes, early day motions, the devolved parliaments, committee evidence) that
+  is still running `[answer] side_lookup_seconds` (6) after the search began is left out of that briefing, which
+  goes on without it; `docker compose logs app | grep "side lookup"` lists each time it happened, by kind. A few
+  are no cause for concern (a cold disk after a restart); many of one kind are worth timing that lookup
+  ([EVALUATION.md](EVALUATION.md), "The devolved parliaments' lookup").
 * "Was this briefing useful?", a report that names a briefing, its withdrawal, and a public note on a report of
   it are marked on that briefing's record, so the statistics can say how often each happens.
 * `GET /api/check` gives counts and ages (what is waiting, how old the newest backup is, the last day's figures,

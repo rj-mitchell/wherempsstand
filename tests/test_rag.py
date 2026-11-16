@@ -491,3 +491,49 @@ def test_a_claim_above_a_lead_in_stays_a_point_to_check_when_shown_again():
         answer = as_saved(parts)
         # judged again without the block it was written in, it must not pass for the opening of the quotation
         assert recheck_flags(answer) is answer, block
+
+
+def test_a_slow_side_lookup_is_left_out_after_its_time_limit(indexed_settings, caplog):
+    import dataclasses
+    import logging
+    import threading
+    import time
+
+    settings = dataclasses.replace(indexed_settings, raw={
+        **indexed_settings.raw, "answer": {**indexed_settings.answer, "side_lookup_seconds": 0.5}})
+    p = pipeline(settings, FakeClient())
+    release, calls = threading.Event(), []
+
+    def stuck(plan, req):  # the devolved lookup on a bad day: still running long after the limit
+        calls.append(1)
+        release.wait(30)
+        return []
+
+    p.find_devolved = stuck
+    plan = parse_offline("What has been said about trial by jury?", settings.regions)
+    req = AskRequest(question=plan.question)
+    p.find(plan, req)  # once, so that what is loaded on first use is not counted against the limit
+    release.set()
+    while p._overrunning:
+        time.sleep(0.01)
+    release.clear()
+    try:
+        with caplog.at_level(logging.WARNING, logger="hansard.rag.pipeline"):
+            began = time.monotonic()
+            _, _, sources = p.find(plan, req)
+            took = time.monotonic() - began
+        assert took < 0.5 + 1.0, "the briefing goes on at the limit, not when the lookup ends"
+        assert sources and not [s for s in sources if s.kind == "devolved"]
+        assert "side lookup 'devolved' took longer than 0.5 s" in caplog.text
+        assert len(calls) == 2
+
+        caplog.clear()
+        with caplog.at_level(logging.WARNING, logger="hansard.rag.pipeline"):
+            p.find(plan, req)  # while the last one still runs, no second thread is given to the same kind
+        assert len(calls) == 2 and "side lookup 'devolved' left out" in caplog.text
+    finally:
+        release.set()
+    while p._overrunning:  # once it has finished, the lookup is made again
+        time.sleep(0.01)
+    p.find(plan, req)
+    assert len(calls) == 3

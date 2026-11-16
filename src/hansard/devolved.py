@@ -200,9 +200,14 @@ class DevolvedStore:
                         where.append("s.date <= ?")
                         params.append(str(date_to))
                     have = {r["id"] for r in rows}
+                    # CROSS JOIN keeps the full-text index as the outer loop, whatever the dates. Left to itself,
+                    # SQLite walks every speech of the period by (legislature, date) and asks the full-text index
+                    # about each one in turn, which took minutes for a parliament's term and several words
+                    # (docs/EVALUATION.md, "The devolved parliaments' lookup"). Ties in relevance go to the earlier
+                    # stored speech, as they always did without dates.
                     rows += [r for r in con.execute(f"""
-                        SELECT s.* FROM speech_text JOIN speeches s ON s.id = speech_text.rowid
-                        WHERE {' AND '.join(where)} ORDER BY bm25(speech_text, 1.0, 3.0, 2.0, 0.0) LIMIT ?""",
+                        SELECT s.* FROM speech_text CROSS JOIN speeches s ON s.id = speech_text.rowid
+                        WHERE {' AND '.join(where)} ORDER BY bm25(speech_text, 1.0, 3.0, 2.0, 0.0), s.id LIMIT ?""",
                                                     [*params, per_body * 4]).fetchall() if r["id"] not in have]
                 seen: set[str] = set()
                 for r in rows:  # one contribution per member, so a few speakers do not fill the evidence

@@ -155,3 +155,32 @@ def test_early_holyrood_files_are_read_from_the_older_folder_with_speakers_mappe
     assert stats["files"] == 2
     day = store.day("scottish-parliament", "sp2005-03-02")
     assert day and day[0]["person_id"] == "uk.org.publicwhip/person/90002", "membership ID mapped to the person"
+
+
+def test_the_lookup_for_briefings_reads_the_full_text_index_first_whatever_the_dates(tmp_path):
+    """Left to itself, SQLite answered a question with dates by walking every speech of the period and asking the
+    full-text index about each one: minutes for a parliament's term on the real record (docs/EVALUATION.md)."""
+    store = DevolvedStore(tmp_path / "devolved.sqlite")
+    talk = "Austerity has cut public spending on the islands' ferry services, year after year. " * 6
+    for day, leg, n in (("2009-03-04", "scottish-parliament", 2), ("2012-03-07", "scottish-parliament", 3),
+                        ("2013-01-15", "ni-assembly", 2), ("2021-06-09", "senedd", 2)):
+        store.replace(leg, day, f"{day}.xml", day, [
+            {"sid": f"{day}.{k}", "major": "Public Spending", "minor": None, "person_id": f"p/{leg}/{k}",
+             "speaker": f"Member {k}", "time": None, "url": None, "text": talk + "Thank you." * k} for k in range(n)])
+    sql: list[str] = []
+    with store.connect() as con:
+        con.set_trace_callback(sql.append)
+    try:
+        found = store.relevant(["austerity", "public", "spending", "ferry"], date_from="2010-05-06",
+                               date_to="2015-05-07")
+    finally:
+        with store.connect() as con:
+            con.set_trace_callback(None)
+    assert [(d["legislature"], d["date"]) for d in found] == [("scottish-parliament", "2012-03-07")] * 2 + [
+        ("ni-assembly", "2013-01-15")] * 2, "within the dates, two members a parliament, the best first"
+    lookups = [s for s in sql if "bm25" in s]
+    assert lookups
+    with store.connect() as con:
+        for statement in lookups:
+            plan = [row[3] for row in con.execute("EXPLAIN QUERY PLAN " + statement)]
+            assert plan[0].startswith("SCAN speech_text VIRTUAL TABLE"), plan
