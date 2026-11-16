@@ -101,8 +101,9 @@ REPLY_MESSAGES = ReplyMessages(
                  "sit beside it for now."),
     daily_statements="Thank you, we have your statements. Please email us if there is more to add.",
     daily_reports="Thank you, we have your reports. Please email us if there is more to add.",
+    # the family's words for these two, the same on every Where They Stand site (owner, 16 November 2026)
     report_kind="Please choose what the report is about.",
-    report_too_short="Please say what is wrong: a sentence or more.",
+    report_too_short="Please say what is wrong, in a few words.",
     lapsed="No decision was made in time; please send it again.",
     # the family glossary's heading and disclaimer
     heading="Statement from {name}, {date}",

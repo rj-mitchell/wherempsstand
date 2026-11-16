@@ -151,9 +151,11 @@ def test_what_the_forms_and_the_public_pages_answer(played):
     assert len(WAS["http"]) == 62
     assert differences(played, "http") == {
         # R: a report of nothing but spaces was thanked and kept, empty; it is refused, in the words for one too
-        # short (wts-core docs/MIGRATION.md 1.9)
+        # short (wts-core docs/MIGRATION.md 1.9). Those words are the family's, the same on every Where They Stand
+        # site: the owner asked for the family's wording to be the same (16 November 2026); they were "Please say
+        # what is wrong: a sentence or more."
         SPACES: {"status": (200, 400), "json.ok": (True, "(absent)"),
-                 "json.detail": ("(absent)", "Please say what is wrong: a sentence or more.")},
+                 "json.detail": ("(absent)", "Please say what is wrong, in a few words.")},
         # R: with two things wrong, the words are checked before the name (wts-core docs/AS-BUILT.md, replies:
         # the order of the checks); each fault alone is answered as before
         "a statement with two things wrong: the name and the words": {"json.detail": (

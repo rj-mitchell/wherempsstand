@@ -174,7 +174,7 @@ reportForm?.addEventListener("submit", async (e) => {
   const errorEl = document.getElementById("report-error")!;
   const message = String(data.get("message") ?? "").trim();
   if (message.length < 10) {
-    errorEl.textContent = "Please describe the problem in a sentence or two.";
+    errorEl.textContent = "Please say what is wrong, in a few words."; // the family's words (owner, 16 November 2026)
     errorEl.hidden = false;
     return;
   }
