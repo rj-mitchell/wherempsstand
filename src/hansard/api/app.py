@@ -2073,6 +2073,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             return await call_next(request)
         request.scope["method"] = "GET"
         resp = await call_next(request)
+        # Back to HEAD before the answer goes out: the web server reads this same scope as it sends, and for a GET
+        # it waits for as many bytes of body as Content-Length says, which a HEAD answer never has.
+        request.scope["method"] = "HEAD"
         return Response(status_code=resp.status_code, headers=dict(resp.headers))
 
     if dist.exists():

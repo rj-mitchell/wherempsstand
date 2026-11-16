@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import dataclasses
 import html
 import json
@@ -322,6 +323,37 @@ def test_static_pages_are_served_at_clean_addresses(indexed_settings, tmp_path):
     assert client.get("/api/nope").status_code == 404
     head = client.head("/methodology")  # link checkers and search engines ask with HEAD
     assert head.status_code == 200 and head.text == ""
+
+
+def test_a_head_request_is_still_one_when_its_answer_is_sent(indexed_settings, tmp_path):
+    """The web server (uvicorn) reads the request's own scope as the answer starts, to know whether a body follows.
+    The site answers HEAD by asking for the page as GET; if the scope still said GET then, the server expected the
+    page's body, got none, and logged "Response content shorter than Content-Length" for every HEAD (found on the
+    server, 16 November 2026). The test client does not look at the scope, so this asks the app as the server does."""
+    dist = tmp_path / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("app")
+    (dist / "methodology.html").write_text("method")
+    s = dataclasses.replace(indexed_settings, raw={**indexed_settings.raw,
+                                                   "paths": {**indexed_settings.raw.get("paths", {}), "web_dist": str(dist)}})
+    app, _, _ = make_app(s, tmp_path, auth=False)
+    scope = {"type": "http", "asgi": {"version": "3.0"}, "http_version": "1.1", "method": "HEAD", "scheme": "http",
+             "path": "/methodology", "raw_path": b"/methodology", "root_path": "", "query_string": b"",
+             "headers": [(b"host", b"testserver")], "client": ("192.0.2.1", 50000), "server": ("testserver", 80)}
+    sent = []
+
+    async def receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
+    async def send(message):
+        sent.append((message["type"], scope["method"], message))
+
+    asyncio.run(app(scope, receive, send))
+    start = next(m for m in sent if m[0] == "http.response.start")
+    assert start[1] == "HEAD"  # what the server sees as the answer starts
+    assert start[2]["status"] == 200
+    assert dict(start[2]["headers"])[b"content-length"] == b"6"  # the GET's length, as HEAD should say
+    assert b"".join(m[2].get("body", b"") for m in sent if m[0] == "http.response.body") == b""
 
 
 def test_public_endpoints_show_only_when_and_whether_updates_ran(public):
