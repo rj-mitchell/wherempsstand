@@ -173,6 +173,6 @@ class Weeks:
             title = title_of(source, major, minor, None)
             path = debate_path(source, day, title, None, None)
             out.append({"division_id": did, "date": day.isoformat(), "house": house, "number": number,
-                        "title": " — ".join(x for x in (major, minor) if x), "ayes": ayes, "noes": noes,
+                        "title": ": ".join(x for x in (major, minor) if x), "ayes": ayes, "noes": noes,
                         "path": f"{path}#div-{anchor(did)[1:]}" if path else None})
         return vote_types(self.settings).annotate(out)

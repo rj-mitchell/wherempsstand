@@ -11,27 +11,20 @@ from PIL import Image, ImageDraw, ImageFont
 from hansard.config import STATIC_DIR
 
 W, H = 1200, 630
-PAPER = (247, 243, 234)
-INK = (35, 31, 26)
-INK_SOFT = (77, 70, 61)
-INK_FAINT = (109, 102, 92)
+PAPER = (255, 255, 255)
+PANEL = (242, 244, 244)
+INK = (28, 36, 39)
+INK_SOFT = (79, 90, 94)
 COMMONS = (29, 69, 53)
+ON_CLOTH = (255, 255, 255)
 FONTS = STATIC_DIR / "fonts"
 LEFT, RIGHT = 96, 1120
+BAND = 150
 
 
 @lru_cache(maxsize=32)
 def _font(name: str, size: int) -> ImageFont.FreeTypeFont:
     return ImageFont.truetype(str(FONTS / name), size)
-
-
-def _spaced(draw: ImageDraw.ImageDraw, xy: tuple[int, int], text: str, font, fill, spacing: float) -> int:
-    """Draw letter-spaced text (Pillow has no tracking); returns the x after the last letter."""
-    x, y = xy
-    for ch in text:
-        draw.text((x, y), ch, font=font, fill=fill)
-        x += draw.textlength(ch, font=font) + spacing
-    return int(x)
 
 
 def _wrap(draw: ImageDraw.ImageDraw, text: str, font, width: int) -> list[str]:
@@ -69,27 +62,23 @@ def evidence_line(evidence: dict[str, Any] | None) -> str:
     parts = [f"{evidence['records']} contributions from {evidence['speakers']} speakers"]
     parties = sorted((evidence.get("parties") or {}).items(), key=lambda kv: -kv[1])
     if parties:
-        parts.append("Parties: " + ", ".join(f"{p} {n}" for p, n in parties[:4]))
-    return " · ".join(parts)
+        parts.append("parties: " + ", ".join(f"{p} {n}" for p, n in parties[:4]))
+    return "; ".join(parts)
 
 
 def render_card(question: str, prepared: str, records_up_to: str, evidence: dict[str, Any] | None) -> Image.Image:
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
-    d.rectangle((0, 0, 12, H), fill=COMMONS)  # the Commons-green spine
+    d.rectangle((0, 0, W, BAND), fill=COMMONS)  # the site's cloth, as the header band on every page
 
     icon = Image.open(STATIC_DIR / "brand" / "icon-192.png").convert("RGBA").resize((76, 76), Image.LANCZOS)
-    img.paste(icon, (LEFT, 54), icon)
-    _spaced(d, (LEFT + 100, 58), "WHERE MPs STAND", _font("SourceSerif4-Semibold.ttf", 30), INK, 4.2)
-    d.text((LEFT + 100, 100), "Sourced briefings on the record of Parliament", font=_font("SourceSerif4-It.ttf", 23),
-           fill=INK_SOFT)
-    d.rectangle((LEFT, 160, RIGHT, 163), fill=(46, 42, 36))  # thick-and-thin rule, as on the printed report
-    d.rectangle((LEFT, 168, RIGHT, 169), fill=(46, 42, 36))
+    img.paste(icon, (LEFT, 37), icon)
+    d.text((LEFT + 100, 44), "Where MPs Stand", font=_font("SourceSerif4-Semibold.ttf", 38), fill=ON_CLOTH)
+    d.text((LEFT + 100, 92), "A Where They Stand project", font=_font("SourceSans3-Regular.ttf", 23), fill=ON_CLOTH)
 
-    _spaced(d, (LEFT, 196), "BRIEFING · WRITTEN BY AI FROM HANSARD", _font("SourceSans3-Semibold.ttf", 19), INK_FAINT,
-            2.4)
+    d.text((LEFT, 186), "Briefing written by AI from Hansard", font=_font("SourceSans3-Semibold.ttf", 23), fill=INK_SOFT)
     font, lines = _fit_question(d, question, RIGHT - LEFT, 4)
-    y = 236
+    y = 228
     line_h = int(font.size * 1.18)
     for line in lines:
         d.text((LEFT, y), line, font=font, fill=INK)
@@ -99,13 +88,13 @@ def render_card(question: str, prepared: str, records_up_to: str, evidence: dict
     small = _font("SourceSans3-Regular.ttf", 23)
     if ev:
         while d.textlength(ev, font=small) > RIGHT - LEFT and " " in ev:
-            ev = ev.rsplit(" ", 1)[0].rstrip(",") + "…"
-        d.text((LEFT, 506), ev, font=small, fill=INK_SOFT)
-    d.rectangle((LEFT, 548, RIGHT, 549), fill=(200, 193, 180))
+            ev = ev.rsplit(" ", 1)[0].rstrip(",;") + "…"
+        d.text((LEFT, 500), ev, font=small, fill=INK_SOFT)
+    d.rectangle((0, 548, W, H), fill=PANEL)
     stamp = f"Prepared {prepared}" + (f" from records up to {records_up_to}" if records_up_to else "")
-    d.text((LEFT, 566), stamp, font=small, fill=INK_FAINT)
+    d.text((LEFT, 574), stamp, font=small, fill=INK_SOFT)
     url_font = _font("SourceSans3-Semibold.ttf", 23)
-    d.text((RIGHT - d.textlength("wherempsstand.com", font=url_font), 566), "wherempsstand.com", font=url_font,
+    d.text((RIGHT - d.textlength("wherempsstand.com", font=url_font), 574), "wherempsstand.com", font=url_font,
            fill=COMMONS)
     return img
 

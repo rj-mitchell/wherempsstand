@@ -395,7 +395,7 @@ def test_every_briefing_gets_a_permanent_shareable_address(indexed_settings, tmp
 
     page = client.get(f"/b/{bid}")
     assert page.status_code == 200 and "<body>app</body>" in page.text
-    assert '<meta property="og:title" content="What has been said about trial by jury? — Where MPs Stand" />' in page.text
+    assert '<meta property="og:title" content="What has been said about trial by jury? | Where MPs Stand" />' in page.text
     # shared links show the site's family card; the briefing's own card is still there for embedding
     assert '/family/card.png" />' in page.text and 'content="noindex"' in page.text
     assert page.text.count("<title>") == 1 and page.text.count('property="og:image"') == 1  # site-wide tags replaced
@@ -636,7 +636,7 @@ def test_support_reminder_every_n_new_briefings(indexed_settings, tmp_path, monk
 def test_pages_carry_readable_text_for_readers_without_scripts():
     from hansard.api.plaintext import briefing_text, markdown_text, with_text
 
-    page = '<body><div id="person-root"><p class="muted">Loading…</p></div></body>'
+    page = '<body><div id="person-root"><p class="muted">Fetching the member page.</p></div></body>'
     assert with_text(page, "<h1>Hilary Benn</h1>") == '<body><div id="person-root"><h1>Hilary Benn</h1></div></body>'
     assert 'class="thread prose"><p>x</p>' in with_text('<div id="root"></div>', "<p>x</p>")
     assert with_text(page, None) == page

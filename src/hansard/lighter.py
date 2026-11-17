@@ -68,7 +68,7 @@ def heading(major: str | None, minor: str | None) -> str | None:
     major, minor = (_CHAIR.sub("", x or "").strip() or None for x in (major, minor))
     if major and minor and TITLE_PART.search(major) and TITLE_PART.search(minor):
         return minor
-    return " — ".join(x for x in (major, minor) if x) or None
+    return ": ".join(x for x in (major, minor) if x) or None
 
 
 def light(m: dict[str, Any], row: dict[str, Any], excluded: tuple[set[str], list[str]]) -> bool:

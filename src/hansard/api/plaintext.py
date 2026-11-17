@@ -10,8 +10,8 @@ from typing import Any
 
 from hansard.api.briefings import fmt_date
 
-# the page's "Loading…" placeholder, with any attributes it carries (role="status" in web/*.html)
-_ROOT = re.compile(r'(<div id="[\w-]+-root">)\s*<p class="muted"[^>]*>Loading…</p>\s*(</div>)')
+# the page's placeholder ("Fetching the debate."), with any attributes it carries (role="status" in web/*.html)
+_ROOT = re.compile(r'(<div id="[\w-]+-root">)\s*<p class="muted"[^>]*>[^<]*</p>\s*(</div>)')
 _EMPTY_ROOT = '<div id="root"></div>'
 # the home page's text for readers with scripts off (web/index.html); other pages built on it bring their own
 _HOME_FALLBACK = re.compile(r'(?:<!--[^>]*-->\s*)?<noscript class="home-fallback">.*?</noscript>\s*', re.S)
@@ -128,7 +128,7 @@ def bill_text(b: dict[str, Any]) -> str:
     for s in (b.get("sittings") or [])[:MAX_ITEMS]:
         stages = ", ".join(s.get("stages") or [])
         parts.append(f"<li>{e(fmt_date(s['date']))}, {'House of Lords' if s.get('house') == 'lords' else 'House of Commons'}"
-                     f"{': ' + e(stages) if stages else ''} — {_link(s.get('path') or s.get('url'), 'read the debate')}</li>")
+                     f"{': ' + e(stages) if stages else ''}, {_link(s.get('path') or s.get('url'), 'read the debate')}</li>")
     parts.append("</ul>")
     return "".join(parts)
 

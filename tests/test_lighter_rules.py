@@ -24,7 +24,7 @@ def test_light_moments_only():
 
 def test_one_title_without_the_chair():
     assert heading("School Funding: Stockport", "Nuclear Energy: Scotland") == "Nuclear Energy: Scotland"
-    assert heading("Treasury", "Topical Questions") == "Treasury — Topical Questions"
+    assert heading("Treasury", "Topical Questions") == "Treasury: Topical Questions"
     assert heading("Bus Services — [Pete Wishart in the Chair]", None) == "Bus Services"
 
 

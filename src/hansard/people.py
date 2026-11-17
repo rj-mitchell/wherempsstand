@@ -225,7 +225,7 @@ class People:
             d["date"] = d["date"].isoformat()
             d["debate_path"] = debate_path(d.pop("source"), d["date"], d["major_heading"], d["minor_heading"],
                                            d.pop("bill"), d["record_id"])
-            d["heading"] = " — ".join(x for x in (d.pop("major_heading"), d.pop("minor_heading")) if x)
+            d["heading"] = ": ".join(x for x in (d.pop("major_heading"), d.pop("minor_heading")) if x)
             out.append(d)
         return out
 
@@ -304,7 +304,7 @@ class People:
             ORDER BY d.date DESC, d.number DESC""", [person_id]).fetchall()
         all_rebellions = [{
             "date": r[0].isoformat(), "house": r[1], "number": r[2],
-            "title": " — ".join(x for x in (r[3], r[4]) if x), "vote": r[5], "party_majority": r[6],
+            "title": ": ".join(x for x in (r[3], r[4]) if x), "vote": r[5], "party_majority": r[6],
             "twfy_url": r[7], "official_url": r[8], "division_id": r[9], "whip_group": r[10]} for r in rows]
         vote_types(self.settings).annotate(all_rebellions)
         # voting differently from colleagues in a reported free vote breaks no whip: not a rebellion

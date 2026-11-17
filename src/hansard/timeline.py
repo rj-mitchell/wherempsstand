@@ -59,7 +59,7 @@ def member_votes(people: People, person_id: str, topic: str, limit: int = 20) ->
         WHERE pv.person_id = ? AND ({score}) >= {need}
         ORDER BY d.date DESC, d.number DESC LIMIT {int(limit)}""", [person_id, *params]).fetchall()
     return [{"kind": "voted", "date": r[0].isoformat(), "house": r[1], "number": r[2],
-             "title": " — ".join(x for x in (r[3], r[4]) if x), "ayes": r[5], "noes": r[6], "vote": r[7],
+             "title": ": ".join(x for x in (r[3], r[4]) if x), "ayes": r[5], "noes": r[6], "vote": r[7],
              "against_party": bool(r[8] and r[9] and r[9] >= 2 and r[7] != r[8]),
              "url": r[10] or r[11], "division_id": r[12]} for r in rows]
 
@@ -79,7 +79,7 @@ def party_votes(people: People, party_id: str, topic: str, limit: int = 20) -> l
         GROUP BY ALL ORDER BY d.date DESC, d.number DESC LIMIT {int(limit)}""",
                              [group[0] if group else party_id, *params]).fetchall()
     return [{"kind": "voted", "date": r[0].isoformat(), "house": r[1], "number": r[2],
-             "title": " — ".join(x for x in (r[3], r[4]) if x), "ayes": r[5], "noes": r[6],
+             "title": ": ".join(x for x in (r[3], r[4]) if x), "ayes": r[5], "noes": r[6],
              "party_ayes": r[7], "party_noes": r[8], "url": r[9] or r[10], "division_id": r[11]} for r in rows]
 
 

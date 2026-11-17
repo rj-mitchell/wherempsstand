@@ -43,9 +43,9 @@ def test_group_devolved_and_motion_text():
 
 
 def test_text_goes_into_the_page_root():
-    page = '<body><div id="group-root"><p class="muted">Loading…</p></div></body>'
+    page = '<body><div id="group-root"><p class="muted">Fetching the group page.</p></div></body>'
     assert with_text(page, "<h1>X</h1>") == '<body><div id="group-root"><h1>X</h1></div></body>'
-    status = '<body><div id="group-root"><p class="muted" role="status">Loading…</p></div></body>'
+    status = '<body><div id="group-root"><p class="muted" role="status">Fetching the group officers, members and benefits.</p></div></body>'
     assert with_text(status, "<h1>X</h1>") == '<body><div id="group-root"><h1>X</h1></div></body>'
 
 

@@ -738,19 +738,19 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         if b is None or b["withdrawn_at"]:
             gone = b is not None
             html_page = page_with_meta(
-                page, title="Briefing withdrawn — Where MPs Stand" if gone else "Briefing not found — Where MPs Stand",
+                page, title="Briefing withdrawn | Where MPs Stand" if gone else "Briefing not found | Where MPs Stand",
                 description="This briefing is no longer available." if gone else "There is no briefing at this address.",
                 url=f"{base}/b/{bid}", image=None)
             return Response(html_page, status_code=410 if gone else 404, media_type="text/html")
         note = hidden_note(replies, bid)
         if note is not None:  # hidden for now: the page says so (its script asks), and nothing of it is in the page
-            html_page = page_with_meta(page, title=f"{NOT_SHOWN} — Where MPs Stand", description=note,
+            html_page = page_with_meta(page, title=f"{NOT_SHOWN} | Where MPs Stand", description=note,
                                        url=f"{base}/b/{bid}", image=None)
             return Response(html_page, status_code=423, media_type="text/html")
         view = public_view(b)
         description = summary_text(view["answer"]) or "A sourced briefing on the record of Parliament."
         html_page = page_with_meta(
-            page, title=f"{b['question']} — Where MPs Stand", description=description, url=f"{base}/b/{bid}",
+            page, title=f"{b['question']} | Where MPs Stand", description=description, url=f"{base}/b/{bid}",
             noindex=not is_featured(state, bid))  # featured briefings are for search engines to find
         return Response(with_text(html_page, readable(lambda: briefing_text(view))), media_type="text/html")
 
@@ -808,7 +808,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         b = get_briefing(parts.archive, cur["briefing_id"]) if cur else None
         description = (summary_text(public_view(b)["answer"]) if b else "") or t.description or t.question
         html_page = page_with_meta(
-            page, title=f"{t.title}: where MPs and peers stand — Where MPs Stand", description=description,
+            page, title=f"{t.title}: where MPs and peers stand | Where MPs Stand", description=description,
             url=f"{base}/topics/{slug}", noindex=False)
         text = readable(lambda: briefing_text(public_view(b), heading=t.title)) if b else None
         return Response(with_text(html_page, text), media_type="text/html")
@@ -883,13 +883,13 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         page = index.read_text() if index.is_file() else "<!doctype html><html><head></head><body></body></html>"
         base = str(request.base_url).rstrip("/")
         if b is None:
-            return Response(page_with_meta(page, title="Bill not found — Where MPs Stand",
+            return Response(page_with_meta(page, title="Bill not found | Where MPs Stand",
                                            description="There is no bill at this address.", url=f"{base}/bills/{slug}",
                                            image=None), status_code=404, media_type="text/html")
         houses = " and ".join("the Lords" if h == "lords" else "the Commons" for h in b["houses"])
         description = (f"The {b['name']} in Parliament: every debate and vote in {houses}, "
                        f"{fmt_date(b['first'])} to {fmt_date(b['last'])}, from the official record.")
-        return Response(with_text(page_with_meta(page, title=f"{b['name']} — Where MPs Stand", description=description,
+        return Response(with_text(page_with_meta(page, title=f"{b['name']} | Where MPs Stand", description=description,
                                                  url=f"{base}/bills/{slug}", image=None, noindex=False),
                                   readable(lambda: bill_text(b))), media_type="text/html")
 
@@ -934,7 +934,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         page = index.read_text() if index.is_file() else "<!doctype html><html><head></head><body></body></html>"
         url = f"{str(request.base_url).rstrip('/')}/debates/{day}/{chamber}/{slug}"
         if d is None:
-            return Response(page_with_meta(page, title="Debate not found — Where MPs Stand",
+            return Response(page_with_meta(page, title="Debate not found | Where MPs Stand",
                                            description="There is no debate at this address.", url=url, image=None),
                             status_code=404, media_type="text/html")
         if d.get("kind") == "statement":
@@ -943,7 +943,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         else:
             description = (f"{d['title']}: the debate in the {d['chamber_name']} on {fmt_date(d['date'])}, as "
                            f"recorded in Hansard, with {d['contributions']} contributions from {d['speakers']} members.")
-        return Response(with_text(page_with_meta(page, title=f"{d['title']}, {fmt_date(d['date'])} — Where MPs Stand",
+        return Response(with_text(page_with_meta(page, title=f"{d['title']}, {fmt_date(d['date'])} | Where MPs Stand",
                                                  description=description, url=url, image=None, noindex=False),
                                   readable(lambda: debate_text(d))), media_type="text/html")
 
@@ -988,14 +988,14 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         page = index.read_text() if index.is_file() else "<!doctype html><html><head></head><body></body></html>"
         base = str(request.base_url).rstrip("/")
         if w is None:
-            return Response(page_with_meta(page, title="Week not found — Where MPs Stand",
+            return Response(page_with_meta(page, title="Week not found | Where MPs Stand",
                                            description="Parliament did not sit that week.",
                                            url=f"{base}/weeks/{start}", image=None),
                             status_code=404, media_type="text/html")
         url = f"{base}/this-week" if start is None else f"{base}/weeks/{w['start']}"
         span = f"{fmt_date(w['start'])} to {fmt_date(w['end'])}"
         return Response(with_text(page_with_meta(
-            page, title=f"In Parliament, week of {fmt_date(w['start'])} — Where MPs Stand",
+            page, title=f"In Parliament, week of {fmt_date(w['start'])} | Where MPs Stand",
             description=f"The debates, votes, bills and statements in Parliament, {span}, from the official record.",
             url=url, image=None, noindex=False), readable(lambda: week_text(w))), media_type="text/html")
 
@@ -1140,11 +1140,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         base = str(request.base_url).rstrip("/")
         rows = get_devolved()[0].day(leg, key) if leg in LEGISLATURES else []
         if not rows:
-            return Response(page_with_meta(page, title="Not found — Where MPs Stand", description="Nothing here.",
+            return Response(page_with_meta(page, title="Not found | Where MPs Stand", description="Nothing here.",
                                            url=f"{base}/devolved/{leg}/{key}", image=None),
                             status_code=404, media_type="text/html")
         name = LEGISLATURES[leg]["name"]
-        return Response(with_text(page_with_meta(page, title=f"{name}, {fmt_date(rows[0]['date'])} — Where MPs Stand",
+        return Response(with_text(page_with_meta(page, title=f"{name}, {fmt_date(rows[0]['date'])} | Where MPs Stand",
                                                  description=f"What was said in the {name} on {fmt_date(rows[0]['date'])}, "
                                                              "as recorded in its official report, with each member's "
                                                              "party and seat.",
@@ -1220,11 +1220,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         url = f"{str(request.base_url).rstrip('/')}/evidence/{sid}"
         t = get_evidence().transcript(sid)
         if t is None:
-            return Response(page_with_meta(page, title="Transcript not found — Where MPs Stand",
+            return Response(page_with_meta(page, title="Transcript not found | Where MPs Stand",
                                            description="There is no transcript for that session here yet.", url=url,
                                            image=None), status_code=404, media_type="text/html")
         title = t["title"] or "Oral evidence"
-        return Response(with_text(page_with_meta(page, title=f"{title} — Where MPs Stand",
+        return Response(with_text(page_with_meta(page, title=f"{title} | Where MPs Stand",
                                                  description=f"{title}: the transcript of a committee evidence session, "
                                                              "with who said what.", url=url, image=None, noindex=False),
                                   readable(lambda: evidence_text({**t, **get_committees().sessions_meta({sid}).get(sid, {})}))),
@@ -1246,7 +1246,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             d = None
         path = f"/committees/{ident}" if kind == "committee" else f"/inquiries/{ident}"
         if d is None:
-            return Response(page_with_meta(page, title="Not found — Where MPs Stand", description="Nothing here.",
+            return Response(page_with_meta(page, title="Not found | Where MPs Stand", description="Nothing here.",
                                            url=base + path, image=None), status_code=404, media_type="text/html")
         if kind == "committee":
             title, desc = d["name"], (d.get("purpose") or f"The {d['name']}: its inquiries, reports and the "
@@ -1254,9 +1254,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         else:
             title = d["title"]
             desc = (f"{d['title']}: an inquiry by the " + " and ".join(x["name"] for x in d["committees"]) +
-                    ", with its reports, the government's responses and who gave evidence.")
+                    ", with its reports, the Government's responses and who gave evidence.")
         text = committee_text if kind == "committee" else inquiry_text
-        return Response(with_text(page_with_meta(page, title=f"{title} — Where MPs Stand", description=desc[:300],
+        return Response(with_text(page_with_meta(page, title=f"{title} | Where MPs Stand", description=desc[:300],
                                                  url=base + path, image=None, noindex=False), readable(lambda: text(d))),
                         media_type="text/html")
 
@@ -1380,12 +1380,12 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         g = get_groups().group(slug, parliament)
         base = str(request.base_url).rstrip("/")
         if g is None:
-            return Response(page_with_meta(page, title="Group not found — Where MPs Stand",
+            return Response(page_with_meta(page, title="Group not found | Where MPs Stand",
                                            description="There is no group at this address.",
                                            url=f"{base}/groups/{parliament}/{slug}", image=None),
                             status_code=404, media_type="text/html")
         desc = (g["purpose"] or g["title"])[:280]
-        return Response(with_text(page_with_meta(page, title=f"{g['title']} — Where MPs Stand", description=desc,
+        return Response(with_text(page_with_meta(page, title=f"{g['title']} | Where MPs Stand", description=desc,
                                                  url=f"{base}/groups/{parliament}/{slug}", image=None, noindex=False),
                                   readable(lambda: group_text(g))),
                         media_type="text/html")
@@ -1491,12 +1491,12 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         page = index.read_text() if index.is_file() else "<!doctype html><html><head></head><body></body></html>"
         url = f"{str(request.base_url).rstrip('/')}/edms/{edm_id}"
         if e is None:
-            return Response(page_with_meta(page, title="Early day motion not found — Where MPs Stand",
+            return Response(page_with_meta(page, title="Early day motion not found | Where MPs Stand",
                                            description="There is no early day motion with that number.", url=url,
                                            image=None), status_code=404, media_type="text/html")
         when = fmt_date(e["date_tabled"]) if e["date_tabled"] else "an unknown date"
         return Response(with_text(page_with_meta(
-            page, title=f"{e['title']} (early day motion) — Where MPs Stand",
+            page, title=f"{e['title']} (early day motion) | Where MPs Stand",
             description=f"Early day motion tabled on {when} by {e['primary_name']}, with "
                         f"{e['sponsors_count'] or 0} signatures: the text and who signed.",
             url=url, image=None, noindex=False), readable(lambda: edm_text(edm_detail(edm_id)))), media_type="text/html")
@@ -1702,7 +1702,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         info = pp.page(pid) if pid else None
         base = str(request.base_url).rstrip("/")
         if info is None:
-            return Response(page_with_meta(html_doc, title="Member not found — Where MPs Stand",
+            return Response(page_with_meta(html_doc, title="Member not found | Where MPs Stand",
                                            description="There is no member at this address.",
                                            url=f"{base}/people/{number}", image=None), status_code=404,
                             media_type="text/html")
@@ -1718,7 +1718,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                    == "commons" else "House of Lords"}} if info.get("current") else {}),
                   **({"affiliation": {"@type": "Organization", "name": info["current"]["party"]}}
                      if (info.get("current") or {}).get("party") else {})}
-        return Response(with_text(page_with_meta(html_doc, title=f"{info['name']} — Where MPs Stand", description=desc,
+        return Response(with_text(page_with_meta(html_doc, title=f"{info['name']} | Where MPs Stand", description=desc,
                                                  url=page_url, noindex=False, data=person), text), media_type="text/html")
 
     @app.get("/sitemap-people.xml", include_in_schema=False)
@@ -1776,7 +1776,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     # ---- RSS feeds -------------------------------------------------------------------------
     def feed(request: Request, path: str, title: str, link: str, description: str, items: list) -> Response:
         base = str(request.base_url).rstrip("/")
-        return Response(rss(title=f"{title} — Where MPs Stand", link=base + link, description=description,
+        return Response(rss(title=f"{title} | Where MPs Stand", link=base + link, description=description,
                             self_url=base + path, items=items), media_type=FEED_TYPE)
 
     @app.get("/feeds/people/{number}.xml", include_in_schema=False)

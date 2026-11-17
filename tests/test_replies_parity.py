@@ -163,6 +163,15 @@ def test_what_the_forms_and_the_public_pages_answer(played):
         # the report filed in the place of the one of spaces, so that the rest keep their numbers
         "the owner's list of reports": {"json.reports[4].message": ("", FILLER)},
         "the owner's list of open reports": {"json.reports[4].message": ("", FILLER)},
+        # page titles are "Page | Site name", as on every Where They Stand site (the charity's family/GLOSSARY.md,
+        # "Page titles")
+        "a saved briefing's page": {"title": (
+            "<title>What has been said about trial by jury since 2020? — Where MPs Stand</title>",
+            "<title>What has been said about trial by jury since 2020? | Where MPs Stand</title>")},
+        "a withdrawn briefing's page": {"title": (
+            "<title>Briefing withdrawn — Where MPs Stand</title>", "<title>Briefing withdrawn | Where MPs Stand</title>")},
+        "the page of a briefing there is not": {"title": (
+            "<title>Briefing not found — Where MPs Stand</title>", "<title>Briefing not found | Where MPs Stand</title>")},
     }
     # R: a name or a role typed with runs of spaces is kept with single ones (as it was always shown on a page)
     listed = {s["id"]: s for s in played["http"][-5]["json"]["statements"]}
@@ -207,6 +216,7 @@ def test_what_the_owners_commands_print(played):
 
 
 def test_what_the_owners_pages_do_and_what_is_shown_afterwards(played):
+    FEED = next(i for i, c in enumerate(WAS["after"]) if c["case"] == "the corrections feed")
     assert differences(played, "admin") == {}  # all 18 steps as before, taking a published statement down included
     assert len(WAS["admin"]) == 18
     assert differences(played, "after") == {
@@ -214,6 +224,11 @@ def test_what_the_owners_pages_do_and_what_is_shown_afterwards(played):
         # the owner's public note (wts-core CHANGELOG 0.2.1; the note says what was put right)
         "the corrections log, with a note and two withdrawn": {"json.corrections[2].briefing_id": ("briefingaa", None)},
         "the owner's list of reports, now": {"json.reports[4].message": ("", FILLER)},
+        # the feed's title is "Corrections | Where MPs Stand", as page titles are (family/GLOSSARY.md, "Page titles")
+        "the corrections feed": {"text": (
+            WAS["after"][FEED]["text"],
+            WAS["after"][FEED]["text"].replace("<title>Corrections — Where MPs Stand</title>",
+                                               "<title>Corrections | Where MPs Stand</title>"))},
         # O: a statement taken down after it was published is "removed", not "declined"; and a statement keeps
         # the time it was first published when it is updated (the date shown beside it is the update's, as before)
         "the owner's list of statements, now": {
