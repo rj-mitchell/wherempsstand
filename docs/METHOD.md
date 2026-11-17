@@ -1,0 +1,191 @@
+# Method
+
+The technical method behind Where MPs Stand: how the record is read, stored and searched, how the evidence for a
+briefing is chosen and ranked, how a briefing is kept to what the record says, and the known limitations. The
+version for readers is the site's [methodology page](https://wherempsstand.com/methodology)
+(`web/methodology.html`).
+
+## Contents
+
+1. [From the record to an answer](#from-the-record-to-an-answer)
+2. [Ranking: recency and role weighting](#ranking-recency-and-role-weighting)
+3. [Keeping answers grounded](#keeping-answers-grounded)
+4. [Known limitations](#known-limitations)
+
+## From the record to an answer
+
+```
+ TheyWorkForYou scrapedxml ──► streaming parser ──► Parquet (zstd, by source & year) ──► DuckDB SQL
+ (HTTPS, twice a day)          (lxml iterparse)            │
+                                                           ▼
+ mysociety/parlparse members/ ──► reference tables ──► speaker-on-date enrichment
+ (git pull, each update)          (people, seats, offices,      │
+ ONS / mySociety boundaries       regions, parties)             ▼
+                                                  LanceDB: BM25 passages + vectors (local model)
+                                                           │
+ question ─► filter plan (Claude, shown as editable chips) ─► deterministic retrieval & ranking
+                                                           │
+                                       Claude (Sonnet 5.5) answers only from the sources,
+                                       with native search-result citations ─► verification ─► UI
+```
+
+* Ingest. `lxml.etree.iterparse` streams each file and frees elements as it goes, so memory stays flat
+  however large the file is ([EVALUATION.md](EVALUATION.md#measured-performance) has the timings).
+* Storage. Zstd-compressed Parquet, partitioned by source and year. Each sitting day is replaced atomically
+  when Hansard issues a correction. Days older than 90 days are compacted into one file per partition, so
+  queries spanning many years run in tens of milliseconds.
+* Republished records. About 37,000 written answers, mostly corrected Lords answers, are republished in a
+  later day's file under the same ID. As on TheyWorkForYou, only the newest copy is searched and cited.
+* Identity. Speakers are resolved only by parlparse IDs, never by name. One person ID covers every
+  name and title change. For example, David Cameron is "David Cameron", MP for Witney, Prime Minister in 2012,
+  and "Lord Cameron of Chipping Norton", Foreign Secretary in the Lords in 2024. Both are the same person.
+* Temporal joins. Every open-ended or partial date is normalised: a missing or empty end becomes
+  `9999-12-31`, and a year on its own like `"1983"` covers the whole year. Duplicate office rows in the source
+  data are removed and overlapping spells merged. Each join is aggregated per record, so a minister with two
+  posts never duplicates a speech.
+* Search. LanceDB holds a BM25 full-text index over 4.7 million passages, plus vectors from a local
+  open-source embedding model (`snowflake-arctic-embed-xs`, run on CPU; its weights are downloaded once from
+  Hugging Face and pinned by SHA-256). Both are filtered by date, House, region, party, person and role. A Labour
+  filter also includes Labour/Co-operative MPs.
+* Balanced evidence. The best-ranked candidates (eight per source wanted, at least 150) are grouped into
+  government ministers, opposition frontbench, select committee chairs, backbench MPs in city, town and rural
+  seats, and backbench peers. Members who raised the subject on three or more separate days among them (not
+  counting what they said as ministers) are included first, up to four, so a backbencher who keeps returning to a
+  subject is not crowded out; the briefing may say how often they raised it, and the evidence summary lists who
+  raised it most. The rest of the evidence set is drawn round-robin across the groups, with at most two
+  contributions per speaker and a relevance floor, so a briefing can compare groups instead of echoing one minister
+  six times.
+* Seat type. Every constituency in both boundary sets is classified from official statistics by the size of
+  the urban area most of its residents live in, not by city status (`data_static/geo/constituencies.csv`):
+  * city: the main urban area has 200,000+ people (ONS's "major" built-up area class). Reading, Milton
+    Keynes and Bolton count; Bolton because it is part of the Greater Manchester built-up area;
+  * town: a smaller urban area. Bath, Canterbury and Lichfield count, despite their city status;
+  * rural: most residents live outside urban areas of 10,000+, the official ONS rural definition. Wells
+    and Ely count.
+
+  The urban areas are:
+  * England and Wales: ONS's 2011 built-up areas, with 2011 Census populations. A conurbation stops at its
+    own county: Bolton is part of Greater Manchester, but towns physically joined to London or another
+    conurbation from outside it (Watford, St Albans, Woking, Guildford, Wilmslow) count as towns in their own
+    right, using ONS's own sub-division populations;
+  * Scotland: National Records of Scotland's Census 2022 settlements, where Greater Glasgow includes Paisley;
+  * Northern Ireland: NISRA's 2015 settlements, where Belfast City is the only one of 200,000+.
+
+  Each source's own lookups link small areas to both sets of seats. That gives about 315 city, 225 town and 110 rural seats in each set. Each source label names the urban area and its size. The rules and source URLs are in
+  `scripts/build_geo_lookups.py`.
+
+* Seats on the day. Each MP's source carries the result of the most recent election in their seat before the
+  day they spoke (a general election or a by-election): their majority (as votes and as a share of votes cast,
+  banded marginal under 10%, 10% to 20%, safe over 20%), the party that came second with its votes, and
+  whether they were still in their first Parliament. Questions can be limited to, or grouped by, any of these
+  (`majority_bands`, `runner_up_parties`, `tenure`; `group_by` "majority", "runner_up", "tenure"), checked against
+  each record's own date. Who came second is that election's result, not a prediction: no polls or projections are
+  used, and a question about seats "threatened by" or "facing" a party is read as seats where it came second, and
+  shown as such ([DECISIONS.md](DECISIONS.md), 29). Results from 2010 come from the Members API: the list of a
+  seat's results gives no candidates, so each result's own page is read once for its runner-up, within the same
+  polite, budgeted refresh, and the copy saved with the code (`data_static/elections/results_snapshot.json`, made
+  by `scripts/snapshot_election_results.py`) supplies any the server has not fetched yet. The general elections of
+  1997–2005 and the by-elections of 1997–2010 come from the Commons Library and Information Office files, which give
+  the runner-up too, except where the Library adds smaller parties together as "Other". Party names are mapped to
+  the site's party ids: the Brexit Party is Reform UK under its earlier name. Where who came second cannot be known
+  (a tie for second, a single candidate, "Other"), it is shown as not known, never guessed or taken from an earlier
+  election.
+
+* Party groups and caucuses. Groups within a party (the Socialist Campaign Group, the Labour Growth Group, the
+  Conservative Environment Network...) are not recorded by Parliament and mostly publish no lists. A member counts
+  as in one only on published evidence, kept with its source and shown with it (`src/hansard/groups.py`): the
+  group's own list, a letter or statement they signed that the group published with names, or their own words in
+  Parliament. The lists are in `data_static/groups/groups.json`, made from the research file by
+  `scripts/groups_from_research.py`, which applies the owner's decisions ([DECISIONS.md](DECISIONS.md), 30) and can be
+  run again as lists are found. Self-declarations are found by rule in each update's new and corrected records (and
+  the whole record with `hansard groups-scan --all`; `--report` writes them out for checking): first person only
+  ("I am a member of", "of which I am the chair", "we in the ERG", "I declare that I am part of"), and not negations,
+  questions, hypotheses, quotations, statements about others, ministers answering a group, a member of another party,
+  or names that are also everyday phrases unless written as the group's name. Evidence counts for the Parliament it
+  belongs to (from one general election to the next); a declaration for the whole of its Parliament. Questions can be
+  limited to, or grouped by, groups there is evidence for (`groups`; `group_by` "group": two named groups compared are
+  both searched and grouped; one compared with other members groups everyone). IPSA's records of MPs paying for a
+  group's pooled research service are their own kind, used when `[groups] show_ipsa` is on (it is, from 12 November
+  2026): labelled "paid for the group's research service (IPSA records, years)", never membership, with no amounts.
+  A claim whose IPSA service and own description name different groups is left out as unclear (twelve claims of
+  March 2022 filed under the Common Sense Group's service but described as the European Research Group's).
+
+## Ranking: recency and role weighting
+
+Ranking is soft: nothing is excluded unless a filter is set.
+
+```
+score = relevance × recency × authority
+
+relevance = ½ · BM25/max(BM25)  +  ½ · calibrated cosine similarity
+recency   = 0.35 + 0.65 · 0.5^(age / half-life)           (slider: off … half-life 6 months; default 2 years)
+authority = 1 + (W − 1) · m                               (slider W: 1.0× … 2.0×)
+```
+
+The authority multiplier `m` depends on the speaker's role on the date of the record:
+
+| Speaker's role on the date | m |
+|---|---|
+| Government minister, shadow minister or select committee chair whose portfolio matches the question | 1.0 |
+| Minister, shadow minister or chair, other portfolio | 0.5 |
+| Ordinary member of a select committee on the question's subject | 0.3 |
+| Backbencher | 0 |
+
+* Recency floor. Because of the 0.35 floor, a much stronger 2011 match still beats a weak 2025 one.
+* Portfolios. Departments are mapped to stable portfolios that survive renames. For example DECC → BEIS
+  → DESNZ all map to `energy_climate`, so an energy question boosts the energy minister of every era. Every
+  post-2010 role title in parlparse maps to a portfolio or is deliberately marked as having none, and a test
+  enforces this.
+* Frontbench search. When the question has a subject, its shadow ministers, and its ministers and committee
+  chairs, are also searched by keyword on their own (apart, so ministers' many answers cannot crowd out the
+  opposition), so the speeches setting out each side's position are considered even on a subject so widely
+  debated that they fall outside the best few hundred passages of the whole record.
+* Transparency. The source drawer shows each source's score breakdown.
+
+## Keeping answers grounded
+
+1. Editable filters. The question becomes an editable filter plan: dates, Houses, regions, parties,
+   speakers, roles and boosted portfolios. "Northern MPs" means the North East, North West, and Yorkshire and
+   The Humber (`[regions]` in `config/settings.toml`). Readers see and can edit every filter.
+2. Synthesis rules. The model is told to synthesise rather than list, to group speakers by the attributes
+   given in each source's title (role on the date, party, seat type, region), and to use no other attributes.
+   It characterises each group's stance with one to three cited examples, preferably short exact quotations,
+   and describes the strength of evidence honestly ("two MPs", "in the records retrieved").
+3. Neutral wording. The model reports with plain verbs (said, argued, criticised) and may not use loaded or
+   judgemental words in its own voice (lied, misled, U-turn, admitted, attacked and the like). Such words can
+   appear only inside an exact, cited quotation from the speaker who used them. It never says an individual
+   contradicted themselves; it gives what they said on each date. Fair and accurate reports of Parliament have
+   legal protection; editorialising would fall outside it.
+4. British English. Briefings and the one-line interpretation of each question are written in British
+   English (spelling, vocabulary, and dates such as 9 October 2026). A final deterministic pass then converts
+   any American spelling left in the model's own words (organize, program, percent, defense and so on). It never
+   touches quotations, which stay exactly as Hansard records them, nor capitalised names such as the World
+   Health Organization.
+5. Deterministic retrieval. The same plan and sliders always give the same sources.
+6. Sources only. Claude (Sonnet 5.5) receives only those sources, as search-result blocks with citations
+   enabled, under rules that forbid outside knowledge. When the sources don't answer the question, it must say
+   "No records found."
+7. Verification. Every citation is re-checked against the site's copy of the source text. Any uncited
+   substantive sentence is flagged in the UI as unsupported, never passed off as sourced.
+8. No guessing on empty results. If retrieval finds nothing, the model is not called at all.
+
+Every data source, its licence and how it is credited is in [ATTRIBUTION.md](../ATTRIBUTION.md).
+
+## Known limitations
+
+- Hansard's XML has no official URL for each speech. For debates, the official link opens the sitting day, and the
+  column number and the TheyWorkForYou link identify the speech. Written questions and statements link to the exact
+  official record.
+- Region filters apply to MPs only, since peers have no constituencies.
+- Party on a date comes from parlparse memberships, so any gaps there are gaps here. Committee and role data are as
+  current as mySociety's daily updates.
+- Seats before the 2010 boundaries have no ONS code. They take their region and seat type from the later seat of the
+  same name, or their region from `data_static/geo/pre2010_regions.csv` (117 seats abolished or renamed, with no seat
+  type). Posts of members who left before 2010 come from parlparse's `ministers.json`, and their select committee
+  places from a saved copy of Parliament's records (`data_static/committees_before_2010.json`). Committee pages start
+  in 2010.
+- Sixteen MPs of 1997 to 2010 could not be matched safely to Parliament's records, so their pages show no election
+  results.
+- About 110 members since 2010, mostly peers, have no recorded date of birth and are left out of groupings by age.
+- Of Public Whip's 1,273 divisions of 1997 to 2001, about 1,165 are matched to the result printed in Hansard. The
+  rest keep Public Whip's title and link to the day.

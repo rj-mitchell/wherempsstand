@@ -1,0 +1,73 @@
+# Where MPs Stand on a single server: the app plus Caddy for automatic HTTPS. Caddy is also the front door for the
+# charity's other sites on this server (SITES in .env), each in its own folder under /opt with its own containers.
+# Usage (from this directory): cp .env.example .env && edit, then
+#   docker compose up -d --build
+
+# Logs are capped (three files of 10 MB per container) so they never fill the disk.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  app:
+    build:
+      context: ..
+    env_file: .env
+    logging: *logging
+    volumes:
+      - hansard-data:/data
+      # daily backups land here on the server itself (/opt/hansardgpt/deploy/backups), easy to copy off
+      - ./backups:/backups
+    restart: unless-stopped
+    # No memory limit yet, unlike the other sites on this server: there are no measurements to set one from. The
+    # monthly disk and memory report (deploy/disk-report.sh) gives each container's use; once a few months of it,
+    # and a sync watched with docker stats, show this site's peak, set about 1.5 times that here and remove the #
+    # (docs/HOSTING.md, "Disk space"). An update's one-off container gets the same limit again.
+    # mem_limit: <peak x 1.5>g
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      # A start is given ten minutes before a check that fails counts against it: the search models are loaded
+      # first, and a first start on a version that moves the state database copies the file and brings its rows
+      # across before the site answers (3 seconds for 430 MB on a test machine, so room for some 9 GB at a tenth
+      # of that speed). Until then the site is "starting", and the watchdog leaves it alone. A site that answers
+      # sooner is healthy at once. deploy/update.sh waits as long.
+      start_period: 10m
+
+  caddy:
+    image: caddy:2.11.7
+    logging: *logging
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+      REDIRECT_DOMAINS: ${REDIRECT_DOMAINS:?set REDIRECT_DOMAINS in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # this server's own settings for Caddy: Cloudflare's addresses and, behind Cloudflare, its certificate
+      - ./local:/etc/caddy/local:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - default
+      # the other sites' containers join this network too, so Caddy can pass their visitors on
+      - sites
+    depends_on:
+      - app
+    restart: unless-stopped
+
+networks:
+  sites:
+    external: true  # made by update.sh and provision.sh: docker network create sites
+
+volumes:
+  hansard-data:
+  caddy-data:
+  caddy-config:

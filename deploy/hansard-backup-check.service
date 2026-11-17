@@ -1,0 +1,15 @@
+# Checks each morning that the nightly backup and its off-site copy are still being made (hansard backup-check: what
+# the admin page says of them). Ends with status 1 when either has stopped, so the alert email is sent. Installed by
+# deploy/update.sh with hansard-backup-check.timer (docs/OPERATIONS.md, "Backups").
+[Unit]
+Description=Where MPs Stand: check that backups are being made
+After=docker.service
+Requires=docker.service
+OnFailure=alert@%n.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hansardgpt/deploy
+ExecStart=/usr/bin/docker compose run --rm --no-deps -T app hansard backup-check --in /backups
+TimeoutStartSec=10min
+Nice=10

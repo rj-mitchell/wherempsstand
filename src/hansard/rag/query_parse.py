@@ -1,0 +1,609 @@
+"""Turn a plain-English question into structured, user-editable search filters.
+
+This is the only model-driven step before retrieval. Its output is shown in
+the UI as filter chips the user can remove or change; retrieval itself is
+deterministic. Without an API key, :func:`parse_offline` applies simple rules.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import re
+from dataclasses import dataclass, field
+from datetime import date
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field
+from wts_core.ports import ModelClient, ModelRequest, Usage
+
+from hansard.engine import Filters
+from hansard.reference.portfolios import PORTFOLIOS, portfolios_for_query
+from hansard.sources.demographics import AGE_BANDS
+from hansard.sources.elections import RUNNER_UP_NAME
+
+AGE_BAND_KEYS = [k for k, *_ in AGE_BANDS]
+GROUP_BY_KEYS = ("role", "gender", "age", "tenure", "majority", "runner_up", "group")
+
+log = logging.getLogger(__name__)
+
+ITL1_REGIONS = [
+    "North East", "North West", "Yorkshire and The Humber", "East Midlands", "West Midlands",
+    "East of England", "London", "South East", "South West", "Scotland", "Wales", "Northern Ireland",
+]
+Region = Literal["North East", "North West", "Yorkshire and The Humber", "East Midlands", "West Midlands",
+                 "East of England", "London", "South East", "South West", "Scotland", "Wales", "Northern Ireland"]
+Office = Literal["gov", "shadow", "chair", "backbench"]
+House = Literal["commons", "lords"]
+Gender = Literal["F", "M"]
+AgeBand = Literal["under-40", "40-54", "55-69", "70-plus"]
+GroupBy = Literal["role", "gender", "age", "tenure", "majority", "runner_up", "group"]
+Tenure = Literal["first-term", "returning"]
+MajorityBand = Literal["marginal", "middle", "safe"]
+SeatType = Literal["city", "town", "rural"]
+SEAT_TYPES = ("city", "town", "rural")
+
+
+class ParsedQuery(BaseModel):
+    """Schema the model fills in (structured output)."""
+
+    search_text: str = Field(description="Keywords for retrieval in UK parliamentary vocabulary")
+    date_from: str | None = Field(description="YYYY-MM-DD or null")
+    date_to: str | None = Field(description="YYYY-MM-DD or null")
+    houses: list[House]
+    regions: list[Region]
+    parties: list[str]
+    speakers: list[str]
+    offices: list[Office]
+    genders: list[Gender]
+    age_bands: list[AgeBand]
+    tenure: list[Tenure]
+    majority_bands: list[MajorityBand]
+    seat_types: list[SeatType] = Field(default_factory=list)
+    runner_up_parties: list[str] = Field(default_factory=list,
+                                         description="Party ids that came second in the MP's seat at the last election")
+    groups: list[str] = Field(default_factory=list, description="Party group ids (caucuses within a party)")
+    group_by: GroupBy
+    portfolios: list[str]
+    wants_votes: bool
+    interpretation: str = Field(description="One sentence: how the question was interpreted")
+
+
+@dataclass
+class QueryPlan:
+    question: str
+    search_text: str
+    filters: Filters
+    portfolios: list[str] = field(default_factory=list)
+    wants_votes: bool = False
+    speakers: list[dict[str, str]] = field(default_factory=list)  # resolved {"person_id", "name"}
+    unresolved_speakers: list[str] = field(default_factory=list)
+    interpretation: str = ""
+    parser: str = "offline"
+    group_by: str = "role"   # how the briefing groups speakers: role (default), gender or age on the day
+    parse_error: str | None = None  # set when the model could not be used and offline rules were (not shown to readers)
+    compare: list[dict[str, str]] = field(default_factory=list)  # sides compared: {"kind", "id", "label"}
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "question": self.question,
+            "search_text": self.search_text,
+            "filters": self.filters.as_dict(),
+            "portfolios": self.portfolios,
+            "wants_votes": self.wants_votes,
+            "speakers": self.speakers,
+            "unresolved_speakers": self.unresolved_speakers,
+            "interpretation": self.interpretation,
+            "parser": self.parser,
+            "group_by": self.group_by,
+            "compare": self.compare,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> QueryPlan:
+        """A plan as the browser sends it back (the reader may have edited it): every list and text is bounded, so
+        an oversized plan cannot become an oversized search or prompt."""
+        f = d.get("filters") or {}
+
+        def few(v: Any, n: int = 50) -> list[Any]:
+            return [str(x)[:200] for x in (v if isinstance(v, list) else [])[:n]]
+
+        filters = Filters(
+            date_from=_iso(f.get("date_from")), date_to=_iso(f.get("date_to")),
+            houses=few(f.get("houses")), regions=few(f.get("regions")),
+            parties=few(f.get("parties")), person_ids=few(f.get("person_ids")),
+            offices=few(f.get("offices")), record_types=few(f.get("record_types")),
+            genders=[g for g in f.get("genders") or [] if g in ("F", "M")],
+            age_bands=[b for b in f.get("age_bands") or [] if b in AGE_BAND_KEYS],
+            tenure=[t for t in f.get("tenure") or [] if t in ("first-term", "returning")],
+            majority_bands=[b for b in f.get("majority_bands") or [] if b in ("marginal", "middle", "safe")],
+            seat_types=[t for t in f.get("seat_types") or [] if t in SEAT_TYPES],
+            runner_up_parties=[x for x in few(f.get("runner_up_parties"), 20) if _PARTY_ID.fullmatch(x)],
+            groups=[x for x in few(f.get("groups"), 20) if _PARTY_ID.fullmatch(x)],
+        )
+        speakers = [{k: str(v)[:200] for k, v in x.items()} for x in (d.get("speakers") or [])[:10]
+                    if isinstance(x, dict)]
+        return cls(question=str(d.get("question", ""))[:2000],
+                   search_text=str(d.get("search_text") or d.get("question", ""))[:1000],
+                   filters=filters, portfolios=few(d.get("portfolios")),
+                   wants_votes=bool(d.get("wants_votes")), speakers=speakers,
+                   interpretation=str(d.get("interpretation", ""))[:1000], parser=str(d.get("parser", "edited"))[:20],
+                   group_by=d.get("group_by") if d.get("group_by") in GROUP_BY_KEYS else "role",
+                   compare=[{k: str(x.get(k, ""))[:200] for k in ("kind", "id", "label")}
+                            for x in d.get("compare") or [] if isinstance(x, dict)][:3])
+
+
+_PARTY_ID = re.compile(r"[a-z0-9][a-z0-9-]{0,59}")
+
+
+def _iso(v: Any) -> date | None:
+    if not v:
+        return None
+    try:
+        return date.fromisoformat(str(v)[:10])
+    except ValueError:
+        return None
+
+
+# offline rules
+
+_YEAR = r"(19\d\d|20\d\d)"
+
+
+def _dates(q: str, today: date) -> tuple[date | None, date | None]:
+    ql = q.lower()
+    if m := re.search(rf"between {_YEAR} and {_YEAR}", ql) or re.search(rf"{_YEAR}\s*(?:-|–|to|until)\s*{_YEAR}", ql):
+        a, b = sorted(int(x) for x in m.groups())
+        return date(a, 1, 1), date(b, 12, 31)
+    if m := re.search(rf"(?:since|after|from) {_YEAR}", ql):
+        return date(int(m.group(1)), 1, 1), None
+    if m := re.search(rf"before {_YEAR}", ql):
+        return None, date(int(m.group(1)) - 1, 12, 31)
+    if m := re.search(rf"\bin {_YEAR}\b", ql):
+        y = int(m.group(1))
+        return date(y, 1, 1), date(y, 12, 31)
+    if "last year" in ql:
+        return date(today.year - 1, 1, 1), date(today.year - 1, 12, 31)
+    if "this year" in ql:
+        return date(today.year, 1, 1), None
+    return None, None
+
+
+_FILTER_WORDS = set(["how", "have", "has", "had", "did", "do", "does", "what", "which", "who", "whom", "whose", "when", "where", "why", "is", "are", "was", "were", "be", "been", "being", "the", "a", "an", "of", "to", "in", "on", "for", "by", "with", "about", "from", "at", "as", "and", "or", "not", "any", "all", "this", "that", "these", "those", "there", "their", "they", "them", "it", "its", "into", "over", "under", "between", "since", "before", "after", "during", "until", "than", "then", "so", "such", "said", "say", "says", "saying", "stated", "mps", "mp", "members", "member", "ministers", "minister", "government", "governments", "lords", "lord", "peers", "peer", "commons", "house", "parliament", "parliamentary", "shadow", "backbench", "backbenchers", "backbencher", "chairs", "chair", "committee", "committees", "northern", "southern", "midlands", "north", "south", "east", "west", "party", "parties", "labour", "conservative", "conservatives", "tory", "tories", "liberal", "democrat", "democrats", "snp", "year", "years", "last", "this"])
+
+
+_PARTY_WORDS = [
+    ("labour", r"\blabour\b"),
+    ("conservative", r"\bconservatives?\b|\btor(y|ies)\b"),
+    ("liberal-democrat", r"\blib(eral)? ?dem(ocrat)?s?\b"),
+    ("scottish-national-party", r"\bsnp\b|scottish national"),
+    ("reform", r"\breform uk\b|\breform (mps|party)\b"),
+    ("plaid-cymru", r"\bplaid\b"),
+    ("dup", r"\bdup\b"),
+]
+
+
+_WHO = r"(?:mps|members|peers|ministers|politicians|parliamentarians|backbenchers|speakers)"
+
+
+def demographic_rules(ql: str) -> tuple[list[str], list[str], str]:
+    """Gender and age filters, and grouping, from plain words. A topic ("women's health") is not a filter."""
+    genders: list[str] = []
+    if re.search(rf"\b(women|female) {_WHO}\b", ql):
+        genders.append("F")
+    if re.search(rf"\b(men|male) {_WHO}\b", ql) and not re.search(r"\b(women|female) and (men|male)\b", ql):
+        genders.append("M")
+    bands: list[str] = []
+    if re.search(rf"\b(younger|young) {_WHO}\b|\bunder (the age of )?40\b", ql):
+        bands.append("under-40")
+    if re.search(rf"\b(older|oldest) {_WHO}\b|\b(over|aged) 70\b", ql):
+        bands.append("70-plus")
+    group_by = "role"
+    if re.search(r"\bby (gender|sex)\b|\b(women|female) and (men|male)\b|\b(men|male) and (women|female)\b|"
+                 r"\bgender (split|divide|gap|differences?)\b", ql):
+        group_by, genders = "gender", []
+    elif re.search(r"\bby age\b|\b(younger|young) and older\b|\bolder and younger\b|\bage (gap|groups?|divide)\b",
+                   ql):
+        group_by, bands = "age", []
+    return genders, bands, group_by
+
+
+def seat_rules(ql: str) -> tuple[list[str], list[str], str | None]:
+    """First-term / marginal-seat filters and grouping from plain words."""
+    tenure: list[str] = []
+    if re.search(rf"\b(new|newly[- ]elected|first[- ]term|new intake of) {_WHO}\b|\b20\d\d intake\b", ql):
+        tenure.append("first-term")
+    majority: list[str] = []
+    if re.search(r"\bmarginal (seats?|constituenc)", ql):
+        majority.append("marginal")
+    if re.search(r"\bsafe (seats?|constituenc)", ql):
+        majority.append("safe")
+    group = None
+    if re.search(r"\bmarginal and safe\b|\bsafe and marginal\b|\bby majority\b", ql):
+        group, majority = "majority", []
+    elif re.search(rf"\b(new|first[- ]term) and (long[- ]serving|experienced|returning) {_WHO}\b", ql):
+        group, tenure = "tenure", []
+    return tenure, majority, group
+
+
+def seat_type_rules(ql: str) -> list[str]:
+    """City, town or rural seats, when the question restricts to them (not when it compares them)."""
+    kinds = {k for k, pat in (("city", r"\b(city|cities|urban)\b"), ("town", r"\btowns?\b"),
+                              ("rural", r"\b(rural|countryside|village)\b"))
+             if re.search(rf"{pat}\W+(?:\w+\W+)?(?:seats?|constituenc\w*|mps)\b|\bmps for {pat}", ql)}
+    mentioned = sum(1 for pat in (r"\b(city|cities|urban)\b", r"\btowns?\b", r"\b(rural|countryside|village)\b")
+                    if re.search(pat, ql))
+    if mentioned > 1 and re.search(r"\b(differ\w*|compar\w*|versus|vs|between)\b", ql):
+        return []  # a comparison between kinds of seat: search them all
+    if "urban" in ql and "city" in kinds:
+        kinds.add("town")
+    return [k for k in SEAT_TYPES if k in kinds]
+
+
+# Parties as named when saying who came second in a seat (lower-cased question)
+_SECOND_PARTIES = [
+    ("reform", r"reform(?: uk)?|(?:the )?brexit party"),
+    ("conservative", r"(?:the )?(?:conservatives?|tor(?:y|ies))"),
+    ("labour", r"labour"),
+    ("liberal-democrat", r"(?:the )?lib(?:eral)? ?dem(?:ocrat)?s?"),
+    ("scottish-national-party", r"(?:the )?(?:snp|scottish national(?: party)?)"),
+    ("green", r"(?:the )?greens?(?: party)?"),
+    ("plaid-cymru", r"plaid(?: cymru)?"),
+    ("ukip", r"ukip"),
+    ("independent", r"(?:an )?independents?(?: candidates?)?"),
+]
+_OTHERS = r"(?:others?|other part(?:y|ies)|other challengers|another party|a different party|anyone else|someone else)"
+_SEATS = r"(?:(?:mps )?(?:in |for |with |holding )?(?:(?:the|their) )?(?:seats?|constituenc(?:y|ies)) )?"
+
+
+def _second_phrases(party: str) -> list[str]:
+    """Ways of saying that ``party`` came second (or is "the challenger", or "threatens" a seat): all of them read as the
+    fact that it came second at the last election, never as a judgement about the next one."""
+    return [rf"{_SEATS}(?:where|in which|that) (?:the )?(?:{party}) (?:came|come|comes|were|was|is|are|finished|"
+            rf"placed|ran) (?:a |the )?(?:close )?(?:second|runners?[- ]up|main challengers?|challengers?)",
+            rf"{_SEATS}(?:threatened|challenged|under threat|at risk|targeted) (?:by|from) (?:the )?(?:{party})",
+            rf"(?:{party})[- ](?:facing|threatened|targeted|target|challenged|second[- ]place) "
+            rf"(?:seats?|constituenc(?:y|ies)|mps)",
+            rf"{_SEATS}(?:with|where) (?:the )?(?:{party}) (?:in|as) (?:a |the )?(?:close )?(?:second(?: place)?|"
+            rf"runners?[- ]up|main challengers?)",
+            rf"(?:seats?|constituenc(?:y|ies)|mps) facing (?:a |the )?(?:{party})(?: challenge)?"]
+
+
+_SECOND_RULES = [(pid, re.compile(r"\b(?:" + "|".join(_second_phrases(pat)) + r")\b")) for pid, pat in _SECOND_PARTIES]
+_SECOND_OTHERS = re.compile(r"\b(?:" + "|".join(_second_phrases(_OTHERS)) + r")\b")
+_BY_RUNNER_UP = r"\bby (?:the )?(?:runners?[- ]up|second[- ]placed? party|challengers?|party (?:that|which|who) came second)\b"
+_SECOND_ANY = re.compile(r"\b(?:" + "|".join(_second_phrases("|".join(p for _, p in _SECOND_PARTIES) + "|" + _OTHERS))
+                         + r")\b|" + _BY_RUNNER_UP, re.I)
+
+
+def runner_up_rules(ql: str) -> tuple[list[str], bool]:
+    """Seats where a named party came second at the last election ("where Reform came second", "Reform-facing seats",
+    "seats threatened by Reform"): those parties, or, when the question sets them against others or against each other,
+    grouping by runner-up instead (True). Wording about threats is read as the fact of second place only."""
+    parties = [pid for pid, rule in _SECOND_RULES if rule.search(ql)]
+    by_runner_up = bool(re.search(_BY_RUNNER_UP, ql))
+    if parties and (_SECOND_OTHERS.search(ql) or (len(parties) > 1 and re.search(
+            r"\b(differ\w*|compar\w*|versus|vs|than|between|contrast\w*)\b", ql))):
+        by_runner_up = True
+    if by_runner_up:
+        return [], True
+    return parties, False
+
+
+_COMPARE = r"\b(differ\w*|compar\w*|versus|vs|than|between|contrast\w*)\b"
+
+
+def group_patterns(groups: dict[str, list[str]]) -> dict[str, re.Pattern[str]]:
+    """How a question names each party group: its names; initials and one-word names only as written ("ERG",
+    "Mainstream", not "the mainstream media")."""
+    out = {}
+    for gid, names in groups.items():
+        alts = [f"(?-i:{re.escape(n)})" if " " not in n else re.escape(n) for n in names]
+        out[gid] = re.compile(r"\b(?:the\s+)?(?:" + "|".join(alts) + r")\b(?:\s+(?:members|mps|caucus))?", re.I)
+    return out
+
+
+def group_rules(question: str, groups: dict[str, list[str]] | None) -> tuple[list[str], bool, str]:
+    """Party groups named in a question: (the groups to search, whether to group by them, the question without
+    their names). Two or more groups compared: those groups, grouped. One group compared with other members ("how do
+    SCG members differ from other Labour MPs"): every group, grouped. Otherwise: members of the groups named."""
+    found, rest = [], question
+    for gid, pattern in group_patterns(groups or {}).items():
+        if pattern.search(rest):
+            found.append(gid)
+            rest = pattern.sub(" ", rest)
+    ql = question.lower()
+    compared = re.search(_COMPARE, ql)
+    if len(found) >= 2 and compared:
+        return found, True, rest
+    if len(found) == 1 and compared and re.search(r"\b(other|others|rest of|everyone else|non-members?)\b", ql):
+        return [], True, rest
+    return found, False, rest
+
+
+_DEMOGRAPHIC_PHRASES = re.compile(
+    rf"\b(?:(?:women|female|men|male|younger|young|older|oldest|new|newly[- ]elected|first[- ]term)"
+    rf"(?: and (?:women|female|men|male|older|younger|long[- ]serving|experienced|returning))? "
+    rf"{_WHO}|under (?:the age of )?40|(?:over|aged) 70|by (?:gender|sex|age)|"
+    rf"(?:gender|age) (?:split|divide|gap|groups?|differences?)|(?:marginal|safe)(?: and (?:marginal|safe))? "
+    rf"(?:seats?|constituencies)|20\d\d intake|by majority|(?:mps for )?(?:city|town|rural|urban|countryside) (?:seats?|constituencies|mps))\b", re.I)
+
+
+def topic_words(question: str) -> str:
+    """Retrieval words: drop question words, filter words and years (they become filters)."""
+    words = re.findall(r"[A-Za-z0-9][A-Za-z0-9'-]*", question)
+    keep = [w for w in words if w.lower() not in _FILTER_WORDS and not re.fullmatch(r"(19|20)\d\d", w)]
+    return " ".join(keep)
+
+
+def parse_offline(question: str, region_groups: dict[str, list[str]], today: date | None = None,
+                  groups: dict[str, list[str]] | None = None) -> QueryPlan:
+    """``groups``: the party groups a reader can choose (id -> names), from ``hansard.groups.Groups.aliases``."""
+    today = today or date.today()
+    group_ids, by_group, unnamed = group_rules(question, groups)
+    ql = unnamed.lower()
+    date_from, date_to = _dates(question, today)
+    regions: list[str] = []
+    for group, members in region_groups.items():
+        stem = group.rstrip("s").replace("_", " ")
+        if re.search(rf"\b{re.escape(stem)}", ql):
+            regions.extend(members)
+    for r in ITL1_REGIONS:
+        if r.lower() in ql and r not in regions:
+            regions.append(r)
+    houses: list[str] = []
+    if re.search(r"\blords\b|\bpeers?\b", ql):
+        houses.append("lords")
+    if re.search(r"\bmps\b|\bcommons\b", ql) or regions:
+        houses.append("commons")
+    offices: list[str] = []
+    if re.search(r"\bshadow\b", ql):
+        offices.append("shadow")
+    elif re.search(r"\bministers?\b|\bgovernment\b", ql):
+        offices.append("gov")
+    if re.search(r"committee chairs?|chairs? of", ql):
+        offices.append("chair")
+    if re.search(r"backbench", ql):
+        offices.append("backbench")
+    wants_votes = bool(re.search(r"\bvot(e|ed|es|ing)\b|dissent|rebel|divisions?\b", ql))
+    genders, age_bands, group_by = demographic_rules(ql)
+    tenure, majority_bands, seat_group = seat_rules(ql)
+    group_by = seat_group or group_by
+    seat_types = seat_type_rules(ql)
+    runner_up_parties, by_runner_up = runner_up_rules(ql)
+    if by_runner_up:
+        group_by = "runner_up"
+    if by_group:
+        group_by = "group"
+    if tenure or majority_bands or seat_group or seat_types or runner_up_parties or by_runner_up:
+        houses.append("commons")
+    # the party that came second is not the speakers' party: "Labour MPs where Reform came second" is about Labour MPs
+    speaking = _SECOND_ANY.sub(" ", ql)
+    parties = [pid for pid, pattern in _PARTY_WORDS if re.search(pattern, speaking)]
+    topic = _SECOND_ANY.sub(" ", _DEMOGRAPHIC_PHRASES.sub(" ", unnamed))
+    return QueryPlan(
+        question=question,
+        search_text=topic_words(topic) or question,
+        filters=Filters(date_from=date_from, date_to=date_to, houses=sorted(set(houses)) if len(set(houses)) == 1 else [],
+                        regions=regions, offices=offices, parties=parties, genders=genders, age_bands=age_bands,
+                        tenure=tenure, majority_bands=majority_bands, seat_types=seat_types,
+                        runner_up_parties=runner_up_parties, groups=group_ids),
+        portfolios=list(portfolios_for_query(topic)),
+        wants_votes=wants_votes,
+        interpretation="Interpreted with offline rules (no language model).",
+        parser="offline",
+        group_by=group_by,
+    )
+
+
+# model-based
+
+
+def system_prompt(region_groups: dict[str, list[str]], parties: list[tuple[str, str]], today: date,
+                  start: date = date(1997, 5, 1), party_groups: list[tuple[str, str]] | None = None) -> str:
+    groups = "\n".join(f"- {k}: {', '.join(v)}" for k, v in region_groups.items())
+    group_list = ", ".join(f"{gid} ({name})" for gid, name in party_groups or []) or "none"
+    ports = "\n".join(f"- {k}: {v}" for k, v in PORTFOLIOS.items())
+    party_list = ", ".join(f"{pid} ({name})" for pid, name in parties)
+    return f"""You convert research questions about the UK Parliament into search filters for a Hansard search engine.
+Today's date is {today.isoformat()}. The archive covers {start:%B %Y} to today.
+
+Rules:
+- Only set a filter when the question clearly asks for it. Never invent constraints.
+- search_text: the topic, rewritten in the vocabulary used in Hansard. Translate non-UK or informal terms
+  (e.g. "zoning" -> "planning, land use", "cops" -> "police") and add close UK synonyms. Leave out words that
+  only express filters (dates, regions, party, "ministers").
+- date_from/date_to: ISO dates for explicit or clearly implied periods ("between 2018 and 2022" ->
+  2018-01-01 to 2022-12-31; "since the 2024 election" -> 2024-07-04). A bare year is the calendar year: "since
+  2024" and "from 2024" -> 2024-01-01; use an election date only when the question mentions the election.
+- houses: "commons" for MPs/House of Commons/constituencies, "lords" for peers/House of Lords.
+- regions: ITL1 regions, only for questions about where MPs' seats are, listed individually by name. A named group
+  stands for all its regions, so list each of them:
+{groups}
+  Choose exactly the places asked about: "Scottish MPs" -> ["Scotland"], "Welsh MPs" -> ["Wales"].
+  Region filters apply to MPs only (peers have no constituency), so also set houses to ["commons"].
+- parties: party ids from this list: {party_list}
+- speakers: full names of specific people the question asks about, as written.
+- offices: "gov" for government ministers, "shadow" for opposition frontbenchers, "chair" for select committee
+  chairs, "backbench" for backbenchers - only when the question restricts who is speaking.
+- genders: "F" (women) and/or "M" (men), only when the question restricts speakers by gender ("female MPs").
+  A topic about women or men ("women's health", "men's mental health") is never a gender filter.
+- age_bands: speakers' age on the date they spoke: "under-40", "40-54", "55-69", "70-plus". Only when the
+  question restricts speakers by age ("younger MPs" -> ["under-40"], "MPs over 70" -> ["70-plus"]).
+- tenure: MPs' length of service on the date they spoke: "first-term" (newly elected: still in the Parliament they
+  were first elected to, e.g. "new MPs", "the 2024 intake") or "returning" (re-elected at least once). Only when the
+  question restricts speakers this way; it also implies houses ["commons"].
+- majority_bands: the MP's majority at the time they spoke, as a share of votes cast: "marginal" (under 10%),
+  "middle" (10% to 20%), "safe" (over 20%). Only when the question restricts to marginal or safe seats; it also
+  implies houses ["commons"].
+- seat_types: the kind of place an MP's seat is, by the size of its main urban area (not official city status):
+  "city" (an urban area of about 200,000 people or more), "town" (a smaller one), "rural" (mostly outside towns of
+  10,000+). Only when the question restricts speakers to one or two kinds ("MPs for town seats" -> ["town"],
+  "rural MPs" -> ["rural"], "urban MPs" -> ["city", "town"]); it also implies houses ["commons"]. When the question
+  compares kinds of seat ("where do rural and city MPs differ"), leave it empty so every kind is searched.
+- runner_up_parties: party ids (from the parties list; "independent" for independent candidates) of the party that
+  came second in the MP's seat at the most recent election before the day they spoke. Set it when the question limits
+  speakers to seats where a party came second or is the main challenger, however it is put: "seats where Reform came
+  second", "Reform-facing seats", "seats threatened by Reform", "Reform target seats", "where the Lib Dems are the
+  challengers" -> ["reform"] or ["liberal-democrat"]. The Brexit Party is Reform UK under its earlier name: "reform".
+  This is only the fact of second place at the last election: never judge which seats are threatened, at risk or
+  targets, never use polls or projections, and never add majority_bands unless the question also asks about marginal
+  or safe seats or the size of majorities. It also implies houses ["commons"]. In the interpretation, describe it as
+  the fact ("MPs in seats where Reform UK came second at the last election"), never as a threat.
+- groups: party groups and caucuses within a party, by id from this list: {group_list}. Set it when the question limits
+  speakers to members of a group ("members of the Socialist Campaign Group", "ERG MPs"). Membership is on published
+  evidence only (the group's lists, letters members signed, their own statements in Parliament), so say "members of
+  ... on the published evidence" in the interpretation. A group not in the list is a search topic, never a filter. A
+  group's name is never a parties filter ("Labour Growth Group MPs" is not a Labour filter unless the question also
+  asks for Labour MPs).
+- group_by: "gender" if the question asks how women and men differ, "age" if it asks how views differ by age,
+  "tenure" if it compares new and long-serving MPs, "majority" if it compares MPs in marginal and safe seats,
+  "runner_up" if it compares MPs by which party came second in their seats ("Labour MPs where Reform came second
+  compared with those where others came second", "seats threatened by Reform versus by the Conservatives"), "group"
+  if it compares party groups ("how does the Labour Growth Group differ from Tribune": groups set to both, so only
+  their members are searched; "how do SCG members differ from other Labour MPs": groups left empty);
+  otherwise "role" (the default: ministers, opposition, backbenchers by seat type). When grouping by one of these,
+  leave the matching filter empty so every group is searched. The party that came second is never a parties filter:
+  "Labour MPs where Reform came second" sets parties ["labour"] and runner_up_parties ["reform"].
+- portfolios: the policy areas the question is about (used to boost relevant ministers, not to filter):
+{ports}
+- wants_votes: true if the question is about how members voted, rebellions, dissent or divisions.
+- Follow-up questions: when earlier questions are given and the new one builds on the last of them ("what about
+  the Lords?", "and since 2024?", "how did they vote?", "which Labour MPs?"), keep the earlier topic and filters
+  and change only what the follow-up changes: search_text keeps the earlier topic, and a new filter replaces the
+  one it contradicts ("what about the Lords?" after a question about MPs sets houses to ["lords"] and drops
+  MP-only filters such as regions). A follow-up that names something within the earlier topic, or mentioned in
+  the earlier answer ("what about the break clause?", "and the cost?", "what did Wrigley say?"), narrows it:
+  search_text is the earlier topic plus that thing ("Palantir NHS contract break clause"), never the new words
+  alone. A question on a new subject starts afresh.
+- interpretation: one plain sentence describing the filters you chose, in British English (British spelling,
+  dates written as 9 October 2026)."""
+
+
+def expand_regions(names: list[str], groups: dict[str, list[str]]) -> list[str]:
+    """ITL1 region names, in the standard order; a named group ("northern") becomes its regions."""
+    lower = {r.lower(): r for r in ITL1_REGIONS}
+    out: set[str] = set()
+    for n in names:
+        key = n.strip()
+        group = groups.get(key) or groups.get(key.lower().replace(" ", "_"))
+        out.update(group or ([lower[key.lower()]] if key.lower() in lower else []))
+    return [r for r in ITL1_REGIONS if r in out]
+
+
+def _open_end(d: date | None, today: date) -> date | None:
+    """An end date of today or later is the same as no end date (and reads better as a filter)."""
+    return None if d is not None and d >= today else d
+
+
+def parse_model(settings) -> str:
+    return settings.answer.get("query_parse_model") or settings.answer.get("model", "claude-sonnet-5-5")
+
+
+def parse_with_model(client: ModelClient, settings, question: str, history: list[dict[str, str]] | None,
+                     parties: list[tuple[str, str]], today: date | None = None,
+                     party_groups: list[tuple[str, str]] | None = None) -> tuple[QueryPlan, Usage]:
+    """The question as the model reads it, and what the reading cost. A refusal, or an answer with nothing in it,
+    raises (the shared model client's ``structured``), and the caller falls back to the built-in rules."""
+    today = today or date.today()
+    convo = ""
+    if history:
+        convo = ("Earlier questions in this conversation, oldest first, with what each searched for (for resolving "
+                 "follow-ups like 'what about the Lords?'):\n")
+        convo += "\n".join(f"- {h['question']}" + (f" [searched for: {h['topic']}" + (f"; {h['scope']}" if h.get("scope") else "")
+                                                   + "]" if h.get("topic") else "")
+                           for h in history[-4:]) + "\n\n"
+        last = (history[-1].get("answer") or "").strip()
+        if last:  # what the follow-up may refer to ("the break clause") is often named only in the answer
+            convo += f"The start of the answer to the last of them:\n{last[:800]}\n\n"
+    request = ModelRequest(
+        model=parse_model(settings), max_tokens=2000,
+        instructions=system_prompt(settings.regions, parties, today, settings.archive_start, party_groups),
+        question=f"{convo}Question: {question}", effort=settings.answer.get("query_parse_effort", "low"),
+        cache_instructions=settings.answer.get("cache_instructions", "short"))
+    p, usage = client.structured(request, ParsedQuery)
+    known_ports = set(PORTFOLIOS)
+    known_parties = {pid for pid, _ in parties}
+    plan = QueryPlan(
+        question=question,
+        search_text=p.search_text.strip() or question,
+        filters=Filters(
+            date_from=_iso(p.date_from), date_to=_open_end(_iso(p.date_to), today),
+            houses=sorted(set(p.houses)), regions=expand_regions(p.regions, settings.regions),
+            parties=[x for x in p.parties if x in known_parties], offices=sorted(set(p.offices)),
+            genders=sorted(set(p.genders)) if p.group_by != "gender" else [],
+            age_bands=[b for b in AGE_BAND_KEYS if b in p.age_bands] if p.group_by != "age" else [],
+            tenure=sorted(set(p.tenure)) if p.group_by != "tenure" else [],
+            majority_bands=[b for b in ("marginal", "middle", "safe") if b in p.majority_bands]
+            if p.group_by != "majority" else [],
+            seat_types=[t for t in SEAT_TYPES if t in p.seat_types],
+            runner_up_parties=[x for x in dict.fromkeys(p.runner_up_parties)
+                               if x in known_parties or x in RUNNER_UP_NAME] if p.group_by != "runner_up" else [],
+            groups=[x for x in dict.fromkeys(p.groups) if x in {g for g, _ in party_groups or []}],
+        ),
+        portfolios=[x for x in p.portfolios if x in known_ports],
+        wants_votes=p.wants_votes,
+        interpretation=p.interpretation,
+        parser="model",
+        group_by=p.group_by,
+    )
+    plan.unresolved_speakers = list(p.speakers)
+    plan.filters.date_from = year_start(question, plan.filters.date_from)
+    return plan, usage
+
+
+def year_start(question: str, date_from: date | None) -> date | None:
+    """"Since 2024" means from 1 January 2024, not from the general election that year, unless the question
+    mentions an election."""
+    m = re.search(r"\b(?:since|from|after|starting in|beginning in)\s+(?:the\s+(?:start|beginning)\s+of\s+)?((?:19|20)\d\d)\b",
+                  question, re.I)
+    if not m or re.search(r"\belection\b", question, re.I):
+        return date_from
+    year = int(m.group(1))
+    if date_from is None or date_from.year == year:
+        return date(year, 1, 1)
+    return date_from
+
+
+def resolve_speakers(resolver_con, names: list[str], f: Filters) -> tuple[list[dict[str, str]], list[str]]:
+    """Map names the user mentioned to person ids. Every word of the name must be a word of the member's name (a
+    first name may be a short form: "Ed Davey" is Edward Davey; "Benn" is Hilary Benn, not Andrew Bennett). Among
+    several, a full-name match comes first, then people who sat in the dates asked about (or lately), then the
+    better known (government posts count most, then shadow posts, then committee chairs)."""
+    from hansard.sources.donations import _same_first
+
+    found, missing = [], []
+    lo, hi = f.date_from or date(1997, 5, 1), f.date_to or date.today()
+    for name in names:
+        want = re.findall(r"[\w'’-]+", name.lower())
+        if not want:
+            missing.append(name)
+            continue
+        rows = resolver_con.execute(
+            """SELECT n.person_id, n.name,
+                      (SELECT max(m."end") FROM ref_memberships m WHERE m.person_id = n.person_id) AS last_sat,
+                      EXISTS (SELECT 1 FROM ref_memberships m WHERE m.person_id = n.person_id
+                              AND m.start <= ? AND m."end" >= ?) AS sat_then,
+                      (SELECT coalesce(sum(CASE o.kind WHEN 'gov' THEN 3 WHEN 'shadow' THEN 2 WHEN 'chair' THEN 1
+                                            ELSE 0 END), 0)
+                       FROM ref_offices o WHERE o.person_id = n.person_id) AS posts
+               FROM ref_names n WHERE lower(n.name) LIKE '%' || ? || '%'
+               GROUP BY n.person_id, n.name LIMIT 500""", [hi, lo, want[-1]]).fetchall()
+
+        def matches(row: tuple, want: list[str] = want) -> bool:
+            words = re.findall(r"[\w'’-]+", row[1].lower())
+            if want[-1] not in words:
+                return False
+            return all(any(w == x or _same_first(w, x) for x in words) for w in want[:-1])
+
+        rows = [r for r in rows if matches(r)]
+        if not rows:
+            missing.append(name)
+            continue
+        best = max(rows, key=lambda r: (r[1].lower() == name.lower(), r[3], r[4], r[2] or date.min))
+        found.append({"person_id": best[0], "name": best[1], "query": name})
+    return found, missing
+
+
+def plan_json(plan: QueryPlan) -> str:
+    return json.dumps(plan.to_dict(), default=str)

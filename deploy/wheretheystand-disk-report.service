@@ -1,0 +1,13 @@
+# Email the alerts address a monthly report on where the disk is going (deploy/disk-report.sh). Serves every site
+# on this server. Installed by deploy/update.sh.
+[Unit]
+Description=Email the monthly disk report
+After=docker.service
+OnFailure=alert@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/hansardgpt/deploy/disk-report.sh
+TimeoutStartSec=1h
+Nice=10
+IOSchedulingClass=idle

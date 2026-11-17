@@ -1,0 +1,231 @@
+# Where MPs Stand settings. Paths are relative to the repository root unless absolute.
+# Environment overrides: HANSARD_DATA_DIR, HANSARD_CONFIG, ANTHROPIC_API_KEY.
+
+[paths]
+data_dir = "data"
+
+[archive]
+# From the 1997 general election. Seats before the 2010 boundaries take their region from the
+# same-named later seat or data_static/geo/pre2010_regions.csv; posts held by people who left
+# before 2010 come from parlparse's ministers.json. Some record types start later (the Lords
+# from November 1999, Westminster Hall 2000, written answers 2001, written statements 2002).
+start_date = "1997-05-01"
+# TheyWorkForYou scrapedxml directories to ingest.
+record_dirs = ["debates", "westminhall", "lordspages", "wrans", "lordswrans", "wms", "lordswms", "standing"]
+
+[sources]
+twfy_rsync = "data.theyworkforyou.com::parldata/scrapedxml"
+twfy_https = "https://www.theyworkforyou.com/pwdata/scrapedxml"
+# Store the raw Hansard files gzipped (about a quarter of the size; docs/DECISIONS.md, 25), fetched over HTTPS. Set to
+# false for a full uncompressed mirror by rsync (TheyWorkForYou's own method), when port 873 is reachable.
+compress_raw_xml = true
+parlparse_repo = "https://github.com/mysociety/parlparse"
+parlparse_branch = "master"
+
+[regions]
+# Named groups the query parser can use ("northern MPs" -> northern).
+northern = ["North East", "North West", "Yorkshire and The Humber"]
+midlands = ["East Midlands", "West Midlands"]
+southern = ["London", "South East", "South West", "East of England"]
+devolved_nations = ["Scotland", "Wales", "Northern Ireland"]
+
+[ranking]
+candidates_bm25 = 300
+candidates_vector = 300
+candidates_frontbench = 100  # also searched alone: the subject's shadow ministers, and its ministers and chairs
+# Meaning search. The index compares compressed vectors and on its own finds only about two thirds of the truly
+# nearest passages; re-checking 5x the candidates against the full vectors finds over 90% (measured on 14 sample
+# searches) for a few milliseconds more. vector_nprobes is how many index partitions each search reads (LanceDB's
+# default is 20). `hansard reindex-vectors` rebuilds the index for the current number of vectors, measures both
+# settings against an exact search and saves the fastest that finds as much as the best.
+vector_refine_factor = 5
+# vector_nprobes = 20
+# Weight of normalised BM25 vs cosine similarity in the relevance score.
+bm25_weight = 0.5
+# Recency factor = floor + (1 - floor) * 0.5 ** (age_years / half_life).
+# Slider s in [0, 1]: s = 0 disables decay; otherwise half_life = min_half_life_years / s.
+# The shortest half-life is 6 months and the default 2 years (docs/DECISIONS.md, 27), so recent contributions lead
+# by default, and more when a reader asks for it.
+recency_floor = 0.35
+min_half_life_years = 0.5
+default_recency = 0.25
+# Role weight slider W in [1.0, 2.0]; authority = 1 + (W - 1) * m.
+default_role_weight = 1.5
+# m by speaker's office on the speech date (max over concurrent offices).
+m_gov_match = 1.0
+m_gov_other = 0.5
+m_shadow_match = 1.0
+m_shadow_other = 0.5
+m_chair_match = 1.0
+m_chair_other = 0.5
+# An ordinary (not chairing) member of a select committee on the question's subject, on the date.
+m_member_match = 0.3
+# A contribution about one place (a town's bus route, a constituency's station) is scored down by this factor
+# for a question that is not itself about a place, region, kind of seat or member, so national points lead.
+local_factor = 0.7
+# Below this best relevance score the engine answers "no records found".
+no_records_threshold = 0.2
+# Evidence selection for briefings: balance across speaker groups (ministers,
+# opposition, committee chairs, city/town/rural backbenchers, peers).
+max_per_speaker = 2
+min_relevance_ratio = 0.25
+# Members who raised the subject on at least this many separate days among the records found (not as ministers)
+# are included first, up to max_persistent of them, most persistent first: those who keep returning to a subject.
+min_occasions = 3
+max_persistent = 4
+# Re-ranking: a small model on the server takes a second, closer look at the best candidates (no cost per question).
+# Off for now: on the test set it raised the share of sources directly on the question from 64% to 68% (re-ranking
+# 100) without narrowing the balance, but added about 5 seconds per search on a 4-core machine. See docs/EVALUATION.md.
+# reranker = "Xenova/ms-marco-MiniLM-L-6-v2"
+rerank_top = 100            # how many of the best candidates it re-reads
+rerank_weight = 0.6         # share of the final relevance it decides
+rerank_query = "both"       # what passages are compared with: question | keywords | both
+
+[answer]
+# Sonnet: about 13s and 5 US cents a briefing on the test set, against Opus's 21s and 11 cents, with similar
+# accuracy (docs/EVALUATION.md, October 2026). "claude-opus-5-5" writes slightly fuller briefings if cost allows.
+model = "claude-sonnet-5-5"
+summary_sources = 24
+comprehensive_sources = 40
+# places for early day motions, the devolved parliaments and committee evidence, chosen by closeness in meaning to
+# the question; closer ones can also take the places of weaker Westminster sources (see src/hansard/rag/blend.py)
+side_sources = 10
+comprehensive_side_sources = 15
+summary_effort = "medium"
+comprehensive_effort = "high"
+query_parse_effort = "low"
+# The model that reads each question and chooses the filters (defaults to the model above). On the 62-question test
+# set (eval/), Haiku chose every filter right on 60 (Opus: 62), about twice as fast, at a thirtieth of the cost
+# (about 0.01p a question), so it also reads the question for "Sources only".
+query_parse_model = "claude-haiku-5-5"
+# While a briefing is written, the same small model checks the quoted members' register entries that applied on the
+# day for any that concern the subject of what they said; matches are flagged on the sources (rag/interests.py).
+interests_check = true
+max_tokens = 16000
+# Server-side refusal fallback (beta). Disable if your account or platform rejects it.
+use_fallbacks = true
+# The instructions to the model are the same for every request (apart from the date), so they are sent to be kept
+# in the provider's prompt cache: "short" (five minutes, as always), "long" (an hour, dearer to write) or "off".
+cache_instructions = "short"
+# How long a briefing waits for each lookup made alongside the main search (votes, early day motions, the devolved
+# parliaments, committee evidence), in seconds from the start of the search. One still running then is left out of
+# that briefing, with a warning in the log, rather than holding the reader up; 0 waits for every lookup however long.
+side_lookup_seconds = 6
+
+[embedding]
+# "fastembed" (local ONNX model; weights fetched once from Hugging Face and pinned)
+# or "hashing" (deterministic, offline; for tests and the sample demo only).
+backend = "fastembed"
+# snowflake-arctic-embed-xs: 384 dims, ~2.6x faster than bge-small on CPU with similar
+# retrieval quality (benchmarked on this project).
+model = "snowflake/snowflake-arctic-embed-xs"
+dim = 384
+passage_words = 250
+# Small batches: same CPU throughput as 64, a fifth of the memory (ONNX attention buffers).
+batch_size = 8
+# How alike two questions must be to count as one theme in the weekly report (cosine similarity, for this model,
+# which scores unrelated text around 0.5 and a strong match around 0.85). A first figure, to be looked at again
+# once there are a few weeks' worth of questions.
+theme_similarity = 0.8
+
+[usage]
+# The site is public; each new model-written briefing costs money.
+# Every this many new briefings in a day, a visitor is shown a short note on what the site costs, with the donation
+# link (only when [site] donate_url is set). Going through to the donation page stops it for the rest of the day.
+support_reminder_every = 10
+# A backstop against automated use, not an everyday limit (the reminder above does that job).
+per_visitor_daily_questions = 40   # anonymous visitors (keyed by a salted hash of their IP address)
+per_user_daily_questions = 60      # signed-in users, when invite-only sign-in is on
+requests_per_minute = 20           # questions and searches per visitor
+answer_cache_hours = 168           # identical questions are not re-run until new records arrive (or a week)
+# A briefing's cost is known only when it is finished, so each one being written is counted at this estimate
+# against the caps below meanwhile; and only so many are written at once, for one reader and in all.
+briefing_estimate_usd = 0.15
+briefings_at_once = 8
+briefings_at_once_per_reader = 2
+daily_spend_cap_usd = 10.0
+monthly_spend_cap_usd = 150.0
+# USD per million tokens, used for spend tracking only.
+price_input_per_mtok = 4.0
+price_output_per_mtok = 20.0
+price_cache_read_per_mtok = 0.2
+cache_write_multiplier = 1.25
+
+# Prices for each model the settings may name. Every model named in [answer] must have its entry here: the site
+# will not start with a model it has no prices for, so that none is costed at another's and the caps bite on time.
+# A model named in data/settings.local.toml needs its entry too; write it there as a table of its own
+# ([usage.models."<name>"], with its three prices): it is added beside these, which stay as they are. A model
+# whose name begins with one of these names is costed at that one's prices.
+[usage.models."claude-opus-5-5"]
+# the larger model the base prices above are for, should briefings be moved to it
+price_input_per_mtok = 4.0
+price_output_per_mtok = 20.0
+price_cache_read_per_mtok = 0.2
+
+[usage.models."claude-sonnet-5-5"]
+price_input_per_mtok = 2.0
+price_output_per_mtok = 10.0
+price_cache_read_per_mtok = 0.2
+
+[usage.models."claude-haiku-5-5"]
+# for prompts up to 100,000 tokens, which covers every call this site makes
+price_input_per_mtok = 0.1
+price_output_per_mtok = 0.5
+price_cache_read_per_mtok = 0.01
+
+[auth]
+# Public by default. Set required = true for an invite-only site (accounts are
+# created with `hansard user add`). Admin endpoints need HANSARD_ADMIN_TOKEN either way.
+required = false
+session_days = 14
+
+[sync]
+# UK local times the systemd timer runs `hansard sync`.
+times = ["07:15", "19:15"]
+
+[site]
+# The "Support this site" link and the occasional donations reminder. Every Where They Stand site links to the
+# charity's Donate page, which explains where donations go (the founder's Ko-fi until the charity has a bank
+# account). Empty: neither is shown. HANSARD_DONATE_URL in the server's .env overrides this.
+donate_url = "https://wheretheystand.uk/donate"
+
+[topics]
+# Topic briefings (/topics): standing questions listed in config/topics.toml, refreshed by the sync.
+enabled = true
+file = "topics.toml"
+max_per_run = 4             # at most this many rewrites per sync (the sync runs twice a day)
+unchanged_overlap = 0.8     # not rewritten when this share of the sources is the same as last time
+
+[groups]
+# Party groups and caucuses (src/hansard/groups.py; data_static/groups/groups.json). A member counts as in a group on
+# published evidence only: the group's own list, a letter or statement they signed, or their own words in Parliament.
+# show_ipsa: also show (and filter, group and count by) IPSA's records of MPs' offices paying for a group's pooled
+# research service, labelled as that and never as membership. On from 12 November 2026 (owner), on the basis of the
+# special purposes exemption for research and journalism (the charity's policies/special-category-data.md, section 3).
+# Set to false to stop showing them at once, e.g. after a complaint or legal advice.
+show_ipsa = true
+
+[logs]
+# The structured log of briefings (data/logs/briefings.jsonl): one line for each stage a briefing reaches and one
+# for how it ended, never a reader's words. Kept for 14 days or 50 MB, whichever is less (wts-core docs/adr/0012).
+max_bytes = 3000000
+keep = 15
+days = 14
+
+[alerts]
+# What the weekly report and `hansard stats --check` warn about. Thresholds start unset: the first weekly
+# report proposes them from that week's figures, and the owner writes them here (or in data/settings.local.toml).
+# The names are p95_full_briefing_ms, error_rate, check_failure_rate, not_useful_rate and daily_cost_usd. An alert
+# never comes from a number nobody chose.
+
+[eval]
+# The most a run of the test questions may spend on the model, in US dollars (`hansard eval run`, which has each
+# briefing written): no run starts without a limit, and it stops cleanly once spending reaches it.
+max_cost_usd = 3.0
+
+[eval.thresholds]
+# What a run is held to (a threshold is min_ or max_ and the name of a figure). Citations and quotations must all
+# check and nothing may fail; the rest are left until the first run on the server's record gives a baseline.
+max_invalid_citations = 0
+max_unverified_quotations = 0
+max_errors = 0

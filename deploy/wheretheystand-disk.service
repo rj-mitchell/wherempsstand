@@ -1,0 +1,11 @@
+# Email the alerts address if the server's disk is 80% full or more (deploy/disk-check.sh). Serves every site on
+# this server. Installed by deploy/update.sh.
+[Unit]
+Description=Check the server's disk is not filling up
+OnFailure=alert@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/hansardgpt/deploy/disk-check.sh
+TimeoutStartSec=15min
+Nice=10

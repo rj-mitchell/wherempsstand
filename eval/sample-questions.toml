@@ -1,0 +1,38 @@
+# Questions for the bundled sample data (`hansard bootstrap --sample`): a few debates of 2021 and 2022, enough to
+# see the whole pipeline work with a real model for a few pence. They are not the test set (eval/questions.toml,
+# which is for the full archive), and what they give says nothing of the live site's figures: the sample is a few
+# hundred speeches, where the archive is millions.
+#
+#   HANSARD_EVAL_QUESTIONS=eval/sample-questions.toml hansard eval run --max-cost 1.0
+#
+# Nothing is expected of how each is read: they are here for the briefings.
+
+[[q]]
+id = "jury"
+question = "What have MPs said about trial by jury?"
+category = "sample"
+
+[[q]]
+id = "ni-security"
+question = "What has been said about the security situation in Northern Ireland?"
+category = "sample"
+
+[[q]]
+id = "building-safety"
+question = "What have MPs said about making residential buildings safe?"
+category = "sample"
+
+[[q]]
+id = "media-plurality"
+question = "What has been said in the Lords about media plurality?"
+category = "sample"
+
+[[q]]
+id = "money-laundering"
+question = "What has the Government said about money laundering and asset recovery?"
+category = "sample"
+
+[[q]]
+id = "mars"
+question = "What have MPs said about lighthouses on Mars?"
+category = "sample"

@@ -1,0 +1,539 @@
+"""Answer generation guardrails, with a fake Claude client (no network)."""
+
+from __future__ import annotations
+
+from datetime import date
+from types import SimpleNamespace as NS
+
+from wts_core.adapters.hashing import HashingEmbedder
+
+from hansard.engine import Engine, Filters, Scope
+from hansard.rag.checks import VERIFIER
+from hansard.rag.pipeline import AskRequest, Pipeline, answer_once
+from hansard.rag.prompts import NO_RECORDS
+from hansard.rag.query_parse import parse_offline
+from hansard.rag.sources import Source
+
+from .conftest import model_of
+
+TODAY = date(2026, 10, 1)
+GROUPS = {"northern": ["North East", "North West", "Yorkshire and The Humber"]}
+
+
+# query parsing (offline)
+
+
+def test_offline_parse_hs2_example():
+    plan = parse_offline("How have ministers justified delays to HS2?", GROUPS, TODAY)
+    assert plan.filters.offices == ["gov"]
+    assert plan.portfolios == ["transport"]
+    assert not plan.wants_votes and plan.filters.date_from is None
+
+
+def test_offline_parse_northern_dissent_example():
+    plan = parse_offline("Did northern MPs dissent on agricultural zoning bills between 2018 and 2022?", GROUPS, TODAY)
+    f = plan.filters
+    assert f.regions == GROUPS["northern"]
+    assert f.houses == ["commons"]
+    assert (f.date_from, f.date_to) == (date(2018, 1, 1), date(2022, 12, 31))
+    assert plan.wants_votes and "environment" in plan.portfolios
+
+
+# verification
+
+
+def src(n, *blocks):
+    return Source(n, "record", f"Source {n}", f"https://example/{n}", list(blocks))
+
+
+verify = VERIFIER.verify
+recheck_flags = VERIFIER.recheck
+_QUOTED = "It has failed."
+
+
+def _classify_uncited(text, next_is_cited):
+    """How the verifier judges one uncited block of the model's, which is or is not followed by a cited one: its
+    pieces, as ``verify`` gives them."""
+    blocks = [{"text": text}]
+    if next_is_cited:
+        blocks.append({"text": f'"{_QUOTED}"', "citations": [{"search_result_index": 0, "cited_text": _QUOTED}]})
+    segments = verify(blocks, [src(1, _QUOTED)]).segments
+    return segments[:-1] if next_is_cited else segments
+
+
+def as_saved(parts, quotation='"it has failed"'):
+    """A briefing as it was saved before the checking rules were stamped on each answer, so that showing it again
+    judges it again: the verifier's pieces, then a cited quotation."""
+    return {"segments": [*({"text": p.text, "status": p.status} for p in parts),
+                         {"text": quotation, "status": "cited"}],
+            "unsupported_segments": sum(p.status == "unsupported" for p in parts), "grounded_ratio": 0.3}
+
+
+def test_verify_marks_cited_unsupported_and_invalid():
+    sources = [src(1, "The line to Crewe is delayed by two years.", "Costs rose sharply."), src(2, "We oppose it.")]
+    blocks = [
+        {"text": "Ministers said ", "citations": []},
+        {"text": "the Crewe line is delayed by two years", "citations": [
+            {"search_result_index": 0, "cited_text": "The line to Crewe is delayed by two years."}]},
+        {"text": ". The project was also cancelled in 2023 because of a scandal.", "citations": []},
+        {"text": "Opponents disagreed", "citations": [{"search_result_index": 1, "cited_text": "Text not in source"}]},
+    ]
+    v = verify(blocks, sources)
+    statuses = [s.status for s in v.segments]
+    assert statuses == ["connective", "cited", "unsupported", "invalid"]
+    assert v.citations_total == 2 and v.citations_invalid == 1
+    assert "[Source 1]" in v.markdown() and "[Source 2]" not in v.markdown()
+    assert 0 < v.grounded_ratio < 1
+    assert not v.no_records
+
+
+def test_verify_separates_lead_ins_and_evidence_notes_from_uncited_claims():
+    sources = [src(1, "We will deliver the line to Manchester.")]
+    cite = {"search_result_index": 0, "cited_text": "We will deliver the line to Manchester."}
+    blocks = [
+        {"text": "## Labour MPs\n\n**Shadow ministers**\n\n"
+                 "Shadow ministers attacked the decision to cancel the northern legs.\n"
+                 "- Louise Haigh (Sheffield Heeley, Lab), 4 October 2023, said ", "citations": []},
+        {"text": "the line to Manchester would be delivered", "citations": [cite]},
+        {"text": ".\n\nNo division records were supplied, so votes cannot be reported.\n"
+                 "- The retrieved records contain no revised opening date.\n"
+                 "- Two results on prison building were not relevant and have been excluded.\n"
+                 "- The records are dominated by compensation. Little was found on the system itself.", "citations": []},
+    ]
+    v = verify(blocks, sources)
+    by_status = {}
+    for s in v.segments:
+        by_status.setdefault(s.status, []).append(s.text)
+    unsupported = "".join(by_status["unsupported"])
+    assert "attacked the decision" in unsupported
+    assert "Louise Haigh" not in unsupported and "Labour MPs" not in unsupported
+    assert "No division records" not in unsupported
+    assert "opening date" not in unsupported and "prison" not in unsupported and "dominated" not in unsupported
+    assert v.to_dict()["unsupported_segments"] == 1
+
+
+def test_verify_detects_no_records_answer():
+    v = verify([{"text": f"{NO_RECORDS} The records cover only fisheries.", "citations": []}], [src(1, "x")])
+    assert v.no_records
+
+
+# pipeline with a fake client
+
+
+class FakeStream:
+    def __init__(self, blocks, stop_reason="end_turn"):
+        self.blocks, self.stop_reason = blocks, stop_reason
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def __iter__(self):
+        for b in self.blocks:
+            yield NS(type="content_block_delta", delta=NS(type="text_delta", text=b["text"]))
+            for c in b.get("citations", []):
+                yield NS(type="content_block_delta", delta=NS(type="citations_delta", citation=NS(**c)))
+
+    def get_final_message(self):
+        content = [NS(type="text", text=b["text"], citations=[NS(type="search_result_location", **c)
+                                                              for c in b.get("citations", [])])
+                   for b in self.blocks]
+        return NS(content=content, stop_reason=self.stop_reason, model="claude-sonnet-5-5",
+                  usage=NS(input_tokens=1000, output_tokens=200, cache_read_input_tokens=0,
+                           cache_creation_input_tokens=0))
+
+
+class FakeClient:
+    """Answers by citing the first sentence of the first source it is given."""
+
+    def __init__(self, refuse=False):
+        self.calls = []
+        self.refuse = refuse
+        self.beta = NS(messages=NS(stream=self._stream))
+        self.messages = NS(stream=self._stream, parse=self._parse)
+
+    def _parse(self, **kw):
+        raise RuntimeError("force offline parse in tests")
+
+    def _stream(self, **kw):
+        self.calls.append(kw)
+        if self.refuse:
+            return FakeStream([], stop_reason="refusal")
+        first = next(b for b in kw["messages"][0]["content"] if b["type"] == "search_result")
+        quote = first["content"][0]["text"]
+        return FakeStream([
+            {"text": "According to the record, "},
+            {"text": quote[:80], "citations": [{"search_result_index": 0, "cited_text": quote, "source": "x"}]},
+        ])
+
+
+def pipeline(settings, client):
+    return Pipeline(settings, Engine(settings, embedder=HashingEmbedder(64), today=TODAY), client=model_of(client),
+                    today=TODAY)
+
+
+def test_pipeline_end_to_end_is_grounded(indexed_settings):
+    client = FakeClient()
+    out = answer_once(pipeline(indexed_settings, client), AskRequest("What has been said about trial by jury?"))
+    assert out["plan"]["plan"]["search_text"]
+    cards = out["sources"]["sources"]
+    assert cards and cards[0]["n"] == 1 and cards[0]["text"]
+    final = out["final"]["answer"]
+    assert final["citations_total"] == 1 and final["citations_invalid"] == 0
+    assert "[Source 1]" in final["markdown"]
+    # The model only ever sees our sources (as search results) and the grounding rules.
+    call = client.calls[0]
+    blocks = call["messages"][0]["content"]
+    assert [b["type"] for b in blocks[:-1]] == ["search_result"] * len(cards)
+    system = call["system"][0]
+    assert "ONLY" in system["text"] and NO_RECORDS in system["text"]
+    assert system["cache_control"] == {"type": "ephemeral"}  # the shared instructions are cached
+    assert call["fallbacks"] == "default" and call["model"] == "claude-sonnet-5-5"
+
+
+def test_pipeline_returns_no_records_without_calling_the_model(indexed_settings):
+    client = FakeClient()
+    req = AskRequest("anything", plan={"search_text": "jury", "filters": {
+        "date_from": "2011-01-01", "date_to": "2011-01-02"}})
+    out = answer_once(pipeline(indexed_settings, client), req)
+    assert out["final"]["answer"]["no_records"] is True
+    assert client.calls == []
+
+
+def test_pipeline_reports_refusals_instead_of_answering(indexed_settings):
+    out = answer_once(pipeline(indexed_settings, FakeClient(refuse=True)), AskRequest("trial by jury"))
+    assert "error" in out and "final" not in out
+
+
+def test_edited_plan_from_ui_is_used_verbatim(indexed_settings):
+    client = FakeClient()
+    req = AskRequest("q", plan={"search_text": "security", "filters": {"houses": ["lords"]}},
+                     scope=Scope(written=False, votes=False))
+    out = answer_once(pipeline(indexed_settings, client), req)
+    assert out["plan"]["plan"]["filters"]["houses"] == ["lords"]
+    assert {c["chamber"] for c in out["sources"]["sources"]} <= {"House of Lords"}
+
+
+def test_votes_evidence_is_offered_for_dissent_questions(indexed_settings):
+    p = pipeline(indexed_settings, FakeClient())
+    divs = p.votes.find("Finance Bill", Filters())
+    assert divs and divs[0]["major_heading"].startswith("Finance")
+    assert "party_votes" in divs[0] and divs[0]["voters_in_scope"] > 0
+
+
+def test_offline_parse_northern_labour_mps():
+    plan = parse_offline("What have northern Labour MPs said about HS2?", GROUPS, TODAY)
+    assert plan.filters.parties == ["labour"]
+    assert plan.filters.regions == GROUPS["northern"] and plan.filters.houses == ["commons"]
+    assert plan.search_text == "HS2" and plan.portfolios == ["transport"]
+
+
+def test_api_key_falls_back_to_the_key_file_in_the_data_folder(tmp_path, monkeypatch):
+    from wts_core.adapters.anthropic import KEY_FILE
+
+    from hansard.adapters import has_model, model_client
+    from hansard.config import load_settings
+
+    def api_key():
+        return model_client(load_settings()).api_key
+
+    for name in ("HANSARD_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("HANSARD_DATA_DIR", str(tmp_path))
+    assert api_key() is None and has_model(load_settings()) is False
+    (tmp_path / KEY_FILE).write_text("sk-ant-from-file\n")
+    assert api_key() == "sk-ant-from-file" and has_model(load_settings()) is True
+    monkeypatch.setenv("HANSARD_ANTHROPIC_API_KEY", "sk-ant-from-env")
+    assert api_key() == "sk-ant-from-env"
+
+
+def test_briefing_instructions_require_neutral_wording():
+    from hansard.rag.prompts import system_prompt
+
+    text = system_prompt(TODAY)
+    assert "Report in neutral words" in text
+    for loaded in ("lied", "misled", "U-turn", "admitted"):
+        assert loaded in text  # named as forbidden in the model's own voice
+    assert "exact, cited quotation" in text
+
+
+def test_quotations_are_checked_word_for_word():
+    from wts_core.checks import Segment, Verification
+
+    check_quotes = VERIFIER.check_quotes
+
+    src = [Source(1, "record", "t", "u", ["I very much support renewable energy, but we now have our fair share of "
+                                          "onshore wind. I warmly welcome the hon. and learned Gentleman's point."], {})]
+    segs = [Segment('Lamont said "I very much support renewable energy" ', [], status="connective"),
+            Segment('and "we now have our fair share … onshore wind."', [1]),
+            Segment(' He "warmly welcome[d] the hon. and learned Gentleman".', [1]),
+            Segment(' He also said "wind farms are a blight on the landscape".', [1]),
+            Segment(' The term "net zero" is not a quotation.', [], status="connective")]
+    report = Verification(segs, False, 3, 0, 0, 10)
+    assert check_quotes(report, src) == 1
+    assert (report.quotes_total, report.quotes_unverified) == (4, 1)
+    assert segs[3].misquotes == [{"start": 14, "end": 56, "text": "wind farms are a blight on the landscape"}]
+    assert report.to_dict()["quotes_unverified"] == 1
+
+
+def test_a_word_printed_twice_in_the_record_does_not_make_a_misquote():
+    from wts_core.checks import Segment, Verification
+
+    record = [src(1, "but more with the positioning of of that company, where its profits are made")]
+    segs = [Segment('He said it was "more with the positioning of that company".', [1]),
+            Segment(' He spoke of "the positioning of the company".', [1])]
+    report = Verification(segs, False, 2, 0, 0, 10)
+    assert VERIFIER.check_quotes(report, record) == 1
+    assert not segs[0].misquotes and [m["text"] for m in segs[1].misquotes] == ["the positioning of the company"]
+
+
+def test_pipeline_reports_checked_quotations(indexed_settings):
+    out = answer_once(pipeline(indexed_settings, FakeClient()), AskRequest("What has been said about trial by jury?"))
+    assert out["final"]["answer"]["quotes_unverified"] == 0
+
+
+def test_the_closing_note_about_the_evidence_is_not_a_claim():
+    note = _classify_uncited("\n**About the evidence:** the records span 2013 to 2026 and include no divisions.\n", False)
+    assert [s.status for s in note] == ["connective"]
+    note = _classify_uncited("\nAbout the evidence: the records show what was said, but nothing said by Hilary Benn "
+                             "before 2026.\n", False)
+    assert [s.status for s in note] == ["connective"]
+    claim = _classify_uncited("\nAbout the evidence: Jane Smith said the policy had failed families across the "
+                              "country.\n", False)
+    assert "unsupported" in [s.status for s in claim]  # a claim about what someone said still needs a citation
+
+
+def test_a_lead_in_after_an_uncited_sentence_is_not_flagged_but_the_sentence_is():
+    segs = _classify_uncited("Labour MPs criticised the government. Jane Smith said on 4 May that ", True)
+    assert [(s.status, s.text) for s in segs] == [("unsupported", "Labour MPs criticised the government. "),
+                                                   ("connective", "Jane Smith said on 4 May that ")]
+    assert [s.status for s in _classify_uncited("- Keir Mather (Selby), 10 August 2026, said ", True)] == ["connective"]
+
+
+def test_the_date_after_a_citation_is_not_flagged():
+    for when in (" (16 September 2025).\n", " (March 2024)", " (2019),\n", " on 12 November 2025.\n",
+                 " (written answer, 12 October 2026).\n"):
+        assert [s.status for s in _classify_uncited(when, False)] == ["connective"], when
+    assert [s.status for s in _classify_uncited(" (16 September 2025), when it rose by 4%.\n", False)] == [
+        "unsupported"]
+
+
+def test_openers_about_the_records_are_dropped():
+    from wts_core.checks import Segment
+
+    drop_preambles = VERIFIER.drop_preambles
+    segs = [Segment("Across the records retrieved, ministers defended the policy."),
+            Segment("**In brief**\n- In the records supplied, Labour MPs criticised it."),
+            Segment("In 2019 the minister said so.")]
+    assert drop_preambles(segs) == 2
+    assert [s.text for s in segs] == ["Ministers defended the policy.", "**In brief**\n- Labour MPs criticised it.",
+                                      "In 2019 the minister said so."]
+
+
+def test_contributions_about_one_place_are_recognised():
+    from hansard.rank.places import Places
+
+    p = Places({"Cornwall", "Workington", "Cockermouth", "Manchester", "Leeds", "Liverpool"})
+    assert p.is_local("Bus Services: Cornwall", "")
+    assert p.is_local("Bus Services", "The new X5 in my constituency of Workington links Cockermouth.")
+    assert not p.is_local("Bus Services", "Franchising will be open to every local authority in England.")
+    assert not p.is_local("Transport", "In Manchester, Liverpool and Leeds franchising has improved services.")
+    assert not p.is_local("Free Bus Travel: Over-60s — [Leeds in the Chair]", "")  # the chair, not the subject
+
+
+def test_local_contributions_are_scored_down_not_dropped():
+    from datetime import date
+
+    from hansard.rank.composite import Candidate, RankParams, rank
+
+    params = RankParams(today=date(2026, 1, 1))
+    national, local = Candidate("a", date(2025, 1, 1), bm25=1.0), Candidate("b", date(2025, 1, 1), bm25=1.0, local=True)
+    scored = rank([local, national], set(), params)
+    assert [s.candidate.record_id for s in scored] == ["a", "b"]
+    assert scored[1].score == scored[0].score * params.local_factor
+
+
+def test_saved_briefings_are_rechecked_by_the_current_rules():
+    answer = {"segments": [{"text": "X said it worked", "status": "cited"},
+                           {"text": " (16 September 2025).\n", "status": "unsupported"},
+                           {"text": "Prices rose by 4% in the year to March, the fastest rise since 1992.",
+                            "status": "unsupported"}],
+              "unsupported_segments": 2, "grounded_ratio": 0.3}
+    out = recheck_flags(answer)
+    assert [s["status"] for s in out["segments"]] == ["cited", "connective", "unsupported"]
+    assert out["unsupported_segments"] == 1 and out["grounded_ratio"] == round(16 / (16 + 68), 3)
+    assert recheck_flags({"segments": []}) == {"segments": []} and recheck_flags(None) is None
+
+
+def test_the_devolution_note_is_not_a_point_to_check():
+    for note in ("These bodies decide many of these subjects for their own nations. ",
+                 "These bodies decide many matters for their own nations and are not the UK Parliament. ",
+                 "The Senedd is a separate parliament that decides education for Wales. ",
+                 "These bodies decide different matters from Westminster. ",
+                 "The Senedd decides many subjects for Wales, so this was a decision on consent. "):
+        assert [s.status for s in _classify_uncited(note, False)] == ["connective"], note
+    # the full stop closing one citation, before the lead-in to the next
+    assert [s.status for s in _classify_uncited(". Jane Smith said that ", True)] == ["connective"]
+
+
+def test_a_follow_up_is_read_with_the_earlier_answer(indexed_settings):
+    from types import SimpleNamespace
+
+    from hansard.rag.query_parse import ParsedQuery, parse_with_model
+
+    sent = {}
+
+    def parse(**kw):
+        sent.update(kw)
+        out = ParsedQuery.model_construct(
+            search_text="Palantir NHS contract break clause", date_from=None, date_to=None, houses=[], regions=[],
+            parties=[], offices=[], genders=[], age_bands=[], tenure=[], majority_bands=[], seat_types=[],
+            portfolios=[], wants_votes=False, interpretation="x", group_by="role", speakers=[])
+        return SimpleNamespace(stop_reason="end_turn", parsed_output=out, usage=None)
+
+    client = model_of(SimpleNamespace(messages=SimpleNamespace(parse=parse)))
+    history = [{"question": "What has been said about Palantir in the NHS?", "topic": "Palantir NHS",
+                "answer": "Backbenchers urged ministers to use the break clause in 2027."}]
+    plan, _ = parse_with_model(client, indexed_settings, "what about the break clause?", history, [])
+    prompt = sent["messages"][0]["content"]
+    assert "Palantir NHS" in prompt and "use the break clause in 2027" in prompt
+    assert plan.search_text == "Palantir NHS contract break clause"
+
+
+def test_a_citation_across_two_paragraphs_is_accepted():
+    from hansard.rag.sources import Source
+    src = Source(1, "record", "A member", "u", ["(3) The assessment must estimate the cost of—",
+                                                "(a) implementation of this Act, and", "(b) the cap."])
+    block = {"text": "It sought a cost estimate", "citations": [{"search_result_index": 0, "cited_text":
+             "the cost of—(a) implementation of this Act, and(b) the cap."}]}
+    report = verify([block], [src])
+    assert report.citations_invalid == 0 and report.segments[0].status == "cited"
+    wrong = {"text": "x", "citations": [{"search_result_index": 0, "cited_text": "the costs of—(a) implementation"}]}
+    assert verify([wrong], [src]).citations_invalid == 1
+
+
+def test_client_has_an_explicit_timeout(monkeypatch):
+    from hansard.adapters import model_client
+    from hansard.config import load_settings
+
+    monkeypatch.setenv("HANSARD_ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://elsewhere.example")  # another tool's: never followed
+    model = model_client(load_settings())  # the shared package's client, made from this site's settings
+    client = model.client  # the SDK's own client, as the site's is set up
+    assert client.timeout.connect == 10.0 and client.timeout.read == 300.0
+    assert client.max_retries == 2 and client.api_key == "test-key"
+    assert str(client.base_url).startswith("https://api.anthropic.com")
+    assert (model.timeout, model.connect, model.max_retries) == (300.0, 10.0, 2)  # the same in every site
+
+
+# ported from Where Countries Stand's verifier
+
+
+def test_an_honorifics_full_stop_ends_no_sentence():
+    # "Mr. " no longer reads as the end of a sentence, so the whole line leads in to the quotation after it
+    segs = _classify_uncited("- Giving evidence to the Transport Committee on the northern legs, Mr. Smith said ", True)
+    assert [s.status for s in segs] == ["connective"]
+    # a claim before the lead-in is still split off and flagged, and the text kept is the original
+    segs = _classify_uncited("Witnesses doubted the figures. Dr. Jones told the committee that ", True)
+    assert [(s.status, s.text) for s in segs] == [("unsupported", "Witnesses doubted the figures. "),
+                                                   ("connective", "Dr. Jones told the committee that ")]
+
+
+def test_a_lead_in_written_in_pieces_is_not_a_claim():
+    sources = [src(1, "The line to Manchester will be delivered in full.")]
+    blocks = [{"text": "- Witnesses from the industry differed sharply on the timetable, as when its chief executive, Mr. "}, {"text": "Stephens said "},
+              {"text": '"The line to Manchester will be delivered in full."', "citations": [
+                  {"search_result_index": 0, "cited_text": "The line to Manchester will be delivered in full."}]},
+              {"text": " The project was then cancelled in 2023 because of a scandal. "}]
+    statuses = [s.status for s in verify(blocks, sources).segments]
+    assert statuses == ["connective", "connective", "cited", "unsupported"]
+    # a whole sentence in between is a claim, and the piece before it leads in to nothing
+    blocks[1] = {"text": "The company had overspent on the northern section by more than a billion pounds. "}
+    statuses = [s.status for s in verify(blocks, sources).segments]
+    assert statuses[:3] == ["unsupported", "unsupported", "cited"]
+
+
+def test_notes_that_data_was_not_supplied_are_not_claims():
+    for note in ("No recorded-vote data was available for any of the debates on this subject. ",
+                 "Division lists for the debates in the Lords in this period were not supplied. ",
+                 "The votes on the second reading were not supplied, so how members voted is unknown. "):
+        assert [s.status for s in _classify_uncited(note, False)] == ["connective"], note
+
+
+def test_saved_briefings_with_a_lead_in_in_pieces_are_cleared():
+    answer = {"segments": [{"text": "- Witnesses from the industry differed sharply on the timetable, as when Mr. ",
+                            "status": "unsupported"},
+                           {"text": "Stephens said ", "status": "connective"},
+                           {"text": "\"it will be delivered\"", "status": "cited"}],
+              "unsupported_segments": 1, "grounded_ratio": 0.5}
+    out = recheck_flags(answer)
+    assert [s["status"] for s in out["segments"]] == ["connective", "connective", "cited"]
+    assert out["unsupported_segments"] == 0 and out["grounded_ratio"] == 1.0
+
+
+def test_a_short_claim_stays_a_point_to_check_when_a_saved_briefing_is_shown_again():
+    # verify() splits a whole sentence off a lead-in and marks it as a claim, however short it is
+    parts = _classify_uncited("Labour MPs criticised the government. Jane Smith said on 4 May that ", True)
+    assert [p.status for p in parts] == ["unsupported", "connective"]
+    answer = as_saved(parts)
+    # shown again, it is judged without that knowledge: being short must not clear it
+    assert recheck_flags(answer) is answer
+
+
+def test_a_claim_above_a_lead_in_stays_a_point_to_check_when_shown_again():
+    for block in ("- Spending on the scheme rose by 40% under the last administration\n- Jane Smith said ",
+                  "Was the funding cut by 40% in real terms? Jane Smith said ",
+                  "The scheme was cut by 40% in real terms! Jane Smith said "):
+        parts = _classify_uncited(block, True)
+        assert [p.status for p in parts] == ["unsupported", "connective"], block
+        answer = as_saved(parts)
+        # judged again without the block it was written in, it must not pass for the opening of the quotation
+        assert recheck_flags(answer) is answer, block
+
+
+def test_a_slow_side_lookup_is_left_out_after_its_time_limit(indexed_settings, caplog):
+    import dataclasses
+    import logging
+    import threading
+    import time
+
+    settings = dataclasses.replace(indexed_settings, raw={
+        **indexed_settings.raw, "answer": {**indexed_settings.answer, "side_lookup_seconds": 0.5}})
+    p = pipeline(settings, FakeClient())
+    release, calls = threading.Event(), []
+
+    def stuck(plan, req):  # the devolved lookup on a bad day: still running long after the limit
+        calls.append(1)
+        release.wait(30)
+        return []
+
+    p.find_devolved = stuck
+    plan = parse_offline("What has been said about trial by jury?", settings.regions)
+    req = AskRequest(question=plan.question)
+    p.find(plan, req)  # once, so that what is loaded on first use is not counted against the limit
+    release.set()
+    while p._overrunning:
+        time.sleep(0.01)
+    release.clear()
+    try:
+        with caplog.at_level(logging.WARNING, logger="hansard.rag.pipeline"):
+            began = time.monotonic()
+            _, _, sources = p.find(plan, req)
+            took = time.monotonic() - began
+        assert took < 0.5 + 1.0, "the briefing goes on at the limit, not when the lookup ends"
+        assert sources and not [s for s in sources if s.kind == "devolved"]
+        assert "side lookup 'devolved' took longer than 0.5 s" in caplog.text
+        assert len(calls) == 2
+
+        caplog.clear()
+        with caplog.at_level(logging.WARNING, logger="hansard.rag.pipeline"):
+            p.find(plan, req)  # while the last one still runs, no second thread is given to the same kind
+        assert len(calls) == 2 and "side lookup 'devolved' left out" in caplog.text
+    finally:
+        release.set()
+    while p._overrunning:  # once it has finished, the lookup is made again
+        time.sleep(0.01)
+    p.find(plan, req)
+    assert len(calls) == 3

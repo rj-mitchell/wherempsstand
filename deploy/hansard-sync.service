@@ -1,0 +1,15 @@
+[Unit]
+Description=Where MPs Stand daily sync (member data, new Hansard, index, embeddings)
+After=docker.service
+Requires=docker.service
+OnFailure=alert@%n.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hansardgpt/deploy
+# One update at a time across every site on this server: each site's scheduled update takes this lock first, and
+# waits (rather than failing) while another holds it. The time limit includes that wait.
+ExecStart=/usr/bin/flock --verbose /var/lock/wheretheystand-update.lock \
+  /usr/bin/docker compose run --rm -T app hansard sync --embed-minutes 240
+TimeoutStartSec=10h
+Nice=10

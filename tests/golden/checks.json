@@ -1,0 +1,952 @@
+{
+ "ids": {
+  "all_different": true,
+  "all_match_the_pattern": true,
+  "all_ten_of_the_alphabet": true
+ },
+ "shown_again": [
+  {
+   "name": "marks made by rules since corrected",
+   "view": {
+    "answer": {
+     "grounded_ratio": 1.0,
+     "loaded_words": 0,
+     "markdown": "Hilary Benn said jury trial matters. The savings claimed were large.",
+     "segments": [
+      {
+       "status": "connective",
+       "text": "Hilary Benn said "
+      },
+      {
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "jury trial matters."
+      },
+      {
+       "loaded": [],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": " The savings claimed were large."
+      }
+     ],
+     "unsupported_segments": 0
+    },
+    "candidates": 12,
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "evidence": {
+     "records": 1
+    },
+    "id": "briefingaa",
+    "interests": [],
+    "plan": {
+     "interpretation": "Debates on \"trial by jury\".",
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-11-12",
+    "semantic": true,
+    "settings": {
+     "mode": "summary"
+    },
+    "sources": [
+     {
+      "n": 1,
+      "title": "Hilary Benn's \"speech\""
+     }
+    ]
+   }
+  },
+  {
+   "name": "a mark that stands",
+   "view": {
+    "answer": {
+     "loaded_words": 1,
+     "segments": [
+      {
+       "loaded": [
+        {
+         "end": 59,
+         "start": 51,
+         "word": "admitted"
+        }
+       ],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "Mr Benn called it \"a cornerstone\" and the minister admitted the delay."
+      }
+     ]
+    },
+    "candidates": 12,
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "evidence": {
+     "records": 1
+    },
+    "id": "briefingaa",
+    "interests": [],
+    "plan": {
+     "interpretation": "Debates on \"trial by jury\".",
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-11-12",
+    "semantic": true,
+    "settings": {
+     "mode": "summary"
+    },
+    "sources": [
+     {
+      "n": 1,
+      "title": "Hilary Benn's \"speech\""
+     }
+    ]
+   }
+  },
+  {
+   "name": "a claim before a quotation",
+   "view": {
+    "answer": {
+     "segments": [
+      {
+       "status": "unsupported",
+       "text": "He said \"no.\" Mr Smith said "
+      },
+      {
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "we will act"
+      }
+     ],
+     "unsupported_segments": 1
+    },
+    "candidates": 12,
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "evidence": {
+     "records": 1
+    },
+    "id": "briefingaa",
+    "interests": [],
+    "plan": {
+     "interpretation": "Debates on \"trial by jury\".",
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-11-12",
+    "semantic": true,
+    "settings": {
+     "mode": "summary"
+    },
+    "sources": [
+     {
+      "n": 1,
+      "title": "Hilary Benn's \"speech\""
+     }
+    ]
+   }
+  },
+  {
+   "name": "a short claim stays a point to check",
+   "view": {
+    "answer": {
+     "grounded_ratio": 0.6,
+     "segments": [
+      {
+       "status": "unsupported",
+       "text": "Mr Benn agreed."
+      },
+      {
+       "sources": [
+        2
+       ],
+       "status": "cited",
+       "text": " Mr Clarke said so too."
+      }
+     ],
+     "unsupported_segments": 1
+    },
+    "candidates": 12,
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "evidence": {
+     "records": 1
+    },
+    "id": "briefingaa",
+    "interests": [],
+    "plan": {
+     "interpretation": "Debates on \"trial by jury\".",
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-11-12",
+    "semantic": true,
+    "settings": {
+     "mode": "summary"
+    },
+    "sources": [
+     {
+      "n": 1,
+      "title": "Hilary Benn's \"speech\""
+     }
+    ]
+   }
+  },
+  {
+   "name": "the scripted briefing, with interests saved before posts in government were left out",
+   "view": {
+    "answer": {
+     "citations_invalid": 0,
+     "citations_total": 2,
+     "grounded_ratio": 0.68,
+     "loaded_words": 0,
+     "markdown": "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+     "no_records": false,
+     "quotes_total": 1,
+     "quotes_unverified": 0,
+     "segments": [
+      {
+       "cited": [
+        {
+         "n": 1,
+         "text": "The right to trial by jury is a cornerstone of our liberties"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        1
+       ],
+       "status": "cited",
+       "text": "Hilary Benn said that trial by jury was \"a cornerstone\"."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "connective",
+       "text": " In the debate that followed:"
+      },
+      {
+       "cited": [
+        {
+         "n": 2,
+         "text": "We will keep jury trial for serious offences"
+        }
+       ],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [
+        2
+       ],
+       "status": "cited",
+       "text": " Kenneth Clarke said jury trial would be kept for serious offences."
+      },
+      {
+       "cited": [],
+       "loaded": [],
+       "misquotes": [],
+       "sources": [],
+       "status": "unsupported",
+       "text": " This was a turning point for every member in the Chamber."
+      }
+     ],
+     "unsupported_segments": 1
+    },
+    "candidates": 12,
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "evidence": {
+     "records": 1
+    },
+    "id": "briefingaa",
+    "interests": [
+     {
+      "items": [
+       {
+        "category": "3 Gifts",
+        "connection": "The gift is from the barristers' professional body and the speech is on jury trial.",
+        "kind": "register",
+        "register": "commons",
+        "registered": "2021-01-05",
+        "summary": "Bar Council - £500.00",
+        "url": null
+       }
+      ],
+      "link": "/people/10669#h-interests",
+      "name": "Hilary Benn",
+      "person_id": "uk.org.publicwhip/person/10669",
+      "register": "Register of Members' Financial Interests",
+      "source": 1
+     }
+    ],
+    "plan": {
+     "interpretation": "Debates on \"trial by jury\".",
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-11-12",
+    "semantic": true,
+    "settings": {
+     "mode": "summary"
+    },
+    "sources": [
+     {
+      "n": 1,
+      "title": "Hilary Benn's \"speech\""
+     }
+    ]
+   }
+  },
+  {
+   "name": "no records",
+   "view": {
+    "answer": {
+     "citations_invalid": 0,
+     "citations_total": 0,
+     "grounded_ratio": 1.0,
+     "markdown": "No records found.",
+     "no_records": true,
+     "segments": [
+      {
+       "cited": [],
+       "sources": [],
+       "status": "connective",
+       "text": "No records found. The archive contains no records matching this question and these filters."
+      }
+     ],
+     "unsupported_segments": 0
+    },
+    "candidates": 12,
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "evidence": {
+     "records": 1
+    },
+    "id": "briefingaa",
+    "interests": [],
+    "plan": {
+     "interpretation": "Debates on \"trial by jury\".",
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-11-12",
+    "semantic": true,
+    "settings": {
+     "mode": "summary"
+    },
+    "sources": [
+     {
+      "n": 1,
+      "title": "Hilary Benn's \"speech\""
+     }
+    ]
+   }
+  },
+  {
+   "name": "an answer with no segments",
+   "view": {
+    "answer": {
+     "markdown": "x",
+     "segments": []
+    },
+    "candidates": 12,
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "evidence": {
+     "records": 1
+    },
+    "id": "briefingaa",
+    "interests": [],
+    "plan": {
+     "interpretation": "Debates on \"trial by jury\".",
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-11-12",
+    "semantic": true,
+    "settings": {
+     "mode": "summary"
+    },
+    "sources": [
+     {
+      "n": 1,
+      "title": "Hilary Benn's \"speech\""
+     }
+    ]
+   }
+  },
+  {
+   "name": "a briefing with no final event",
+   "view": {
+    "answer": null,
+    "candidates": 12,
+    "created_at": "2026-11-13T12:00:00+00:00",
+    "evidence": {
+     "records": 1
+    },
+    "id": "briefingaa",
+    "interests": [],
+    "plan": {
+     "interpretation": "Debates on \"trial by jury\".",
+     "question": "What has been said about trial by jury since 2020?"
+    },
+    "question": "What has been said about trial by jury since 2020?",
+    "records_up_to": "2026-11-12",
+    "semantic": true,
+    "settings": {
+     "mode": "summary"
+    },
+    "sources": [
+     {
+      "n": 1,
+      "title": "Hilary Benn's \"speech\""
+     }
+    ]
+   }
+  }
+ ],
+ "summaries": [
+  "Hilary Benn said jury trial matters. The savings claimed were large.",
+  "",
+  "",
+  "",
+  "Hilary Benn said that trial by jury was \"a cornerstone\". In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This was a turning point for every member in the Chamber.",
+  "No records found.",
+  "X",
+  ""
+ ],
+ "written": [
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 1,
+    "grounded_ratio": 1.0,
+    "loaded_words": 0,
+    "markdown": "Hilary Benn said that the right to trial by jury is a cornerstone of our liberties. [Source 1] This was a turning point for the House.",
+    "no_records": false,
+    "quotes_total": 0,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": "Hilary Benn said that "
+     },
+     {
+      "cited": [
+       {
+        "cited_text": "The right to trial by jury is a cornerstone of our liberties. The organization of the courts must not weaken it.",
+        "source": 1
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       1
+      ],
+      "status": "cited",
+      "text": "the right to trial by jury is a cornerstone of our liberties."
+     },
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": " This was a turning point for the House."
+     }
+    ],
+    "unsupported_segments": 0
+   },
+   "name": "a cited claim, a lead-in and an uncited claim"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 2,
+    "grounded_ratio": 1.0,
+    "loaded_words": 0,
+    "markdown": "Mr Benn called it \"a cornerstone of our liberties\" [Source 1] and Mr Clarke said it was \"a relic of the past\". [Source 2]",
+    "no_records": false,
+    "quotes_total": 2,
+    "quotes_unverified": 1,
+    "segments": [
+     {
+      "cited": [
+       {
+        "cited_text": "The right to trial by jury is a cornerstone of our liberties. The organization of the courts must not weaken it.",
+        "source": 1
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       1
+      ],
+      "status": "cited",
+      "text": "Mr Benn called it \"a cornerstone of our liberties\""
+     },
+     {
+      "cited": [
+       {
+        "cited_text": "We will keep jury trial for serious offences. Gas was supplied to two million homes last winter.",
+        "source": 2
+       }
+      ],
+      "loaded": [],
+      "misquotes": [
+       {
+        "end": 48,
+        "start": 27,
+        "text": "a relic of the past"
+       }
+      ],
+      "sources": [
+       2
+      ],
+      "status": "cited",
+      "text": " and Mr Clarke said it was \"a relic of the past\"."
+     }
+    ],
+    "unsupported_segments": 0
+   },
+   "name": "a quotation found word for word, and one that is not"
+  },
+  {
+   "answer": {
+    "citations_invalid": 1,
+    "citations_total": 2,
+    "grounded_ratio": 0.585,
+    "loaded_words": 0,
+    "markdown": "A third member agreed. Mr Clarke promised to keep it. [Source 2]",
+    "no_records": false,
+    "quotes_total": 0,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "invalid",
+      "text": "A third member agreed."
+     },
+     {
+      "cited": [
+       {
+        "cited_text": "We will keep jury trial for serious offences. Gas was supplied to two million homes last winter.",
+        "source": 2
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       2
+      ],
+      "status": "cited",
+      "text": " Mr Clarke promised to keep it."
+     }
+    ],
+    "unsupported_segments": 0
+   },
+   "name": "a citation to a source that is not there"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 2,
+    "grounded_ratio": 0.514,
+    "loaded_words": 3,
+    "markdown": "Mr Benn slammed the plan, and the minister admitted the delay. [Source 1] Mr Clarke claimed that it was \"a scandal\". The Opposition's regime of amendments failed. The savings claimed were large. [Source 2]",
+    "no_records": false,
+    "quotes_total": 0,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [
+       {
+        "cited_text": "The right to trial by jury is a cornerstone of our liberties. The organization of the courts must not weaken it.",
+        "source": 1
+       }
+      ],
+      "loaded": [
+       {
+        "end": 15,
+        "start": 8,
+        "word": "slammed"
+       },
+       {
+        "end": 51,
+        "start": 43,
+        "word": "admitted"
+       }
+      ],
+      "misquotes": [],
+      "sources": [
+       1
+      ],
+      "status": "cited",
+      "text": "Mr Benn slammed the plan, and the minister admitted the delay."
+     },
+     {
+      "cited": [],
+      "loaded": [
+       {
+        "end": 18,
+        "start": 11,
+        "word": "claimed"
+       }
+      ],
+      "misquotes": [],
+      "sources": [],
+      "status": "unsupported",
+      "text": " Mr Clarke claimed that it was \"a scandal\". The Opposition's regime of amendments failed."
+     },
+     {
+      "cited": [
+       {
+        "cited_text": "We will keep jury trial for serious offences. Gas was supplied to two million homes last winter.",
+        "source": 2
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       2
+      ],
+      "status": "cited",
+      "text": " The savings claimed were large."
+     }
+    ],
+    "unsupported_segments": 1
+   },
+   "name": "judgemental words in the site's own voice, and inside a quotation"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 1,
+    "grounded_ratio": 1.0,
+    "loaded_words": 0,
+    "markdown": "Mr Benn criticised the organisation of the courts, saying \"The organization of the courts must not weaken it.\" [Source 1]",
+    "no_records": false,
+    "quotes_total": 1,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [
+       {
+        "cited_text": "The right to trial by jury is a cornerstone of our liberties. The organization of the courts must not weaken it.",
+        "source": 1
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       1
+      ],
+      "status": "cited",
+      "text": "Mr Benn criticised the organisation of the courts, saying \"The organization of the courts must not weaken it.\""
+     }
+    ],
+    "unsupported_segments": 0
+   },
+   "name": "American spelling in the site's words, and in a quotation"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 1,
+    "grounded_ratio": 1.0,
+    "loaded_words": 0,
+    "markdown": "Two positions emerge. Mr Benn wants jury trial kept. [Source 1]",
+    "no_records": false,
+    "quotes_total": 0,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": "Two positions emerge. "
+     },
+     {
+      "cited": [
+       {
+        "cited_text": "The right to trial by jury is a cornerstone of our liberties. The organization of the courts must not weaken it.",
+        "source": 1
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       1
+      ],
+      "status": "cited",
+      "text": "Mr Benn wants jury trial kept."
+     }
+    ],
+    "unsupported_segments": 0
+   },
+   "name": "an opener about the records, then the briefing"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 1,
+    "grounded_ratio": 1.0,
+    "loaded_words": 0,
+    "markdown": "Mr Benn wants jury trial kept. [Source 1] Gas was supplied to two million homes. The votes on the second reading were not supplied. No vote records were retrieved for 2021. Only two records were retrieved. The minister said that gas was supplied late.",
+    "no_records": false,
+    "quotes_total": 0,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [
+       {
+        "cited_text": "The right to trial by jury is a cornerstone of our liberties. The organization of the courts must not weaken it.",
+        "source": 1
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       1
+      ],
+      "status": "cited",
+      "text": "Mr Benn wants jury trial kept."
+     },
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": " Gas was supplied to two million homes. The votes on the second reading were not supplied. No vote records were retrieved for 2021. Only two records were retrieved. The minister said that gas was supplied late."
+     }
+    ],
+    "unsupported_segments": 0
+   },
+   "name": "notes about the evidence, wide and narrow"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 1,
+    "grounded_ratio": 0.472,
+    "loaded_words": 0,
+    "markdown": "Mr. Clarke said the Government would keep jury trial for serious offences. [Source 2] Dr. Smith disagreed. The hon. Member for St. Ives was not heard.",
+    "no_records": false,
+    "quotes_total": 0,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": "Mr. Clarke said "
+     },
+     {
+      "cited": [
+       {
+        "cited_text": "We will keep jury trial for serious offences. Gas was supplied to two million homes last winter.",
+        "source": 2
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       2
+      ],
+      "status": "cited",
+      "text": "the Government would keep jury trial for serious offences."
+     },
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "unsupported",
+      "text": " Dr. Smith disagreed. The hon. Member for St. Ives was not heard."
+     }
+    ],
+    "unsupported_segments": 1
+   },
+   "name": "an honorific's full stop ends no sentence"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 2,
+    "grounded_ratio": 1.0,
+    "loaded_words": 0,
+    "markdown": "## Labour MPs\n\n**Backbenchers**\n\n- Hilary Benn (Leeds Central, Lab), 4 March 2021: jury trial is a cornerstone [Source 1]\n- Kenneth Clarke (Rushcliffe, Con): jury trial will be kept for serious offences [Source 2]\n\nIn short:",
+    "no_records": false,
+    "quotes_total": 0,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": "## Labour MPs\n\n**Backbenchers**\n\n"
+     },
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": "- Hilary Benn (Leeds Central, Lab), 4 March 2021: "
+     },
+     {
+      "cited": [
+       {
+        "cited_text": "The right to trial by jury is a cornerstone of our liberties. The organization of the courts must not weaken it.",
+        "source": 1
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       1
+      ],
+      "status": "cited",
+      "text": "jury trial is a cornerstone"
+     },
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": "\n- Kenneth Clarke (Rushcliffe, Con): "
+     },
+     {
+      "cited": [
+       {
+        "cited_text": "We will keep jury trial for serious offences. Gas was supplied to two million homes last winter.",
+        "source": 2
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       2
+      ],
+      "status": "cited",
+      "text": "jury trial will be kept for serious offences"
+     },
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": "\n\nIn short:"
+     }
+    ],
+    "unsupported_segments": 0
+   },
+   "name": "headings, a list and a lead-in in pieces"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 0,
+    "grounded_ratio": 0.0,
+    "loaded_words": 0,
+    "markdown": "No records found. The archive holds nothing on this subject between those dates.",
+    "no_records": true,
+    "quotes_total": 0,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "unsupported",
+      "text": "No records found. The archive holds nothing on this subject between those dates."
+     }
+    ],
+    "unsupported_segments": 1
+   },
+   "name": "no records"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 0,
+    "grounded_ratio": 1.0,
+    "loaded_words": 0,
+    "markdown": "",
+    "no_records": false,
+    "quotes_total": 0,
+    "quotes_unverified": 0,
+    "segments": [],
+    "unsupported_segments": 0
+   },
+   "name": "nothing at all"
+  },
+  {
+   "answer": {
+    "citations_invalid": 0,
+    "citations_total": 1,
+    "grounded_ratio": 0.597,
+    "loaded_words": 0,
+    "markdown": "Mr Benn's speech said \"the right to trial by jury is a cornerstone [Source 1]\" in 2021, and it's 'urgent'.",
+    "no_records": false,
+    "quotes_total": 1,
+    "quotes_unverified": 0,
+    "segments": [
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "connective",
+      "text": "Mr Benn's speech said \""
+     },
+     {
+      "cited": [
+       {
+        "cited_text": "The right to trial by jury is a cornerstone of our liberties. The organization of the courts must not weaken it.",
+        "source": 1
+       }
+      ],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [
+       1
+      ],
+      "status": "cited",
+      "text": "the right to trial by jury is a cornerstone"
+     },
+     {
+      "cited": [],
+      "loaded": [],
+      "misquotes": [],
+      "sources": [],
+      "status": "unsupported",
+      "text": "\" in 2021, and it's 'urgent'."
+     }
+    ],
+    "unsupported_segments": 1
+   },
+   "name": "quotes and apostrophes"
+  }
+ ]
+}

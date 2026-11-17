@@ -1,0 +1,9 @@
+# Email the alerts address about a failed job: any unit with OnFailure=alert@%n.service runs this with its own name.
+# Installed by deploy/update.sh; sending is set up with deploy/mail.sh (docs/HOSTING.md, "Email from the server").
+[Unit]
+Description=Email an alert about %i
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/hansardgpt/deploy/alert.sh %i
+TimeoutStartSec=2min

@@ -1,0 +1,766 @@
+[
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "0e6cb50ae1568483d718aa35a5163a66994dc8b63d009bf5d5d38535af8cf029",
+  "world": {}
+ },
+ {
+  "body": {
+   "question": "what has been said about  TRIAL by jury since 2020?"
+  },
+  "key": "0e6cb50ae1568483d718aa35a5163a66994dc8b63d009bf5d5d38535af8cf029",
+  "world": {}
+ },
+ {
+  "body": {
+   "mode": "comprehensive",
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "7b4c937910bf42af5e7268a7460db0969c3c859722db8f4f4a5ca7472ae9f210",
+  "world": {}
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "recency": 0.7
+  },
+  "key": "4b1d7af223b2616e8d94fa10fc2fcaf11e7bd0ff8abd0410f2e925b00ad6068a",
+  "world": {}
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "role_weight": 1.5
+  },
+  "key": "8ec187b8dd7b6080d93ac63bd0bfd8499848619d13aaaecb9548c94e4de13041",
+  "world": {}
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "scope": {
+    "votes": false,
+    "written": false
+   }
+  },
+  "key": "fdecd3d58e0a9e38ee9143f937c5f6a2c4b2b980ef1bf9c8f7971a9c783f1f37",
+  "world": {}
+ },
+ {
+  "body": {
+   "plan": {
+    "filters": {
+     "date_from": "2020-01-01"
+    },
+    "search_text": "trial by jury"
+   },
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "c7b2471fed9c7050134388a6b2afb3307824db49cb407382f9154c310412fd61",
+  "world": {}
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "sources_only": true
+  },
+  "key": "c9259e791512057e93aa06621a3f853ab9fb8c2b3d0f1dc7a7d618d42f7605ea",
+  "world": {}
+ },
+ {
+  "body": {
+   "question": "And what did peers say?"
+  },
+  "key": "d9ea81c5dbfa18d48174ca5e71bd28dbb638ddf5b51819cbae4b343cb2c1baf7",
+  "world": {}
+ },
+ {
+  "body": {
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "7d4b8b62a69d7dd6e47e2fac13839a012016c1996f2c25910064ed7e4ffc35fa",
+  "world": {}
+ },
+ {
+  "body": {
+   "follows": "What has been said about trial by jury since 2020?",
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "84a775713c2721544dca74f24f762ab69064704e0a969b73503baf182843a6ee",
+  "world": {}
+ },
+ {
+  "body": {
+   "compare": [
+    {
+     "id": "labour",
+     "kind": "party"
+    },
+    {
+     "id": "conservative",
+     "kind": "party"
+    }
+   ],
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "3dd114afe9b6b39920e060ef7b7544d378679dcf489ece3e8fee6002badd5543",
+  "world": {}
+ },
+ {
+  "body": {
+   "question": "Où est la bibliothèque — “déjà vu”?"
+  },
+  "key": "418ffc571fd6b621909c0dc779c369d31922c5591216d43359f28ddae16aa615",
+  "world": {}
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "21045d4a4c76328e3048c41c1278e401401d483e7a72c06ee218d075cfcd8e06",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "question": "what has been said about  TRIAL by jury since 2020?"
+  },
+  "key": "21045d4a4c76328e3048c41c1278e401401d483e7a72c06ee218d075cfcd8e06",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "mode": "comprehensive",
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "37042b06ebc14cb2c10dbe1804dc6fe7f95bdbaa68f9f247ba58cb10d6632538",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "recency": 0.7
+  },
+  "key": "9747c860265a38be15acfe94fc240c980668f67c0af0ffc78cca994d0f2f804e",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "role_weight": 1.5
+  },
+  "key": "951fa6c61526eaf574d8acc18b9e14e3acd752f49a82410054f24339a27c4760",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "scope": {
+    "votes": false,
+    "written": false
+   }
+  },
+  "key": "4304b6891c03e38109c9bdd9e282d54baef4dd33155651302cd7fd54cf858243",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "plan": {
+    "filters": {
+     "date_from": "2020-01-01"
+    },
+    "search_text": "trial by jury"
+   },
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "1e358248e4550fc24dbeef6250d34fe81d3d92a5d1c33b2b441f064a8e940eee",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "sources_only": true
+  },
+  "key": "887186eed71ef12fdc8d9924fc0686859f006a8a269ddc77cdeb805e538dd029",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "question": "And what did peers say?"
+  },
+  "key": "7f98b2a6a8d87a1844aabf69f2e9e66035fcfa1a296a3b86296f4b3f0e1c22a6",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "7f1719db5c8a4c7c540d649bb3125d87fb32250094850dd8a200d5d008c72225",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "follows": "What has been said about trial by jury since 2020?",
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "4f55b601a7b2359009713dc9ec58ee759788d70574ddd3406c15b1b47ec85f23",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "compare": [
+    {
+     "id": "labour",
+     "kind": "party"
+    },
+    {
+     "id": "conservative",
+     "kind": "party"
+    }
+   ],
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "cfeb5aeccedcec9a36168553c39e385f7d8677695d12fd6648a6932395f5871b",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "question": "Où est la bibliothèque — “déjà vu”?"
+  },
+  "key": "a03c5757c72b636419c8f858d6fd282e1c9d621a2ce0af61d35c9f8c4c32d306",
+  "world": {
+   "model": "claude-opus-5-5"
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "a1089249d05e1372436214a57c0479b4439cb55c468f30e0c3a21fd6c0e54ff3",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "question": "what has been said about  TRIAL by jury since 2020?"
+  },
+  "key": "a1089249d05e1372436214a57c0479b4439cb55c468f30e0c3a21fd6c0e54ff3",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "mode": "comprehensive",
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "6b41a9d5d349bccbc61c6864158fd93a89119fc1acc385fb4546bf49fabdef73",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "recency": 0.7
+  },
+  "key": "40dd7a5c0bdb3c41bb54c0ef9da8167afbe2df323a08f727aadf194545e74e48",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "role_weight": 1.5
+  },
+  "key": "529f942dad61ae045fd6bd8cad4fd0ae5b96c0b41c51c04491f4f49a12c1f795",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "scope": {
+    "votes": false,
+    "written": false
+   }
+  },
+  "key": "64acddfa00b2e92222119969fe62f67bd7e3bdd69dbdcee5e48762091b6a6382",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "plan": {
+    "filters": {
+     "date_from": "2020-01-01"
+    },
+    "search_text": "trial by jury"
+   },
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "a9062af299a10cb574dd5e1c4e872a8d66f7696141058d4e42ec587af4503bd8",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "sources_only": true
+  },
+  "key": "52b8f062b6d8f73a39f021cba135748eed7a0627d6837cacaaf25775e77fbdee",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "question": "And what did peers say?"
+  },
+  "key": "6d3ab3baeaed35636223578fb70d2ba7bbb0d561cdf22fd5f1d01cfc8bcc52cb",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "55d93a5578a491fd8024aeb6f32e8167fcc06c06e41b095aba4e59181e30c977",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "follows": "What has been said about trial by jury since 2020?",
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "59ea20c547321c78bfcc13fab35e231b6c042d08d5d91f62e7574d230e44b117",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "compare": [
+    {
+     "id": "labour",
+     "kind": "party"
+    },
+    {
+     "id": "conservative",
+     "kind": "party"
+    }
+   ],
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "0a0c8ab562db9f451ba607afdc4e4201b2a08f3d76bd175b59282a3e54cf50ca",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "question": "Où est la bibliothèque — “déjà vu”?"
+  },
+  "key": "d5fc7eaee1cd5dce06e9a81607df371f678dec9a7ec45a051f7bc1a4e2406b8b",
+  "world": {
+   "data": 41
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "2243feb1f0dd48a3e0b11113ff7a16fd0a4116484f0d83eef92193695016f5a2",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "question": "what has been said about  TRIAL by jury since 2020?"
+  },
+  "key": "2243feb1f0dd48a3e0b11113ff7a16fd0a4116484f0d83eef92193695016f5a2",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "mode": "comprehensive",
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "785aff2aeab7d85bb9343cf73d06fcabf9fddf4f45b48d10abf0d5858fe39617",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "recency": 0.7
+  },
+  "key": "d73a4638ba5fcf8cede3cb281fd276e92b84de7454a0efbf5ce11f51a8825a82",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "role_weight": 1.5
+  },
+  "key": "79e22f0f933260625b7633563ba07d2c5e71a5375513e7a96570ba2214452339",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "scope": {
+    "votes": false,
+    "written": false
+   }
+  },
+  "key": "f2500cdaf6ab5de3428e620867fb2e2cf7d334713abf90e5f94c440952fc8277",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "plan": {
+    "filters": {
+     "date_from": "2020-01-01"
+    },
+    "search_text": "trial by jury"
+   },
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "6d617ff247e67c265cc61fe766d2930cbbf536b78e160c77059e590ab2bf3441",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "sources_only": true
+  },
+  "key": "08015f07047c208783f66f033ff5bb6673343ad26c609946fbc19ec87d6ca522",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "question": "And what did peers say?"
+  },
+  "key": "13db97c1827658d781ccc180997b5d90ac9996138e4fe1cde4714c3392ab5d82",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "07063bc23001e89583bd03e95608c225946f984f6bc06d03ab4d068e17156fec",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "follows": "What has been said about trial by jury since 2020?",
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "44234e1ac6a4bd76be32a6e451402000d2a53dcf1c68fad4bb1da7f1b2f5e024",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "compare": [
+    {
+     "id": "labour",
+     "kind": "party"
+    },
+    {
+     "id": "conservative",
+     "kind": "party"
+    }
+   ],
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "047fb95506b112d0e9a830b93a972d84641341ce91e8e01f2c352383c0d85353",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "question": "Où est la bibliothèque — “déjà vu”?"
+  },
+  "key": "089bc4f202ec92f79bec00cf07de5eda1ab42f04457cc56bc51a1a4a01ea54c4",
+  "world": {
+   "data": null
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "e9542dde9490f5ee4fb6faa0c7234bf5dbe6cff13ff794a24c05525ceda79b38",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "question": "what has been said about  TRIAL by jury since 2020?"
+  },
+  "key": "e9542dde9490f5ee4fb6faa0c7234bf5dbe6cff13ff794a24c05525ceda79b38",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "mode": "comprehensive",
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "66c6e9969562d3f7af57b1510ae221dd2dd472b42bb9d00880f10a286b34c8d0",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "recency": 0.7
+  },
+  "key": "115282d9a2e99dc674e241128ec7c34b4dc870c7e001ea0d07401e3ad0e57951",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "role_weight": 1.5
+  },
+  "key": "a21ea43c3eae00be32c0d836f3d7196449d2ca7fa0b780724e1a31f1550fbbde",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "scope": {
+    "votes": false,
+    "written": false
+   }
+  },
+  "key": "1e3837e48f2fadc0a573362f57ee5c207571c92323ac99dcac4c2a1270773002",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "plan": {
+    "filters": {
+     "date_from": "2020-01-01"
+    },
+    "search_text": "trial by jury"
+   },
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "307612ef8ab2aec9c6c3b4231b2ccb2d859b484c43e20917f79ae17cc890f903",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "question": "What has been said about trial by jury since 2020?",
+   "sources_only": true
+  },
+  "key": "8e2b28cbea68d9720dcb98dbf89aeeb2a6b33cdd4c916f1c580e6291745df54c",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "question": "And what did peers say?"
+  },
+  "key": "a25e399ff36da4f9a41c08b463aa40c719bd1220aea0094a4a56136737d94bbf",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "79e5902a2b89b3bcae16c28868763ac5b092c34cc90c098f150ae78ede9e8aa5",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "follows": "What has been said about trial by jury since 2020?",
+   "history": [
+    {
+     "answer": "Ministers said that jury trial would be kept.",
+     "question": "What has been said about trial by jury since 2020?",
+     "scope": "since 2020",
+     "topic": "trial by jury"
+    }
+   ],
+   "question": "And what did peers say?"
+  },
+  "key": "8f4699a3c00d143107f1bd29b9b4b234df59c4d2ab921ff6d32b8995a558998c",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "compare": [
+    {
+     "id": "labour",
+     "kind": "party"
+    },
+    {
+     "id": "conservative",
+     "kind": "party"
+    }
+   ],
+   "question": "What has been said about trial by jury since 2020?"
+  },
+  "key": "2be8f9af8a47e2adef9401c6e40b74f3b3c42bc116f5c9a1b0768e71b55cf2ee",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ },
+ {
+  "body": {
+   "question": "Où est la bibliothèque — “déjà vu”?"
+  },
+  "key": "24165b9adcef5ae9a1fb6365c122ac9881279e189d13547c7dea3feb34a1494d",
+  "world": {
+   "instructions": "0123456789ab"
+  }
+ }
+]

@@ -1,0 +1,149 @@
+# Data sources and attribution
+
+Every data source Where MPs Stand uses, its licence and how it is credited. The site shows these attributions in
+its footer and on its About page.
+
+## Parliamentary proceedings (Hansard)
+
+Contains Parliamentary information licensed under the
+[Open Parliament Licence v3.0](https://www.parliament.uk/site-information/copyright-parliament/open-parliament-licence/).
+
+Debates, written answers, written ministerial statements, Public Bill Committee
+debates and division records are taken from the structured XML published by
+[TheyWorkForYou](https://www.theyworkforyou.com/) / [ParlParse](https://parser.theyworkforyou.com/),
+a project of [mySociety](https://www.mysociety.org/). Every excerpt the
+application displays keeps a link back to its primary Hansard record.
+
+The Commons division lists of May 1997 to May 2001, which TheyWorkForYou's files for those years lack, come from
+the vote matrix published by [Public Whip](https://www.publicwhip.org.uk/) (kept in `data_static/votes`), which
+took them from Hansard. With thanks to Public Whip's volunteers.
+
+## Members, offices and committees
+
+People, names, seats, parties, ministerial and shadow posts, and select
+committee memberships come from the `members/` data in
+[mysociety/parlparse](https://github.com/mysociety/parlparse), which draws on
+the UK Parliament Members' Names Information Service (Open Parliament Licence
+v3.0). With thanks to mySociety for maintaining these datasets.
+
+## Early day motions, committees and the devolved parliaments
+
+Early day motions and their signatures come from the UK Parliament
+[oral questions and motions API](https://oralquestionsandmotions-api.parliament.uk/), and committees, inquiries,
+reports, government responses and oral evidence witnesses from the UK Parliament
+[Committees API](https://committees-api.parliament.uk/), both under the Open Parliament Licence v3.0.
+
+The official reports of the Scottish Parliament, the Senedd and the Northern Ireland Assembly, and plain-English
+descriptions of some divisions
+([TheyWorkForYou Votes](https://votes.theyworkforyou.com/)) come from the data published by
+[TheyWorkForYou](https://www.theyworkforyou.com/pwdata/) (mySociety). The devolved reports contain information
+licensed under the Open Parliament Licence and the equivalent licences of the Scottish Parliament, the Senedd and
+the Northern Ireland Assembly.
+
+TheyWorkForYou Votes states no licence for its descriptions of divisions (from
+`theyworkforyou.com/pwdata/votes/divisions.parquet`), and the API terms that put mySociety's own data under CC BY-SA
+2.5 do not mention them. The site labels each description "(TheyWorkForYou Votes)" and credits mySociety on the
+methodology page and here. mySociety has been asked to confirm the terms (`outreach/2026-11/mysociety.txt`). If the
+descriptions may not be used, they will be removed; the site's own labels for kinds of vote are not affected.
+
+## Registers of interests
+
+The Register of Members' Financial Interests and the registers of the Scottish Parliament, the Senedd and the
+Northern Ireland Assembly come from the copies published by [TheyWorkForYou](https://www.theyworkforyou.com/pwdata/)
+(mySociety); the Register of Lords' Interests from the UK Parliament
+[Members API](https://members-api.parliament.uk/), under the Open Parliament Licence v3.0 and the equivalent
+licences of the devolved parliaments.
+
+## Political donations
+
+Donations to MPs and to their local parties come from the
+[Electoral Commission's register of donations](https://search.electoralcommission.org.uk/), refreshed weekly,
+with donors' addresses and postcodes left out. Matching donations to MPs is this site's own work (see the
+methodology page); each entry links to the Commission's record of it. Contains Electoral Commission Information ©
+Electoral Commission and/or database right. The register is downloaded once a week with the search site's own CSV
+export, and credited as the Commission asks (checked on 12 October 2026).
+
+## Company roles
+
+Directorships and other company roles come from the [Companies House](https://find-and-update.company-information.service.gov.uk/)
+register, through its free public data API, with addresses, nationality and dates of birth left out. Contains
+Companies House data. Matching Companies House records to members (by name and month and year of birth) is this
+site's own work; each entry links to the Companies House record. The developer guidelines that come with the API key
+(checked on 8 November 2026) set no attribution wording. The site keeps under their limit of 600 requests in five
+minutes (with a 0.6-second pause between requests), waits when it is answered "429 Too Many Requests", and keeps
+the key out of the repository (in the server's `deploy/.env`).
+
+## All-party and cross-party groups
+
+Groups, officers, members, secretariats and registered benefits come from mySociety's
+[APPG groups and memberships](https://github.com/mysociety/appg-membership) dataset, licensed under
+[Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/), which is built from the Register of
+All-Party Parliamentary Groups (Open Parliament Licence v3.0) and the devolved parliaments' lists of cross-party
+groups. Membership lists found by AI web search are left out; contact details are left out.
+
+## Party groups and caucuses
+
+Lists of members and signatories of party groups (`data_static/groups/groups.json`) are taken from the groups' own
+pages and from the letters and statements they published with their signatories' names, as reproduced by the sources
+named with each entry (LabourList, Labour Outlook, the groups' and members' own websites); each is linked where it is
+shown. Members' statements in Parliament are from Hansard (Open Parliament Licence v3.0). Records of MPs' offices
+paying for groups' pooled research services come from the Independent Parliamentary Standards Authority's
+[published business costs](https://www.theipsa.org.uk/mp-staffing-business-costs/annual-publications), available
+under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)
+(IPSA: "All content is available under the Open Government License v3.0, except where otherwise stated"); the site
+shows them as payments for a group's research service, never as membership, and with no amounts. Matching names to
+UK Parliament IDs is this site's own work.
+
+## Members' details and election results
+
+Members' gender and constituency election results (majorities, votes cast, the party that came second, by-elections)
+come from the UK Parliament [Members API](https://members-api.parliament.uk/) (Open Parliament Licence v3.0), the
+runner-up from each result's own candidates. General election
+results for 1997, 2001 and 2005 come from the House of Commons Library's
+[general election results 1918–2019](https://commonslibrary.parliament.uk/research-briefings/cbp-8647/) (CBP-8647,
+Open Parliament Licence v3.0), and by-election results for 2001 to 2010 from its research papers
+[05/34](https://commonslibrary.parliament.uk/research-briefings/rp05-34/) and
+[10/50](https://commonslibrary.parliament.uk/research-briefings/rp10-50/) (Open Parliament Licence v3.0), and for 1997
+to 2001 from the House of Commons Information Office's Factsheet M16, *By-election results: 1997–2001* (Open
+Parliament Licence v3.0), kept in
+`data_static/elections`; matching them to seats by name is this site's own work. UK Parliament IDs for MPs that
+ParlParse has none for were found in the Members API by surname, seat and dates (`data_static/parliament_ids.json`). Dates of birth come
+from [Wikidata](https://www.wikidata.org/) (property P569, matched by UK Parliament ID, P10428), whose
+structured data is available under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). For the few
+members Wikidata has no date for, the date in the birth-date field of their English
+[Wikipedia](https://en.wikipedia.org/) article (reached through the same Wikidata item) is used, with the article
+kept as the source.
+
+## Constituency boundaries and regions
+
+Contains public sector information licensed under the
+[Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+Source: Office for National Statistics (Westminster Parliamentary Constituencies,
+December 2021 names and codes), and mySociety's
+[2025-constituencies](https://github.com/mysociety/2025-constituencies) dataset
+(post-2024 constituencies with regions, and 2010→2024 boundary overlaps),
+itself derived from ONS and Boundary Commission data.
+Seat types use ONS 2011 Built-up Areas, 2011 Census populations (Nomis) and ONS output-area lookups
+(England and Wales); National Records of Scotland Census 2022 settlements, populations and lookups
+(Scotland); and NISRA 2015 settlements, Census 2021 populations and lookups (Northern Ireland). All are
+published under the Open Government Licence v3.0.
+Contains OS data © Crown copyright and database right.
+Contains National Statistics data © Crown copyright and database right.
+Contains NRS data © Crown copyright and database right.
+Contains NISRA data © Crown copyright.
+
+## Typefaces
+
+The web app bundles [Source Serif 4](https://github.com/adobe-fonts/source-serif) by Adobe, via Fontsource. Link
+preview cards are drawn with Source Serif 4 and Source Sans 3, also by Adobe (`data_static/fonts/LICENSE-*.md`).
+Both are licensed under the [SIL Open Font License 1.1](https://openfontlicense.org). The Where They Stand family
+kit (`web/public/family/`) carries its own copy of Source Serif 4, with its licence (`fonts/OFL.txt`); the site
+points the kit at the bundled copy instead, so the kit's is not downloaded. No fonts are loaded from third-party
+servers.
+
+## Briefings written by the site
+
+The text of briefings written by Where MPs Stand is licensed under
+[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+Credit "Where MPs Stand" with a link to the briefing. Quotations from Hansard within a briefing remain under the
+Open Parliament Licence v3.0. The name and mark are not covered by the licence.

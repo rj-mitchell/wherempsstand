@@ -1,0 +1,12 @@
+# Restart any site on this server that has stopped answering, and email the alerts address (deploy/watchdog.sh):
+# Where MPs Stand and each site in SITES in deploy/.env. Serves every site on this server. Installed by
+# deploy/update.sh, which also removes the older hansard-watchdog units it replaces.
+[Unit]
+Description=Restart any site on this server that has stopped answering
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/hansardgpt/deploy/watchdog.sh
+TimeoutStartSec=10min

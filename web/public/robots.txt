@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+
+Sitemap: https://wherempsstand.com/sitemap.xml
+Sitemap: https://wherempsstand.com/sitemap-people.xml
+Sitemap: https://wherempsstand.com/sitemap-briefings.xml
+Sitemap: https://wherempsstand.com/sitemap-bills.xml
+Sitemap: https://wherempsstand.com/sitemap-committees.xml
+Sitemap: https://wherempsstand.com/sitemap-edms.xml
+Sitemap: https://wherempsstand.com/sitemap-groups.xml
+Sitemap: https://wherempsstand.com/sitemap-devolved.xml
