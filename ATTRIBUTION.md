@@ -1,7 +1,7 @@
 # Data sources and attribution
 
-Where MPs Stand is built entirely on open data. The application shows these
-attributions in its footer and on its About page.
+Every data source Where MPs Stand uses, its licence and how it is credited. The site shows these attributions in
+its footer and on its About page.
 
 ## Parliamentary proceedings (Hansard)
 
@@ -90,10 +90,11 @@ shown. Members' statements in Parliament are from Hansard (Open Parliament Licen
 paying for groups' pooled research services come from the Independent Parliamentary Standards Authority's
 [published business costs](https://www.theipsa.org.uk/mp-staffing-business-costs/annual-publications), available
 under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)
-(IPSA: "All content is available under the Open Government License v3.0, except where otherwise stated"); they are not
-shown on the site until the charity has legal advice. Matching names to UK Parliament IDs is this site's own work.
+(IPSA: "All content is available under the Open Government License v3.0, except where otherwise stated"); the site
+shows them as payments for a group's research service, never as membership, and with no amounts. Matching names to
+UK Parliament IDs is this site's own work.
 
-## Gender and date of birth
+## Members' details and election results
 
 Members' gender and constituency election results (majorities, votes cast, the party that came second, by-elections)
 come from the UK Parliament [Members API](https://members-api.parliament.uk/) (Open Parliament Licence v3.0), the
