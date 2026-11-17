@@ -45,7 +45,7 @@ class Settings(core.Settings):
     """The shared package's settings (``raw``, ``data_dir``, ``config_path``, ``section``, ``answer``, ``usage``,
     ``state_db``), with this site's own accessors."""
 
-    # Convenience accessors -------------------------------------------------
+    # Convenience accessors
     @property
     def archive_start(self) -> date:
         return date.fromisoformat(self.section("archive").get("start_date", "1997-05-01"))
@@ -70,7 +70,7 @@ class Settings(core.Settings):
     def sources(self) -> dict[str, Any]:
         return self.section("sources")
 
-    # Data layout -------------------------------------------------------------
+    # Data layout
     @property
     def raw_xml_dir(self) -> Path:
         return self.data_dir / "raw" / "scrapedxml"

@@ -210,7 +210,7 @@ def test_a_result_with_no_candidates_is_asked_again_a_week_later(tmp_path):
     assert fetch_runner_up(_api([], candidates=[{"party": {"name": "Labour"}, "votes": 9}]), 7, 422)["candidates"] == 1
 
 
-# ---- MPs on the day, the filter and the grouping (fixture members, real results)
+# MPs on the day, the filter and the grouping (fixture members, real results)
 
 
 def test_the_runner_up_is_from_the_last_election_before_they_spoke(resolver):
@@ -280,7 +280,7 @@ def test_runner_up_filter_checks_the_day(engine):
     assert none.records == []
 
 
-# ---- reading questions
+# reading questions
 
 
 @pytest.mark.parametrize("question, parties, runner_up_parties, group_by", [

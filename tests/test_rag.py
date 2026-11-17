@@ -20,7 +20,7 @@ TODAY = date(2026, 10, 1)
 GROUPS = {"northern": ["North East", "North West", "Yorkshire and The Humber"]}
 
 
-# --------------------------------------------------------------------------- query parsing (offline)
+# query parsing (offline)
 
 
 def test_offline_parse_hs2_example():
@@ -39,7 +39,7 @@ def test_offline_parse_northern_dissent_example():
     assert plan.wants_votes and "environment" in plan.portfolios
 
 
-# --------------------------------------------------------------------------- verification
+# verification
 
 
 def src(n, *blocks):
@@ -117,7 +117,7 @@ def test_verify_detects_no_records_answer():
     assert v.no_records
 
 
-# --------------------------------------------------------------------------- pipeline with a fake client
+# pipeline with a fake client
 
 
 class FakeStream:
@@ -428,7 +428,7 @@ def test_client_has_an_explicit_timeout(monkeypatch):
     assert (model.timeout, model.connect, model.max_retries) == (300.0, 10.0, 2)  # the same in every site
 
 
-# ---- ported from Where Countries Stand's verifier ---------------------------------------------------------------
+# ported from Where Countries Stand's verifier
 
 
 def test_an_honorifics_full_stop_ends_no_sentence():

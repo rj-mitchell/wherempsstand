@@ -69,7 +69,7 @@ def clean(categories: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
-# --------------------------------------------------------------------------- the Lords
+# the Lords
 
 
 def _when(v: str | None) -> str | None:
@@ -186,7 +186,7 @@ def lords_changes(data: dict[str, Any], person_id: str, days: int = 365) -> dict
     return {"since": since, "added": added, "removed": removed, "removed_tracked_from": data.get("tracked_from")}
 
 
-# --------------------------------------------------------------------------- the devolved registers
+# the devolved registers
 
 
 def refresh_devolved(data_dir: Path, *, client: httpx.Client | None = None) -> dict[str, Any]:
@@ -220,7 +220,7 @@ def refresh_devolved(data_dir: Path, *, client: httpx.Client | None = None) -> d
     return out
 
 
-# --------------------------------------------------------------------------- reading
+# reading
 
 
 class Registers:

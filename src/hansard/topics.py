@@ -66,7 +66,7 @@ def load_topics(path: Path) -> list[Topic]:
     return out
 
 
-# ---- versions ------------------------------------------------------------------------------------------------
+# versions
 
 
 def versions(state: StateDB, archive: SavedBriefings, slug: str) -> list[dict[str, Any]]:
@@ -139,7 +139,7 @@ def overlap(a: set[str], b: set[str]) -> float:
     return len(a & b) / len(a | b) if a | b else 1.0
 
 
-# ---- refreshing ----------------------------------------------------------------------------------------------
+# refreshing
 
 
 def refresh_topics(settings: Settings, state: StateDB, pipeline: Pipeline, parts: DeskParts, *,

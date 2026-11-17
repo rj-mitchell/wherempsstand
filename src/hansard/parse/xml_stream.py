@@ -235,7 +235,7 @@ def _row(el, tag, directory, house, family, meta, oral, major, minor, bill, sess
     }
 
 
-# --------------------------------------------------------------------------- divisions
+# divisions
 
 
 def parse_divisions(path: Path, directory: str | None = None) -> tuple[list[dict], list[dict]]:

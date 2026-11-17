@@ -178,7 +178,7 @@ class StateDB:
                               "WHERE key GLOB '*[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'").fetchone()
         return row[0] if row else None
 
-    # ---- manifest ------------------------------------------------------------
+    # manifest
     def manifest(self) -> dict[tuple[str, str], sqlite3.Row]:
         with self.connect() as con:
             return {(r["source"], r["key"]): r for r in con.execute("SELECT * FROM manifest")}
@@ -220,7 +220,7 @@ class StateDB:
                 "SELECT source, key FROM manifest WHERE indexed_at IS NULL AND source NOT LIKE '%division%' "
                 "ORDER BY source, key")]
 
-    # ---- sync log --------------------------------------------------------------
+    # sync log
     def start_run(self, kind: str) -> int:
         with self.connect() as con:
             cur = con.execute("INSERT INTO sync_log (kind, started_at) VALUES (?, ?)", (kind, utcnow()))
@@ -249,7 +249,7 @@ class StateDB:
             out.append(d)
         return out
 
-    # ---- key/value -------------------------------------------------------------
+    # key/value
     def get(self, key: str, default: str | None = None) -> str | None:
         with self.connect() as con:
             row = con.execute("SELECT value FROM kv WHERE key=?", (key,)).fetchone()

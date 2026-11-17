@@ -45,7 +45,7 @@ def without_added(section: str, values: Any) -> Any:
     return out
 
 
-# ---- settings --------------------------------------------------------------------------------------------------
+# settings
 
 
 def test_settings_resolve_as_before(tmp_path):
@@ -70,7 +70,7 @@ def test_the_local_settings_file_is_written_byte_for_byte_as_before(tmp_path):
     assert shared.local_settings_written(tmp_path, save_local_settings) == shared.read("settings.json")["local_file"]
 
 
-# ---- the checks on briefings -----------------------------------------------------------------------------------
+# the checks on briefings
 
 
 def test_the_checks_report_each_briefing_as_before():
@@ -139,7 +139,7 @@ def test_a_briefing_written_under_todays_rules_is_shown_as_it_was_saved():
     assert unstamped["loaded_words"] == 0
 
 
-# ---- the interests check ---------------------------------------------------------------------------------------
+# the interests check
 
 
 def test_the_interests_check_asks_the_model_the_same_and_makes_the_same_of_its_answer():
@@ -252,7 +252,7 @@ def test_on_the_providers_own_client_the_interests_check_puts_on_the_wire_what_t
         assert now.headers.get("x-stainless-helper") == then.headers.get("x-stainless-helper") == "messages.parse"
 
 
-# ---- the flow of a question, with a scripted pipeline ----------------------------------------------------------
+# the flow of a question, with a scripted pipeline
 
 SCRIPTED = shared.read("ask-scripted.json")
 
@@ -270,7 +270,7 @@ def test_the_flow_of_a_question_sends_and_writes_what_it_did(name, tmp_path, mon
     assert now == SCRIPTED[name]
 
 
-# ---- the same through the site's real pipeline, over the tests' own index --------------------------------------
+# the same through the site's real pipeline, over the tests' own index
 
 REAL = shared.read("ask-real.json")
 RULES = '"rules": 1'
@@ -309,7 +309,7 @@ def test_the_real_pipeline_sends_and_writes_what_it_did(name, indexed_settings, 
         assert all(RULES in row[2] for row in now["rows"]["cache"] if '\\"no_records\\": false' in row[2])
 
 
-# ---- the small tables ------------------------------------------------------------------------------------------
+# the small tables
 
 
 def test_the_limit_on_requests_a_minute_decides_as_before():
@@ -402,7 +402,7 @@ def test_the_caps_decide_as_before_over_a_scripted_month(settings):
     assert places == golden["places"]
 
 
-# ---- topic briefings -------------------------------------------------------------------------------------------
+# topic briefings
 
 
 @pytest.mark.parametrize("case", shared.TOPIC_CASES, ids=[c[0] for c in shared.TOPIC_CASES])

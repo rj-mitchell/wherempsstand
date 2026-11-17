@@ -134,7 +134,7 @@ class DevolvedStore:
                             (cur.lastrowid, s["text"], s["major"], s["minor"], s["speaker"]))
             con.execute("INSERT OR REPLACE INTO files VALUES (?, ?, ?, ?, date('now'))", (leg, key, name, day))
 
-    # ---- reading ------------------------------------------------------------------------------------------
+    # reading
     def days(self, leg: str, limit: int = 40, before: str | None = None) -> list[dict[str, Any]]:
         with self.connect() as con:
             rows = con.execute(f"""
@@ -254,7 +254,7 @@ class DevolvedStore:
         return {r[0]: {"speeches": r[1], "from": r[2], "to": r[3]} for r in rows}
 
 
-# ---- who the speakers were on the day --------------------------------------------------------------------------
+# who the speakers were on the day
 class Members:
     """Devolved memberships (seat, party, dates) and names from parlparse's people.json, reloaded when it changes."""
 
@@ -328,7 +328,7 @@ class Members:
         return out
 
 
-# ---- fetching ---------------------------------------------------------------------------------------------------
+# fetching
 def listing(client: httpx.Client, leg: str, since: date) -> dict[str, tuple[str, str, str]]:
     """{key: (latest file name, date, folder)} for the files listed since ``since`` (a later revision wins), from the
     body's folder and any earlier folder it was published in."""

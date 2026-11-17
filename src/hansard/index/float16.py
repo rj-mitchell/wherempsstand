@@ -87,7 +87,7 @@ class Target:
         return self.path / f"{self.new_name}.progress.json"
 
 
-# ---- sizes ---------------------------------------------------------------------------------------------------------
+# sizes
 
 
 def folder_bytes(path: Path) -> int:
@@ -114,7 +114,7 @@ def estimate_bytes(tbl: Any, rows: int) -> int:
     return int(rows * (dim * 2 * 1.15 + 64))
 
 
-# ---- the tables ----------------------------------------------------------------------------------------------------
+# the tables
 
 
 def _db(target: Target):
@@ -293,7 +293,7 @@ def check_searches(target: Target, src, dst, queries: list[np.ndarray], limit: i
     return out
 
 
-# ---- the swap ------------------------------------------------------------------------------------------------------
+# the swap
 
 _RENAME_EXCHANGE = 2
 _AT_FDCWD = -100
@@ -351,7 +351,7 @@ def remove_leftovers(target: Target, db, keep_old: bool) -> list[str]:
     return removed
 
 
-# ---- the whole conversion ------------------------------------------------------------------------------------------
+# the whole conversion
 
 
 def convert(target: Target, *, dry_run: bool = False, keep_old: bool = False, force: bool = False,

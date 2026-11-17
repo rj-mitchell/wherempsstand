@@ -1,9 +1,8 @@
 /**
- * Where the records meet (the family plan, section 4): under a briefing, a quiet link that asks the same question on
- * a sister site, shown only where that site's record deals with the subject. Where Councils Stand answers from
- * councils' minutes, so it is offered for local services; Where Countries Stand answers from the United Nations'
- * record, so it is offered for foreign affairs. Both take the question in `?q=` on their home page (Councils fills in
- * the question box; Countries asks it at once).
+ * Under a briefing, a link that asks the same question on a sister site, shown only where that site's record deals
+ * with the subject. Where Councils Stand answers from councils' minutes, so it is offered for local services; Where
+ * Countries Stand answers from the United Nations' record, so it is offered for foreign affairs. Both take the
+ * question in `?q=` on their home page (Councils fills in the question box; Countries asks it at once).
  */
 import { sister } from "./family";
 

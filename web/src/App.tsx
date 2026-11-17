@@ -75,10 +75,10 @@ export function examplesFor(day: Date): string[] {
   return EXAMPLE_SETS[Math.floor(day.getTime() / 86_400_000) % EXAMPLE_SETS.length];
 }
 
-// Settings saved before version 2 searched the devolved parliaments and committee evidence only on request; they now
-// search everywhere by default. Version 3 (12 November 2026): the recency slider's scale changed (its shortest
-// half-life went from 2 years to 6 months), so a saved value is converted to keep the half-life the reader chose,
-// and the old default (4 years) becomes the new default (2 years). Older saved settings are brought up to date once.
+// Saved settings carry a version and are migrated once when loaded. Version 1 searched the devolved parliaments and
+// committee evidence only on request. Before version 3 a recency value s meant a half-life of 2 / s years rather
+// than 0.5 / s, so a saved value is divided by 4 to keep the reader's half-life, and the old default becomes the
+// current default.
 const SETTINGS_VERSION = 3;
 const OLD_DEFAULT_RECENCY = 0.5;
 

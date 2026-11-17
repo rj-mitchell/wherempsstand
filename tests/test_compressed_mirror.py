@@ -97,7 +97,7 @@ def test_dry_run_changes_nothing(xml_mirror):
     assert {p: p.stat().st_mtime_ns for p in xml_mirror.rglob("*")} == before
 
 
-# --------------------------------------------------------------------------- the HTTPS mirror, stored gzipped
+# the HTTPS mirror, stored gzipped
 
 
 class FakeTWFY:

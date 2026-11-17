@@ -57,7 +57,7 @@ def _fmt(d: date | str) -> str:
     return f"{d.day} {d.strftime('%B %Y')}"
 
 
-# --------------------------------------------------------------------------- Parliaments
+# Parliaments
 
 
 def parliament_span(on: date) -> tuple[date, date]:
@@ -86,7 +86,7 @@ def parliament_label(start: date, end: date) -> str:
     return f"{start.year}–" + ("" if end == END else f"{end.year % 100:02d}")
 
 
-# --------------------------------------------------------------------------- the published lists
+# the published lists
 
 
 def load_group_data(path: Path | None = None) -> dict[str, Any]:
@@ -121,7 +121,7 @@ def evidence_label(ev: dict[str, Any], group: dict[str, Any]) -> str:
     return f"Said in the {house} on {_fmt(ev['date'])}: “{ev.get('sentence')}”"
 
 
-# --------------------------------------------------------------------------- finding self-declarations
+# finding self-declarations
 
 _ROLE = (r"(?:(?:proud|founding|long-standing|active|paid-up|keen|enthusiastic|current|very proud)\s+)*"
          r"(?P<role>member|chair|chairman|chairwoman|co-chair|co-chairman|vice-chair|vice-chairman|deputy chair|"
@@ -290,7 +290,7 @@ def find_declarations(text: str, on: date | None = None, party_id: str | None = 
     return list(out.values())
 
 
-# --------------------------------------------------------------------------- declarations found in the record
+# declarations found in the record
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS declarations (
@@ -420,7 +420,7 @@ def declarations_report(settings) -> str:
     return "\n".join(lines) + "\n"
 
 
-# --------------------------------------------------------------------------- who is in which group, when
+# who is in which group, when
 
 
 class Groups:

@@ -184,7 +184,7 @@ def test_cost_calculation():
         pytest.approx(6.0)
 
 
-# ---- public mode (the default) -------------------------------------------------------------------
+# public mode (the default)
 
 
 def test_public_site_needs_no_sign_in(public):
@@ -740,7 +740,7 @@ def test_pages_without_their_own_image_share_the_family_card():
     assert '<meta property="og:image" content="https://wherempsstand.com/family/card.png" />' in page
 
 
-# ---- a withdrawn briefing is not played again from the answer cache ----------------------------------------------
+# a withdrawn briefing is not played again from the answer cache
 
 
 def test_a_withdrawn_briefing_is_not_replayed_to_the_next_reader_with_the_same_question(tmp_path, monkeypatch):

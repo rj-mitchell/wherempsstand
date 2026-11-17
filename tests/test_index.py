@@ -138,7 +138,7 @@ def test_embedding_with_another_model_is_refused_until_the_vectors_are_started_a
     assert state.unembedded() == []
 
 
-# ---- a refused index is loud: the update fails, the checks say so (the independent review's fourth finding) --------
+# a refused index is loud: the update fails, the checks say so (the independent review's fourth finding)
 
 
 def test_search_by_meaning_switched_off_is_said_by_the_engine_the_command_and_the_familys_check(old, monkeypatch,
@@ -185,7 +185,7 @@ def test_search_by_meaning_switched_off_is_said_by_the_engine_the_command_and_th
     assert "hansard meaning-check" in check and '1) bad "${meaning##' in check
 
 
-# ---- the models folder (wts-core docs/UPGRADING.md, "The embedder's id") ------------------------------------------
+# the models folder (wts-core docs/UPGRADING.md, "The embedder's id")
 
 
 def test_meaning_check_says_which_case_the_models_folder_is_in_and_the_sites_note_of_the_weights_follows_the_index(

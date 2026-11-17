@@ -257,7 +257,7 @@ def load_demographics(cache: Path) -> dict[str, dict[str, Any]]:
     return {"genders": (raw.get("genders") or {}).get("data", {}), "births": births}
 
 
-# --------------------------------------------------------------------------- ages
+# ages
 
 
 def assumed_birth(birth_date: str | date | None, precision: str | None) -> date | None:

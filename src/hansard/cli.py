@@ -77,7 +77,7 @@ def _date(value: str | None) -> date | None:
     return date.fromisoformat(value) if value else None
 
 
-# --------------------------------------------------------------------------- reference
+# reference
 
 
 def build_reference_data(settings: Settings, pull: bool = True, members_dir: Path | None = None) -> dict:
@@ -119,7 +119,7 @@ def reference(pull: bool = typer.Option(True, help="git pull parlparse members/ 
         typer.echo(f"WARNING: {len(unmatched)} seats since 1997 without a region: {unmatched[:10]}")
 
 
-# --------------------------------------------------------------------------- data
+# data
 
 
 @app.command()
@@ -458,7 +458,7 @@ def status():
     typer.echo(json.dumps(out, indent=2, default=str))
 
 
-# --------------------------------------------------------------------------- search
+# search
 
 
 @app.command()
@@ -486,7 +486,7 @@ def search(query: str, date_from: str = typer.Option(None, "--from"), date_to: s
                    f" | {offices}\n    {r['heading']}\n    {r['excerpt'][:300]}...\n    {r['ranking']}")
 
 
-# --------------------------------------------------------------------------- sync and bootstrap
+# sync and bootstrap
 
 
 @app.command()
@@ -701,7 +701,7 @@ def bootstrap(sample: bool = typer.Option(False, help="offline demo using bundle
     typer.echo(json.dumps(stats, indent=2, default=str))
 
 
-# --------------------------------------------------------------------------- web
+# web
 
 
 @app.command("meaning-check")
@@ -820,7 +820,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, reload: bool = False,
                 access_log=access_log)
 
 
-# ---- backups (wts-core, ``wts_core.cli.ops_commands``): `hansard backup`, `restore`, `offsite`, `backup-check` ----
+# backups (wts-core, ``wts_core.cli.ops_commands``): `hansard backup`, `restore`, `offsite`, `backup-check`
 #
 # The commands are the Where They Stand sites' shared ones, under the names, with the options and printing the
 # lines this site has always had. What a backup is called and holds is in hansard/store/wts.py (``BACKUPS``).
@@ -857,7 +857,7 @@ app.add_typer(ops_commands(SITE, lambda: _settings(), BACKUPS, OPS_WORDING, cloc
                            before=lambda: _setup_logging()))
 
 
-# ---- how briefings went: statistics, the weekly report, the nightly tidy (wts-core docs/adr/0012) ---------------
+# how briefings went: statistics, the weekly report, the nightly tidy (wts-core docs/adr/0012)
 #
 # `hansard stats --since 7d` (and --json, --themes, --check), `hansard weekly-report`, `hansard tidy`: the Where
 # They Stand sites' shared commands (``wts_core.cli.stats_commands``) over the record of each briefing.
@@ -942,7 +942,7 @@ def user_disable(email: str):
     typer.echo(f"disabled {email}")
 
 
-# ---- reports and statements beside items (the right of reply) ------------------------------------------------------
+# reports and statements beside items (the right of reply)
 #
 # The commands are the Where They Stand sites' shared ones (wts-core, ``wts_core.cli``), under the names and with
 # the lines this site has always had for statements; the commands for reports are new with them. hansard/owner.py
@@ -951,7 +951,7 @@ def user_disable(email: str):
 app.add_typer(owner.reply_commands(lambda: _settings(), lambda: CLOCK))
 
 
-# ---- topic briefings ----------------------------------------------------------------------------------------------
+# topic briefings
 
 
 @topics_app.command("list")
@@ -990,7 +990,7 @@ def topics_refresh(only: list[str] = typer.Option(None, help="just these topics 
     typer.echo(f"{sum(1 for r in res if r['outcome'].startswith('rewritten'))} rewritten")
 
 
-# ---- the test set ------------------------------------------------------------------------------------------------
+# the test set
 #
 # `hansard eval plans|sources|retrieval|briefings` are the site's own, as they always were: how questions are read,
 # what evidence is chosen, and briefings by several models judged side by side (src/hansard/evaluate.py).

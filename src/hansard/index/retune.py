@@ -146,7 +146,7 @@ def measure(old: LanceIndex, new: LanceIndex, embedder, rows_per_partition: int,
             "before": base.before, **after}
 
 
-# ---- the record of the last rebuild ---------------------------------------------------------------------------------
+# the record of the last rebuild
 # The index is partitioned for the number of vectors when it is built. New vectors join its existing partitions, so
 # as the record grows each search reads more: the monthly disk report (``hansard index-status``) compares the number
 # now with the number in this record, and says when to rebuild.

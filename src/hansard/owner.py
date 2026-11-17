@@ -41,7 +41,7 @@ def tidy_replies(settings: Settings, clock: Clock = SYSTEM_CLOCK, path: Path | N
     return {"emails": emails, "lapsed": lapsed, "contacts": contacts, "counts": desk.forget_old_counts()}
 
 
-# ---- the lines ------------------------------------------------------------------------------------------------------
+# the lines
 
 
 def statement_lines(s: Mapping[str, Any]) -> list[str]:

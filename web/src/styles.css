@@ -1108,7 +1108,7 @@ legend,
   }
 }
 
-/* the briefing: a printed page */
+/* the briefing */
 
 .answer {
   position: relative;
@@ -1206,7 +1206,7 @@ legend,
   white-space: nowrap;
 }
 
-/* exporting a briefing: one menu instead of a row of buttons */
+/* exporting a briefing: one menu */
 .export-menu {
   position: relative;
 }
@@ -1645,10 +1645,8 @@ legend,
   margin-block-start: var(--space-xs);
 }
 
-/* ---- statements in someone's own words (the right of reply) ---------------------------------------------------
-   Set apart from the site's own words, which are serif on ivory between solid rules: a statement is in the sans,
-   on the sunk paper, inside a dashed rule, and always ends with the line saying it is theirs, not the site's. The
-   heading and that line say so in words too, so nothing rests on colour or style alone. */
+/* statements in someone's own words (the right of reply): set apart from the site's own text inside a dashed rule,
+   and always ending with the line that says they are the person's own words */
 .statement {
   margin-block: var(--space-xs) 0;
   padding: var(--space-xs) var(--space-s);
@@ -2013,8 +2011,7 @@ legend,
   min-block-size: 1.5rem; /* "Settings" stands on its own, so it gets the 24px target WCAG 2.2 asks for */
 }
 
-/* what to show: an executive summary, a chronological briefing or the sources only, as a plain choice under the box
-   where it can be seen, rather than buttons or a setting */
+/* what to show: an executive summary, a chronological briefing or the sources only, as a choice under the box */
 .answer-kind {
   flex-basis: 100%;
   display: flex;
@@ -2403,7 +2400,7 @@ legend,
   }
 }
 
-/* sign-in: the cover of a bound volume */
+/* sign-in page (invite-only mode): the name on the green band, then the form */
 
 .login {
   min-block-size: 100svh;
@@ -2532,7 +2529,7 @@ legend,
 }
 
 /* the lists of topics, bills and members sit indented under their heading (or their fold-out's marker), as plain
-   lists do: the rule above was lowered for chips and tags, not for these */
+   lists do */
 .prose :is(.topic-list, .people-list) {
   padding-inline-start: 1.3em;
 }
@@ -3588,8 +3585,6 @@ main:focus {
   }
 }
 
-/* on a phone the header's links fit on one line, and an open menu spans the width of the line, under it, so it
-   stays on screen wherever its name sits */
 /* on a phone the menu takes its own lines under the name, and an open menu spans the width of the column, so it
    stays on screen wherever its name sits */
 @media (max-width: 40rem) {

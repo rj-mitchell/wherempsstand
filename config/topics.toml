@@ -13,7 +13,7 @@
 # Each rewrite costs about 11p. Sixteen topics refreshed weekly, when their evidence has changed, cost roughly
 # £2 to £6 a month.
 
-# ---- The economy and living costs ----
+# The economy and living costs
 
 [[topic]]
 slug = "cost-of-living"
@@ -43,7 +43,7 @@ area = "The economy and living costs"
 question = "What positions have MPs and peers taken on farming and food production over the past twelve months?"
 description = "Farm support, tax, trade and food security."
 
-# ---- Public services ----
+# Public services
 
 [[topic]]
 slug = "nhs-waiting-times"
@@ -87,7 +87,7 @@ area = "Public services"
 question = "What positions have MPs and peers taken on the funding of local councils over the past twelve months?"
 description = "Council finances, services and reorganisation."
 
-# ---- Society and rights ----
+# Society and rights
 
 [[topic]]
 slug = "immigration-and-asylum"
@@ -117,7 +117,7 @@ area = "Society and rights"
 question = "What positions have MPs and peers taken on artificial intelligence over the past twelve months?"
 description = "Regulation, jobs, public services and safety."
 
-# ---- The UK in the world ----
+# The UK in the world
 
 [[topic]]
 slug = "defence-and-ukraine"

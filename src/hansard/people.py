@@ -86,7 +86,7 @@ class People:
         self._lock = threading.Lock()
         self._votes_version: Any = None
 
-    # ---- identity ----------------------------------------------------------------------------------------------
+    # identity
     def resolve(self, number: int) -> str | None:
         """Canonical person id for a parlparse person number (following redirects)."""
         row = self.con.execute("SELECT person_id FROM ref_person_ids WHERE xml_id = ?", [f"{PREFIX}{number}"]).fetchone()
@@ -111,7 +111,7 @@ class People:
         return {"name": row[0], "number": person_number(person_id), "slug": slug(row[0]), "party": row[1],
                 "constituency": row[2]}
 
-    # ---- the page ----------------------------------------------------------------------------------------------
+    # the page
     def by_parliament_id(self, pairs: list[tuple[int, str | None]]) -> dict[tuple[int, str | None], dict[str, Any]]:
         return members_by_parliament_id(self.con, pairs)
 
@@ -191,7 +191,7 @@ class People:
             out.append({"constituency": cname, "start": start.isoformat(), "end": _iso(end), "results": results})
         return out
 
-    # ---- recent contributions ----------------------------------------------------------------------------------
+    # recent contributions
     def contributions(self, person_id: str, limit: int = 20) -> list[dict[str, Any]]:
         if "records" not in self.stores:
             return []
@@ -262,7 +262,7 @@ class People:
         return {"topics": [{"subject": s, "days": n} for s, n, _ in ranked[:limit]],
                 "since": since.isoformat(), "until": until.isoformat()}
 
-    # ---- voting record -----------------------------------------------------------------------------------------
+    # voting record
     def _ensure_votes(self) -> bool:
         if not {"votes", "divisions"} <= self.stores:
             return False
@@ -321,7 +321,7 @@ class People:
                           "voting differently from colleagues there breaks no whip. Members without a party whip are "
                           "not counted, and absences are not recorded."}
 
-    # ---- finding people ----------------------------------------------------------------------------------------
+    # finding people
     def search(self, text: str = "", current_only: bool = True, limit: int = 2000) -> list[dict[str, Any]]:
         """Members for the people index: current MPs and peers (or anyone since the archive starts), optionally by
         name or seat. Every word typed must appear in a name they have used or a seat they have held ("ed balls"

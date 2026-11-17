@@ -80,7 +80,7 @@ class Trends:
         self._totals: dict[str, dict[tuple[int, str], int]] = {}
         self._totals_version: str | None = None
 
-    # ---- the context: every contribution, by year and group --------------------------------------------------
+    # the context: every contribution, by year and group
     def totals(self, by: str, version: str) -> dict[tuple[int, str], int]:
         with self._lock:
             if self._totals_version != version:
@@ -110,7 +110,7 @@ class Trends:
         tmp.write_text(json.dumps({"version": version, "totals": out}))
         tmp.replace(self._path())
 
-    # ---- a chart --------------------------------------------------------------------------------------------
+    # a chart
     def chart(self, phrases: list[str], by: str, version: str) -> dict[str, Any]:
         if "records" not in self.stores:
             return {"years": [], "series": []}

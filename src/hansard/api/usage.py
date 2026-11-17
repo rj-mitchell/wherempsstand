@@ -70,7 +70,7 @@ def support_reminder_due(spending: Spending, state: StateDB, visitor: str | None
     return n if n > 0 and n % every == 0 and state.get(_supporter_key(visitor)) is None else 0
 
 
-# ---- feedback and cookie-free visit counts ----------------------------------------------
+# feedback and cookie-free visit counts
 
 def record_feedback(state: StateDB, briefing_key: str | None, question: str, useful: bool,
                     visitor: str | None) -> None:

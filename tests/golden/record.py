@@ -111,7 +111,7 @@ def run_cli(args: list[str]) -> tuple[int, str]:
     return result.exit_code, result.output
 
 
-# ---- the small tables ----------------------------------------------------------------------------------------------
+# the small tables
 
 
 def limiter() -> dict[str, Any]:
@@ -212,7 +212,7 @@ def interests_check() -> dict[str, Any]:
     return out
 
 
-# ---- /api/ask ------------------------------------------------------------------------------------------------------
+# /api/ask
 
 
 def old_side(pipeline: Any, settings: Any, sdk: Any = None) -> shared.Side:
@@ -304,7 +304,7 @@ def real(tmp: Path, template: Path) -> dict[str, Any]:
     return shared.real_asks(lambda sdk, **usage: real_side(template, tmp / f"real-{next(n)}", sdk, **usage))
 
 
-# ---- topic briefings -----------------------------------------------------------------------------------------------
+# topic briefings
 
 TOPICS = shared.TOPICS
 
@@ -342,7 +342,7 @@ def topic_briefings(tmp: Path) -> dict[str, Any]:
     return shared.plain(out, tmp=tmp)
 
 
-# ---- reports, statements and the owner's commands ------------------------------------------------------------------
+# reports, statements and the owner's commands
 
 
 def replies_kept(state: Any) -> dict[str, Any]:
@@ -373,7 +373,7 @@ def replies(tmp: Path, template: Path) -> dict[str, Any]:
         kept=lambda: replies_kept(side.state))
 
 
-# ---- backups -------------------------------------------------------------------------------------------------------
+# backups
 
 
 def backups(tmp: Path) -> dict[str, Any]:
@@ -393,7 +393,7 @@ def offsite_copies(tmp: Path) -> list[dict[str, Any]]:
         check=lambda env, client: offsite.check(env=env, client=client))
 
 
-# ---- a state database made by the old code, with rows of every kind ---------------------------------------------
+# a state database made by the old code, with rows of every kind
 
 OLD = "2026-08-01T10:00:00+00:00"       # more than three months before the scenarios' day
 KEY_FRESH, KEY_STALE, KEY_NO_ADDRESS = "a" * 64, "b" * 64, "c" * 64
@@ -590,7 +590,7 @@ def old_state(tmp: Path) -> tuple[str, dict[str, Any]]:
     return sql, shared.plain(figures, tmp=tmp)
 
 
-# ---- a search index built by the old code ----------------------------------------------------------------------
+# a search index built by the old code
 
 QUERIES = ["trial by jury", "Northern Ireland security", "Finance Bill", "high speed rail"]
 

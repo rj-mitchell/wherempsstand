@@ -275,7 +275,7 @@ class ProfileResolver:
                 prof.party_groups = self.groups.on(prof.person_id, prof.on)
         return out
 
-    # ---- seats, majorities and first terms ---------------------------------------------------------------
+    # seats, majorities and first terms
     def _seat_index(self) -> dict[str, Any]:
         if getattr(self, "_seats", None) is None:
             reps: dict[str, list[tuple]] = {}

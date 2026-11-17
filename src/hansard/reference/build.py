@@ -81,7 +81,7 @@ class ReferenceData:
     stats: dict[str, Any] = field(default_factory=dict)
 
 
-# --------------------------------------------------------------------------- names
+# names
 
 
 def normalise_place(name: str) -> str:
@@ -138,7 +138,7 @@ def short_name(n: dict[str, Any], alternates: set[str]) -> str:
     return f"{prefix} {short}" if prefix in {"Sir", "Dame"} else short
 
 
-# --------------------------------------------------------------------------- loaders
+# loaders
 
 
 def _resolve_chain(mapping: dict[str, str], key: str) -> str:
@@ -260,7 +260,7 @@ def build_reference(
     ref = ReferenceData()
     ref.constituencies = load_constituencies(geo_csv)
 
-    # ---- persons, redirects and dated names
+    # persons, redirects and dated names
     person_redirect = {p["id"]: p["redirect"] for p in people["persons"] if "redirect" in p}
     for p in people["persons"]:
         if "redirect" in p:
@@ -294,7 +294,7 @@ def build_reference(
         })
     known = {p["person_id"] for p in ref.persons}
 
-    # ---- parties
+    # parties
     for org in people["organizations"]:
         if org.get("classification") == "party":
             ref.parties.append({
@@ -304,7 +304,7 @@ def build_reference(
             })
     party_names = {p["party_id"]: p["party_name"] for p in ref.parties}
 
-    # ---- posts and seat -> GSS matching
+    # posts and seat -> GSS matching
     posts = {p["id"]: p for p in people["posts"]}
     overrides = load_overrides(overrides_csv)
     by_set: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
@@ -350,7 +350,7 @@ def build_reference(
                 return by_set[bset][key]
         return None
 
-    # ---- memberships
+    # memberships
     member_redirect: dict[str, str] = {}
     member_person: dict[str, str] = {}
     unmatched_seats: set[str] = set()
@@ -408,7 +408,7 @@ def build_reference(
                 if nxt:
                     m["party_id"], m["party_name"] = nxt["party_id"], nxt["party_name"]
 
-    # ---- every id that may appear in XML -> canonical person
+    # every id that may appear in XML -> canonical person
     for old, new in person_redirect.items():
         ref.person_ids.append({"xml_id": old, "person_id": _resolve_chain(person_redirect, new)})
     for pid in known:
@@ -420,10 +420,10 @@ def build_reference(
         if target in member_person:
             ref.person_ids.append({"xml_id": old, "person_id": member_person[target]})
 
-    # ---- offices
+    # offices
     ref.offices, office_stats = load_offices(members_dir, person_redirect, known)
 
-    # ---- seats and election results (matched by UK Parliament ID)
+    # seats and election results (matched by UK Parliament ID)
     ref.representations, ref.election_results = election_tables(ref.persons, elections or {})
 
     recent = {m["person_id"] for m in ref.memberships if m["end"] >= date(2010, 5, 6)}
@@ -618,7 +618,7 @@ def office_display(office: dict[str, Any], on: date | None = None) -> str:
     return office["role"]
 
 
-# --------------------------------------------------------------------------- output
+# output
 
 _SCHEMAS = {
     "persons": pa.schema([("person_id", pa.string()), ("latest_name", pa.string()),

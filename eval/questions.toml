@@ -11,7 +11,7 @@
 
 today = "2026-10-11"
 
-# ---- topics with no filters --------------------------------------------------------------------------------------
+# topics with no filters
 
 [[q]]
 id = "wind"
@@ -85,7 +85,7 @@ question = "Are there enough cops on the beat?"
 category = "topic"
 expect = { portfolios = ["home_office"] }
 
-# ---- parties ------------------------------------------------------------------------------------------------------
+# parties
 
 [[q]]
 id = "labour-tuition"
@@ -129,7 +129,7 @@ question = "Green Party contributions on net zero"
 category = "party"
 expect = { parties = ["green"], portfolios = ["energy_climate"] }
 
-# ---- places -------------------------------------------------------------------------------------------------------
+# places
 
 [[q]]
 id = "northern-rail"
@@ -161,7 +161,7 @@ question = "What did Midlands MPs say about cancelling HS2?"
 category = "region"
 expect = { regions = ["East Midlands", "West Midlands"], houses = ["commons"], portfolios = ["transport"] }
 
-# ---- dates --------------------------------------------------------------------------------------------------------
+# dates
 
 [[q]]
 id = "since-2024-election"
@@ -193,7 +193,7 @@ question = "How was austerity debated under the coalition government?"
 category = "dates"
 expect = { date_from = "2010-05-06", date_to = "2015-05-07", portfolios = ["treasury"] }
 
-# ---- Houses and roles ---------------------------------------------------------------------------------------------
+# Houses and roles
 
 [[q]]
 id = "lords-rwanda"
@@ -225,7 +225,7 @@ question = "What have select committee chairs said about government transparency
 category = "office"
 expect = { offices = ["chair"], houses_any = [[], ["commons"]], portfolios_any = [["cabinet_office"], []] }
 
-# ---- people -------------------------------------------------------------------------------------------------------
+# people
 
 [[q]]
 id = "benn-ni"
@@ -245,7 +245,7 @@ question = "Compare what Keir Starmer and Rishi Sunak said about immigration"
 category = "speaker"
 expect = { speakers = ["Keir Starmer", "Rishi Sunak"], portfolios = ["home_office"] }
 
-# ---- who is speaking: gender, age, length of service, majority ---------------------------------------------------
+# who is speaking: gender, age, length of service, majority
 
 [[q]]
 id = "women-mps-defence"
@@ -331,7 +331,7 @@ question = "Do Labour MPs in seats threatened by Reform have a different opinion
 category = "demographic"
 expect = { parties = ["labour"], group_by = "runner_up", houses = ["commons"], portfolios_any = [[], ["treasury"], ["work_pensions"], ["treasury", "work_pensions"]] }
 
-# ---- votes --------------------------------------------------------------------------------------------------------
+# votes
 
 [[q]]
 id = "votes-rwanda"
@@ -351,7 +351,7 @@ question = "How did the Commons vote on the withdrawal agreement in 2019?"
 category = "votes"
 expect = { wants_votes = true, houses = ["commons"], date_from = "2019-01-01", date_to = "2019-12-31", portfolios = ["exiting_eu"] }
 
-# ---- combinations -------------------------------------------------------------------------------------------------
+# combinations
 
 [[q]]
 id = "combo-1"
@@ -371,7 +371,7 @@ question = "What did women peers say about online safety?"
 category = "combination"
 expect = { genders = ["F"], houses = ["lords"], portfolios = ["science_tech", "culture"] }
 
-# ---- awkward wording ----------------------------------------------------------------------------------------------
+# awkward wording
 
 [[q]]
 id = "loaded"
@@ -415,7 +415,7 @@ question = "What did MPs say about the 2003 invasion of Iraq at the time?"
 category = "awkward"
 expect = { date_from_any = ["2003-01-01", "", "2002-09-01", "2002-01-01"], date_to_any = ["2003-12-31", "2004-12-31", "", "2003-06-30"], houses_any = [[], ["commons"]], portfolios = ["defence", "foreign"] }
 
-# ---- follow-up questions ------------------------------------------------------------------------------------------
+# follow-up questions
 
 [[q]]
 id = "follow-lords"

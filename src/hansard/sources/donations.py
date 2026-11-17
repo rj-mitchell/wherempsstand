@@ -120,7 +120,7 @@ CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT);
 """
 
 
-# --------------------------------------------------------------------------- reading the register
+# reading the register
 
 
 def _money(v: str | None) -> float | None:
@@ -175,7 +175,7 @@ def fetch(client: httpx.Client, entity_type: str) -> list[dict[str, Any]]:
     return parse_csv(resp.text)
 
 
-# --------------------------------------------------------------------------- matching
+# matching
 
 
 def name_tokens(name: str | None) -> list[str]:
@@ -346,7 +346,7 @@ def match_all(rd: list[dict[str, Any]], pp: list[dict[str, Any]], matcher: Match
     return out, dict(stats)
 
 
-# --------------------------------------------------------------------------- storing and reading
+# storing and reading
 
 
 def write(path: Path, rows: list[dict[str, Any]], stats: dict[str, Any]) -> None:

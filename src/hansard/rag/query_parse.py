@@ -145,7 +145,7 @@ def _iso(v: Any) -> date | None:
         return None
 
 
-# --------------------------------------------------------------------------- offline rules
+# offline rules
 
 _YEAR = r"(19\d\d|20\d\d)"
 
@@ -396,7 +396,7 @@ def parse_offline(question: str, region_groups: dict[str, list[str]], today: dat
     )
 
 
-# --------------------------------------------------------------------------- model-based
+# model-based
 
 
 def system_prompt(region_groups: dict[str, list[str]], parties: list[tuple[str, str]], today: date,

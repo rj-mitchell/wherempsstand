@@ -119,7 +119,7 @@ def test_retrieval_runs_are_compared_without_grading(tmp_path):
     assert newest_plans(tmp_path / "none") is None
 
 
-# ---- the shared harness: `hansard eval run`, `compare`, `replay` (wts-core, ``wts_core.eval``) ------------------
+# the shared harness: `hansard eval run`, `compare`, `replay` (wts-core, ``wts_core.eval``)
 
 
 def test_the_sample_questions_are_valid_and_the_harness_reads_both_files():

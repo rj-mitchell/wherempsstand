@@ -105,7 +105,7 @@ async function showStatus(el: HTMLElement) {
 const live = document.getElementById("status-live");
 if (live) void showStatus(live);
 
-// ---- corrections page --------------------------------------------------------------------------------
+// corrections page
 
 interface Correction {
   date: string;
@@ -174,7 +174,7 @@ reportForm?.addEventListener("submit", async (e) => {
   const errorEl = document.getElementById("report-error")!;
   const message = String(data.get("message") ?? "").trim();
   if (message.length < 10) {
-    errorEl.textContent = "Please say what is wrong, in a few words."; // the family's words (owner, 16 November 2026)
+    errorEl.textContent = "Please say what is wrong, in a few words."; // the family's wording
     errorEl.hidden = false;
     return;
   }
@@ -211,7 +211,7 @@ reportForm?.addEventListener("submit", async (e) => {
   }
 });
 
-// ---- If you're named: a statement in someone's own words ---------------------------------------------------------
+// If you're named: a statement in someone's own words
 
 const statementForm = document.getElementById("statement-form") as HTMLFormElement | null;
 

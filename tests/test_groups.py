@@ -40,7 +40,7 @@ VICKERS, AHMED, CORBYN, HAYES = ("uk.org.publicwhip/person/25853", "uk.org.publi
                                  "uk.org.publicwhip/person/10133", "uk.org.publicwhip/person/10265")
 
 
-# ---- the data file and the owner's decisions
+# the data file and the owner's decisions
 
 
 def _research() -> list[dict]:
@@ -142,7 +142,7 @@ def test_evidence_counts_for_its_own_parliament():
     assert named_parliament_span("2024-", date(2026, 11, 12))[0] == date(2024, 7, 4)
 
 
-# ---- self-declarations: the labelled examples from the research, then our own
+# self-declarations: the labelled examples from the research, then our own
 
 TRUE = [
     ("socialist-campaign-group", "2014-03-20", "labour", "chair",
@@ -256,7 +256,7 @@ def test_precision_on_the_labelled_examples():
                              date(2020, 3, 11), "conservative", GROUPS) == []
 
 
-# ---- who is in which group, when; IPSA only when switched on
+# who is in which group, when; IPSA only when switched on
 
 
 def _data(ipsa: bool = True) -> dict:
@@ -317,7 +317,7 @@ def test_the_setting_is_on_and_can_be_switched_off(indexed_settings):
     assert g.show_ipsa
 
 
-# ---- the filter, the grouping, the evidence summary
+# the filter, the grouping, the evidence summary
 
 
 @pytest.fixture(scope="module")
@@ -352,7 +352,7 @@ def test_grouping_by_party_group(engine):
     assert "party group" not in speaker_label(res.records[0])
 
 
-# ---- reading questions
+# reading questions
 
 ALIASES = {"labour-growth-group": ["Labour Growth Group", "LGG"], "tribune-group": ["Tribune Group"],
            "socialist-campaign-group": ["Socialist Campaign Group", "SCG"], "european-research-group":
@@ -390,7 +390,7 @@ def test_plans_and_instructions_carry_groups():
     assert "labour-growth-group (Labour Growth Group)" in text and '"group"' in text
 
 
-# ---- finding declarations in the record
+# finding declarations in the record
 
 
 def test_scan_finds_declarations_in_new_records(indexed_settings, tmp_path):

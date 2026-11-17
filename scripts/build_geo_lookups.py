@@ -96,7 +96,7 @@ SOURCES = {
 }
 
 
-# ---- downloads ---------------------------------------------------------------------------
+# downloads
 
 def fetch(cache: Path, key: str) -> Path:
     url = SOURCES[key]
@@ -161,7 +161,7 @@ def sheet_table(path: Path, sheet: str, header: str, columns: dict[str, str]) ->
                      for src, out in columns.items()})
 
 
-# ---- small areas, one table per nation ------------------------------------------------------
+# small areas, one table per nation
 # Each yields rows (area, pop, ua_code, ua_name, seat2010, seat2024).
 
 def england_wales(con: duckdb.DuckDBPyConnection, cache: Path) -> None:

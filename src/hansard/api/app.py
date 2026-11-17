@@ -539,7 +539,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             raise HTTPException(429, exc.message) from None
         return visitor, key
 
-    # ---- auth --------------------------------------------------------------------
+    # auth
     @app.post("/api/auth/login")
     def login(body: LoginBody, request: Request, response: Response):
         address = network_of(request.client.host if request.client else None)
@@ -570,7 +570,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         return {"email": user["email"] if user else None, "is_admin": bool(user and user["is_admin"]),
                 "auth_required": auth_required}
 
-    # ---- metadata ----------------------------------------------------------------
+    # metadata
     @app.get("/api/meta")
     def meta(user=Depends(current_user)):
         p = get_pipeline()
@@ -612,7 +612,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def health():
         return {"ok": True}
 
-    # ---- questions -----------------------------------------------------------------
+    # questions
     @app.post("/api/ask")
     def ask(body: AskBody, request: Request, user=Depends(current_user)):
         """A question's whole journey is the shared briefing desk's (wts-core, ``wts_core.briefing``): the cache,
@@ -700,7 +700,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         return keep(parts.archive, state, body.question, body.model_dump(exclude={"question", "history"}), kept,
                     final)
 
-    # ---- shared briefings ---------------------------------------------------------------
+    # shared briefings
     def _briefing_or_error(bid: str) -> dict[str, Any]:
         b = get_briefing(parts.archive, bid)
         if b is None:
@@ -767,7 +767,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def briefings_list(limit: int = 50, user=Depends(admin_user)):
         return {"briefings": recent_briefings(parts.archive, min(max(limit, 1), 500))}
 
-    # ---- topic briefings and featured briefings ------------------------------------------------
+    # topic briefings and featured briefings
     def _topic(slug: str):
         from hansard.topics import load_topics, topics_file
 
@@ -849,7 +849,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             raise HTTPException(404, "That briefing is not featured.")
         return {"ok": True}
 
-    # ---- bills ---------------------------------------------------------------------------------
+    # bills
     def get_bills():
         from hansard.bills import Bills
 
@@ -902,7 +902,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                         f'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',
                         media_type="application/xml")
 
-    # ---- debates -------------------------------------------------------------------------------
+    # debates
     def get_debates():
         from hansard.debates import Debates
 
@@ -947,7 +947,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                                  description=description, url=url, image=None, noindex=False),
                                   readable(lambda: debate_text(d))), media_type="text/html")
 
-    # ---- the week in Parliament ---------------------------------------------------------------
+    # the week in Parliament
     def get_weeks():
         from hansard.week import Weeks
 
@@ -1007,8 +1007,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def a_week_page(start: str, request: Request):
         return week_page(start, request)
 
-    # ---- early day motions -----------------------------------------------------------------------
-    # ---- the public search API (no AI) -----------------------------------------------------------
+    # early day motions
+    # the public search API (no AI)
     @app.get("/api/v1/search")
     def public_search(request: Request, q: str = "", date_from: str | None = None, date_to: str | None = None,
                       house: str | None = None, party: str | None = None, written: bool = True,
@@ -1044,7 +1044,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                 "licence": "Contains Parliamentary information licensed under the Open Parliament Licence v3.0."}
         return JSONResponse(body, headers={"Server-Timing": server_timing(res.timings)})
 
-    # ---- the devolved parliaments --------------------------------------------------------------
+    # the devolved parliaments
     def get_devolved():
         from hansard.devolved import DevolvedStore, Members
         from hansard.sync import devolved_path
@@ -1501,7 +1501,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                         f"{e['sponsors_count'] or 0} signatures: the text and who signed.",
             url=url, image=None, noindex=False), readable(lambda: edm_text(edm_detail(edm_id)))), media_type="text/html")
 
-    # ---- charts --------------------------------------------------------------------------------
+    # charts
     chart_slots = threading.Semaphore(2)  # each chart scans the record for a few seconds; keep the server responsive
 
     def get_trends():
@@ -1565,7 +1565,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         return {"phrases": [phrase], "by": "parliaments", "years": years, "series": series,
                 "partial_years": partial, "total": sum(sum(c or 0 for c in s["counts"]) for s in series)}
 
-    # ---- timelines -----------------------------------------------------------------------------
+    # timelines
     @app.get("/api/timeline")
     def timeline_api(request: Request, q: str = "", person: int | None = None, party: str | None = None,
                      user=Depends(current_user)):
@@ -1585,7 +1585,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             raise HTTPException(404, "There is no party with that name.")
         return timeline(get_pipeline().engine, get_people(), q, person_id=pid, party_id=party)
 
-    # ---- MPs and peers -----------------------------------------------------------------------
+    # MPs and peers
     @app.get("/api/people")
     def people_list(q: str = "", everyone: bool = False):
         return {"people": get_people().search(q.strip()[:80], current_only=not everyone)}
@@ -1773,7 +1773,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             keys = con.execute("SELECT legislature, key FROM files ORDER BY date DESC").fetchall()
         return sitemap([f"{base}/devolved/{leg}/{key}" for leg, key in keys if leg in LEGISLATURES])
 
-    # ---- RSS feeds -------------------------------------------------------------------------
+    # RSS feeds
     def feed(request: Request, path: str, title: str, link: str, description: str, items: list) -> Response:
         base = str(request.base_url).rstrip("/")
         return Response(rss(title=f"{title} | Where MPs Stand", link=base + link, description=description,
@@ -1877,7 +1877,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def changelog_gone():  # the changelog page was retired: old links go to the About page
         return RedirectResponse("/about", status_code=301)
 
-    # ---- feedback, visit counts and public status ---------------------------------------
+    # feedback, visit counts and public status
     @app.post("/api/feedback")
     def feedback(body: FeedbackBody, request: Request, user=Depends(current_user)):
         visitor, _ = requester(request, user)
@@ -1905,7 +1905,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             record.mark(bid, reported=True)  # what happened next, on that briefing's record
         return {"ok": True}
 
-    # ---- statements beside items (the right of reply). Kept apart from the record: the briefing pipeline, search
+    # statements beside items (the right of reply). Kept apart from the record: the briefing pipeline, search
     # and the pages' readable text never read them; the site fetches them on their own, to show beside the item.
     @app.post("/api/statements")
     def statement_add(body: StatementBody, request: Request, user=Depends(current_user)):
@@ -2065,7 +2065,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def sync_log(user=Depends(admin_user)):
         return {"runs": state.runs(30)}
 
-    # ---- web app -------------------------------------------------------------------
+    # web app
     @app.middleware("http")
     async def head_requests(request: Request, call_next):
         """HEAD (used by link checkers and search engines) answers like GET, without the body."""

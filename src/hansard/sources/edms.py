@@ -50,7 +50,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS edm_text USING fts5(title, text, content='edm
 """
 
 
-# ---- reading the API's answers, tolerantly ---------------------------------------------------------------
+# reading the API's answers, tolerantly
 def _get_key(d: Any, *names: str) -> Any:
     """The first of ``names`` present in ``d``, ignoring case (the API's casing has varied)."""
     if not isinstance(d, dict):
@@ -123,7 +123,7 @@ def normalise_sponsors(raw: dict[str, Any]) -> list[dict[str, Any]] | None:
     return out
 
 
-# ---- the local copy -------------------------------------------------------------------------------------
+# the local copy
 class EdmStore:
     def __init__(self, path: Path):
         self.path = Path(path)
@@ -196,7 +196,7 @@ class EdmStore:
         with self.connect() as con:
             con.execute("INSERT OR REPLACE INTO edm_months VALUES (?, date('now'))", (month,))
 
-    # ---- reading, for the pages --------------------------------------------------------------------------
+    # reading, for the pages
     def search(self, q: str = "", *, mnis: list[int] | None = None, limit: int = 20, offset: int = 0
                ) -> tuple[int, list[dict[str, Any]]]:
         where, params = ["1=1"], []
@@ -263,7 +263,7 @@ class EdmStore:
         return {"tabled": tabled, "signed": signed, "recent": rows}
 
 
-# ---- fetching -------------------------------------------------------------------------------------------
+# fetching
 def _client() -> httpx.Client:
     return httpx.Client(timeout=30, headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
                         follow_redirects=True)

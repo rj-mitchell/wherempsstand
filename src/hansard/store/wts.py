@@ -106,7 +106,7 @@ def migrations() -> tuple[Migration, ...]:
     return (*usage.migrations(), *replies.migrations(), *observe.migrations())
 
 
-# ---- the one-off copy of the site's old rows into the shared package's tables (wts-core docs/adr/0005) ---------
+# the one-off copy of the site's old rows into the shared package's tables (wts-core docs/adr/0005)
 #
 # What changes its name: a spending row's ``user_id`` is its ``account``; a briefing's ``settings`` are its
 # ``options``, and its ``records_up_to`` and ``model`` go into ``extra``; a statement's ``item_path`` is its
@@ -204,7 +204,7 @@ IMPORTS = (
 )
 
 
-# ---- when the old code has run again after the move ---------------------------------------------------------------
+# when the old code has run again after the move
 #
 # The import runs once, and marks that it has (``import:hansard-state`` in ``wts_schema``, with the time). If the
 # site is then taken back to the code before the shared package, that code reads and writes the old tables only;

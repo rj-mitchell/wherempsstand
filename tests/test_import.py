@@ -219,7 +219,7 @@ def test_a_new_site_has_nothing_to_bring_and_no_copy_is_made(settings):
     assert rows(settings.state_db, "PRAGMA journal_mode") == [("wal",)]
 
 
-# ---- what the site says of the old rows, read through the shared package: as the old code said it ---------------
+# what the site says of the old rows, read through the shared package: as the old code said it
 
 VISITOR_A, VISITOR_B = "a1" * 12, "b2" * 12
 KEY_FRESH, KEY_STALE, KEY_NO_ADDRESS = "a" * 64, "b" * 64, "c" * 64
@@ -379,7 +379,7 @@ def test_reports_and_statements_read_the_same_after_the_import_but_for_what_thre
     assert (result.exit_code, result.output) == (code, "".join(blocks[n] + "\n\n" for n in (8, 7, 6, 5, 4, 3, 2, 1)))
 
 
-# ---- the old tables after the import: kept to the privacy notice's promises each night, then dropped ------------
+# the old tables after the import: kept to the privacy notice's promises each night, then dropped
 
 
 def old_personal_data(path: Path) -> dict[str, int]:

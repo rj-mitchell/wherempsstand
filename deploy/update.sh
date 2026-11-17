@@ -120,9 +120,9 @@ if ! flock -n 8; then
   echo "  The site is still running on the version it was; only the new image has been built."
   exit 1
 fi
-# The app runs as its own user (10001), not root. Anything in its data or backups not yet owned by that user (all of
-# it, the first time after this change; afterwards, nothing) is handed over before the new version starts. The first
-# time takes a minute or two, with the site stopped meanwhile.
+# The app runs as its own user (10001), not root. Anything in its data or backups not yet owned by that user is
+# handed over before the new version starts; on a server where nothing has been handed over yet, this takes a minute
+# or two, with the site stopped meanwhile.
 if docker compose run --rm --no-deps -T --user root --entrypoint sh app -c \
      'find /data /backups ! -user 10001 -print -quit | grep -q .'; then
   echo "==> Handing the site's data to its own user (once)"

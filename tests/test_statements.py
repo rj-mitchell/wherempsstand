@@ -43,7 +43,7 @@ def list_statements(client):
     return [as_listed(replies, row) for row in replies.statements()]
 
 
-# ---- what is accepted ----------------------------------------------------------------------------------------------
+# what is accepted
 
 def test_item_addresses_are_paths_on_this_site():
     assert item_path("https://wherempsstand.com/people/10669/hilary-benn") == "/people/10669"
@@ -125,7 +125,7 @@ def test_the_trap_field_keeps_nothing_and_there_is_a_daily_limit(site):
     assert codes == [200] * 5 + [429]
 
 
-# ---- the owner's commands ------------------------------------------------------------------------------------------
+# the owner's commands
 
 def test_owner_publishes_declines_updates_and_withdraws(site):
     client, state, _ = site
@@ -256,7 +256,7 @@ def test_the_reports_commands(settings, monkeypatch):
     assert again.exit_code == 1 and f"no open report {rid}" in again.output
 
 
-# ---- how long the email address is kept ------------------------------------------------------------------------------
+# how long the email address is kept
 
 def test_the_email_is_deleted_three_months_after_a_statement_is_withdrawn_or_declined(settings):
     clock = FixedClock("2026-08-12T09:00:00+00:00")
@@ -281,7 +281,7 @@ def test_the_email_is_deleted_three_months_after_a_statement_is_withdrawn_or_dec
     assert lapsed["status"] == "declined" and lapsed["email"] is None and lapsed["reason"] == "No decision was made in time; please send it again."
 
 
-# ---- never the model's, the record's or the search's -----------------------------------------------------------------
+# never the model's, the record's or the search's
 
 def test_statements_never_reach_the_model_the_record_or_the_search(site):
     client, state, fake = site

@@ -4,7 +4,7 @@ import { sourceLine } from "./export";
 import { fmtDate } from "./render";
 import type { Answer, SourceCard } from "./types";
 
-// ---- a minimal zip writer (files stored uncompressed, which Word reads happily) -------------------------
+// a minimal zip writer (files stored uncompressed, which Word reads happily)
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256);
   for (let n = 0; n < 256; n++) {
@@ -69,7 +69,7 @@ export function zip(files: { name: string; text: string }[]): Uint8Array {
   return out;
 }
 
-// ---- WordprocessingML ---------------------------------------------------------------------------------
+// WordprocessingML
 const esc = (s: string) =>
   s
     .replace(/&/g, "&amp;")

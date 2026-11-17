@@ -92,7 +92,7 @@ def save(out_dir: Path, name: str, data: Any) -> Path:
     return path
 
 
-# =========================================================================== 1. reading the question
+# 1. reading the question
 
 
 def plan_values(plan: QueryPlan) -> dict[str, Any]:
@@ -214,7 +214,7 @@ def summarise_plans(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-# =========================================================================== 2. choosing the sources
+# 2. choosing the sources
 
 
 @dataclass
@@ -408,7 +408,7 @@ def summarise_sources(run: dict[str, Any], judgments: dict[tuple[str, str], int]
             "per_question": {p["id"]: round(p["mean"], 3) for p in per_q}}
 
 
-# =========================================================================== 3. briefings
+# 3. briefings
 
 
 class Verdict(BaseModel):
@@ -525,7 +525,7 @@ def compare_briefings(settings: Settings, client, a: dict[str, Any], b: dict[str
             "tally": {k: dict(c) for k, c in tally.items()}, "cost_usd": round(spent, 4)}
 
 
-# =========================================================================== the shared harness
+# the shared harness
 
 
 class HansardEval:

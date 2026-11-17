@@ -514,7 +514,7 @@ class Engine:
         lap("records")
         return SearchResult(top, records, no_records, len(cands), semantic, where, evidence_summary(records), timings)
 
-    # ---- full records for display / grounding ---------------------------------
+    # full records for display / grounding
     def records_for(self, scored: list[Scored]) -> list[dict[str, Any]]:
         by_part: dict[tuple[str, int], list[Scored]] = {}
         for s in scored:

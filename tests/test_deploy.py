@@ -256,7 +256,7 @@ def test_the_housekeeping_after_the_backup_has_its_own_time_limit_and_every_time
         assert "OnFailure=alert@%n.service" in text, job
 
 
-# ---- a look at the state database before the move (deploy/before-wts-core.py) ------------------------------------
+# a look at the state database before the move (deploy/before-wts-core.py)
 
 LOOK = DEPLOY / "before-wts-core.py"
 
@@ -358,7 +358,7 @@ def test_the_look_says_when_the_database_is_not_the_old_codes_and_reads_a_new_si
     assert done.returncode == 0 and "nothing to look at" in done.stdout
 
 
-# ---- going back to the code before the move (deploy/undo-wts-core.sql) -------------------------------------------
+# going back to the code before the move (deploy/undo-wts-core.sql)
 
 UNDO = DEPLOY / "undo-wts-core.sql"
 OLD_COLUMNS = {
@@ -582,7 +582,7 @@ def test_going_back_that_way_is_no_longer_possible_once_the_old_tables_are_dropp
     open_core(old, FixedClock("2027-02-02T09:00:00+00:00"))  # and with no old tables there is nothing to look for
 
 
-# ---- the settings are checked before the database is moved, and the old code after the move is noticed ----------
+# the settings are checked before the database is moved, and the old code after the move is noticed
 #
 # The independent review's finding: the one-off import ran before the settings were checked. With a model in the
 # server's own settings that had no prices, the site refused to start AFTER the import was made and marked; the

@@ -54,7 +54,7 @@ def keep(archive: SavedBriefings, state: StateDB, question: str, settings: dict[
     return {"briefing_id": saved.id, "prepared_at": saved.created_at, "records_up_to": records_up_to}
 
 
-# ---- featured briefings ------------------------------------------------------------------------------------------
+# featured briefings
 
 
 def feature(archive: SavedBriefings, state: StateDB, bid: str, title: str | None = None,

@@ -313,7 +313,7 @@ def refresh(path: Path, client: httpx.Client | None = None, sleep: Callable[[flo
 
 
 
-# ---- organisations: one name however it is written ---------------------------------------------------------------
+# organisations: one name however it is written
 _PARTS = re.compile(r"\s*(?:,|;|\bat\b|\band the\b| / )\s*", re.I)
 
 
@@ -371,7 +371,7 @@ def group_organisations(rows: list[dict[str, Any]], limit: int) -> list[dict[str
     out.sort(key=lambda o: (-o["sessions"], o["organisation"].lower()))
     return out[:limit]
 
-# ---- reading, for the pages ---------------------------------------------------------------------------------
+# reading, for the pages
 def links(kind: str, ident: int, extra: int | None = None) -> str:
     """Parliament's own page for a committee, inquiry, evidence session or publication."""
     if kind == "committee":

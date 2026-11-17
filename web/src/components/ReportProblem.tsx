@@ -38,7 +38,7 @@ export function ReportProblem({ briefingId }: { briefingId?: string }) {
     e.preventDefault();
     setError(null);
     if (message.trim().length < 10) {
-      setError("Please say what is wrong, in a few words."); // the family's words (owner, 16 November 2026)
+      setError("Please say what is wrong, in a few words."); // the family's wording
       return;
     }
     setState("sending");

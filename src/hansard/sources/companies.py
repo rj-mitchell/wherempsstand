@@ -94,7 +94,7 @@ def _key(s: str | None) -> str:
     return " ".join(re.findall(r"[a-z]+", s))
 
 
-# ---------------------------------------------------------------------------------------------- the members
+# the members
 
 
 def members(reference_dir: Path, people_json: Path) -> list[dict[str, Any]]:
@@ -162,7 +162,7 @@ def name_matches(elements: dict[str, Any], m: dict[str, Any]) -> bool:
     return any(_same_first(g, f) for g in given for f in m["firsts"])
 
 
-# ---------------------------------------------------------------------------------------------- fetching
+# fetching
 
 
 class Client:
@@ -384,7 +384,7 @@ def refresh(path: Path, reference_dir: Path, people_json: Path, *, per_run: int 
     return stats
 
 
-# ---------------------------------------------------------------------------------------------- reading
+# reading
 
 _SUFFIX = {"the", "limited", "ltd", "plc", "llp", "lp", "company", "co", "uk", "cic", "group", "holdings", "and"}
 

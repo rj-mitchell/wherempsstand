@@ -57,7 +57,7 @@ def briefing_ids() -> Iterator[str]:
             yield f"briefing{a}{b}"
 
 
-# ---- settings ------------------------------------------------------------------------------------------------------
+# settings
 
 SAMPLE_CONFIG = """\
 [paths]
@@ -160,7 +160,7 @@ def local_settings_written(tmp: Path, save: Callable[[Path, dict[str, dict[str, 
     return [save(folder, updates).read_text() for updates in LOCAL_UPDATES]
 
 
-# ---- the limit on requests a minute ------------------------------------------------------------------------------
+# the limit on requests a minute
 
 A, B = "visitor:a", "user:7"
 LIMITER_PER_MINUTE = 3
@@ -170,7 +170,7 @@ LIMITER_SCRIPT = (
 )
 
 
-# ---- cost ----------------------------------------------------------------------------------------------------------
+# cost
 
 MODELS = ["claude-sonnet-5-5", "claude-haiku-5-5", "claude-haiku-5-5-20260101", "claude-opus-5-5", None]
 USAGES: list[dict[str, Any] | None] = [
@@ -190,7 +190,7 @@ USAGES: list[dict[str, Any] | None] = [
 ]
 
 
-# ---- cache keys ----------------------------------------------------------------------------------------------------
+# cache keys
 
 Q = "What has been said about trial by jury since 2020?"
 Q2 = "And what did peers say?"
@@ -223,7 +223,7 @@ KEY_WORLDS: list[dict[str, Any]] = [
 ]
 
 
-# ---- caps, and briefings in progress ---------------------------------------------------------------------------
+# caps, and briefings in progress
 
 CAP_LIMITS = {"per_visitor_daily_questions": 2, "per_user_daily_questions": 3, "daily_spend_cap_usd": 1.0,
               "monthly_spend_cap_usd": 2.0}
@@ -276,7 +276,7 @@ IN_PROGRESS_SCRIPT: list[list[Any]] = [
 ]
 
 
-# ---- the checks: briefings as the model writes them, and saved briefings shown again ---------------------------
+# the checks: briefings as the model writes them, and saved briefings shown again
 
 BENN = "The right to trial by jury is a cornerstone of our liberties. The organization of the courts must not " \
        "weaken it."
@@ -419,7 +419,7 @@ SAVED_BRIEFINGS: list[dict[str, Any]] = [
 ]
 
 
-# ---- the interests check: what the small model is asked, and what is made of its answer ------------------------
+# the interests check: what the small model is asked, and what is made of its answer
 
 GIFT = {"type": "3", "name": "Gifts, benefits and hospitality from UK sources", "items": [
     {"summary": "Bar Council - £1,920.00", "details": [["Payment Description", "Dinner at Middle Temple"]],
@@ -482,7 +482,7 @@ INTEREST_CASES: dict[str, Any] = {
 }
 
 
-# ---- a scripted pipeline, in the site's own shapes ---------------------------------------------------------------
+# a scripted pipeline, in the site's own shapes
 
 PARSE_USAGE = {"input_tokens": 1200, "output_tokens": 80, "cache_read_tokens": 0, "cache_write_tokens": 0}
 ANSWER_USAGE = {"input_tokens": 9000, "output_tokens": 700, "cache_read_tokens": 3000, "cache_write_tokens": 2000}
@@ -619,7 +619,7 @@ class ScriptedPipeline:
         yield final
 
 
-# ---- the two tellings of /api/ask ------------------------------------------------------------------------------
+# the two tellings of /api/ask
 
 
 class Side:
@@ -869,7 +869,7 @@ def scripted_asks(make: Callable[..., Side], only: str | None = None) -> dict[st
     return out
 
 
-# ---- the same through the site's real pipeline, over the tests' own small index ------------------------------------
+# the same through the site's real pipeline, over the tests' own small index
 
 
 class FakeStream:
@@ -1002,7 +1002,7 @@ def events_of(body: str) -> list[Any]:
     return out
 
 
-# ---- topic briefings: the standing questions the update keeps up to date ----------------------------------------
+# topic briefings: the standing questions the update keeps up to date
 
 TOPICS = """
 [[topic]]
@@ -1029,7 +1029,7 @@ TOPIC_CASES: list[tuple[str, list[str], dict[str, Any], bool]] = [
 ]
 
 
-# ---- a simulated Backblaze B2 --------------------------------------------------------------------------------------
+# a simulated Backblaze B2
 
 
 class FakeB2:
@@ -1123,7 +1123,7 @@ def offsite_scenario(tmp: Path, *, send: Callable[..., dict[str, Any]], check: C
     return out
 
 
-# ---- backups -------------------------------------------------------------------------------------------------------
+# backups
 
 
 def listing(folder: Path) -> list[dict[str, Any]]:
@@ -1300,7 +1300,7 @@ def backups_scenario(tmp: Path, *, run: Callable[[list[str]], tuple[int, str]],
     return out
 
 
-# ---- reports, statements, saved briefings: what is sent, and what the owner types ------------------------------
+# reports, statements, saved briefings: what is sent, and what the owner types
 
 WORDS = "I have always supported the right to trial by jury, and the record of my speeches shows it in full."
 BRIEFING_1, BRIEFING_2, WITHDRAWN = "briefingaa", "briefingab", "briefingac"

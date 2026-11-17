@@ -246,7 +246,7 @@ def test_the_backup_check_command_says_what_the_admin_page_says_and_fails_when_b
     assert run_in(settings, ["backup-check", "--in", str(folder)]) == (0, "Backups are up to date.\n")
 
 
-# ---- the nightly housekeeping: `hansard tidy` ----------------------------------------------------------------------
+# the nightly housekeeping: `hansard tidy`
 
 
 def file_bytes(folder: Path, name: str = "state.sqlite") -> bytes:

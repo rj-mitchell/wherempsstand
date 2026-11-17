@@ -239,7 +239,7 @@ class EvidenceStore:
         with self.connect() as con:
             return {r[0] for r in con.execute("SELECT session_id FROM transcripts WHERE status = 'ok'")}
 
-    # ---- meaning-based search (hansard.index.evidence) -----------------------------------------------------------
+    # meaning-based search (hansard.index.evidence)
     def unembedded(self, limit: int | None = None) -> list[int]:
         """Sessions with a transcript whose answers have not been embedded yet, newest first."""
         with self.connect() as con:

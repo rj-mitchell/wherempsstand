@@ -491,7 +491,7 @@ def commons_member_ids(people_json: Path, since: str = "1997-05-01") -> list[str
     return sorted(out)
 
 
-# --------------------------------------------------------------------------- calculations
+# calculations
 
 
 def majority_band(pct: float | None) -> str | None:
