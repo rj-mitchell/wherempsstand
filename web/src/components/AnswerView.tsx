@@ -106,10 +106,17 @@ export function AnswerView({
   );
 }
 
+/** Statements not tied to a cited source: those with no citation ("unsupported"), and those whose every citation
+ * failed the check against the source text and was removed ("invalid", counted apart by the server, which counts
+ * only the first in `unsupported_segments`). Both are marked alike (render.ts). */
+export function uncitedStatements(answer: Answer): number {
+  return answer.unsupported_segments + answer.segments.filter((s) => s.status === "invalid").length;
+}
+
 /** Next to the briefing's label: the result of checking every citation and quotation against the record, which is
  * what sets a briefing apart from a chatbot's answer. Points to the full note under the briefing. */
 function CheckBadge({ answer, target }: { answer: Answer; target: string }) {
-  const problems = answer.unsupported_segments + (answer.quotes_unverified ?? 0) + (answer.loaded_words ?? 0);
+  const problems = uncitedStatements(answer) + (answer.quotes_unverified ?? 0) + (answer.loaded_words ?? 0);
   const text = problems
     ? `${problems} point${problems === 1 ? "" : "s"} to check`
     : `✓ ${answer.citations_total} citation${answer.citations_total === 1 ? "" : "s"} checked against the record`;
@@ -281,7 +288,7 @@ export function Grounding({
   if (answer.no_records) {
     return <p id={id} className="grounding neutral">No matching records in the archive for this question and these filters.</p>;
   }
-  const flagged = answer.unsupported_segments;
+  const flagged = uncitedStatements(answer);
   const loaded = answer.loaded_words ?? 0;
   const misquoted = answer.quotes_unverified ?? 0;
   return (

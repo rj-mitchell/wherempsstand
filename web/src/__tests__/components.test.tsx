@@ -126,6 +126,38 @@ describe("answer view", () => {
     expect(container.querySelector(".answer-body.show-uncited .unsupported")).not.toBeNull();
   });
 
+  it("counts and marks a statement whose citations all failed the check, as it does one with no citation", () => {
+    const failed: Answer = {
+      ...answer,
+      segments: [...answer.segments, { text: " Everyone agreed.", sources: [], cited: [], status: "invalid" }],
+      citations_total: 2,
+      citations_invalid: 1,
+      unsupported_segments: 0, // the server counts only "unsupported" here
+    };
+    const { container } = render(<AnswerView question="q" answer={failed} streamText="" sources={[]} onCite={vi.fn()} />);
+    expect(screen.getByRole("link", { name: "1 point to check" })).toBeInTheDocument();
+    expect(screen.getByText(/One statement in this briefing is/)).toBeInTheDocument();
+    expect(screen.getByText(/1 citation\(s\) could not be verified and were removed/)).toBeInTheDocument();
+    expect(screen.queryByText(/each checked against the source text/)).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Show it" }));
+    expect(container.querySelector(".answer-body.show-uncited .unsupported")?.textContent).toBe("Everyone agreed.");
+  });
+
+  it("counts statements with no citation and with failed citations together", () => {
+    const both: Answer = {
+      ...answer,
+      segments: [
+        ...answer.segments,
+        { text: " Everyone agreed.", sources: [], cited: [], status: "unsupported" },
+        { text: " Nobody objected.", sources: [], cited: [], status: "invalid" },
+      ],
+      unsupported_segments: 1,
+    };
+    render(<AnswerView question="q" answer={both} streamText="" sources={[]} onCite={vi.fn()} />);
+    expect(screen.getByText(/2 statements in this briefing are/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show them" })).toBeInTheDocument();
+  });
+
   it("flags judgemental words in the briefing's own voice", () => {
     const flagged: Answer = {
       ...answer,

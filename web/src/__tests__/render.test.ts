@@ -23,6 +23,13 @@ describe("answer rendering", () => {
     expect(html).toContain('class="unsupported"');
   });
 
+  it("marks a sentence whose citations all failed the check as it marks an unsupported one", () => {
+    const html = renderAnswer(segmentsToMarkdown([seg("A claim its source did not bear out.", "invalid")]));
+    expect(html).toContain('<span class="unsupported" title="Not directly supported by a cited source">');
+    expect(html).toContain("A claim its source did not bear out.</span>");
+    expect(html).not.toContain('class="cite"');
+  });
+
   it("marks quotations not found in their sources, and loaded words, in the same segment", () => {
     const text = 'He said "we will never do that" and called it a disgrace.';
     const seg: Segment = {
