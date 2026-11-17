@@ -48,7 +48,7 @@ mountpoint() { docker volume inspect -f '{{.Mountpoint}}' "$1" 2>/dev/null; }
   done | sort -h | tail -15
   echo
   # the passages now against the number when the index was last rebuilt (read from the table's metadata, not its
-  # vectors: a few seconds); at 20% more it says to run hansard reindex-vectors (docs/HOSTING.md, "Day to day")
+  # vectors: a few seconds); at 20% more it says to run hansard reindex-vectors (docs/OPERATIONS.md, "Day to day")
   echo "== Where MPs Stand's meaning-search index"
   (cd "$DIR/deploy" && timeout 300 docker compose run --rm --no-deps -T app hansard index-status --text 2>/dev/null) \
     || echo "Not read. To see it: cd $DIR/deploy && docker compose run --rm -T app hansard index-status"

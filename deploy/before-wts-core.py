@@ -4,7 +4,7 @@ changed.
 It needs nothing but Python, opens the database read-only, and prints no address, name or word of what anyone
 sent: numbers, dates, ages and sizes. It is not a `hansard` command on purpose: a `hansard` command on newly built
 code, run before the site has restarted on it, would open the database and make the move itself, while the old
-site was still writing (docs/OPERATIONS.md, "The state database"). So it is piped into the site as it is running:
+site was still writing (docs/OPERATIONS.md, "Moving onto wts-core"). So it is piped into the site as it is running:
 
     cd /opt/hansardgpt
     git fetch origin        # fetches the new version without changing the one that is running

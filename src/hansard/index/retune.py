@@ -191,7 +191,7 @@ def status(index_dir: Path, vectors_now: int, growth_limit: float = REINDEX_GROW
         out["rebuild_due"] = None
         out["reminder"] = (f"Meaning-search index: {vectors_now:,} passages, and no record of when its index was last "
                            "rebuilt. Run hansard reindex-vectors once meaning-based search has caught up (hansard "
-                           "status shows files_unembedded 0); docs/HOSTING.md, 'Day to day', has the command.")
+                           "status shows files_unembedded 0); docs/OPERATIONS.md, 'Day to day', has the command.")
         return out
     then = int(record["vectors"])
     growth = vectors_now / then - 1
@@ -204,7 +204,7 @@ def status(index_dir: Path, vectors_now: int, growth_limit: float = REINDEX_GROW
     change = f"{growth:.0%} more" if growth >= 0 else f"{-growth:.0%} fewer"
     line = f"Meaning-search index: {vectors_now:,} passages now, {then:,} when it was last rebuilt ({when}), {change}."
     if out["rebuild_due"]:
-        line += (f" That is {growth_limit:.0%} or more: rebuild it with hansard reindex-vectors (docs/HOSTING.md, "
+        line += (f" That is {growth_limit:.0%} or more: rebuild it with hansard reindex-vectors (docs/OPERATIONS.md, "
                  "'Day to day', has the command).")
     else:
         line += f" Rebuild it at {growth_limit:.0%} more ({int(then * (1 + growth_limit)):,} passages)."

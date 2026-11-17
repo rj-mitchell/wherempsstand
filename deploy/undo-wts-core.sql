@@ -1,5 +1,5 @@
 -- Going back to the site's code as it was before the shared package (wts-core), without losing what was asked,
--- sent or decided since. docs/OPERATIONS.md, "The state database", says when and how to run this.
+-- sent or decided since. docs/OPERATIONS.md, "Moving onto wts-core", says when and how to run this.
 --
 -- VALID ONLY UNTIL 1 FEBRUARY 2027. On that day the site drops its old tables (src/hansard/store/wts.py,
 -- OLD_TABLES), and this file, which writes them again, has nothing to write to: it fails at its first statement and

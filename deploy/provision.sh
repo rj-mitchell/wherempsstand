@@ -10,8 +10,8 @@
 #   2. clones the repository to /opt/hansardgpt
 #   3. asks for your domain and Anthropic API key and writes deploy/.env
 #   4. builds and starts the app behind Caddy (automatic HTTPS)
-#   5. starts the one-off bootstrap in the background (downloads ~5 GB of Hansard
-#      since 2010, ingests, indexes; embeddings continue in later syncs)
+#   5. starts the one-off bootstrap in the background (downloads Hansard since 1997,
+#      ingests, indexes; embeddings continue in later syncs)
 #   6. installs the twice-daily sync timer, the nightly backup timer, the watchdog (restarts any site on the server
 #      that stops answering), and the hourly disk check and monthly disk report (all three email the alerts address
 #      once mail.sh is set up)

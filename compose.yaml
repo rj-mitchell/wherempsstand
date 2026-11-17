@@ -1,5 +1,5 @@
 # Run Where MPs Stand on your own computer at http://localhost:8000
-# (step by step: "Try it on your own computer" in README.md).
+# (step by step: docs/OPERATIONS.md, "Running the full site locally").
 # For a public server with a domain and HTTPS, use deploy/docker-compose.yml instead.
 name: hansardgpt-local   # kept from the old name so existing local data is reused
 services:

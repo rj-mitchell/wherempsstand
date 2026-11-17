@@ -18,7 +18,7 @@ database that has them, their rows are copied into the ``wts_`` tables, once (``
 The import leaves the old tables as they were, so the version before this one still runs on the file; and a copy
 of the whole file as it was is kept beside it first, as ``state.pre-wts-core.<date>.sqlite``. ``hansard tidy``
 deletes that copy once it is older than the backups are kept, keeps the old tables to the privacy notice's
-promises each night, and drops them on a stated day (``OLD_TABLES``). docs/OPERATIONS.md, "The state database",
+promises each night, and drops them on a stated day (``OLD_TABLES``). docs/OPERATIONS.md, "Moving onto wts-core",
 says how to go back, and until when.
 """
 

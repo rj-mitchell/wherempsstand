@@ -203,7 +203,7 @@ def check_key(key: str | None = None, client: httpx.Client | None = None) -> dic
     and to the test ("sandbox") service, which only accepts keys made for a Test application."""
     key = key if key is not None else os.environ.get(KEY_ENV)
     if not key:
-        return {"ok": False, "problem": f"no key: {KEY_ENV} is not set inside the app (see docs/HOSTING.md)"}
+        return {"ok": False, "problem": f"no key: {KEY_ENV} is not set inside the app (see docs/OPERATIONS.md, 'Day to day')"}
     raw = key
     key = key.strip()
     out: dict[str, Any] = {

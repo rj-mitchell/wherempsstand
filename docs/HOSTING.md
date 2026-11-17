@@ -1,21 +1,23 @@
-# Where MPs Stand and the shared server (Hostkey, London)
+# The shared server
 
-## The front door for every site on the server
+How to set up the server that runs Where MPs Stand and three of the charity's other sites, and how the parts that
+serve every site on it work: the front door, email alerts, Cloudflare, the watchdog and disk space. Running Where
+MPs Stand itself, day to day, is in [OPERATIONS.md](OPERATIONS.md).
 
-Four of the charity's sites run on one server in London, and **this repository's `deploy/` folder is the front door
-for all of them**, in Where MPs Stand's checkout at `/opt/hansardgpt` (its original name):
+## Contents
 
-- Caddy, the web server that answers every domain and passes each site's visitors to its containers (`SITES` in
-  `deploy/.env`; [Other sites on this server](#other-sites-on-this-server));
-- Cloudflare set-up for each domain (`deploy/cloudflare.sh`), and the health check (`deploy/check.sh`);
-- email from the server (`deploy/mail.sh`) and failure alerts for every site's jobs (`alert@.service`;
-  [Email from the server](#email-from-the-server));
-- the **watchdog**, which restarts any site that stops answering (`wheretheystand-watchdog.timer`;
-  [The watchdog](#the-watchdog));
-- the **hourly disk check** and **monthly disk report** (`wheretheystand-disk.timer`,
-  `wheretheystand-disk-report.timer`; [Disk space](#disk-space));
-- the **server-wide update lock**, `/var/lock/wheretheystand-update.lock`, which each site's update takes so that two
-  never run at once.
+1. [The server and its sites](#the-server-and-its-sites)
+2. [Setting up the server](#setting-up-the-server)
+3. [Email from the server](#email-from-the-server)
+4. [Cloudflare protection (optional)](#cloudflare-protection-optional)
+5. [Other sites on this server](#other-sites-on-this-server)
+6. [The watchdog](#the-watchdog)
+7. [Disk space](#disk-space)
+
+## The server and its sites
+
+The server is a Hostkey virtual server in London running Ubuntu 24.04. Four sites run on it, each from a git
+checkout under `/opt` with its own containers, data, settings and timers:
 
 | Site | Folder on the server | Update unit (and timer) | When it runs |
 |---|---|---|---|
@@ -25,307 +27,178 @@ for all of them**, in Where MPs Stand's checkout at `/opt/hansardgpt` (its origi
 | Where Landlords Stand | `/opt/wherelandlordsstand` | `landlords-update.service` | Thursdays at 11.40am (UK time) |
 
 Each site also has its own nightly backup (`hansard-backup`, `councils-backup`, `wcs-backup`, `landlords-backup`).
-Where MPs Stand's backup is followed by its nightly housekeeping (`hansard tidy`), and it has two more timers: a
-check each morning that backups are still being made (`hansard-backup-check`, 9.40am) and the weekly report on how
-briefings went (`hansard-weekly-report`, Mondays at 6.10am); [OPERATIONS.md](OPERATIONS.md), "How briefings went".
+Where MPs Stand's own timers are described in [OPERATIONS.md](OPERATIONS.md).
+
+Where MPs Stand's `deploy/` folder, in `/opt/hansardgpt`, is also the front door for every site on the server:
+
+- Caddy, the web server that answers every domain and passes each site's visitors to its container
+  ([Other sites on this server](#other-sites-on-this-server));
+- Cloudflare set-up for each domain (`deploy/cloudflare.sh`) and the health check (`deploy/check.sh`);
+- email from the server (`deploy/mail.sh`) and alerts when any site's job fails (`alert@.service`);
+- the watchdog, which restarts any site that stops answering (`wheretheystand-watchdog.timer`);
+- the hourly disk check and monthly disk report (`wheretheystand-disk.timer`, `wheretheystand-disk-report.timer`);
+- the server-wide update lock, `/var/lock/wheretheystand-update.lock`, which each site's update takes so that two
+  never run at once.
+
+The charity's `family/OPERATIONS.md` describes the server as a whole. The other sites' `docs/DEPLOY.md` link to the
+sections "Other sites on this server", "Email from the server" and "Cloudflare protection" here, so keep those names
+or update the links.
+
 Never put the server's address in this or any other public repository, letters included: the sites sit behind
-Cloudflare, and the server turns away connections that don't come through it.
-Where Lives Stand, the charity's own site (wheretheystand.uk) and the game Understudy: Lumaya run on Cloudflare
-Workers, not on this server.
+Cloudflare, and the server turns away connections that do not come through it. Where Lives Stand, the charity's own
+site (wheretheystand.uk) and the game Understudy: Lumaya run on Cloudflare Workers, not on this server.
 
-The charity's `family/OPERATIONS.md` describes the server as a whole. This guide keeps the procedures for the parts
-in this repository until they move to a shared `server/` folder. The other sites' `docs/DEPLOY.md` cover only their own steps and link
-here for the rest, so keep the section names below ("Other sites on this server", "Email from the server",
-"Cloudflare protection") as they are, or update those links when they change.
+## Setting up the server
 
-## Putting Where MPs Stand online
+These steps take a newly provisioned server to a live site at wherempsstand.com. Allow about an hour, most of it
+waiting for the first data load. They need the server's IP address and root password (in Hostkey's email and
+control panel), the domain wherempsstand.com and an Anthropic API key.
 
-This guide takes you from a newly provisioned server to a live site at **wherempsstand.com**, step by step. It is
-written for your Hostkey virtual server in London, running Ubuntu 24.04, which you log in to with the root password
-Hostkey gave you. Allow about an hour, most of it waiting for the Hansard data to load.
+### Server size
 
-You will need:
-- the server's **IP address** and **root password**: they are in the email Hostkey sent when the server was
-  ready, and in your Hostkey control panel;
-- the domain wherempsstand.com;
-- your Anthropic API key;
-- the code on GitHub's `main` branch (step 1).
+For Where MPs Stand alone: 4 to 8 vCPU, 16 GB of memory and 60 GB of disk. Its data is the largest part of the
+shared server's.
 
----
+| Data | Size |
+|---|---|
+| Raw Hansard XML since 1997 | about 9 to 10 GB as plain XML, about a quarter of that gzipped as stored |
+| Parquet store | 1.2 GB |
+| Keyword index | 7.9 GB (4.6 GB of passages, 3.3 GB of full-text and filter indexes) |
+| Meaning-search vectors | about 7 GB |
 
-## 1. Put the latest code on `main` (on GitHub, two clicks)
+Each sync deletes index versions more than an hour old; a large update, such as a big reshuffle, can add several
+GB until the next sync. A smaller server (2 to 4 vCPU and 8 GB) works with recent years only (`hansard bootstrap
+--from 2019-01-01`; later updates keep to that date) or keyword search only (`hansard bootstrap --keyword-only`,
+which skips the vectors, so questions worded differently from the speeches are matched less well).
 
-The server installs whatever is on the `main` branch of <https://github.com/rj-mitchell/wherempsstand>. When a
-change is ready it comes as a pull request: open it, press **Squash and merge**, then **Confirm squash and merge**.
+### 1. Point the domain at the server
 
-The repository was called `wheretheystand` until 6 November 2026. GitHub forwards the old address, but a server set
-up before then should be pointed at the new one, once:
-`git -C /opt/hansardgpt remote set-url origin https://github.com/rj-mitchell/wherempsstand.git`.
+In the domain's DNS settings, add an A record for `@` and one for `www`, each with the server's IP address. Remove
+any "parking" A records first, and leave MX and TXT records alone: they deliver email to admin@wherempsstand.com.
 
-## 2. Point the domain at the server
+If the domain is on Cloudflare, set both records to DNS only (the grey cloud) for now: while proxied, the site
+cannot get its first HTTPS certificate. The main address can be put behind Cloudflare once the site works
+([Cloudflare protection](#cloudflare-protection-optional)).
 
-At the company where you registered the domain, open its **DNS settings** and add these records, using your
-server's IP address. Remove any existing "parking" **A** records first, but leave any **MX** or **TXT**
-records alone: those deliver your email to admin@wherempsstand.com.
+Changes usually take effect within an hour. `nslookup wherempsstand.com` should print the server's IP address
+before step 3.
 
-| Domain | Type | Name / host | Value |
-|---|---|---|---|
-| wherempsstand.com | A | `@` | your server's IP |
-| wherempsstand.com | A | `www` | your server's IP |
+### 2. Log in and change the root password
 
-The charity's own domains (wheretheystand.uk, wheretheystand.co.uk and wheretheystand.org.uk) don't point at this
-server: wheretheystand.uk is the charity's site, served by Cloudflare, and the other two redirect to it there.
-
-If your domain is on Cloudflare: set both of these records to **DNS only** (the grey cloud), not
-**Proxied** (the orange cloud, Cloudflare's default), for now. While proxied, `nslookup` shows Cloudflare's addresses
-instead of your server's, and the site cannot get its first HTTPS certificate. Once the site is working, the main
-address can be put behind Cloudflare's proxy: see [Cloudflare protection](#cloudflare-protection-optional) below.
-
-Changes usually take effect within an hour. To check, run `nslookup wherempsstand.com` on your computer (in
-Terminal or PowerShell): it should print your server's IP address. Wait until it does before step 4, so that the
-HTTPS certificates can be issued.
-
-## 3. Log in to the server with its password
-
-On Windows, open **Terminal** (or PowerShell); on a Mac, open **Terminal**. Type, using your server's IP address:
-
-```
+```bash
 ssh root@YOUR.SERVER.IP
 ```
 
-- The first time, it asks whether to trust the server: type `yes` and press Return.
-- It then asks for the password. Paste the root password from Hostkey (in Windows Terminal, right-click pastes;
-  on a Mac, Cmd+V) and press Return. **Nothing appears while you type or paste a password; that is normal.**
+Answer `yes` to trust the server the first time, then paste the root password from Hostkey (nothing appears while
+typing it). Check the system with `grep PRETTY /etc/os-release`: it must say Ubuntu 24.04, or reinstall the server
+from Hostkey's control panel. Then set a new root password with `passwd`, since Hostkey's was sent by email, and keep
+it in a password manager.
 
-You are now typing commands on the server. Check it is running Ubuntu 24.04:
+### 3. Run the setup script
 
-```
-grep PRETTY /etc/os-release
-```
-
-It should say `Ubuntu 24.04`. If it says anything else, stop here and reinstall the server with Ubuntu 24.04 from
-the Hostkey control panel.
-
-Then choose a new root password of your own, because the one Hostkey emailed has been sent in plain text:
-
-```
-passwd
-```
-
-Type the new password twice (again, nothing appears). Keep it in your password manager. To leave the server at
-any point, type `exit`.
-
-## 4. Run the setup script
-
-On the server, run:
-
-```
+```bash
 curl -fsSL https://raw.githubusercontent.com/rj-mitchell/wherempsstand/main/deploy/provision.sh -o provision.sh
 bash provision.sh
 ```
 
-It asks three questions:
-1. Main domain name: `wherempsstand.com`
-2. Other domain names to redirect: leave it blank and press Return. (`www.wherempsstand.com` is added
-   automatically.)
-3. Anthropic API key: paste it. Nothing appears as you paste; that is deliberate. Press Return.
+It asks for the main domain (`wherempsstand.com`), other domains to redirect (leave blank: `www.wherempsstand.com`
+is added automatically) and the Anthropic API key (hidden while pasted). It then:
 
-The script then:
-- installs Docker, turns on automatic security updates, sets up a firewall that allows only SSH and the web, and
-  installs fail2ban, which blocks anyone who keeps guessing the password;
-- builds and starts the site, with HTTPS certificates obtained automatically;
-- starts loading Hansard since 2010 in the background (30–60 minutes);
-- sets up the twice-daily update and a nightly backup.
+- installs Docker, automatic security updates, a firewall that allows only SSH and the web, and fail2ban, which
+  blocks addresses that keep guessing the password;
+- clones the repository to `/opt/hansardgpt`, writes `deploy/.env` with a new admin token, and starts the site behind
+  Caddy, which obtains HTTPS certificates automatically;
+- starts the first data load in the background;
+- installs the site's timers (the twice-daily update, nightly backup, backup check and weekly report) and the
+  server-wide watchdog and disk timers.
 
-At the end it prints a command for checking usage and spend. Keep it somewhere safe; it contains your admin
-token.
+At the end it prints a command for checking usage and spending, which contains the admin token. Keep it safe.
 
-## 5. Recommended: switch to a key instead of a password
+### 4. Switch to an SSH key
 
-Logging in with a password works, but a **key** (a pair of files on your computer) is much safer, because there
-is nothing to guess. Once it is set up, you can turn password logins off. Do this from your **own computer**, not
-the server: if you are still logged in to the server, type `exit` first.
+A key cannot be guessed, so password logins can then be turned off. On the maintainer's own computer:
 
-### a. Make the key (once)
+1. Make a key, once: `ssh-keygen -t ed25519`, pressing Return at each question (a passphrase is optional).
+2. Copy it to the server. On a Mac, `ssh-copy-id root@YOUR.SERVER.IP`. On Windows, in PowerShell:
 
-In Terminal or PowerShell:
+   ```powershell
+   type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh root@YOUR.SERVER.IP "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+   ```
 
-```
-ssh-keygen -t ed25519
-```
+3. Check that `ssh root@YOUR.SERVER.IP` now logs in without the password. Do not go on unless it does.
+4. Stay logged in, log in again in a second window as a safety net, and in one of them run:
 
-Press Return at each question. (A passphrase is optional; if you set one, you type it instead of the server
-password.)
+   ```bash
+   printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\n' > /etc/ssh/sshd_config.d/00-keys-only.conf
+   systemctl reload ssh
+   ```
 
-### b. Copy it to the server
+5. In a third window, check that `ssh root@YOUR.SERVER.IP` still logs in. If it does not, undo it from a window
+   still logged in: `rm /etc/ssh/sshd_config.d/00-keys-only.conf && systemctl reload ssh`.
 
-You will be asked for the root password one last time.
+If the key is ever lost, Hostkey's control panel has a web console and can reset the root password.
 
-Windows (PowerShell or Terminal):
+### 5. Check everything is working
 
-```
-type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh root@YOUR.SERVER.IP "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
-```
-
-Mac:
-
-```
-ssh-copy-id root@YOUR.SERVER.IP
-```
-
-### c. Check the key works
-
-Run `ssh root@YOUR.SERVER.IP` again. It should log you straight in without asking for
-the server password. **Do not go on to step d unless it does.**
-
-### d. Turn off password logins
-
-Stay logged in, open a *second* Terminal window as a safety net, and log in there
-too. Then, in one of them, run:
-
-```
-printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\n' > /etc/ssh/sshd_config.d/00-keys-only.conf
-systemctl reload ssh
-```
-
-In a third window, check `ssh root@YOUR.SERVER.IP` still logs you in. If it does, you are done. If it does not,
-use one of the windows still logged in to undo it with `rm /etc/ssh/sshd_config.d/00-keys-only.conf && systemctl
-reload ssh`, and ask for help.
-
-If you are ever locked out (a lost laptop, say), the Hostkey control panel has a web console and can reset the
-root password.
-
-## 6. Check everything is working
-
-On the server, run:
-
-```
+```bash
 bash /opt/hansardgpt/deploy/check.sh
 ```
 
-It changes nothing. It lists what is working (✓) and anything that needs attention (✗), with what to do about each.
-Run it again at any time.
+It changes nothing, and lists what works (✓) and what needs attention (✗), with what to do about each.
 
-## 7. Watch the first data load
+### 6. Watch the first data load
 
-On the server (log in again with `ssh root@YOUR.SERVER.IP` if you are not already):
-
-```
+```bash
 tail -f /var/log/hansard-bootstrap.log
 ```
 
-Press Ctrl+C to stop watching (the load carries on). When it finishes, open **https://wherempsstand.com**.
-Searching works as soon as the load completes. Meaning-based matching is then built in the background during
-each twice-daily update, newest records first; on 8 cores the whole archive takes roughly a day. The
-[status page](https://wherempsstand.com/status) shows its progress.
+Ctrl+C stops watching; the load carries on. When it finishes, the site at https://wherempsstand.com searches the
+whole record by keyword. Meaning-based search is then built during each twice-daily update, newest records first;
+on 8 cores the whole archive takes roughly a day. The [status page](https://wherempsstand.com/status) shows its
+progress.
 
----
-
-## Day to day
-
-The easiest way to keep an eye on the site is the admin page, **https://wherempsstand.com/admin**. Paste your
-admin token (below) to see spending, reports from readers, feedback, visits, recent briefings and update
-history. You can close reports there (adding a public note for the [corrections page](https://wherempsstand.com/corrections)
-if something was put right) and withdraw a briefing. A withdrawal reason is shown publicly.
-
-| To… | Run on the server |
-|---|---|
-| See usage, spend, visits and feedback | the admin page, or the `curl` command printed at the end of setup |
-| See the update history | `curl -H "Authorization: Bearer YOUR_ADMIN_TOKEN" https://wherempsstand.com/api/admin/sync` |
-| Install a new version of the site | merge the latest changes into `main` on GitHub (step 1), then on the server: `bash /opt/hansardgpt/deploy/update.sh` (it finishes with the health check). Not in the hours the timers run, and with no `hansard` command of the new version run by hand first: [OPERATIONS.md](OPERATIONS.md), "New code". The version of November 2026 moves the state database: read "At deploy" there first |
-| Restart the site | `cd /opt/hansardgpt/deploy && docker compose restart` |
-| Change the API key | the command below |
-| Change the "Support this site" link (it points to the charity's Donate page, https://wheretheystand.uk/donate) | add `HANSARD_DONATE_URL=https://…` to `/opt/hansardgpt/deploy/.env`, then `docker compose up -d` in the same folder |
-| List recent briefings | `curl -H "Authorization: Bearer YOUR_ADMIN_TOKEN" https://wherempsstand.com/api/admin/briefings` |
-| Feature a briefing (listed on the Topics page and found by search engines) | the admin page: "Feature" next to a recent briefing, or paste its address under "Featured briefings" |
-| Write the topic briefings now, rather than waiting for the twice-daily update (about 11p each) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard topics refresh` (add `--only cost-of-living` for one) |
-| See each topic's state | the admin page, or `docker compose exec app hansard topics list` |
-| Collect the devolved parliaments' records now, rather than a few dozen files per update (free; about 4,000 files back to 1998, a few hours) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard devolved --files 5000` |
-| Rebuild the committee pages now, rather than waiting for the weekly update (free; the first time takes about two hours, because each committee's list of inquiries is fetched once from a slow service; later rebuilds take under an hour) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard committees` |
-| Fetch the newest Register of Members' Financial Interests now (free; also done by every update) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard interests` |
-| Collect committee evidence transcripts back to 2014 and make them searchable by meaning now, rather than 500 per update (free; once; about 8,000 sessions, several hours: one request at a time, then the embedding) | `cd /opt/hansardgpt/deploy && docker compose exec -d app sh -c 'mkdir -p /data/logs && hansard evidence > /data/logs/evidence.log 2>&1'` |
-| Read every past edition of the Commons register of interests (since 2000) now, rather than 40 per update (free; once; about 420 editions, 20–30 minutes) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard interests --archive 500` |
-| Load the donations to MPs now, rather than at the weekly update (free; about a minute) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard donations` |
-| Load the all-party groups now, rather than at the weekly update (free; a few seconds) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard groups` |
-| See which of these background jobs are still running (no output means all have finished) | `cd /opt/hansardgpt/deploy && docker compose exec app sh -c 'for p in /proc/[0-9]*; do tr "\0" " " < $p/cmdline 2>/dev/null; echo; done \| grep "[h]ansard "'` |
-| Load the 1997–2010 records now, rather than at the next update (once, after installing the version that adds them; free; a few hours) | `sudo systemctl start --no-block hansard-sync.service`, then watch with `journalctl -u hansard-sync -f` |
-| See whether an update is running, and whether the last one finished | `systemctl status hansard-sync --no-pager` (`active` means running, or waiting for another site's update to finish: see [Other sites on this server](#other-sites-on-this-server); `failed` with `status=137` means it ran out of memory: run `bash /opt/hansardgpt/deploy/swap.sh`, then start it again as above) |
-| See how much is still to do | `cd /opt/hansardgpt/deploy && docker compose run --rm -T app hansard status` (`files_unembedded` falls to 0 as meaning-based search catches up, up to 4 hours of it per update) |
-| Rebuild the meaning-search index for today's number of passages: quicker searches that find more of the closest passages (after meaning-based search has caught up, and again when the monthly disk report says so; free; about 30–60 minutes, the site works throughout and the twice-daily update waits for it). It measures each setting, saves the best to `/data/settings.local.toml` and records the rebuild in `/data/index/vector-index.json` | `cd /opt/hansardgpt/deploy && docker compose exec -d app sh -c 'mkdir -p /data/logs && hansard reindex-vectors > /data/logs/reindex.log 2>&1'`, then `docker compose exec app cat /data/logs/reindex.log` when it has finished (it ends by saying to restart), then `docker compose restart app` |
-| See how many passages the meaning-search index has now, against the number at its last rebuild | `cd /opt/hansardgpt/deploy && docker compose run --rm -T app hansard index-status` |
-| Check every vote for a whip report in one go, rather than 1,500 per update (free; about 3–4 hours) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard whips --count 20000` |
-| Set or change the Companies House API key (for company roles; free from developer.company-information.service.gov.uk) | `cd /opt/hansardgpt/deploy && read -rsp "Companies House API key: " K && echo && sed -i -e '/^HANSARD_COMPANIES_HOUSE_KEY=/d' -e '$a\' .env && printf 'HANSARD_COMPANIES_HOUSE_KEY=%s\n' "$K" >> .env && unset K && docker compose up -d` |
-| Look up every member's company roles now, rather than 400 per update (free; about 2–3 hours) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard directorships --count 4000` |
-| See the company roles found for members whose name contains some text | `cd /opt/hansardgpt/deploy && docker compose exec app hansard directorships --show "Smith"` |
-| Remove a company role wrongly matched to a member | add a line for it to `data_static/directorships_exclude.csv` in the code (the file says what goes in each column), then install it as a new version; the role is removed at the next update |
-| Check that early day motions can be read from Parliament (free) | `cd /opt/hansardgpt/deploy && docker compose exec app hansard edms --check` |
-| Collect all early day motions since 1997 in one go, in the background (free; about 8–10 hours the first time, one request at a time) | `cd /opt/hansardgpt/deploy && docker compose exec -d app hansard edms --months 400 --signatures 60000` |
-| Add, change or remove a topic | edit `config/topics.toml` in the code, then install it as a new version. Never change a published topic's `slug`: it is its address |
-| Hide a briefing while a complaint about it is looked into, and show it again | `docker compose exec app hansard hide /b/THE_ID --note "This briefing is not shown while a concern about it is looked into."`; `docker compose exec app hansard unhide /b/THE_ID`; `hansard hidden` lists what is hidden ([OPERATIONS.md](OPERATIONS.md), "Hiding a briefing") |
-| See how briefings went this week | `docker compose exec app hansard stats --since 7d`; the weekly reports are in `/data/logs/reports/` |
-| Withdraw a briefing (after a complaint, say) | `curl -X POST -H "Authorization: Bearer YOUR_ADMIN_TOKEN" -H "Content-Type: application/json" -d '{"reason": "complaint about attribution"}' https://wherempsstand.com/api/admin/briefings/THE_ID/withdraw` |
-
-Your admin token is in `/opt/hansardgpt/deploy/.env` (`HANSARD_ADMIN_TOKEN=`).
-
-To change the API key, run this on the server. It asks for the key without showing it (paste it and press
-Return), saves it and restarts the site:
-
-```
-cd /opt/hansardgpt/deploy && read -rsp "Anthropic API key: " K && echo && sed -i "s|^HANSARD_ANTHROPIC_API_KEY=.*|HANSARD_ANTHROPIC_API_KEY=$K|" .env && unset K && docker compose up -d
-```
-
-Then run `bash /opt/hansardgpt/deploy/check.sh`: it should say "Anthropic accepts the API key".
+Then set up email alerts ([Email from the server](#email-from-the-server)) and off-site backups
+([OPERATIONS.md](OPERATIONS.md), "Backups").
 
 ## Email from the server
 
-The server emails **wheretheystanduk@gmail.com** when something needs a look, for every site on it:
+The server emails wheretheystanduk@gmail.com, for every site on it, when:
 
-- a scheduled job fails: an update (Where MPs Stand's sync, and Where Councils Stand's, Where Countries Stand's and
-  Where Landlords Stand's updates) or a nightly backup. Where Countries Stand's update also fails, on purpose, when
-  briefing spending reaches 80% of a cap or briefings have been failing, so that comes by email too;
-- the watchdog restarts a site because it stopped answering, cannot restart it, is waiting for an update to finish
-  first, or has given up after three restarts ([The watchdog](#the-watchdog));
-- the disk is 80% full or more (checked every hour; see [Disk space](#disk-space)).
+- a scheduled job fails: any site's update or nightly backup (Where Countries Stand's update also fails on purpose
+  when briefing spending reaches 80% of a cap, or briefings keep failing);
+- the watchdog restarts a site, cannot restart it, is waiting for an update to finish, or has given up
+  ([The watchdog](#the-watchdog));
+- the disk is 80% full or more ([Disk space](#disk-space)).
 
-On the 1st of each month it also sends a report on where the disk is going.
+On the 1st of each month it also sends a report on where the disk is going. Each email gives the job, what happened
+and its last lines in the system log, and the same job is reported at most once every six hours.
 
-Each email gives the job, what happened and its last lines in the system log. The same job is reported at most once
-every six hours.
+It sends through Gmail with an app password, which can be revoked without changing the account's password. To set
+it up, once:
 
-It sends through Gmail's own mail server with an **app password**: a separate password for one use, which can be
-revoked on its own without changing the account's password. Set it up once:
+1. Sign in to wheretheystanduk@gmail.com, open myaccount.google.com, Security, and turn on 2-Step Verification if
+   it is off (Google offers app passwords only with it).
+2. Open myaccount.google.com/apppasswords, name a new password "server" and press Create. Google shows it once.
+3. On the server, run the following. `setup` asks for the password without showing it and saves it where only root
+   can read it (`/etc/wheretheystand/mail.env`); `test` sends a message, which should arrive within a minute.
 
-1. Sign in to wheretheystanduk@gmail.com and open **myaccount.google.com → Security**. Turn on **2-Step
-   Verification** if it isn't on (Google only offers app passwords with it).
-2. Open **myaccount.google.com/apppasswords**, name it "server" and press **Create**. Google shows a 16-letter
-   password once. Keep the page open.
-3. On the server, run this. It asks for the password without showing it, and saves it where only root can read it
-   (`/etc/wheretheystand/mail.env`):
-
-   ```
+   ```bash
    bash /opt/hansardgpt/deploy/mail.sh setup
    bash /opt/hansardgpt/deploy/mail.sh test
    ```
 
-   The test message should arrive within a minute. Then run `bash /opt/hansardgpt/deploy/update.sh` (and the other
-   sites' `update.sh`) once, so the jobs know where to report.
+4. Run each site's `deploy/update.sh` once, so its jobs know where to report.
 
-Never paste the app password anywhere else. To stop the server sending, delete it at
-myaccount.google.com/apppasswords.
+To stop the server sending, delete the app password at myaccount.google.com/apppasswords.
 
-The same script sends prepared letters, such as Where Councils Stand's requests to councils for permission to read
-their sites (`outreach/` in that repository). They go from the account like any other email, so they appear in its
-Sent folder and replies come to its inbox. A letter already sent is skipped, so the command is safe to run twice:
+The same script sends prepared letters, such as the requests in `outreach/` of this and other repositories. They
+go from the account like any other email, so they appear in its Sent folder and replies come to its inbox. A letter
+already sent is skipped, so the command is safe to run twice. `--test-to` sends a test copy instead, which is not
+counted as sent:
 
-```
-bash /opt/hansardgpt/deploy/mail.sh send /opt/wherecouncilsstand/outreach/2026-11/*.txt
-```
-
-To see a letter as it would arrive before sending it for real, send a test copy to yourself. Its real recipients
-get nothing, and it isn't counted as sent:
-
-```
-bash /opt/hansardgpt/deploy/mail.sh send --test-to you@example.com /opt/wherecouncilsstand/outreach/2026-11/essex.txt
+```bash
+bash /opt/hansardgpt/deploy/mail.sh send --test-to <address> /opt/hansardgpt/outreach/2026-11/mysociety.txt
+bash /opt/hansardgpt/deploy/mail.sh send /opt/hansardgpt/outreach/2026-11/mysociety.txt
 ```
 
 `/var/lib/wheretheystand/sent.log` lists what was sent and when.
@@ -333,438 +206,192 @@ bash /opt/hansardgpt/deploy/mail.sh send --test-to you@example.com /opt/wherecou
 ## Cloudflare protection (optional)
 
 Cloudflare's proxy (the orange cloud) puts Cloudflare between visitors and the server, so floods of automated
-requests are absorbed before they reach it. For **wherempsstand.com**, the server then uses a certificate from
-Cloudflare, closes any connection that does not come through Cloudflare, and still sees each visitor's own address
-(Cloudflare passes it on), so the per-visitor daily limit keeps working. **www.wherempsstand.com** is redirected to
-wherempsstand.com by Cloudflare itself, so no DNS record shows the server's address any more. (Old DNS records can
-still reveal it, so this protects against casual abuse and heavy load more than a determined attack on the server
-itself.)
+requests are absorbed before they reach it. The server then uses a certificate from Cloudflare, closes any
+connection that does not come through Cloudflare, and still sees each visitor's own address, so the per-visitor
+limits keep working. www.wherempsstand.com is redirected by Cloudflare itself, so no DNS record shows the server's
+address. Old DNS records can still reveal it, so this protects against heavy load and casual abuse more than a
+determined attack.
 
-### The charity's domains
+The charity's own domains (wheretheystand.uk, wheretheystand.co.uk and wheretheystand.org.uk) are served by
+Cloudflare and never reach this server, so `REDIRECT_DOMAINS` in `deploy/.env` holds only `www.wherempsstand.com`.
 
-Until 31 October 2026 the site's address was wheretheystand.uk, and wheretheystand.uk,
-wheretheystand.co.uk and wheretheystand.org.uk all redirected here. Now wheretheystand.uk is the charity's own site
-(the hub, on Cloudflare), and the other two redirect to it there: none of them reaches this server, and their
-Cloudflare settings belong to the hub, not to this guide. Only `www.wherempsstand.com` belongs in `REDIRECT_DOMAINS`
-in `/opt/hansardgpt/deploy/.env`; with the old list, `check.sh` reports the wheretheystand names as "does not
-redirect". To change it on the server:
+1. Deploy the latest version (`bash /opt/hansardgpt/deploy/update.sh`), which fetches Cloudflare's list of
+   addresses.
+2. At dash.cloudflare.com, choose Add a domain, enter wherempsstand.com and pick the Free plan. Check the records it
+   found: the A records for `@` and `www` (DNS only for now) and every MX and TXT record. At the domain's registrar,
+   replace its nameservers with the two Cloudflare gives, and wait for Cloudflare to say the domain is Active.
+3. In Cloudflare, for wherempsstand.com:
+   - SSL/TLS, Overview: Full (strict). "Flexible" sends visitors round in circles.
+   - SSL/TLS, Edge Certificates: Always Use HTTPS on.
+   - Security, Settings, Client-side abuse: Email Address Obfuscation off (it rewrites pages).
+   - Security, Settings, Bot traffic: Bot fight mode off (it can block the public API and sets a cookie), Block AI
+     bots set to "Do not block", and Managed robots.txt off, since the site publishes readable text for AI
+     assistants and has its own robots.txt. In AI Crawl Control, set any crawler marked Block to Allow.
+   - Speed, Settings, Content Optimization: Rocket Loader off.
+   - Speed, Settings: HTTP/3 (with QUIC), 0-RTT Connection Resumption and HTTP/2 to Origin on. Caching, Tiered
+     Cache: Smart Tiered Caching on. Leave Caching, Configuration at Standard and "Respect existing headers", with
+     no "Cache everything" rule: pages carry live data, and the site already marks which files can be kept.
+   - Web Analytics (in the account's menu, under Analytics & Logs): once the domain is proxied Cloudflare turns it
+     on, so find wherempsstand.com, choose Manage site, and under automatic setup choose Disable. It would add a
+     tracking script, and the site keeps its own cookie-free counts.
+4. Create the origin certificate: SSL/TLS, Origin Server, Create Certificate. Keep "Generate private key and CSR
+   with Cloudflare" and RSA (2048), remove `*.wherempsstand.com` so that only `wherempsstand.com` is listed, choose
+   15 years, press Create, and leave the page open with the format on PEM: the private key is shown only once.
+5. In DNS, Records, set the A record for `wherempsstand.com` (`@`) to Proxied, and any AAAA record for `@` too (or
+   delete it), or visitors using IPv6 are turned away in the next step.
+6. A few minutes later, on the server, run `bash /opt/hansardgpt/deploy/cloudflare.sh on` and paste the Origin
+   Certificate and then the Private Key, each followed by Return. It checks they belong together and are for
+   wherempsstand.com, switches the server over and checks the site through Cloudflare. If that fails, it puts
+   everything back and says what to check.
+7. In Rules, Redirect Rules, create a rule named `To wherempsstand.com`: custom filter expression, Hostname equals
+   `www.wherempsstand.com`; then type Dynamic, expression `concat("https://wherempsstand.com", http.request.uri.path)`,
+   status 301, Preserve query string ticked; Deploy. Then edit the `www` DNS record: Proxied, with the IPv4 address
+   `192.0.2.1` (an address that goes nowhere, since Cloudflare answers this name itself), and delete any AAAA record
+   for `www`.
+8. A few minutes later, on the server, run `bash /opt/hansardgpt/deploy/cloudflare.sh redirects on`. It checks that
+   Cloudflare redirects each name, then stops the server doing it. If a name is not ready yet it changes nothing and
+   says which; run it again later.
+9. `bash /opt/hansardgpt/deploy/check.sh` should say "goes through Cloudflare's proxy" and that each name
+   redirects. Then ask a question on the site and check the briefing appears as it is written.
 
-```
-sed -i 's/^REDIRECT_DOMAINS=.*/REDIRECT_DOMAINS="www.wherempsstand.com"/' /opt/hansardgpt/deploy/.env
-bash /opt/hansardgpt/deploy/update.sh
-```
-
-1. Install the latest version (`bash /opt/hansardgpt/deploy/update.sh`). It fetches Cloudflare's list of
-   addresses; that is harmless while nothing is proxied.
-2. Put the domain on Cloudflare. At dash.cloudflare.com, choose **Add a domain**, enter wherempsstand.com, pick
-   the **Free** plan, and check the records it found: the **A** records for `@` and `www` from step 2 (set them to **DNS only** for now) and every
-   **MX** and **TXT** record (email). Then, at the company where you registered the domain, replace its nameservers
-   with the two Cloudflare gives you, and wait for Cloudflare to say the domain is **Active** (usually within an
-   hour; it emails you).
-3. Settings in Cloudflare. For **wherempsstand.com**:
-   - SSL/TLS → Overview: choose **Full (strict)**. (Not "Flexible": that sends visitors round in circles.)
-   - SSL/TLS → Edge Certificates: turn on **Always Use HTTPS**.
-   - Security → Settings (filter by *Client-side abuse*): turn off **Email Address Obfuscation** (on by default;
-     it rewrites pages).
-   - Security → Settings (filter by *Bot traffic*): turn off **Bot fight mode** (it can block the public API
-     and sets a cookie), set **Block AI bots** to *Do not block*, and turn off **Managed robots.txt**: the site
-     publishes readable text for AI assistants and has its own robots.txt. If **AI Crawl Control** (left-hand menu)
-     lists any crawlers as *Block*, set them to *Allow*.
-   - Speed → Settings → Content Optimization: make sure **Rocket Loader** is off (off by default).
-   - Web Analytics (in the account's left-hand menu, under *Analytics & Logs*, not inside the domain): once the
-     domain is proxied, Cloudflare turns it on by itself. Find wherempsstand.com in the list, choose **Manage site**,
-     and under automatic setup choose **Disable** (it would add a tracking script; the site has its own cookie-free
-     counts).
-
-   - For speed (all free): **Speed → Settings**: **HTTP/3 (with QUIC)** and **0-RTT Connection Resumption** on,
-     and **HTTP/2 to Origin** on; **Caching → Tiered Cache**: **Smart Tiered Caching** on. Leave **Caching → Configuration**
-     at *Standard* and *Respect existing headers*, and add no "Cache everything" rule: pages carry live data, and the
-     site already tells Cloudflare which files can be kept for a year.
-
-4. Create the origin certificate (wherempsstand.com only): **SSL/TLS → Origin Server → Create Certificate**.
-   Keep *Generate private key and CSR with Cloudflare* and key type **RSA (2048)**. Under hostnames, **remove
-   `*.wherempsstand.com`** so that only `wherempsstand.com` is listed. Validity: **15 years**. Press **Create** and
-   leave the page open, with the format on **PEM**: the private key is shown only once.
-5. Turn the proxy on for the main address: in wherempsstand.com's **DNS → Records**, edit the **A** record named
-   `wherempsstand.com` (`@`) and set it to **Proxied** (orange cloud). If there is an **AAAA** record for `@`, set it
-   to Proxied too (or delete it), or visitors using IPv6 would be turned away in the next step. The site carries on
-   working (Cloudflare uses the server's current certificate until the next step).
-6. Switch the server over. A few minutes later, on the server, run:
-
-   ```
-   bash /opt/hansardgpt/deploy/cloudflare.sh on
-   ```
-
-   Paste the **Origin Certificate** from the Cloudflare page and press Return, then the **Private Key** and press
-   Return. It checks they belong together and are for wherempsstand.com, switches the server over, and checks the
-   site through Cloudflare. If that fails, it puts everything back and says what to check.
-7. Have Cloudflare do the redirect from www.wherempsstand.com. In wherempsstand.com, open **Rules → Redirect
-   Rules** (in some accounts, **Rules → Overview → Create rule → Redirect Rule**) and create a rule:
-   - Rule name: `To wherempsstand.com`.
-   - If incoming requests match: choose *Custom filter expression*: field **Hostname**, operator **equals**,
-     value `www.wherempsstand.com`.
-   - Then: type **Dynamic**, expression `concat("https://wherempsstand.com", http.request.uri.path)`, status
-     code **301**, and tick **Preserve query string**.
-   - Press **Deploy**.
-
-   Then, in **DNS → Records**, edit the `www` record: set it to **Proxied**, and change its **IPv4 address** to
-   `192.0.2.1` (an address that goes nowhere: Cloudflare answers this name itself, and the server's address is no
-   longer shown). Delete any **AAAA** record for `www`. Leave MX and TXT records alone.
-8. Hand the redirects over. A few minutes later, on the server, run:
-
-   ```
-   bash /opt/hansardgpt/deploy/cloudflare.sh redirects on
-   ```
-
-   It checks that Cloudflare redirects each name to the same page on wherempsstand.com, then stops the server doing
-   it. If any name is not ready (a brand-new domain's Cloudflare certificate can take a little while), it changes
-   nothing and says which; run it again later.
-9. Check: `bash /opt/hansardgpt/deploy/check.sh` should say "goes through Cloudflare's proxy" and that each name
-   redirects. Then ask a question on the site and check that the briefing appears as it is written.
-
-To undo the redirects, point each of those records back at the server's IP address (**DNS only**), delete the
-redirect rules, then run `bash /opt/hansardgpt/deploy/cloudflare.sh redirects off`. **To undo the proxy** for the
-main address, run `bash /opt/hansardgpt/deploy/cloudflare.sh off` on the server **first**, then set its A record back
-to **DNS only**. The certificate is kept, so `cloudflare.sh on` switches back without pasting it again (add
-`--replace` to paste a new one). If the site is ever under attack, **Security → Settings → Under Attack mode** in
-Cloudflare asks every visitor's browser to pass a short check first.
+To undo the redirects, point the records back at the server's IP address (DNS only), delete the redirect rules and
+run `cloudflare.sh redirects off`. To undo the proxy, run `cloudflare.sh off` on the server first, then set the A
+record back to DNS only. The certificate is kept, so `cloudflare.sh on` switches back without pasting it again
+(`--replace` pastes a new one). Under attack, Cloudflare's Security, Settings, Under Attack mode asks every visitor's
+browser to pass a short check first.
 
 ## Other sites on this server
 
-The charity's other sites (Where Countries Stand, Where Councils Stand and Where Landlords Stand) run on this
-server too, each in its own folder under `/opt`, with its own containers, data, settings, AI spending caps and update
-timer. This site's web
-server (Caddy) is the front door for all of them: it answers every domain, with the same protections as this site
-(Cloudflare's certificate, connections not through Cloudflare closed, the 1 MB request limit, the security
-headers), and passes each site's visitors to its container over a shared Docker network called `sites`.
+The other sites run from their own folders under `/opt`, with their own containers, data, settings, spending caps
+and update timers. Caddy, in this repository, answers every domain with the same protections (Cloudflare's
+certificate, connections not through Cloudflare closed, a 1 MB request limit, the security headers) and passes each
+site's visitors to its container over a shared Docker network called `sites`.
 
-`SITES` in `deploy/.env` lists them, as `domain=container` pairs (see `deploy/.env.example`). A site is served once
+`SITES` in `deploy/.env` lists them as `domain=container` pairs (see `deploy/.env.example`). A site is served once
 its Cloudflare origin certificate is added; until then Caddy leaves its domain alone.
 
-Adding a site (the site's own `docs/DEPLOY.md` has its details, such as the first data load):
+To add a site (its own `docs/DEPLOY.md` has its details, such as the first data load):
 
-1. Cloudflare, for the site's domain: the settings in step 3 of "Cloudflare protection" above; an **A** record
-   for `@` pointing at this server, **Proxied**; `www` redirected by a redirect rule (step 7 above); and an origin
-   certificate (step 4 above), with the page left open.
-2. The site itself, on the server:
+1. In Cloudflare, for the site's domain: the settings in step 3 of [Cloudflare
+   protection](#cloudflare-protection-optional), a Proxied A record for `@` pointing at this server, `www`
+   redirected by a rule (step 7), and an origin certificate (step 4), with the page left open.
+2. On the server:
 
-   ```
+   ```bash
    git clone https://github.com/rj-mitchell/<site> /opt/<site>
    cd /opt/<site>/deploy && cp .env.example .env && nano .env
    bash /opt/<site>/deploy/update.sh
    ```
 
-   `update.sh` builds and starts it, and installs its update and backup timers.
-3. The front door: make sure the site is in `SITES` in `/opt/hansardgpt/deploy/.env`, then paste its
-   certificate:
-
-   ```
-   bash /opt/hansardgpt/deploy/cloudflare.sh site <domain>
-   ```
-
-4. Check: `bash /opt/hansardgpt/deploy/check.sh` lists each site, and the memory left.
+   `update.sh` builds and starts the site and installs its timers.
+3. Add the site to `SITES` in `/opt/hansardgpt/deploy/.env`, then paste its certificate:
+   `bash /opt/hansardgpt/deploy/cloudflare.sh site <domain>`.
+4. `bash /opt/hansardgpt/deploy/check.sh` lists each site and the memory left.
 
 ### Keeping out of each other's way
 
-Each site's updates run at their own time:
-this site at 7.15am and 7.15pm (UK time), Where Councils Stand at 3.17am and Where Countries Stand at 5.41am and
-5.41pm (UTC), and Where Landlords Stand on Thursdays at 11.40am (UK time). A long update can still run into the
-next one (Where Councils Stand's first load, say), so each site's scheduled update also takes one server-wide lock
-first, `/var/lock/wheretheystand-update.lock`, and waits while another update holds it: two updates never run at
-once. Backups don't take the lock; they are small and quick. Their containers have memory limits, so a runaway update
-stops itself rather than slowing this site.
+Each site's update runs at its own time (the table above). A long update can still run into the next one, so each
+site's update unit wraps its command in `flock /var/lock/wheretheystand-update.lock` and waits while another update
+holds the lock; a new site joins by doing the same. Backups do not take the lock, since they are small and quick.
 
-To see whether an update is waiting for another: `systemctl status hansard-sync --no-pager` shows `flock` as the
-running command until the lock is free, and `journalctl -u hansard-sync` then says how long it waited. To see which
-update holds the lock: `fuser -v /var/lock/wheretheystand-update.lock`. Each site's update unit wraps its command in
-`flock /var/lock/wheretheystand-update.lock`, so a new site joins by doing the same. If `check.sh` reports less than 3 GB of memory free for
-long, it is time for more memory or a second server.
+While an update waits, `systemctl status hansard-sync --no-pager` shows `flock` as the running command, and
+`journalctl -u hansard-sync` then says how long it waited. `fuser -v /var/lock/wheretheystand-update.lock` shows
+which update holds the lock. If `check.sh` reports less than 3 GB of memory free for long, the server needs more
+memory or a second server is needed.
 
-### An idea for later
+## The watchdog
 
-Not needed now; worth doing if the server gets busier or a site misbehaves. It was worked out
-in `rj-mitchell/parentwheretheystand` (archived November 2026), an earlier plan to run every site from one combined
-setup, so its code can be copied from there.
+Each site's app checks itself every 30 seconds (Docker runs its `/api/health`), and Docker marks it unhealthy after
+three failures in a row, but does not restart it. `deploy/watchdog.sh` does, every two minutes
+(`wheretheystand-watchdog.timer`), for Where MPs Stand and each site in `SITES`, in its folder `/opt/<container>`. A
+site listed but not installed yet is skipped. `update.sh` and `provision.sh` install it.
 
-* A share of the processors for jobs. Memory limits stop a runaway update, but an update can still keep every
-  processor busy and slow the sites while it runs. Running each update in a container limited to part of the
-  processors (`cpus:` in its compose file) keeps the sites quick. (A `Nice=` in a systemd unit does not reach the
-  work: Docker starts the container, not the unit.)
+When a site is unhealthy, the watchdog restarts its app (`docker compose restart app` in its `deploy` folder) and
+emails the alerts address. It is careful not to make things worse:
 
-### The watchdog
+- an app that is not running or is still starting is left alone, and so is an update's one-off container;
+- while an update holds the update lock it restarts nothing, and emails that it is waiting; once the update has
+  finished, the next check restarts the site if it is still unhealthy. It holds the lock itself while it restarts a
+  site, so no update starts in the middle;
+- after restarting a site it leaves it alone for 10 minutes, then 20 after the next restart, and after three
+  restarts in six hours it stops and emails that someone needs to look. It tries again once the oldest of those
+  restarts is six hours old.
 
-Each site's app checks itself every 30 seconds (Docker runs its `/api/health` inside its container) and Docker marks
-it **unhealthy** after three failures in a row, but Docker does not restart it. `deploy/watchdog.sh` does, run every
-two minutes by `wheretheystand-watchdog.timer` for **every site on the server**: Where MPs Stand, and each site in
-`SITES` in `deploy/.env`, in its folder `/opt/<container>` (the part after `=`; a site listed but not installed yet is
-skipped). A new site is watched as soon as it is in `SITES`: it needs nothing of its own beyond the health check every
-site's compose file already has. `update.sh` and `provision.sh` install it; it replaced `hansard-watchdog`, which
-watched this site alone, and `update.sh` removes that.
+Each kind of email about each site is sent at most once every six hours (`alert.sh`). The restarts are listed in
+`/var/lib/wheretheystand/watchdog/`, one file per site; deleting a site's file lets the watchdog restart it again at
+once.
 
-When a site is unhealthy it restarts that site's app (`docker compose restart app` in its `deploy` folder) and emails
-the alerts address. It is careful not to make things worse:
-
-- an app that isn't running, or is still starting, is left alone: an update is rebuilding it, say. So is an update's
-  own one-off container, which carries the same health check;
-- while an update holds the update lock (`/var/lock/wheretheystand-update.lock`) it restarts nothing: a site that
-  slows down during a long update is left to the update, and an email says the watchdog is waiting. Once the update
-  has finished, the next check restarts the site if it is still unhealthy. The watchdog holds the lock itself while it
-  restarts a site, so no update starts in the middle;
-- it backs off: after restarting a site it leaves that site alone for 10 minutes, then 20 after the next restart;
-  after **three restarts in six hours** it stops, and emails that a person needs to look. It tries again once the
-  oldest of those restarts is six hours old.
-
-Each kind of email about each site is sent at most once every six hours (`alert.sh`). The restarts it has made are
-listed in `/var/lib/wheretheystand/watchdog/` (one file per site, one time per line); deleting a site's file lets
-it restart that site again at once.
-
-| To… | Run on the server |
+| Task | Command |
 |---|---|
 | See what the watchdog has done | `journalctl -t wheretheystand-watchdog --since -7d` |
 | See each site's health now | `docker ps --format '{{.Names}}: {{.Status}}'` |
 | Run it now | `systemctl start wheretheystand-watchdog` |
-| Pause it (during maintenance, say) | `systemctl stop wheretheystand-watchdog.timer`; `systemctl start wheretheystand-watchdog.timer` to resume. `update.sh` resumes it too |
+| Pause it, during maintenance | `systemctl stop wheretheystand-watchdog.timer`; `systemctl start wheretheystand-watchdog.timer`, or any `update.sh`, resumes it |
 
 ## Disk space
 
-The server's disk holds every site's data, and Where MPs Stand's is by far the largest (about 40 GB). Two jobs
-watch it, for every site on the server. Both are installed by `update.sh` and email the alerts address
-([Email from the server](#email-from-the-server)):
+Two jobs watch the disk for every site, and email the alerts address ([Email from the
+server](#email-from-the-server)):
 
-- every hour, `deploy/disk-check.sh` emails if the disk is **80% full** or more, with what is using it. While it
-  stays that full, it emails again at most every six hours;
-- on the 1st of each month, `deploy/disk-report.sh` emails where the disk is going: each site's data and its
-  largest folders, the search indexes and how many old versions each keeps, Docker's images and build cache, swap,
-  the system log, and last month's figure for comparison. It also gives the memory each container is using at that
-  moment (`docker stats`), with its limit, and how much swap has been used since the server started. And it gives
-  the number of passages searched by meaning now, against the number when that index was last rebuilt, with the
-  growth (`hansard index-status`). New passages join the index's existing partitions, so each search reads more as
-  the record grows: at 20% more, the line says to run `hansard reindex-vectors` ([Day to day](#day-to-day) has the
-  command). If no rebuild has been recorded (`/data/index/vector-index.json`, written by `reindex-vectors` and
-  `vectors-f16` since 7 November 2026), it says to run one once meaning-based search has caught up.
+- every hour, `deploy/disk-check.sh` emails if the disk is 80% full or more, with what is using it, and again at
+  most every six hours while it stays that full;
+- on the 1st of each month, `deploy/disk-report.sh` emails where the disk is going: each site's data and its largest
+  folders, the search indexes and their old versions, Docker's images and build cache, swap, the system log, last
+  month's figure, each container's memory use against its limit, and the meaning-search index's growth since its
+  last rebuild (`hansard index-status`). At 20% growth it says to rebuild the index ([OPERATIONS.md](OPERATIONS.md),
+  "Day to day", has the command).
 
-### Memory limits
-
-The other sites' containers have memory limits (4 GB for Where Countries Stand and Where Councils
-Stand, 1 GB for Where Landlords Stand), so a runaway update stops itself rather than slowing every site. Where MPs
-Stand has none yet, because nothing has been measured: `mem_limit` in `deploy/docker-compose.yml` is left commented
-out until it has. To measure, run `docker stats --no-stream` every so often while a sync runs, and read the monthly
-reports; then set the limit to about one and a half times the highest figure seen, remove the `#`, and run
-`update.sh`. A sync's one-off container gets the same limit as the site again, so leave room for both.
-
-`update.sh` also keeps the server's own logs and downloads in check (`deploy/housekeeping.sh`): the system log is
-capped at 500 MB, and apt deletes out-of-date downloaded packages once a week.
-
-`check.sh` also marks the disk ✗ from 80%. To see the report now, run `bash /opt/hansardgpt/deploy/disk-report.sh`
-(it prints it, and emails it too).
+`check.sh` also marks the disk ✗ from 80%, and `bash /opt/hansardgpt/deploy/disk-report.sh` prints and emails the
+report at any time. `update.sh` caps the system log at 500 MB and has apt delete out-of-date downloads weekly
+(`deploy/housekeeping.sh`).
 
 If the disk is filling, these are safe at any time and free space at once:
 
-```
+```bash
 docker builder prune -f            # Docker's build cache: rebuilt as needed
 docker image prune -f              # old copies of the sites' programs that nothing uses
-journalctl --vacuum-size=500M      # the system log (it is kept under 500 MB anyway)
+journalctl --vacuum-size=500M      # the system log
 apt-get clean                      # downloaded updates that are already installed
 ```
 
-### Docker's log limit (once, at a quiet time)
+Never run `docker volume prune`: it deletes the data of every site not running at that moment. Beyond these, the
+next steps are each site's own, such as its search indexes; measure first.
 
-Each site's containers keep at most 30 MB of logs, set in its
-compose file. A default for any other container belongs in `/etc/docker/daemon.json`; `provision.sh` writes it on a
-new server, but a server set up before November 2026 needs it added by hand. Applying it restarts Docker, which
-stops every site on the server for up to a minute, so do it at a quiet time and away from the update times (see
-[Other sites on this server](#other-sites-on-this-server)). On the server:
+### Memory limits
 
-```
-cat /etc/docker/daemon.json
-```
+The other sites' containers have memory limits (4 GB for Where Countries Stand and Where Councils Stand, 1 GB for
+Where Landlords Stand), so a runaway update stops itself. Where MPs Stand has none until its peak has been
+measured: `mem_limit` in `deploy/docker-compose.yml` is commented out. To set it, watch `docker stats --no-stream`
+during a sync and read the monthly reports, set the limit to about one and a half times the highest figure, remove
+the `#` and run `update.sh`. A sync's one-off container gets the same limit again, so leave room for both.
 
-If that says "No such file or directory", run:
+### Docker's log limit
 
-```
+Each site's containers keep at most 30 MB of logs, set in its compose file. The default for any other container is
+in `/etc/docker/daemon.json`, which `provision.sh` writes. If `cat /etc/docker/daemon.json` says "No such file or
+directory", add it at a quiet time, away from the update times, since restarting Docker stops every site for up to
+a minute:
+
+```bash
 printf '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"3"}}\n' > /etc/docker/daemon.json
 systemctl restart docker
 bash /opt/hansardgpt/deploy/check.sh
 ```
 
-Every site's containers start again by themselves. If the file already exists, add the two settings to it by hand
-instead of replacing it.
+The sites start again by themselves. If the file exists without these settings, add them by hand.
 
-Never run `docker volume prune`: it deletes every site's data that isn't running at that moment. If those are
-not enough, the next steps are each site's own (its search indexes, and Where MPs Stand's raw Hansard files, below);
-measure first.
+### Compressing raw Hansard files
 
-### Compressing Where MPs Stand's raw Hansard files (once)
+The sync stores each of TheyWorkForYou's files gzipped (`<name>.xml.gz`, about a quarter of the size;
+[DECISIONS.md](DECISIONS.md), 25). Files stored plain by an older mirror can be compressed in place with
+`hansard compress-raw`, which keeps their dates, so nothing is read again and the search index is untouched. At a
+quiet hour, from `/opt/hansardgpt/deploy`, see what it would do (this changes nothing), then run it under the update
+lock:
 
-Since November 2026 the sync fetches TheyWorkForYou's
-files over HTTPS and stores each one gzipped (`<name>.xml.gz`, about a quarter of the size; decision 25 in
-[DECISIONS.md](DECISIONS.md)). The files already on the server stay as they are until this one-off command compresses
-them, which frees about 7–8 GB. It keeps each file's modification time, and the site's record of what it has read
-compares the size of the XML inside, so **nothing is read again and the search index is untouched**. The sites are
-not slowed: only the sync reads these files.
-
-Do it at a quiet hour, away from the update times above, after `update.sh` has installed the version that has the
-command. First see what it would do (this changes nothing, and needs no lock):
-
-```
-cd /opt/hansardgpt/deploy
+```bash
 docker compose run --rm -T app hansard compress-raw --dry-run
-```
-
-It prints how many plain files there are, their size, and the likely size afterwards from a sample. Then run it under
-the server-wide update lock, so that no site's update runs meanwhile (it waits if one is running):
-
-```
 flock --verbose /var/lock/wheretheystand-update.lock docker compose run --rm -T app hansard compress-raw
 ```
 
-It should take well under an hour (compressing runs at roughly 20 MB a second on one core), needs only a few MB
-of free space at a time, and prints the GB before and
-after. It is safe to stop (Ctrl-C) and run again: it carries on where it stopped. `--limit 5000` compresses only that
-many files, to try it first. If it lists any `conflicts` (a file stored in both forms with different contents), the
-gzipped copy is the one read; nothing else needs doing.
-
-To check the syncs are no slower, note the `fetch` and `ingest` seconds of the last sync before, and of the first two
-after (`docker compose run --rm -T app hansard status` lists the recent runs). The first sync after the switch to
-HTTPS lists each folder on TheyWorkForYou and takes each file's date from the listing (`markers_from_listing`), so it
-downloads only what is new or corrected. If `downloaded` is large instead, the files are fetched again once, but any
-that are unchanged are kept as they are (`unchanged`) and not read again.
-
-To keep a full uncompressed mirror by rsync instead (TheyWorkForYou's own method), set `compress_raw_xml = false`
-under `[sources]` in `/data/settings.local.toml`; `hansard fetch --transport rsync` does one such fetch.
-
-### Halving the meaning-search vectors (once)
-
-Since November 2026 new search vectors are stored as 16-bit numbers
-rather than 32-bit, half the space, with no measurable change in what is found (decision 26 in
-[DECISIONS.md](DECISIONS.md); the measurements are in [EVALUATION.md](EVALUATION.md), "Retrieval only"). The vectors
-already on the server (`index/vectors.lance`, about 13 GB, and `evidence_index/turns.lance`, about 1.7 GB) stay
-32-bit, and keep working, until this one-off command converts them, which frees about 6–7 GB. The site keeps
-working throughout and needs no restart: the command builds a new 16-bit copy beside each table, checks it, and
-swaps it in one step.
-
-Do it at a quiet hour, away from the update times above, after `update.sh` has installed the version that has the
-command. All four steps below are free (no AI model is called). In `/opt/hansardgpt/deploy`:
-
-1. See what it would do (this changes nothing, and needs no lock). It prints each table's size, the free space,
-   the space it needs while the old and new copies both exist (an estimate of the new copy, about 7.5 GB for the
-   passages, plus 5 GB it keeps free besides; it refuses, changing nothing, if there is less) and the likely saving
-   (`likely_gb_saved`, a cautious figure: the passages' table measured 0.82 KB a row after converting, which would
-   make it about 6.5 GB, half of today's 13 GB):
-
-   ```
-   cd /opt/hansardgpt/deploy
-   docker compose run --rm -T app hansard vectors-f16 --dry-run
-   ```
-
-2. Record what the test set's questions find now (a minute or two; it saves a file and prints its name, which the
-   last step needs):
-
-   ```
-   docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard eval retrieval --out /data/eval-runs
-   ```
-
-3. Convert, under the server-wide update lock, so that no site's update runs meanwhile (it waits if one is running).
-   It takes roughly an hour, most of it building the new search index, so it runs in the background and writes to
-   a log that you can follow (Ctrl-C stops only the following, not the conversion):
-
-   ```
-   nohup flock --verbose /var/lock/wheretheystand-update.lock docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard vectors-f16 < /dev/null > /root/vectors-f16.log 2>&1 &
-   tail -f /root/vectors-f16.log
-   ```
-
-   (The test set is mounted so that the conversion's own check searches for its 62 questions as well as 14 samples.)
-   For the passages, once the new table's search index is built, it measures that index as `hansard
-   reindex-vectors` does: how many of the truly nearest passages it finds at 20, 40 and 80 partitions searched
-   (`nprobes`), with and without re-checking, and recommends the fastest setting that finds the most (`tuning`). A
-   new index searched with the old settings can find fewer: on 7 November 2026, 85% at 20 partitions against 94% at
-   80 ([EVALUATION.md](EVALUATION.md)). It ends with a summary for each table: `"status": "converted"`, the checks
-   (`rows_ok`, the `sample` of vectors with its largest difference, and `searches`: the share of the nearest 10
-   passages the new table, searched with its recommended settings, finds of the old table's, `overlap_at_10`, which
-   must be at least 0.9), and `gb_before`, `gb_after` and `gb_saved`. The recommended settings are saved to
-   `/data/settings.local.toml` and the rebuild recorded (`record`), and it ends by saying to restart the app
-   (`docker compose restart app`), which then searches with them. If a check fails it says "not swapped", and the
-   site carries on with the old table, untouched (`--force` swaps even when only the searches differ, or when no
-   setting of the new index finds as many as the old: ask before using it). It is safe to stop (`docker ps --filter name=app-run` names its container; `docker stop` that name) and run
-   again: it carries on from where it stopped (the copy, then the index), and a run after a finished one only
-   tidies up.
-
-4. Run the test set's questions again and compare (use the file name step 2 printed):
-
-   ```
-   docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard eval retrieval --out /data/eval-runs --compare /data/eval-runs/<step 2's file>.json
-   ```
-
-   Expect almost the same sources (`sources_overlap` near 1) and, for the meaning search, `overlap_at_10` near 1 and
-   similarities differing in the fourth decimal place (`max_similarity_difference` under about 0.001). `docker
-   compose run --rm -T app ls /data/eval-runs` lists the saved runs.
-
-`bash /opt/hansardgpt/deploy/disk-report.sh` shows the indexes' new sizes. To keep the old 32-bit tables for a while
-(about 15 GB until deleted), add `--keep-old` to step 3; they are kept as `vectors_f32.lance` and `turns_f32.lance`
-beside the new ones, and the next run of the step 3 command deletes them.
-
-## Backups
-
-Everything can be rebuilt from public sources except the saved briefings, reports from readers, feedback, usage and
-visit counts. The setup script backs these up **every night at 3.30am**, keeping the last 14 days, in
-`/opt/hansardgpt/deploy/backups` on the server.
-
-Those copies protect against mistakes, but not against losing the whole server, so each night's backup is also
-copied to a **Backblaze B2** bucket once it is set up (the last 60 nights are kept there; they are small, well
-within B2's free 10 GB).
-
-### Setting up the off-site copy (once)
-
-1. At backblaze.com, create a **private** B2 bucket and an **application key** allowed to access only that bucket.
-2. On the server, run this. It asks for the bucket name, the keyID and the applicationKey; the key is not shown as
-   you paste it, and is saved only in the server's settings file:
-
-   ```
-   cd /opt/hansardgpt/deploy && read -rp "B2 bucket name: " B && read -rp "B2 keyID: " I && read -rsp "B2 applicationKey: " K && echo && sed -i -e '/^HANSARD_B2_/d' -e '$a\' .env && printf 'HANSARD_B2_BUCKET=%s\nHANSARD_B2_KEY_ID=%s\nHANSARD_B2_APPLICATION_KEY=%s\n' "$B" "$I" "$K" >> .env && unset B I K
-   ```
-
-3. Check the key works: `docker compose run --rm -T app hansard offsite` should say `"ok": true`.
-4. Make a backup now, which also sends it off-site:
-   `docker compose run --rm -T app hansard backup --to /backups`. It should end "Off-site copy: stored in …".
-
-From then on it happens every night. The admin page shows a warning if a backup or its off-site copy fails. Each morning
-`hansard-backup-check` looks as well, and the alerts address is emailed if a backup or its off-site copy has stopped.
-
-To get a backup back from B2 (if the server is lost): in the Backblaze website, open the bucket, download the
-newest `where-they-stand-….tar.gz`, copy it into `/opt/hansardgpt/deploy/backups/` on the new server, and restore it
-as below.
-
-You can still copy backups to your own computer if you like. In Terminal or PowerShell on your computer:
-
-```
-scp "root@YOUR.SERVER.IP:/opt/hansardgpt/deploy/backups/*.tar.gz" .
-```
-
-To make a backup straight away: `cd /opt/hansardgpt/deploy && docker compose run --rm -T app hansard backup --to /backups`.
-
-To put a backup back (replacing what is there now), on the server:
-
-```
-cd /opt/hansardgpt/deploy
-docker compose stop app
-docker compose run --rm -T app hansard restore /backups/where-they-stand-2026-10-11.tar.gz --yes
-docker compose start app
-```
-
-(Use the date of the backup you want; `ls backups` lists them.)
-
-The backup is checked before anything is replaced. If it is damaged, or is not one of this site's backups, the
-command says "Not restored: …" and changes nothing. What was there before is kept in the data folder as
-`state.sqlite.before-restore`, in case the restore was a mistake. It holds the same private details as the
-database, and nothing deletes it for you: delete it once the site is right
-(`docker compose run --rm -T app sh -c 'rm -f /data/state.sqlite.before-restore*'`). A restore needs free disk
-space of about twice the size of `state.sqlite`. While `state.sqlite.before-restore` is there, another restore is
-refused, so that it is never written over: if you restored the wrong day, move it somewhere safe first (it is the
-only copy of what was there before), then restore the right day. If the very last step fails (putting the checked
-backup in place), the message names the files to move back to return to what was there; nothing is undone for you.
-
-## Spending limits
-
-Every 10 new briefings in a day, a visitor sees a short note on what the site costs, with a link to the charity's
-Donate page; if they go through to it, they are not reminded again that day. As a backstop against automated use, a visitor can have
-at most 40 new briefings a day. The whole site has budgets of $10 a day and $150 a month. To change any of these, edit the `[usage]` section of `config/settings.toml`, then install it as a new version (see the table).
+It needs only a few MB free at a time, prints the GB before and after, and is safe to stop and run again.
+`--limit 5000` compresses only that many files, to try it first.
