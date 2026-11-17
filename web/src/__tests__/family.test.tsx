@@ -54,6 +54,12 @@ describe("the Where They Stand family binding", () => {
     expect(container.querySelectorAll(".family-shelf .wts-book")).toHaveLength(6);  // five sites and Understudy: Lumaya
     expect(container.querySelector(".independence")?.textContent).toBe(BRAND.independence);
     expect(read("partials/footer.html")).toContain(`<p class="independence">${BRAND.independence}</p>`);
+    // the licence notices are one paragraph, word for word the same as the static pages'
+    const partial = document.createElement("div");
+    partial.innerHTML = read("partials/footer.html");
+    const text = (el: Element | null | undefined) => el?.textContent?.replace(/\s+/g, " ").trim();
+    expect(text(container.querySelector(".licence"))).toBe(text(partial.querySelector(".licence")));
+    expect(container.querySelectorAll(".footer > p.licence")).toHaveLength(1);
     expect(BRAND.independence).toBe(
       "Where MPs Stand is independent. It is not affiliated with or endorsed by the UK Parliament.",
     );

@@ -21,6 +21,11 @@ function partials(): Plugin {
             readFileSync(here(family ? `./public/family/${name}.html` : `./partials/${name}.html`), "utf8"),
           );
         }
+        // each page's link preview carries its own title and description
+        const title = html.match(/<title>([^<]*)<\/title>/)?.[1];
+        const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1];
+        if (title) html = html.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${title}$2`);
+        if (description) html = html.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${description}$2`);
         return html;
       },
     },

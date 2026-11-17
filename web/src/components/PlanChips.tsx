@@ -112,12 +112,12 @@ export function PlanChips({ plan, meta, onRerun, busy }: Props) {
           {editing ? "Close" : "Edit filters"}
         </button>
       </div>
-      <ul className="chips">
-        <li className="chip search-text" title="Words used for retrieval">
+      <ul className="filter-tags">
+        <li className="filter-tag search-text" title="Words used for retrieval">
           “{draft.search_text}”
         </li>
         {chips.map((c) => (
-          <li key={c.key} className="chip">
+          <li key={c.key} className="filter-tag">
             {c.label}
             <button type="button" aria-label={`Remove ${c.label}`} onClick={() => setDraft(c.remove(draft))}>
               ×
@@ -125,7 +125,7 @@ export function PlanChips({ plan, meta, onRerun, busy }: Props) {
           </li>
         ))}
         {plan.unresolved_speakers.length > 0 && (
-          <li className="chip warn">No member found for: {plan.unresolved_speakers.join(", ")}</li>
+          <li className="filter-tag warn">No member found for: {plan.unresolved_speakers.join(", ")}</li>
         )}
       </ul>
       {editing && <PlanEditor draft={draft} meta={meta} onChange={setDraft} />}

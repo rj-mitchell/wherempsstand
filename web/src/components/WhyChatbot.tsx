@@ -1,40 +1,30 @@
 /**
- * Under the question box on the home page: one line that is always shown, and a fold-out answering "Why use this
- * rather than a chatbot?". The wording is the family's (the charity's family/GLOSSARY.md, "Why use this rather than
- * a chatbot?"), with this site's own record in it; each claim is checked against the code it describes, and the
- * About and methodology pages say the same at more length (#chatbot on each). A plain <details>: it opens without
- * scripts, and nothing counts how often it is opened.
+ * Under the question box on the home page: the line saying briefings are written by AI, and a plain fold-out of how
+ * they are checked, in the family's words (the charity's family/GLOSSARY.md, "AI briefings"). The About and
+ * methodology pages say the same at more length (#ai-briefings on each).
  */
 export function WhyChatbot() {
   return (
     <div className="why">
-      <p className="why-line">Answers only from the official record, every point linked and checked.</p>
+      <p className="why-line">Briefings are written by AI from the official record only, and every citation is checked.</p>
       <details className="why-chatbot">
-        <summary>Why use this rather than a chatbot?</summary>
+        <summary>How the briefings are checked</summary>
         <ul>
           <li>
-            <strong>Only the record.</strong> The AI that writes a briefing is given only the Hansard and other
-            parliamentary records found for your question, and may use nothing else.
+            The AI is given only the Hansard and other parliamentary records found for your question, and may use
+            nothing else. Early day motions, committee evidence and the devolved parliaments' reports are given too,
+            when they bear on the question.
           </li>
           <li>
-            <strong>Every point linked and checked.</strong> Each point links to its source. Citations are checked
-            against the source text, quotations word for word, and sentences no source supports are flagged.
+            Each point links to its source. Citations are checked against the source text, quotations are checked
+            word for word, and sentences that no source supports are flagged.
           </li>
-          <li>
-            <strong>Up to date.</strong> Hansard is read in twice a day.
-          </li>
-          <li>
-            <strong>It says when there is nothing.</strong> If the record holds nothing relevant, you see &ldquo;No
-            records found&rdquo;, not a guess.
-          </li>
-          <li>
-            <strong>Balanced by design.</strong> Evidence is chosen across ministers, opposition and backbenchers,
-            not only by relevance.
-          </li>
+          <li>Hansard is read in twice a day.</li>
+          <li>If the record holds nothing relevant, the site says &ldquo;No records found&rdquo;.</li>
+          <li>Evidence is drawn from across ministers, the opposition and backbenchers.</li>
         </ul>
         <p>
-          Briefings here are written by AI too. The difference is what the AI is given and how it is checked.{" "}
-          <a href="/methodology#chatbot" className="nowrap">How it works</a>
+          The <a href="/methodology#ai-briefings">methodology</a> sets out each check in full.
         </p>
       </details>
     </div>

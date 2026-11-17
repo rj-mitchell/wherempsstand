@@ -28,9 +28,8 @@ export function Login({ onDone }: { onDone: () => void }) {
     <main className="login">
       <div className="cover" aria-hidden="true">
         <Mark className="mark cover-mark" />
-        <p className="cover-kicker">Parliamentary Debates</p>
         <p className="cover-title">{BRAND.name}</p>
-        <p className="cover-years">Sourced briefings since 1997</p>
+        <p>Sourced briefings since 1997</p>
       </div>
       <form onSubmit={submit} className="login-card" aria-label="Sign in">
         <h1>Sign in to {BRAND.name}</h1>

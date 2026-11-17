@@ -11,7 +11,6 @@ import { SourceDrawer, SourceList } from "./components/Sources";
 import { BriefingStatements, useStatements } from "./components/Statements";
 import { SupportReminder } from "./components/SupportReminder";
 import { TopicHeader } from "./components/TopicHeader";
-import { ATTRIBUTION } from "./attribution";
 import { BRAND } from "./brand";
 import { Mark } from "./components/Mark";
 import { fmtDate } from "./render";
@@ -35,13 +34,6 @@ import type {
   Turn,
 } from "./types";
 import { withInterests } from "./types";
-
-/** The name as set in capitals, with "MPs" kept as written. */
-const WORDMARK = (
-  <>
-    Where <span className="keep-case">MPs</span> Stand
-  </>
-);
 
 const SHARED = /^\/b\/([a-km-z2-9]{10})\/?$/;
 const TOPIC = /^\/topics\/([a-z0-9-]+)\/?$/;
@@ -205,7 +197,7 @@ export default function App() {
     api
       .topic(slug)
       .then(({ topic, briefing: b, versions }) => {
-        document.title = `${topic.title}: where MPs and peers stand — Where MPs Stand`;
+        document.title = `${topic.title}: where MPs and peers stand | Where MPs Stand`;
         setTurns([
           b
             ? {
@@ -468,7 +460,7 @@ export default function App() {
     void run(q);
   }, [auth, meta, compare, question]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (auth === "unknown") return <div className="loading">Loading…</div>;
+  if (auth === "unknown") return <div className="loading">Opening Where MPs Stand.</div>;
   if (auth === "out") return <Login onDone={() => void refresh()} />;
 
   // Once a briefing is being written it comes first; how it was found (the search, its filters, the spread of
@@ -516,7 +508,7 @@ export default function App() {
           id="q"
           value={question}
           placeholder={
-            turns.length ? "Ask a follow-up, or a new question…" : "Ask a question about the proceedings of Parliament…"
+            turns.length ? "Ask a follow-up, or a new question" : "Ask a question about what Parliament has said or done"
           }
           rows={2}
           ref={questionRef}
@@ -603,72 +595,62 @@ export default function App() {
       <a className="skip-link" href="#main">
         Skip to main content
       </a>
-      {/* the full title page on the front door only; elsewhere the name sits on one line with the menu */}
-      <header className={front ? "masthead full-width" : "masthead full-width compact"}>
+      <header className="masthead full-width">
+        <div className="masthead-band full-width">
+          <div className="masthead-row">
+            {/* the name comes first, so Tab reaches the home link before the menu */}
+            <div className="title-block">
+              {front ? (
+                <Mark />
+              ) : (
+                <a href="/" className="home-link" aria-label={`${BRAND.name}: home`}>
+                  <Mark />
+                </a>
+              )}
+              {/* a topic page's own title is its main heading; elsewhere the site's name is */}
+              <div className="name-block">
+                {TOPIC.test(window.location.pathname) ? (
+                  <p className="wordmark">{BRAND.name}</p>
+                ) : (
+                  <h1 className="wordmark">{BRAND.name}</h1>
+                )}
+                <FamilyEndorsement />
+              </div>
+            </div>
+            <span className="masthead-actions">
+              <nav className="page-nav" aria-label="Site">
+                {NAV.map((n) => (
+                  <a key={n.href} href={n.href} aria-current={n.href === "/" ? "page" : undefined}>
+                    {n.label}
+                  </a>
+                ))}
+                {MENUS.map((m) => (
+                  <details key={m.label} className="nav-more">
+                    <summary>{m.label}</summary>
+                    <div className="nav-more-list">
+                      {m.items.map((n) => (
+                        <a key={n.href} href={n.href}>
+                          {n.label}
+                        </a>
+                      ))}
+                    </div>
+                  </details>
+                ))}
+              </nav>
+              {user && (
+                <button type="button" className="link" onClick={() => void api.logout().then(() => setAuth("out"))}>
+                  Sign out
+                </button>
+              )}
+            </span>
+          </div>
+        </div>
         <p className="phase-banner">
           <strong className="phase-tag">Beta</strong>{" "}
           <span>
             This is a new service and it is still being tested. <a href="/corrections#report">Tell us about a problem</a>.
           </span>
         </p>
-        {/* the name comes first, so Tab reaches the home link before the menu; styles.css still draws the menu above it */}
-        <div className="title-block">
-          {front ? (
-            <Mark />
-          ) : (
-            <a href="/" className="home-link" aria-label={`${BRAND.name}: home`}>
-              <Mark />
-            </a>
-          )}
-          {/* a topic page's own title is its main heading; elsewhere the site's name is */}
-          <div className="name-block">
-            {TOPIC.test(window.location.pathname) ? (
-              <p className="wordmark">{WORDMARK}</p>
-            ) : (
-              <h1 className="wordmark">{WORDMARK}</h1>
-            )}
-            <FamilyEndorsement />
-          </div>
-          <p className="tagline">{BRAND.tagline}</p>
-          <p className="imprint">
-            {/* said again in the footer and the introduction, so a phone leaves these two out (styles.css) */}
-            <span className="imprint-claim">Independent research service</span>
-            <span className="imprint-claim">Sourced to Hansard</span>
-            {meta?.last_sync?.finished_at && <span>Updated {fmtDate(meta.last_sync.finished_at.slice(0, 10))}</span>}
-          </p>
-        </div>
-        <div className="running-head">
-          <span>
-            Parliament's record{meta ? ` since ${meta.archive_start.slice(0, 4)}` : ""}: debates, questions, statements,
-            votes, bills, committees and members' interests
-          </span>
-          <span className="masthead-actions">
-            <nav className="page-nav" aria-label="Site">
-              {NAV.map((n) => (
-                <a key={n.href} href={n.href} aria-current={n.href === "/" ? "page" : undefined}>
-                  {n.label}
-                </a>
-              ))}
-              {MENUS.map((m) => (
-                <details key={m.label} className="nav-more">
-                  <summary>{m.label}</summary>
-                  <div className="nav-more-list">
-                    {m.items.map((n) => (
-                      <a key={n.href} href={n.href}>
-                        {n.label}
-                      </a>
-                    ))}
-                  </div>
-                </details>
-              ))}
-            </nav>
-            {user && (
-              <button type="button" className="link" onClick={() => void api.logout().then(() => setAuth("out"))}>
-                Sign out
-              </button>
-            )}
-          </span>
-        </div>
       </header>
 
       {supportCount > 0 && meta?.donate_url && (
@@ -692,73 +674,78 @@ export default function App() {
       <main className="thread" id="main" tabIndex={-1}>
         {turns.length === 0 && (
           <section className="empty">
-            <h2>
-              Ask about the record of Parliament <span className="ai-tag">AI-powered</span>
-            </h2>
-            <p className="lede">
+            <h2>Ask about the record of Parliament</h2>
+            <p className="intro-text">
               Ask in your own words. Get a short briefing on who said what, from which side and in what role, with every
               point cited to Hansard, or the most relevant records on their own, without AI.
             </p>
             {composer("composer composer-inline")}
-            <WhyChatbot />
-            <p className="and-more">
-              Not just MPs, despite the name: peers, select committees and their witnesses, and the Scottish
-              Parliament, the Senedd and the Northern Ireland Assembly are all in here too.
-            </p>
-            <h3 className="examples-head">Try</h3>
-            <ol className="examples">
-              {examplesFor(new Date()).map((ex) => (
-                <li key={ex}>
-                  <button type="button" className="example" onClick={() => {
-                      setQuestion(ex);
-                      setHint(false);
-                      questionRef.current?.focus();
-                    }}>
-                    {ex}
-                  </button>
-                </li>
-              ))}
-            </ol>
-            <nav className="start-from" aria-label="Other ways in">
-              <span className="examples-head">Or start from</span>
-              <a href="/topics">Topic briefings</a>
-              <a href="/this-week">This week</a>
-              <a href="/bills">Bills</a>
-              <a href="/committees">Committees</a>
-              <a href="/timeline">Timelines</a>
-              <a href="/compare">Compare</a>
-              <a href="/developers">Data and API</a>
-            </nav>
-            <p className="ai-caution">
-              AI can make mistakes: check the cited sources before relying on a briefing. Prefer no AI? Choose
-              &ldquo;Sources only&rdquo; to see the most relevant records without a written briefing, or use{" "}
-              <a href="https://hansard.parliament.uk/search" target="_blank" rel="noreferrer">
-                Hansard's own search
-              </a>{" "}
-              to find every mention of a word. The <a href="/resources">other resources</a> page lists more sites
-              worth using alongside this one.
-            </p>
-            <h3 className="examples-head">How this differs from a search</h3>
-            <p>
-              <strong>Answers, not a list of hits.</strong> Hansard's own search and TheyWorkForYou list every mention
-              of the words you type, in date order, for you to read through. Here the question is read for its
-              meaning, so the MPs and peers who spoke on it are found even when they put it differently, and the
-              speeches, answers, statements and votes since {meta ? meta.archive_start.slice(0, 4) : "1997"} that
-              answer it are brought together in one briefing.
-            </p>
+            <div className="home-grid">
+              <div className="home-try">
+                <h3 className="examples-head">Example questions</h3>
+                <ul className="examples">
+                  {examplesFor(new Date()).map((ex) => (
+                    <li key={ex}>
+                      <button type="button" className="example" onClick={() => {
+                          setQuestion(ex);
+                          setHint(false);
+                          questionRef.current?.focus();
+                        }}>
+                        {ex}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <h3 className="examples-head">Searching by meaning</h3>
+                <p>
+                  Hansard's own search and TheyWorkForYou list every mention of the words you type, in date order, for
+                  you to read through. Here the question is read for its meaning, so the MPs and peers who spoke on it
+                  are found even when they put it differently, and the speeches, answers, statements and votes since{" "}
+                  {meta ? meta.archive_start.slice(0, 4) : "1997"} that answer it are brought together in one briefing.
+                </p>
+              </div>
+              <div className="home-side">
+                <WhyChatbot />
+                <p className="and-more">
+                  As well as MPs, the record covers peers, select committees and their witnesses, and the Scottish
+                  Parliament, the Senedd and the Northern Ireland Assembly.
+                </p>
+                <nav className="start-from" aria-labelledby="start-from-head">
+                  <h3 className="examples-head" id="start-from-head">Other ways in</h3>
+                  <ul>
+                    <li><a href="/topics">Topic briefings</a></li>
+                    <li><a href="/this-week">This week in Parliament</a></li>
+                    <li><a href="/bills">Bills</a></li>
+                    <li><a href="/committees">Committees</a></li>
+                    <li><a href="/timeline">Timelines</a></li>
+                    <li><a href="/compare">Compare</a></li>
+                    <li><a href="/developers">Data and API</a></li>
+                  </ul>
+                </nav>
+                <p className="ai-caution">
+                  AI can make mistakes, so check the cited sources before relying on a briefing. To see the most
+                  relevant records without a written briefing, choose &ldquo;Sources only&rdquo;. To find every mention
+                  of a word, use{" "}
+                  <a href="https://hansard.parliament.uk/search" target="_blank" rel="noreferrer">
+                    Hansard's own search
+                  </a>
+                  . The <a href="/resources">other resources</a> page lists more sites worth using alongside this one.
+                </p>
+              </div>
+            </div>
           </section>
         )}
         {turns.map((t) => (
           <article key={t.id} id={`turn-${t.id}`} className="turn">
             {t.topic && <TopicHeader topic={t.topic} preparedAt={t.preparedAt} recordsUpTo={t.recordsUpTo} />}
             {t.comparing !== undefined && (
-              <p className="eyebrow">
-                Comparison{t.comparing.length ? `: ${t.comparing.join(" and ")}` : ""} ·{" "}
+              <p className="page-context">
+                Comparison{t.comparing.length ? `: ${t.comparing.join(" and ")}` : ""}.{" "}
                 <a href="/compare">Compare something else</a>
               </p>
             )}
             {t.follows && t.follows !== t.question && (
-              <p className="eyebrow follows">Follow-up to &ldquo;{t.follows}&rdquo;</p>
+              <p className="page-context follows">Follow-up to &ldquo;{t.follows}&rdquo;</p>
             )}
             <h2 className="question">{t.question}</h2>
             {t.shared && t.preparedAt && (
@@ -793,7 +780,7 @@ export default function App() {
             {t.note && <p className="muted small">{t.note}</p>}
             {answerFirst(t) && (
               <details className="page-more how-found">
-                <summary>How this was found: the search, its filters and who the sources are from</summary>
+                <summary>The search behind this briefing: its filters and who the sources are from</summary>
                 {howFound(t)}
               </details>
             )}
@@ -841,7 +828,7 @@ export default function App() {
 
       <SourceDrawer source={drawerSource} quotes={drawer?.h.quotes ?? []} onClose={closeDrawer} />
 
-      <SiteFooter donateUrl={meta?.donate_url} attribution={meta?.attribution ?? ATTRIBUTION}>
+      <SiteFooter>
         <p className="print-only">
           From {BRAND.name} (beta), wherempsstand.com. Briefings are written by AI from the cited Hansard records; check the
           sources.
@@ -863,7 +850,7 @@ function InterestsNote({ sources }: { sources: SourceCard[] }) {
       {names.length === 1 ? "had an entry" : "had entries"} in the register of interests, made before they spoke, that
       may relate to what they said ({flagged.length === 1 ? "source" : "sources"} {flagged.map((s) => s.n).join(", ")}). Open a
       source for the details.
-      Matched by AI; a link to check, not a finding of wrongdoing.
+      Matched by AI. It is a link to check and is not a finding of wrongdoing.
     </p>
   );
 }

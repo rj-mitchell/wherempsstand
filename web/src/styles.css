@@ -1,18 +1,7 @@
-/*
- * Where MPs Stand — styles.
- *
- * The look borrows from the printed Official Report: ivory paper and black serif
- * type, small-capital headings between rules, column numbers in the margin, and
- * the bound volumes' cloth — green for the Commons, red for the Lords — with gilt
- * lettering. The tone is that of a reference work: the bound record, open, as the mark (a pen on the left page,
- * a magnifying glass on the right), the name in spaced capitals, square corners, ruled lists and no decoration
- * that does not carry meaning.
- * Techniques follow good-css (github.com/vojtaholik/good-css): logical
- * properties, OKLCH tokens that hold both light and dark values, one fluid type
- * scale, hover only where hover exists, and motion only when it is welcome.
- */
+/* Where MPs Stand. Colours, fonts, the endorsement and the footer shelf come from the family kit
+   (public/family/family.css). */
 
-/* ---- reset ---------------------------------------------------------------------- */
+/* reset */
 
 *,
 *::before,
@@ -27,8 +16,6 @@
   text-wrap: pretty;
   overflow-wrap: break-word;
   font-synthesis: none;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
 }
@@ -71,61 +58,60 @@ button,
   -webkit-user-select: none;
 }
 
-/* ---- tokens ----------------------------------------------------------------------- */
+/* tokens */
 
 :root {
   color-scheme: light dark;
 
-  /* paper and ink: an ivory page by day, a dark green binding by night. The paper is #faf6ec and #0e1612 in hex;
-     public/manifest.webmanifest repeats the light one. The theme colour is the site's cloth, Commons green #1d4535,
-     set by the family kit (public/family/head.html). */
-  --paper: light-dark(oklch(97.3% 0.014 88), oklch(19% 0.014 165));
-  --paper-raised: light-dark(oklch(99.2% 0.007 88), oklch(23% 0.016 165));
-  --paper-sunk: light-dark(oklch(94.6% 0.018 86), oklch(16.5% 0.012 165));
-  --ink: light-dark(oklch(22% 0.012 70), oklch(93% 0.016 88));
-  --ink-soft: color-mix(in oklch, var(--ink) 74%, var(--paper));
-  --ink-faint: color-mix(in oklch, var(--ink) 60%, var(--paper));
-  --rule: color-mix(in oklch, var(--ink) 15%, var(--paper));
-  --rule-strong: color-mix(in oklch, var(--ink) 80%, var(--paper));
+  /* a white page with light grey panels, and the Commons green cloth as the header band (family kit 2.0) */
+  --paper: var(--wts-paper-light);
+  --paper-raised: var(--wts-paper-light);
+  --panel: var(--wts-paper);
+  --paper-sunk: var(--wts-paper);
+  --ink: var(--wts-ink);
+  --ink-soft: var(--wts-ink-muted);
+  --ink-faint: var(--wts-ink-muted);
+  --rule: var(--wts-rule-faint);
+  --rule-strong: var(--wts-rule);
+  /* the edge of a text box or button: 3:1 against the page (WCAG 1.4.11) */
+  --field: light-dark(#7A8588, #7D898D);
 
   /* the Houses, as on the bound volumes and the benches */
-  --commons: light-dark(oklch(41% 0.08 162), oklch(76% 0.09 160));
+  --commons: var(--wts-cloth-mps-text);
   --lords: light-dark(oklch(43% 0.13 24), oklch(75% 0.11 22));
-  --cloth-commons: oklch(33% 0.06 162);
-  --cloth-lords: oklch(33% 0.1 22);
-  --gilt: light-dark(oklch(62% 0.1 80), oklch(80% 0.11 85));
-  --gilt-on-cloth: oklch(83% 0.105 86);
-  --on-cloth: oklch(96% 0.02 88);
+  --cloth-commons: var(--wts-cloth-mps);
+  --cloth-lords: light-dark(oklch(36% 0.1 22), oklch(42% 0.1 22));
+  --on-cloth: var(--wts-on-cloth);
+  --band: var(--wts-cloth-mps);
 
   --accent: var(--commons);
-  --accent-strong: color-mix(in oklch, var(--accent), var(--ink) 25%);
-  --accent-subtle: color-mix(in oklch, var(--accent) 11%, var(--paper));
-  --on-accent: light-dark(oklch(98% 0.01 88), oklch(17% 0.02 165));
+  --accent-strong: color-mix(in oklch, var(--accent), var(--ink) 35%);
+  --accent-subtle: color-mix(in oklch, var(--accent) 9%, var(--paper));
+  --on-accent: light-dark(#FFFFFF, #111517);
   --mark: light-dark(oklch(91% 0.1 95), oklch(47% 0.09 88));
   --warn: light-dark(oklch(50% 0.12 62), oklch(82% 0.12 78));
-  --warn-subtle: color-mix(in oklch, var(--warn) 13%, var(--paper));
+  --warn-subtle: color-mix(in oklch, var(--warn) 12%, var(--paper));
   --danger: light-dark(oklch(50% 0.17 27), oklch(76% 0.14 25));
 
-  --serif: "Source Serif 4 Variable", "Iowan Old Style", Charter, Georgia, serif;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --radius: 0; /* square corners, as on the other Where They Stand sites (docs/DESIGN.md); pills keep --radius-pill */
-  --radius-pill: 999px;
-  --shadow: 0 1px 2px oklch(0.2 0.02 160 / 0.08), 0 8px 28px oklch(0.2 0.02 160 / 0.1);
+  --serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans: var(--wts-sans);
+  --radius: 0;
+  --radius-small: 3px;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
-  /* one fluid scale for type and space (good-css) */
+  /* one fluid scale for type and space */
   --narrow: 20;
   --wide: 77.5;
   --size-narrow: 1.0625;
-  --size-wide: 1.1875;
+  --size-wide: 1.125;
   --ratio-narrow: 1.2;
-  --ratio-wide: 1.25;
+  --ratio-wide: 1.3;
   --fluid: clamp(0rem, (100vw - var(--narrow) * 1rem) / (var(--wide) - var(--narrow)), 1rem);
   --at-narrow: calc(var(--size-narrow) * (1rem - var(--fluid)));
   --at-wide: calc(var(--size-wide) * var(--fluid));
-  /* the smallest text (labels, notes) is never under 12.5px, which is still comfortable to read on a phone */
+  /* the smallest text (labels, notes) is never under 12.5px */
   --step--2: max(0.78rem, calc(var(--step-0) / pow(var(--ratio-narrow), 2)));
   --step--1: calc(var(--step-0) / var(--ratio-narrow));
   --step-0: calc(var(--at-narrow) + var(--at-wide));
@@ -140,6 +126,13 @@ button,
   --space-l: calc(2 * var(--step-0));
   --space-xl: calc(3 * var(--step-0));
 
+  /* the column every page lines up to (the kit's 72rem with its gutter), and the measure of running text in it */
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --column: calc(72rem - 2 * var(--gutter));
+  --measure: 46rem;
+  --wts-gutter: var(--gutter);
+  --wts-shelf-width: var(--column);
+
   --drawer-w: min(34rem, 100%);
   --composer-h: 6rem;
 }
@@ -152,7 +145,7 @@ button,
   color-scheme: dark;
 }
 
-/* ---- base ------------------------------------------------------------------------- */
+/* base */
 
 html {
   background: var(--paper);
@@ -174,19 +167,17 @@ html {
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--serif);
+  font-family: var(--sans);
   font-size: var(--step-0);
   line-height: 1.55;
-  font-optical-sizing: auto;
-  /* The family kit (public/family/family.css) sets its endorsement, footer shelf and .wts-headings in Source Serif
-     4. This site already bundles that typeface as a variable font, so the kit uses it rather than downloading the
-     kit's own copy of the same face. */
+  /* the kit's headings use the site's own copy of Source Serif 4 */
   --wts-serif: var(--serif);
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   font-family: var(--serif);
   font-weight: 600;
   line-height: 1.2;
@@ -210,9 +201,7 @@ a {
   }
 }
 
-/* the family's focus ring (the kit's shared conventions: 3px, 3px clear of the control), in this site's green; the
-   footer shelf and the endorsement wear the same ring through --wts-focus. The fallbacks hold if the kit's stylesheet
-   fails to load. */
+/* the family's focus ring: 3px, 3px clear of the control */
 :root {
   --wts-focus: var(--accent);
 }
@@ -232,14 +221,14 @@ mark {
 
 time,
 .num,
-.badge,
+.source-number,
 .count,
 .colref,
 table td {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- controls ----------------------------------------------------------------------- */
+/* controls */
 
 button {
   font: inherit;
@@ -260,8 +249,7 @@ summary {
   list-style: none;
 }
 
-/* one marker for every fold-out: the browser's own triangle is hidden, and a gilt one, as on a volume's spine,
-   turns down when the fold-out is open. The header's menus and the export menu are menus, and keep their ▾ */
+/* one marker for every fold-out, turning down when it is open; the header's menus and the export menu keep their ▾ */
 summary::-webkit-details-marker {
   display: none;
 }
@@ -276,7 +264,7 @@ summary::-webkit-details-marker {
   font-family: var(--sans);
   font-weight: 400;
   font-style: normal;
-  color: var(--gilt);
+  color: var(--accent);
 }
 
 :where(details[open]:not(.nav-more, .export-menu)) > summary::before {
@@ -294,8 +282,7 @@ button.secondary {
   font-family: var(--sans);
   font-size: var(--step--1);
   font-weight: 600;
-  letter-spacing: 0.01em;
-  border-radius: var(--radius);
+  border-radius: var(--radius-small);
   padding-block: 0.6em;
   padding-inline: 1.2em;
 }
@@ -313,7 +300,7 @@ button.primary:focus-visible {
 button.secondary {
   background: var(--paper-raised);
   color: var(--ink);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--field);
 }
 
 button.link {
@@ -342,7 +329,7 @@ button.link {
   }
 }
 
-:is(button.primary, button.secondary, .example, .chip button, .close, .chip-button, .follow-up):not(:disabled):active {
+:is(button.primary, button.secondary, .example, .filter-tag button, .close, .topic-button, .follow-up):not(:disabled):active {
   transform: scale(0.97);
 }
 
@@ -351,7 +338,7 @@ button.link {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :is(button.primary, button.secondary, .example, .chip button, .close, .chip-button, .follow-up) {
+  :is(button.primary, button.secondary, .example, .filter-tag button, .close, .topic-button, .follow-up) {
     transition:
       transform 160ms var(--ease-out),
       background-color 160ms var(--ease-out),
@@ -365,8 +352,8 @@ select {
   font-family: var(--sans);
   color: var(--ink);
   background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
+  border: 1px solid var(--field);
+  border-radius: var(--radius-small);
   padding-block: 0.5em;
   padding-inline: 0.65em;
   accent-color: var(--accent);
@@ -404,31 +391,20 @@ fieldset {
 legend,
 .label {
   font-family: var(--sans);
-  font-size: var(--step--2);
+  font-size: var(--step--1);
   font-weight: 650;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
   color: var(--ink-soft);
   padding: 0;
   margin-block-end: var(--space-2xs);
 }
 
-/* ---- page: a content grid with breakouts -------------------------------------------- */
+/* page: every part lines up to one column, the same as the header band and the footer */
 
 .app {
-  --gutter: 1rem;
-  --content: 46rem;
-  --breakout: 64rem;
-  /* the family shelf in the footer lines up with the masthead's column (the kit's tokens, family kit 1.3.1) */
-  --wts-gutter: var(--gutter);
-  --wts-shelf-width: var(--breakout);
-
   display: grid;
   grid-template-columns:
     [full-width-start] minmax(var(--gutter), 1fr)
-    [breakout-start] minmax(0, calc((var(--breakout) - var(--content)) / 2))
-    [content-start] min(100% - var(--gutter) * 2, var(--content)) [content-end]
-    minmax(0, calc((var(--breakout) - var(--content)) / 2)) [breakout-end]
+    [content-start breakout-start] min(100% - var(--gutter) * 2, var(--column)) [content-end breakout-end]
     minmax(var(--gutter), 1fr) [full-width-end];
   align-content: start;
   min-block-size: 100svh;
@@ -456,288 +432,131 @@ legend,
 }
 
 .loading {
-  padding: var(--space-xl);
-  text-align: center;
-  color: var(--ink-faint);
-  font-style: italic;
-}
-
-/* ---- masthead: the title page of a daily part ----------------------------------------- */
-
-.masthead {
-  padding-block: var(--space-xs) var(--space-s);
-  text-align: center;
-  position: relative;
-}
-
-/* the title block comes before the menu in the markup, so Tab reaches the home link first; each part is placed on
-   its own row here, so the page is drawn as before: the banner, the menu, then the name and the rule */
-.masthead > .phase-banner {
-  grid-row: 1;
-}
-
-.masthead > .running-head {
-  grid-row: 2;
-}
-
-.masthead > .title-block {
-  grid-row: 3;
-}
-
-.masthead::after {
-  /* thick-and-thin rule under the title, as on the printed report */
-  content: "";
-  grid-row: 4;
-  grid-column: breakout;
-  block-size: 6px;
-  margin-block-start: var(--space-s);
-  border-block-start: 3px solid var(--rule-strong);
-  border-block-end: 1px solid var(--rule-strong);
-}
-
-/* Every page but the home page: the name and seal on one line with the menu, so the page's own content starts near the
-   top of the screen (the full title page is for the front door only) */
-.masthead.compact {
-  padding-block-end: 0;
-}
-
-.masthead.compact > .running-head {
-  grid-row: 2;
-  justify-self: end;
-  align-self: center;
-  padding-block: var(--space-2xs);
-}
-
-.masthead.compact > .running-head > span:first-child,
-.masthead.compact .tagline,
-.masthead.compact .imprint {
-  display: none;
-}
-
-.masthead.compact > .title-block {
-  grid-row: 2;
-  grid-column: breakout;
-  justify-self: start;
-  align-self: center;
-  flex-direction: row;
-  gap: var(--space-xs);
-  padding-block: var(--space-2xs);
-}
-
-.masthead.compact .title-block .mark {
-  block-size: 2.5rem;
-  margin: 0;
-}
-
-.masthead.compact .wordmark {
-  font-size: var(--step-0);
-  letter-spacing: 0.12em;
-  margin-inline-end: 0;
-}
-
-.masthead.compact .name-block {
-  align-items: start;
-  gap: 0.1em;
-}
-
-.masthead.compact .family-endorse {
-  font-size: 0.85em;
-}
-
-.masthead.compact::after {
-  grid-row: 3;
-  margin-block-start: var(--space-2xs);
-}
-
-/* on a phone the menu takes the whole line, with the name under it */
-@media (width < 52rem) {
-  .masthead.compact > .running-head {
-    justify-self: stretch;
-  }
-
-  .masthead.compact > .title-block {
-    grid-row: 3;
-    justify-self: center;
-  }
-
-  .masthead.compact::after {
-    grid-row: 4;
-  }
-}
-
-/* GOV.UK-style phase banner: the service is in beta */
-.phase-banner {
-  grid-column: breakout;
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-xs);
-  font-family: var(--sans);
-  font-size: var(--step--1);
+  padding-block: var(--space-l);
   color: var(--ink-soft);
-  text-align: start;
-  padding-block-end: var(--space-xs);
-  margin-block-end: var(--space-xs);
-  border-block-end: 1px solid var(--rule);
 }
 
-.phase-tag {
-  flex: none;
-  font-size: var(--step--2);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--paper);
-  background: var(--ink-soft);
-  padding: 0.1em 0.5em;
-  border-radius: var(--radius);
+/* masthead: the name, the endorsement and the menu on a band of Commons green, then the phase banner */
+
+.masthead-band {
+  background: var(--band);
+  color: var(--on-cloth);
+  --wts-focus: currentColor;
 }
 
-.running-head {
-  grid-column: breakout;
+.masthead-band :focus-visible {
+  outline-color: currentColor;
+}
+
+.masthead-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-xs) var(--space-s);
-  font-family: var(--sans);
-  font-size: var(--step--2);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  text-align: start;
-  padding-block-end: var(--space-xs);
-}
-
-.masthead-actions {
-  margin-inline-start: auto;
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  text-transform: none;
-  letter-spacing: normal;
-}
-
-.masthead-actions > button {
-  flex: none;
-  white-space: nowrap;
+  justify-content: space-between;
+  gap: var(--space-2xs) var(--space-m);
+  padding-block: var(--space-xs);
 }
 
 .title-block {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-2xs);
-  padding-block-start: var(--space-s);
+  gap: var(--space-xs);
 }
 
-.title-block > .mark {
-  block-size: calc(3.2 * var(--step-1));
+.title-block .mark {
+  block-size: 2.75rem;
   inline-size: auto;
-  margin-block-end: var(--space-xs);
 }
 
-/* the name in spaced capitals, as on the title page of a bound volume */
-.wordmark {
-  font-size: var(--step-3);
-  font-weight: 600;
-  font-variation-settings: "opsz" 60;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  line-height: 1.1;
-  /* tracking adds space after the last letter too; give it back so the name centres */
-  margin-inline-end: -0.14em;
-}
-
-/* the name, and under it the family's endorsement (public/family/endorsement.html, from the family kit) */
 .name-block {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-2xs);
+  align-items: start;
+  gap: 0.2rem;
+}
+
+.wordmark,
+.wts-headings .wordmark {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.1;
+  color: inherit;
 }
 
 .family-endorse {
   line-height: 1;
 }
 
-.tagline {
-  font-style: italic;
+.family-endorse .wts-endorse {
+  min-block-size: 1.5rem;
+}
+
+/* the spine is the band's own green, so it is outlined to stand out from it */
+.masthead-band .wts-endorse .wts-spine {
+  outline: 1px solid color-mix(in srgb, var(--on-cloth) 55%, transparent);
+}
+
+.masthead .page-nav a,
+.masthead .nav-more > summary {
+  color: var(--on-cloth);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.masthead .page-nav > a[aria-current="page"],
+.masthead .nav-more.current > summary {
+  color: var(--on-cloth);
+  font-weight: 600;
+  text-decoration-thickness: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .masthead .page-nav > a:hover,
+  .masthead .nav-more > summary:hover {
+    color: var(--on-cloth);
+    text-decoration-thickness: 2px;
+  }
+}
+
+.masthead-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
   font-size: var(--step-0);
+}
+
+.masthead-actions > button.link {
+  color: var(--on-cloth);
+}
+
+.masthead .page-nav .nav-more-list a {
+  color: var(--accent);
+  font-weight: 400;
+}
+
+/* GOV.UK-style phase banner: the service is in beta */
+.phase-banner {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  padding-block: var(--space-xs);
+  border-block-end: 1px solid var(--rule);
+  font-size: var(--step--1);
   color: var(--ink-soft);
 }
 
-.imprint {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0 var(--space-s);
-  margin-block-start: var(--space-xs);
-  font-family: var(--sans);
-  font-size: var(--step--2);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.imprint > span + span::before {
-  content: "·" / "";
-  margin-inline-end: var(--space-s);
-}
-
-/* on a narrow screen (or paper) the items stack, so separators would dangle */
-@media (width < 40rem), print {
-  .imprint {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.15em;
-  }
-
-  .imprint > span + span::before {
-    content: none;
-  }
-}
-
-/* a phone's title page: the same parts in the same order, with a smaller mark and closer together, so the page's own
-   content starts on the first screen. Independence and sourcing are said again in the introduction and the footer,
-   so only the date of the last update stays in the imprint */
-@media (width < 30rem) {
-  .masthead:not(.compact) > .phase-banner {
-    padding-block-end: var(--space-2xs);
-    margin-block-end: var(--space-2xs);
-  }
-
-  .masthead:not(.compact) {
-    padding-block-end: 0;
-  }
-
-  .masthead:not(.compact) > .running-head {
-    padding-block-end: var(--space-2xs);
-  }
-
-  .masthead:not(.compact) > .title-block {
-    gap: 0.15rem;
-    padding-block-start: var(--space-2xs);
-  }
-
-  .masthead:not(.compact) > .title-block > .mark {
-    block-size: 2.5rem; /* the size it is beside the name on every other page */
-    margin-block-end: 0.15rem;
-  }
-
-  .masthead:not(.compact) .name-block {
-    gap: 0.15rem;
-  }
-
-  .masthead:not(.compact) .imprint {
-    margin-block-start: 0;
-  }
-
-  .masthead:not(.compact) .imprint-claim {
-    display: none;
-  }
-
-  .masthead:not(.compact)::after {
-    margin-block-start: var(--space-xs);
-  }
+.phase-tag {
+  flex: none;
+  padding: 0.05em 0.45em 0.1em;
+  border-radius: var(--radius-small);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--step--1);
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .banner {
@@ -745,24 +564,20 @@ legend,
   font-size: var(--step--1);
   background: var(--warn-subtle);
   color: var(--ink);
-  border-inline-start: 3px solid var(--warn);
   padding-block: var(--space-xs);
   padding-inline: var(--space-s);
   border-radius: var(--radius);
 }
 
-/* ---- settings ------------------------------------------------------------------------ */
+/* settings */
 
 .controls {
   grid-column: breakout;
   display: grid;
   gap: var(--space-m);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
+  background: var(--panel);
   padding: var(--space-m);
-  font-family: var(--sans);
   font-size: var(--step--1);
 }
 
@@ -787,10 +602,8 @@ legend,
 }
 
 .slider > span label {
-  font-size: var(--step--2);
+  font-size: var(--step--1);
   font-weight: 650;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
   color: var(--ink-soft);
 }
 
@@ -805,7 +618,7 @@ legend,
   font-size: var(--step--2);
 }
 
-/* ---- the thread ---------------------------------------------------------------------- */
+/* the thread */
 
 .thread {
   display: flex;
@@ -818,7 +631,7 @@ legend,
   display: flex;
   flex-direction: column;
   gap: var(--space-s);
-  padding-block: var(--space-m);
+  padding-block: var(--space-s) var(--space-l);
 }
 
 .empty h2 {
@@ -826,85 +639,105 @@ legend,
   font-weight: 600;
 }
 
-.empty .lede {
-  font-size: var(--step-0);
-  color: var(--ink-soft);
+.empty .intro-text {
+  max-inline-size: var(--measure);
 }
 
-/* the other ways into the record, under the examples */
-.start-from {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2xs) var(--space-s);
-  font-family: var(--sans);
-  font-size: var(--step--1);
-}
-
-/* the links stand alone in a row: a little padding (which moves nothing, as they are inline) makes each 24px tall */
-.start-from a {
-  padding-block: 0.15em;
-}
-
-.start-from > .examples-head {
-  margin: 0;
-  flex-basis: 100%;
-}
-
-/* small capital labels in the sans, set here as headings for screen readers; the family's rule that headings are in
-   Source Serif 4 (.wts-headings, decision 1) is for headings that read as headings, so these keep the sans */
-.examples-head,
-.wts-headings .examples-head {
-  font-family: var(--sans);
-  font-size: var(--step--2);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
+/* the home page under the question box: example questions beside how briefings are checked and other ways in */
+.home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--space-l) var(--space-xl);
+  align-items: start;
   margin-block-start: var(--space-s);
 }
 
-/* example questions: a numbered, ruled list, as on the Order Paper */
-.examples {
-  list-style: none;
-  counter-reset: example;
+.home-try,
+.home-side {
+  display: grid;
+  gap: var(--space-s);
+}
+
+.home-try > .examples-head:not(:first-child) {
+  margin-block-start: var(--space-s);
+}
+
+/* on a narrow screen the parts stack, with how briefings are checked first, just under the question box */
+@media (width < 56rem) {
+  .home-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+  }
+
+  .home-try,
+  .home-side {
+    display: contents;
+  }
+
+  .home-grid .why {
+    order: -2;
+  }
+
+  .home-grid .and-more {
+    order: -1;
+  }
+
+  .home-grid .start-from,
+  .home-grid .ai-caution {
+    order: 1;
+  }
+}
+
+.start-from ul {
   margin: 0;
   padding: 0;
-  border-block-start: 1px solid var(--rule-strong);
+  list-style: none;
+  columns: 2 10rem;
+  column-gap: var(--space-m);
+}
+
+.start-from li {
+  padding-block: 0.15em;
+}
+
+.examples-head,
+.wts-headings .examples-head {
+  font-size: var(--step-1);
+  color: var(--ink);
+  margin-block: 0 var(--space-xs);
+}
+
+/* example questions: a ruled list of buttons that fill in the question box */
+.examples {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-block-start: 1px solid var(--rule);
 }
 
 .examples li {
-  counter-increment: example;
   border-block-end: 1px solid var(--rule);
 }
 
 .example {
-  display: grid;
-  grid-template-columns: 2.2em 1fr;
-  align-items: baseline;
+  display: block;
   inline-size: 100%;
   text-align: start;
   background: none;
   border: 0;
   padding-block: var(--space-xs);
   padding-inline: 0;
-  color: var(--ink);
-}
-
-.example::before {
-  content: counter(example) "." / "";
-  font-family: var(--sans);
-  font-size: var(--step--1);
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-faint);
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .example:hover {
-    color: var(--accent);
-    text-decoration: underline;
-    text-decoration-thickness: 0.06em;
-    text-underline-offset: 0.2em;
+    color: var(--accent-strong);
+    text-decoration-thickness: 2px;
   }
 }
 
@@ -915,24 +748,11 @@ legend,
   scroll-margin-block-start: var(--space-s); /* a follow-up scrolled into view keeps a little room above it */
 }
 
-/* a question reads like a debate heading: a small-capital kicker, then the title */
 .turn > .question {
   font-size: var(--step-2);
   font-weight: 600;
   padding-block-start: var(--space-s);
   border-block-start: 1px solid var(--rule);
-}
-
-.turn > .question::before {
-  content: "Question" / "";
-  display: block;
-  font-family: var(--sans);
-  font-size: var(--step--2);
-  font-weight: 650;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-block-end: var(--space-2xs);
 }
 
 .status {
@@ -946,7 +766,7 @@ legend,
   inline-size: 0.45em;
   block-size: 0.45em;
   margin-inline-end: 0.6em;
-  background: var(--gilt);
+  background: var(--ink-soft);
   vertical-align: 0.12em;
 }
 
@@ -970,9 +790,10 @@ legend,
   display: inline-block;
   inline-size: fit-content;
   padding: 0 0.4em;
-  border-inline-start: 3px solid var(--warn);
+  border-radius: var(--radius-small);
   background: var(--warn-subtle);
   color: var(--ink);
+  font-weight: 600;
   font-size: 0.85em;
 }
 
@@ -980,7 +801,6 @@ legend,
   font-size: var(--step--1, 0.9rem);
   color: var(--ink);
   padding: var(--space-xs) var(--space-s);
-  border-inline-start: 4px solid var(--warn);
   background: var(--warn-subtle);
 }
 
@@ -1000,15 +820,12 @@ legend,
 }
 
 .source-card.has-interest {
-  border-inline-start: 4px solid var(--warn);
   background: var(--warn-subtle);
 }
 
 .interest-box {
   margin-block-end: var(--space-m);
   padding: var(--space-s);
-  border: 1px solid var(--warn);
-  border-inline-start-width: 4px;
   background: var(--warn-subtle);
 }
 
@@ -1061,7 +878,7 @@ legend,
   block-size: 0.45em;
   align-self: center;
   justify-self: center;
-  background: var(--gilt);
+  background: var(--accent);
 }
 
 .progress li.active .progress-label {
@@ -1099,7 +916,7 @@ legend,
   font-size: var(--step--1);
 }
 
-/* ---- filter chips ---------------------------------------------------------------------- */
+/* filter chips */
 
 .plan {
   display: flex;
@@ -1130,7 +947,7 @@ legend,
   align-self: start;
 }
 
-.chips {
+.filter-tags {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2xs) var(--space-xs);
@@ -1139,32 +956,31 @@ legend,
   padding: 0;
 }
 
-.chip {
+.filter-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.35em;
   padding-block: 0.25em;
   padding-inline: 0.7em;
   border: 1px solid var(--rule);
-  border-radius: 999px;
+  border-radius: var(--radius-small);
   background: var(--paper-raised);
   font-size: var(--step--2);
 }
 
-.chip.search-text {
-  font-family: var(--serif);
+.filter-tag.search-text {
   font-style: italic;
   font-size: var(--step--1);
   background: none;
   border-style: dashed;
 }
 
-.chip.warn {
+.filter-tag.warn {
   border-color: var(--warn);
   background: var(--warn-subtle);
 }
 
-.chip button {
+.filter-tag button {
   position: relative;
   display: inline-grid;
   place-items: center;
@@ -1179,7 +995,7 @@ legend,
   color: var(--ink-faint);
 }
 
-.chip button::after {
+.filter-tag button::after {
   /* a 44px target around a small cross */
   content: "";
   position: absolute;
@@ -1187,7 +1003,7 @@ legend,
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .chip button:hover {
+  .filter-tag button:hover {
     color: var(--danger);
   }
 }
@@ -1196,9 +1012,7 @@ legend,
   display: grid;
   gap: var(--space-s);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
+  background: var(--panel);
   padding: var(--space-s);
 }
 
@@ -1225,12 +1039,11 @@ legend,
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
 }
 
-/* ---- evidence base ---------------------------------------------------------------------- */
+/* evidence base */
 
 .evidence-warning {
   margin: 0;
   padding: var(--space-2xs) var(--space-xs);
-  border-inline-start: 3px solid var(--warn);
   background: var(--warn-subtle);
 }
 
@@ -1245,9 +1058,7 @@ legend,
 }
 
 .evidence-head strong {
-  font-size: var(--step--2);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: var(--step--1);
   color: var(--ink-soft);
   margin-inline-end: 0.3em;
 }
@@ -1291,10 +1102,8 @@ legend,
 }
 
 .evidence-label {
-  font-size: var(--step--2);
+  font-size: var(--step--1);
   font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
@@ -1305,17 +1114,13 @@ legend,
   }
 }
 
-/* ---- the briefing: a printed page ------------------------------------------------------ */
+/* the briefing: a printed page */
 
 .answer {
   position: relative;
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-block-start: 3px solid var(--accent);
-  border-radius: var(--radius);
+  background: var(--panel);
   padding: var(--space-m);
   padding-block-start: var(--space-s);
-  box-shadow: var(--shadow);
 }
 
 /* the briefing's label, with the result of checking its citations beside it */
@@ -1332,8 +1137,6 @@ legend,
 
 .answer-label {
   font-weight: 650;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
@@ -1341,7 +1144,7 @@ legend,
   font-weight: 600;
   text-decoration: none;
   padding: 0.15em 0.6em;
-  border-radius: 999px;
+  border-radius: var(--radius-small);
   border: 1px solid currentcolor;
 }
 
@@ -1364,10 +1167,8 @@ legend,
 .stances-head,
 .wts-headings .stances-head {
   font-family: var(--sans);
-  font-size: var(--step--2);
+  font-size: var(--step--1);
   font-weight: 650;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--ink-faint);
   margin-block-end: var(--space-2xs);
 }
@@ -1399,7 +1200,6 @@ legend,
 }
 
 .stances tbody th .link {
-  font-family: var(--serif);
   font-size: inherit;
   font-weight: 600;
   text-align: start;
@@ -1423,10 +1223,10 @@ legend,
   display: inline-flex;
   align-items: center;
   padding: 0.5em 1em;
-  border-radius: var(--radius);
+  border-radius: var(--radius-small);
   background: var(--paper-raised);
   color: var(--ink);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--field);
   font-family: var(--sans);
   font-size: var(--step--1);
 }
@@ -1451,9 +1251,8 @@ legend,
   min-inline-size: 14rem;
   padding: var(--space-xs);
   background: var(--paper);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--rule-strong);
   border-radius: var(--radius);
-  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.12);
 }
 
 .export-list > button {
@@ -1533,7 +1332,7 @@ legend,
   padding-block: 0.05em;
   padding-inline: 0.35em;
   border: 1px solid color-mix(in oklch, var(--accent) 35%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-small);
   background: var(--accent-subtle);
   color: var(--accent);
   font-family: var(--sans);
@@ -1576,11 +1375,8 @@ legend,
 }
 
 .shared-note {
-  font-family: var(--sans);
   font-size: var(--step--1);
   color: var(--ink-soft);
-  border-inline-start: 3px solid var(--gilt);
-  padding-inline-start: var(--space-s);
 }
 
 /* a judgemental word in the briefing's own voice: flagged for the reader, never silently changed */
@@ -1626,7 +1422,7 @@ legend,
   color: var(--ink-soft);
 }
 
-/* ---- report a problem -------------------------------------------------------------------- */
+/* report a problem */
 
 /* author styles such as display: grid must never override the hidden attribute */
 [hidden] {
@@ -1644,10 +1440,7 @@ legend,
   max-inline-size: 38rem;
   margin-block-start: var(--space-s);
   padding: var(--space-s);
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  font-family: var(--sans);
+  background: var(--panel);
   font-size: var(--step--1);
 }
 
@@ -1706,17 +1499,15 @@ legend,
 .admin-alert {
   margin-block: var(--space-2xs);
   padding: var(--space-xs) var(--space-s);
-  border-inline-start: 3px solid var(--warn);
   background: var(--warn-subtle);
   font-family: var(--sans);
 }
 
 .admin-alert.error {
-  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .admin-alert.ok {
-  border-color: var(--accent);
   background: var(--accent-subtle);
 }
 
@@ -1751,19 +1542,12 @@ legend,
   white-space: pre-wrap;
 }
 
-.licence {
-  margin-block: var(--space-2xs);
-  line-height: 2;
-}
+/* MPs and peers */
 
-/* ---- MPs and peers ------------------------------------------------------------------------ */
-
-.eyebrow {
+.page-context {
   margin: 0;
   font-family: var(--sans);
   font-size: var(--step--1);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-soft);
 }
 
@@ -1874,9 +1658,9 @@ legend,
 .statement {
   margin-block: var(--space-xs) 0;
   padding: var(--space-xs) var(--space-s);
-  max-inline-size: 42rem;
+  max-inline-size: var(--measure);
   background: var(--paper-sunk);
-  border: 1px dashed var(--rule-strong);
+  border: 1px dashed var(--field);
   border-radius: var(--radius);
   font-family: var(--sans);
   font-size: var(--step--1);
@@ -1906,8 +1690,6 @@ legend,
 
 .statement-text {
   margin: var(--space-xs) 0 0;
-  padding-inline-start: var(--space-s);
-  border-inline-start: 3px solid var(--rule-strong);
   font-size: var(--step-0);
   line-height: 1.5;
 }
@@ -1955,7 +1737,6 @@ legend,
 
 .named-times {
   padding: var(--space-xs) var(--space-s);
-  border-inline-start: 4px solid var(--accent);
   background: var(--accent-subtle);
 }
 
@@ -1997,7 +1778,7 @@ legend,
   color: var(--ink-faint);
 }
 
-/* ---- sources ---------------------------------------------------------------------------- */
+/* sources */
 
 .sources {
   font-family: var(--sans);
@@ -2039,27 +1820,16 @@ legend,
   padding-block: var(--space-s);
 }
 
-/* group headings sit between rules, like the section headings of the printed report (in the sans, as labels: see
-   .examples-head) */
 .source-group h3,
 .wts-headings .source-group h3 {
   display: flex;
   align-items: center;
   gap: var(--space-s);
   font-family: var(--sans);
-  font-size: var(--step--2);
+  font-size: var(--step--1);
   font-weight: 650;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--ink-soft);
   margin-block-end: var(--space-xs);
-}
-
-.source-group h3::before,
-.source-group h3::after {
-  content: "";
-  flex: 1;
-  border-block-start: 1px solid var(--rule);
 }
 
 .source-group ol {
@@ -2081,9 +1851,8 @@ legend,
   gap: var(--space-2xs) var(--space-s);
   inline-size: 100%;
   text-align: start;
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-inline-start: 3px solid var(--house);
+  background: var(--panel);
+  border: 0;
   border-radius: var(--radius);
   padding-block: var(--space-xs);
   padding-inline: var(--space-s);
@@ -2096,8 +1865,7 @@ legend,
 
 @media (hover: hover) and (pointer: fine) {
   .source-card:hover {
-    background: color-mix(in oklch, var(--house) 5%, var(--paper-raised));
-    border-color: color-mix(in oklch, var(--house) 40%, var(--rule));
+    background: color-mix(in oklch, var(--house) 8%, var(--panel));
   }
 }
 
@@ -2110,21 +1878,19 @@ legend,
   }
 }
 
-/* source numbers are gilt on cloth, like the lettering on a volume's spine */
-.badge {
+/* source numbers on the House's cloth */
+.source-number {
   flex: none;
   display: inline-grid;
   place-items: center;
   min-inline-size: 1.9em;
   block-size: 1.9em;
   padding-inline: 0.3em;
-  border-radius: var(--radius);
+  border-radius: var(--radius-small);
   background: var(--cloth, var(--cloth-commons));
-  color: var(--gilt-on-cloth);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--gilt-on-cloth) 45%, transparent);
-  font-family: var(--serif);
+  color: var(--on-cloth);
   font-size: var(--step--1);
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .source-meta {
@@ -2135,7 +1901,6 @@ legend,
 }
 
 .att {
-  font-family: var(--serif);
   font-size: var(--step-0);
   color: var(--ink);
 }
@@ -2145,7 +1910,6 @@ legend,
 }
 
 .role {
-  font-family: var(--serif);
   font-style: italic;
   color: var(--house, var(--accent));
 }
@@ -2157,15 +1921,13 @@ legend,
 }
 
 .colref {
-  font-size: var(--step--2);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--step--1);
   color: var(--ink-faint);
   white-space: nowrap;
   padding-block-start: 0.35em;
 }
 
-/* ---- composer ----------------------------------------------------------------------------- */
+/* composer */
 
 .composer {
   position: sticky;
@@ -2211,7 +1973,7 @@ legend,
 .composer-dock .controls {
   max-block-size: 55vh;
   overflow: auto;
-  box-shadow: 0 -0.25rem 1rem rgb(0 0 0 / 0.08);
+  border-block-start: 1px solid var(--rule);
 }
 
 /* On the empty home page the question box sits under the introduction, above the examples. */
@@ -2227,14 +1989,12 @@ legend,
   min-block-size: 2lh;
   max-block-size: 9lh;
   resize: none;
-  font-family: var(--serif);
   font-size: max(16px, var(--step-0));
   line-height: 1.45;
   padding-block: 0.7em;
   padding-inline: 1.1em;
-  border-color: color-mix(in oklch, var(--ink) 25%, var(--paper));
+  border-color: var(--field);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
 }
 
 .composer textarea:focus-visible {
@@ -2314,7 +2074,7 @@ legend,
   min-block-size: 2rem;
 }
 
-/* ---- drawer: a page from the report --------------------------------------------------------- */
+/* drawer: a page from the report */
 
 .drawer {
   --house: var(--commons);
@@ -2329,7 +2089,6 @@ legend,
   flex-direction: column;
   background: var(--paper);
   border-inline-start: 1px solid var(--rule);
-  box-shadow: var(--shadow);
   font-family: var(--sans);
   font-size: var(--step--1);
 }
@@ -2363,10 +2122,9 @@ legend,
   padding-block-start: calc(var(--space-s) + env(safe-area-inset-top, 0px));
   background: var(--cloth);
   color: var(--on-cloth);
-  border-block-end: 3px double var(--gilt-on-cloth);
 }
 
-.drawer-head .badge {
+.drawer-head .source-number {
   background: color-mix(in oklch, var(--cloth), black 20%);
 }
 
@@ -2385,10 +2143,10 @@ legend,
   place-items: center;
   inline-size: 2rem;
   block-size: 2rem;
-  border: 1px solid color-mix(in oklch, var(--gilt-on-cloth) 50%, transparent);
+  border: 1px solid color-mix(in oklch, var(--on-cloth) 60%, transparent);
   border-radius: 50%;
   background: none;
-  color: var(--gilt-on-cloth);
+  color: var(--on-cloth);
 }
 
 .close::after {
@@ -2407,12 +2165,12 @@ legend,
 }
 
 .close:focus-visible {
-  outline-color: var(--gilt-on-cloth);
+  outline-color: var(--on-cloth);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .close:hover {
-    background: color-mix(in oklch, var(--gilt-on-cloth) 18%, transparent);
+    background: color-mix(in oklch, var(--on-cloth) 18%, transparent);
   }
 }
 
@@ -2455,10 +2213,8 @@ legend,
 }
 
 .facts dt {
-  font-size: var(--step--2);
+  font-size: var(--step--1);
   font-weight: 650;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--ink-faint);
   padding-block-start: 0.2em;
 }
@@ -2475,12 +2231,10 @@ legend,
 
 /* the verbatim text is set like a printed column */
 .verbatim {
-  font-family: var(--serif);
   font-size: var(--step-0);
   line-height: 1.55;
   hyphens: auto;
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
+  background: var(--panel);
   padding: var(--space-m);
   display: flex;
   flex-direction: column;
@@ -2492,20 +2246,16 @@ legend,
   justify-content: space-between;
   gap: var(--space-s);
   font-family: var(--sans);
-  font-size: var(--step--2);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: var(--step--1);
   color: var(--ink-faint);
   text-align: start;
   padding-block-end: var(--space-2xs);
-  border-block-end: 1px solid var(--rule-strong);
+  border-block-end: 1px solid var(--rule);
 }
 
 .page-heading {
   font-size: var(--step--1);
   font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   text-align: center;
   margin-block: 0.4em 0.2em;
 }
@@ -2522,7 +2272,7 @@ legend,
 .verbatim .question.reply {
   margin-block-start: 1em;
   padding-inline-start: 0.9em;
-  border-inline-start: 2px solid var(--rule);
+  border-inline-start: 1px solid var(--rule-strong);
   font-style: normal;
 }
 
@@ -2557,11 +2307,6 @@ legend,
 .ranking dd {
   margin: 0;
   font-variant-numeric: tabular-nums;
-}
-
-.licence {
-  border-block-start: 1px solid var(--rule);
-  padding-block-start: var(--space-xs);
 }
 
 .division {
@@ -2603,11 +2348,8 @@ legend,
 }
 
 .about-record {
-  font-family: var(--sans);
   font-size: var(--step--1);
   color: var(--ink-soft);
-  border-inline-start: 3px solid var(--rule);
-  padding-inline-start: var(--space-s);
 }
 
 .about-record summary {
@@ -2619,132 +2361,97 @@ legend,
   margin-block-start: var(--space-2xs);
 }
 
-/* ---- footer: the imprint ---------------------------------------------------------------------- */
+/* footer: the family shelf, the site's own links, then the independence and licence notices */
 
 .footer {
-  border-block-start: 1px solid var(--rule);
-  padding-block: var(--space-s) 0; /* the family shelf at its foot has its own padding */
-  font-family: var(--sans);
-  font-size: var(--step--2);
-  color: var(--ink-faint);
-  text-align: center;
-}
-
-.footer > :is(p, a) {
-  text-wrap: balance; /* centred lines of even length, with no word left alone on the last */
-}
-
-.footer > a,
-.login .footer > a {
-  display: block;
-  padding-block: 0.2em; /* at least 24px tall, so each line is easy to tap */
-  color: inherit;
-}
-
-.footer > .independence {
-  font-weight: 600;
+  row-gap: var(--space-xs);
+  margin-block-start: var(--space-l);
+  padding-block-end: var(--space-m);
+  background: var(--panel);
+  font-size: var(--step--1);
   color: var(--ink-soft);
-  margin-block-end: var(--space-xs);
 }
 
-.login .footer > .independence {
-  color: inherit;
-}
-
-/* the family shelf (public/family/shelf.html, from the family kit): a band across the foot of every page */
 .footer > .family-shelf {
   grid-column: full-width;
-  margin-block-start: var(--space-s);
-  text-align: start;
 }
 
 .family-shelf > .wts-shelf {
   margin-block: 0;
+  border-block-end: 1px solid var(--rule);
 }
 
-.footer > a + a {
-  margin-block-start: 0.2em;
+.footer > p {
+  max-inline-size: var(--measure);
+}
+
+.footer a {
+  color: inherit;
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.25rem;
+  padding-block-start: var(--space-xs);
+}
+
+.footer-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 1.5rem;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .footer > a:hover {
+  .footer a:hover {
     color: var(--ink);
+    text-decoration-thickness: 2px;
   }
 }
 
-/* ---- sign-in: the cover of a bound volume ------------------------------------------------------ */
-
-html:has(.login),
-html:has(.login) body {
-  background-color: var(--cloth-commons);
-}
+/* sign-in: the cover of a bound volume */
 
 .login {
   min-block-size: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: var(--space-l);
-  padding-block: var(--space-xl) var(--space-m);
-  padding-inline: 1rem;
-  color: var(--on-cloth);
-  background-color: var(--cloth-commons);
-  background-image:
-    repeating-linear-gradient(45deg, oklch(1 0 none / 0.025) 0 1px, transparent 1px 4px),
-    repeating-linear-gradient(-45deg, oklch(0 0 none / 0.05) 0 1px, transparent 1px 5px);
+  background: var(--paper);
 }
 
 .cover {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-m) var(--gutter);
+  background: var(--band);
+  color: var(--on-cloth);
   text-align: center;
-  color: var(--gilt-on-cloth);
-  padding-block: var(--space-m);
-  padding-inline: var(--space-l);
-  border-block: 3px double color-mix(in oklch, var(--gilt-on-cloth) 75%, transparent);
-}
-
-.cover p {
-  text-wrap: balance;
 }
 
 .cover-mark {
   block-size: 3.4rem;
   inline-size: auto;
-  margin-inline: auto;
-  margin-block-end: var(--space-s);
-}
-
-
-.cover-kicker,
-.cover-years {
-  font-family: var(--sans);
-  font-size: var(--step--2);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
 }
 
 .cover-title {
-  font-size: var(--step-4);
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  font-variation-settings: "opsz" 60;
-  line-height: 1.05;
-  margin-block: var(--space-xs);
-  text-shadow: 0 1px 0 oklch(0 0 none / 0.35);
+  font-family: var(--serif);
+  font-size: var(--step-3);
+  font-weight: 600;
+  line-height: 1.1;
 }
 
 .login-card {
-  inline-size: min(26rem, 100%);
+  inline-size: min(26rem, 100% - 2 * var(--gutter));
   display: flex;
   flex-direction: column;
   gap: var(--space-s);
-  background: var(--paper);
-  color: var(--ink);
   padding: var(--space-m);
-  border-radius: var(--radius);
-  outline: 1px solid color-mix(in oklch, var(--gilt-on-cloth) 70%, transparent);
-  outline-offset: 0.4rem;
-  box-shadow: 0 10px 40px oklch(0 0 none / 0.35);
+  background: var(--panel);
+  color: var(--ink);
 }
 
 .login-card h1 {
@@ -2755,7 +2462,6 @@ html:has(.login) body {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  font-family: var(--sans);
   font-size: var(--step--1);
   font-weight: 600;
 }
@@ -2765,12 +2471,10 @@ html:has(.login) body {
 }
 
 .login .footer {
-  border: 0;
-  color: color-mix(in oklch, var(--on-cloth) 70%, transparent);
-  max-inline-size: 40rem;
+  align-self: stretch;
 }
 
-/* ---- static pages: methodology, status and the like --------------------------------------------- */
+/* static pages: methodology, status and the like */
 
 .page-nav {
   display: flex;
@@ -2780,7 +2484,6 @@ html:has(.login) body {
 
 .page-nav a {
   color: var(--ink-soft);
-  text-decoration: none;
 }
 
 .page-nav a[aria-current="page"] {
@@ -2797,13 +2500,8 @@ html:has(.login) body {
 
 .home-link {
   display: block;
+  flex: none;
   color: inherit;
-}
-
-.title-block > .home-link > .mark {
-  block-size: calc(3.2 * var(--step-1));
-  inline-size: auto;
-  margin-block-end: var(--space-xs);
 }
 
 .prose {
@@ -2811,7 +2509,11 @@ html:has(.login) body {
   flex-direction: column;
   gap: var(--space-s);
   padding-block: var(--space-m) var(--space-xl);
-  max-inline-size: 42rem;
+}
+
+/* running text keeps to about two-thirds of the column; tables, panels and grids take all of it */
+:where(main) :where(p, blockquote, figcaption, :is(ul, ol):not([class]) > li) {
+  max-inline-size: var(--measure);
 }
 
 .prose h1 {
@@ -2819,10 +2521,8 @@ html:has(.login) body {
 }
 
 .prose h2 {
-  font-size: var(--step-1);
-  margin-block-start: var(--space-m);
-  padding-block-start: var(--space-s);
-  border-block-start: 1px solid var(--rule);
+  font-size: var(--step-2);
+  margin-block-start: var(--space-l);
   scroll-margin-block-start: var(--space-m);
 }
 
@@ -2843,21 +2543,21 @@ html:has(.login) body {
   padding-inline-start: 1.3em;
 }
 
-.lede {
+.intro-text {
   font-size: var(--step-1);
-  font-style: italic;
-  color: var(--ink-soft);
+  line-height: 1.45;
+  color: var(--ink);
 }
 
 .toc {
-  font-family: var(--sans);
+  padding: var(--space-s) var(--space-m);
+  background: var(--panel);
   font-size: var(--step--1);
-  border-inline-start: 3px solid var(--rule);
-  padding-inline-start: var(--space-s);
 }
 
 .toc ol {
-  columns: 2 14rem;
+  columns: 3 14rem;
+  column-gap: var(--space-l);
 }
 
 /* the devolved parliaments number their own headings ("1. Questions to…"), so the list adds no second number */
@@ -2899,10 +2599,7 @@ html:has(.login) body {
   gap: var(--space-xs) var(--space-m);
   margin: 0;
   padding: var(--space-s);
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  font-family: var(--sans);
+  background: var(--panel);
   font-size: var(--step--1);
 }
 
@@ -2944,19 +2641,7 @@ html:has(.login) body {
   }
 }
 
-.footer-nav {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--space-s);
-  margin-block-end: var(--space-xs);
-}
-
-.footer-nav a {
-  color: var(--ink-soft);
-}
-
-/* ---- utilities ------------------------------------------------------------------------------------ */
+/* utilities */
 
 .muted {
   color: var(--ink-soft);
@@ -3003,13 +2688,9 @@ main:focus {
   white-space: nowrap;
 }
 
-/* ---- narrow screens -------------------------------------------------------------------------------- */
+/* narrow screens */
 
 @media (width < 40rem) {
-  .running-head > span:first-child {
-    display: none;
-  }
-
   .source-card {
     grid-template-columns: auto 1fr;
   }
@@ -3028,7 +2709,7 @@ main:focus {
   }
 }
 
-/* ---- print: a briefing as a document ------------------------------------------------------------------ */
+/* print: a briefing as a document */
 
 .print-only {
   display: none;
@@ -3048,13 +2729,13 @@ main:focus {
     background: #fff;
   }
 
-  .running-head,
+  .masthead-actions,
   .controls,
   .composer,
   .drawer,
   .answer-actions,
   .plan-head > button,
-  .chip button,
+  .filter-tag button,
   .empty .examples,
   .examples-head,
   .footer-nav,
@@ -3124,7 +2805,7 @@ main:focus {
 }
 
 @media (forced-colors: active) {
-  .badge,
+  .source-number,
   .cite {
     border: 1px solid;
   }
@@ -3137,7 +2818,7 @@ main:focus {
   }
 }
 
-/* ---- other resources: a site, then what it is best for ------------------------------- */
+/* other resources: a site, then what it is best for */
 
 .resources {
   display: grid;
@@ -3158,17 +2839,15 @@ main:focus {
   color: var(--ink-soft);
 }
 
-/* ---- the note on what the site costs (every tenth new briefing in a day) ------------- */
+/* the note on what the site costs (every tenth new briefing in a day) */
 
 .support-reminder {
   max-inline-size: min(34rem, calc(100vw - 2rem));
   border: 1px solid var(--rule-strong);
-  border-block-start: 3px solid var(--accent);
   border-radius: var(--radius);
-  background: var(--paper-raised);
+  background: var(--paper);
   color: var(--ink);
   padding: var(--space-m);
-  box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.25);
 }
 
 .support-reminder::backdrop {
@@ -3197,7 +2876,7 @@ main:focus {
   font-size: var(--step--1);
   font-weight: 600;
   text-decoration: none;
-  border-radius: var(--radius);
+  border-radius: var(--radius-small);
   padding-block: 0.6em;
   padding-inline: 1.2em;
   background: var(--accent);
@@ -3205,7 +2884,7 @@ main:focus {
   border: 1px solid var(--accent);
 }
 
-/* ---- topic briefings ------------------------------------------------------------------ */
+/* topic briefings */
 
 .topic-list {
   list-style: none;
@@ -3261,7 +2940,7 @@ main:focus {
   cursor: pointer;
 }
 
-/* ---- timelines ------------------------------------------------------------------------ */
+/* timelines */
 
 .timeline-list {
   list-style: none;
@@ -3311,10 +2990,8 @@ main:focus {
 
 .vote-badge {
   font-family: var(--sans);
-  font-size: var(--step--2);
+  font-size: var(--step--1);
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--on-accent);
   background: var(--accent);
   padding: 0.05em 0.45em;
@@ -3327,7 +3004,7 @@ main:focus {
   margin-block-end: var(--space-xs);
 }
 
-/* ---- charts ----------------------------------------------------------------------------- */
+/* charts */
 
 :root {
   --series-0: light-dark(#1f5f8b, #7fb8e0);
@@ -3481,7 +3158,7 @@ main:focus {
   margin-block-end: var(--space-xs);
 }
 
-/* ---- kinds of vote and the glossary ------------------------------------------------------ */
+/* kinds of vote and the glossary */
 
 .vote-kind-note,
 .vote-kind-question,
@@ -3531,7 +3208,7 @@ main:focus {
   }
 }
 
-/* ---- debate pages ------------------------------------------------------------------------- */
+/* debate pages */
 
 .debate-section {
   font-size: var(--step-1);
@@ -3577,8 +3254,7 @@ main:focus {
 .debate-division {
   margin-block: var(--space-s);
   padding: var(--space-xs) var(--space-s);
-  border-inline-start: 3px solid var(--accent);
-  background: color-mix(in oklch, var(--accent) 6%, transparent);
+  background: var(--panel);
   scroll-margin-block-start: var(--space-l);
 }
 
@@ -3601,7 +3277,7 @@ main:focus {
   border-block-start: 1px solid var(--rule);
 }
 
-/* ---- the week in Parliament ---------------------------------------------------------------- */
+/* the week in Parliament */
 
 .week-nav {
   display: flex;
@@ -3613,7 +3289,7 @@ main:focus {
 }
 
 /* the week's note and its links to other weeks each keep a little room from the summary above them */
-.week > .lede + p,
+.week > .intro-text + p,
 .week > .week-nav {
   margin-block-start: var(--space-xs);
 }
@@ -3649,14 +3325,12 @@ main:focus {
   display: inline-block;
   margin-inline-end: var(--space-xs);
   font-family: var(--sans);
-  font-size: var(--step--2);
+  font-size: var(--step--1);
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   color: var(--ink-soft);
 }
 
-/* ---- early day motions -------------------------------------------------------------------- */
+/* early day motions */
 
 .prose .edm-list,
 .prose .edm-sponsors {
@@ -3686,18 +3360,16 @@ main:focus {
 .edm-text {
   margin-inline: 0;
   padding: var(--space-s);
-  border-inline-start: 3px solid var(--accent);
-  background: color-mix(in oklch, var(--accent) 5%, transparent);
+  background: var(--panel);
 }
 
 .evidence-note {
   margin: 0;
   padding: var(--space-2xs) var(--space-xs);
-  border-inline-start: 3px solid var(--accent);
-  background: color-mix(in oklch, var(--accent) 6%, transparent);
+  background: var(--panel);
 }
 
-/* ---- registered interests ------------------------------------------------------------------ */
+/* registered interests */
 
 .interest-category {
   margin-block: var(--space-2xs);
@@ -3762,7 +3434,7 @@ main:focus {
   }
 }
 
-/* ---- committees -------------------------------------------------------------------------- */
+/* committees */
 
 .prose .witness-list {
   padding-inline-start: var(--space-s);
@@ -3821,21 +3493,6 @@ main:focus {
   display: inline;
 }
 
-/* the Ask page: say plainly that briefings are written by AI, and what that adds */
-.ai-tag {
-  display: inline-block;
-  vertical-align: middle;
-  font-family: var(--sans);
-  font-size: var(--step--2);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--paper);
-  background: var(--accent);
-  padding: 0.15em 0.55em;
-  border-radius: var(--radius);
-}
-
 .ask-why {
   display: grid;
   gap: var(--space-2xs);
@@ -3843,30 +3500,26 @@ main:focus {
   padding-inline-start: 1.3em; /* the indent of a plain list in running text (.prose ul) */
 }
 
-/* "MPs" in the capitalised name: "MPS" would read as a different word */
-.keep-case {
-  text-transform: none;
-}
-
-/* under the home page's question box: the line that is always shown, and the fold-out that answers "Why use this
-   rather than a chatbot?" (WhyChatbot.tsx). It sits under the box, so opening it never moves the box */
+/* under the home page's question box: the line saying briefings are written by AI, and how they are checked
+   (WhyChatbot.tsx). It sits under the box, so opening it never moves the box */
 .why {
-  margin-block-start: calc(-1 * var(--space-xs)); /* close under the box it speaks for */
-  font-family: var(--sans);
+  padding: var(--space-s) var(--space-m);
+  background: var(--panel);
   font-size: var(--step--1);
-  color: var(--ink-soft);
+  color: var(--ink);
 }
 
 .why-line {
-  font-weight: 600;
-  color: var(--ink);
+  margin: 0;
 }
 
 .why-chatbot > summary {
   display: flex;
   align-items: center;
   inline-size: fit-content;
+  margin-block-start: var(--space-2xs);
   color: var(--accent);
+  font-weight: 600;
 }
 
 .why-chatbot > ul {
@@ -3874,10 +3527,6 @@ main:focus {
   gap: var(--space-2xs);
   margin-block: var(--space-2xs);
   padding-inline-start: 1.3em; /* the indent of a plain list in running text (.prose ul) */
-}
-
-.why-chatbot strong {
-  color: var(--ink);
 }
 
 /* the gentle note under the home page's question box that the site covers more than MPs */
@@ -3888,11 +3537,8 @@ main:focus {
 }
 
 .ai-caution {
-  font-family: var(--sans);
   font-size: var(--step--1);
   color: var(--ink-soft);
-  border-inline-start: 3px solid var(--gilt);
-  padding-inline-start: var(--space-s);
 }
 
 /* the header's "More" menu: the ways to browse the record */
@@ -3937,9 +3583,8 @@ main:focus {
   max-inline-size: calc(100vw - 2rem);
   padding: var(--space-xs) var(--space-s);
   background: var(--paper);
-  border: 1px solid var(--rule, var(--ink-faint));
+  border: 1px solid var(--rule-strong);
   border-radius: var(--radius);
-  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.12);
   text-align: start;
 }
 
@@ -3951,13 +3596,24 @@ main:focus {
 
 /* on a phone the header's links fit on one line, and an open menu spans the width of the line, under it, so it
    stays on screen wherever its name sits */
+/* on a phone the menu takes its own lines under the name, and an open menu spans the width of the column, so it
+   stays on screen wherever its name sits */
 @media (max-width: 40rem) {
+  .masthead-row {
+    padding-block-end: var(--space-2xs);
+  }
+
+  .masthead-actions,
   .masthead-actions.page-nav,
   .masthead-actions > .page-nav {
     position: relative;
-    flex-wrap: nowrap;
-    gap: var(--space-xs) 0.7rem;
-    white-space: nowrap;
+    flex-wrap: wrap;
+    gap: 0 var(--space-s);
+    inline-size: 100%;
+  }
+
+  .masthead-actions {
+    font-size: var(--step--1);
   }
 
   .masthead-actions .nav-more {
@@ -3968,34 +3624,6 @@ main:focus {
     inset-inline: 0;
     min-inline-size: 0;
     max-inline-size: none;
-    white-space: normal;
-  }
-}
-
-/* the narrowest phones (360px): slightly smaller type and spacing, so the whole menu still fits on one line */
-@media (max-width: 24rem) {
-  .masthead-actions.page-nav,
-  .masthead-actions > .page-nav {
-    gap: var(--space-xs) 0.3rem; /* fits a 320px screen even beside a desktop browser's scrollbar */
-    font-size: 0.72rem;
-  }
-
-  .nav-more > summary::after {
-    margin-inline-start: 0.05em;
-  }
-
-  /* each item keeps its own width, so a menu's name never runs under the next one */
-  .masthead-actions.page-nav > * {
-    flex: none;
-  }
-}
-
-/* 320px, the width a page must reflow to (WCAG 1.4.10), as on a desktop browser zoomed to 400% beside its
-   scrollbar: where the menu no longer fits on one line it takes two, rather than running off the screen */
-@media (max-width: 20rem) {
-  .masthead-actions.page-nav,
-  .masthead-actions > .page-nav {
-    flex-wrap: wrap;
   }
 }
 
@@ -4029,13 +3657,12 @@ main:focus {
 }
 
 .follow-up {
-  font-family: var(--serif);
   font-size: var(--step-0);
   text-align: start;
   color: var(--ink);
   background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-radius: 999px;
+  border: 1px solid var(--field);
+  border-radius: var(--radius-small);
   padding-block: 0.35em;
   padding-inline: 0.9em;
   min-block-size: 2.75rem;
@@ -4115,12 +3742,8 @@ main:focus {
   display: grid;
   gap: var(--space-2xs);
   margin-block: var(--space-s);
-  padding: var(--space-s);
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-inline-start: 3px solid var(--accent);
-  border-radius: var(--radius);
-  font-size: var(--step--1);
+  padding: var(--space-s) var(--space-m);
+  background: var(--panel);
 }
 
 .glance > div {
@@ -4132,10 +3755,8 @@ main:focus {
 
 .glance dt {
   font-family: var(--sans);
-  font-size: var(--step--2);
+  font-size: var(--step--1);
   font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
@@ -4149,26 +3770,26 @@ main:focus {
   gap: var(--space-2xs);
 }
 
-.chip-button {
+.topic-button {
   font-family: var(--sans);
   font-size: var(--step--1);
   padding: 0.3em 0.7em;
   min-block-size: 2.25rem;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
+  border: 1px solid var(--field);
+  border-radius: var(--radius-small);
   background: var(--paper);
   color: var(--ink);
   text-align: start;
 }
 
-.chip-button .count {
+.topic-button .count {
   color: var(--accent);
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .chip-button:hover {
+  .topic-button:hover {
     border-color: var(--accent);
   }
 }

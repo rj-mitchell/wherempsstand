@@ -21,13 +21,14 @@ describe("site navigation", () => {
     const html = readFileSync(resolve(__dirname, "../../partials/header.html"), "utf8");
     const app = readFileSync(resolve(__dirname, "../App.tsx"), "utf8");
     expect(html.indexOf('class="title-block"')).toBeGreaterThan(-1);
-    expect(html.indexOf('class="title-block"')).toBeLessThan(html.indexOf('class="running-head"'));
+    expect(html.indexOf('class="title-block"')).toBeLessThan(html.indexOf('class="masthead-actions'));
     expect(app.indexOf('className="title-block"')).toBeGreaterThan(-1);
-    expect(app.indexOf('className="title-block"')).toBeLessThan(app.indexOf('className="running-head"'));
+    expect(app.indexOf('className="title-block"')).toBeLessThan(app.indexOf('className="masthead-actions'));
   });
 
-  it("the footer is the same everywhere and holds only pages about the site", () => {
+  it("the footer is the same everywhere and holds at most six pages about the site", () => {
     expect(links("footer.html")).toEqual(FOOTER);
+    expect(FOOTER.map((l) => l.label)).toEqual(["About", "Methodology", "Corrections", "Accessibility", "Privacy", "Source code"]);
     const header = new Set(HEADER_LINKS.map((l) => l.href));
     expect(FOOTER.filter((l) => header.has(l.href))).toEqual([]);
   });

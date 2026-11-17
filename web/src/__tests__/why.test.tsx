@@ -4,44 +4,49 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { WhyChatbot } from "../components/WhyChatbot";
 
-// The family's wording (family/GLOSSARY.md in the charity's repository, "Why use this rather than a chatbot?").
-const LINE = "Answers only from the official record, every point linked and checked.";
-const SUMMARY = "Why use this rather than a chatbot?";
-const LAST = "Briefings here are written by AI too. The difference is what the AI is given and how it is checked.";
+// The family's wording (family/GLOSSARY.md in the charity's repository, "AI briefings").
+const LINE = "Briefings are written by AI from the official record only, and every citation is checked.";
+const SUMMARY = "How the briefings are checked";
 const POINTS = [
-  "Only the record.",
-  "Every point linked and checked.",
-  "Up to date.",
-  "It says when there is nothing.",
-  "Balanced by design.",
-  "Records searched in full.",
-  "Open.",
+  "The AI is given only the Hansard and other parliamentary records found for your question",
+  "Each point links to its source.",
+  "Hansard is read in twice a day.",
+  "If the record holds nothing relevant, the site says “No records found”.",
+  "Evidence is drawn from across ministers, the opposition and backbenchers.",
 ];
 
 const page = (name: string) => readFileSync(resolve(__dirname, "../..", name), "utf8").replace(/\s+/g, " ");
 
-describe("Why use this rather than a chatbot?", () => {
-  it("is one line and a plain fold-out under the question box, with the first five points", () => {
+describe("How the briefings are checked", () => {
+  it("is one line and a plain fold-out under the question box, with the first five points and no bold lead-ins", () => {
     const { container } = render(<WhyChatbot />);
     expect(screen.getByText(LINE)).toBeTruthy();
     const details = container.querySelector("details");
     expect(details?.open).toBe(false); // closed until the reader opens it, so it takes two lines of the page
     expect(details?.querySelector("summary")?.textContent).toBe(SUMMARY);
-    expect([...container.querySelectorAll("li > strong")].map((s) => s.textContent)).toEqual(POINTS.slice(0, 5));
-    expect(details?.textContent).toContain(LAST);
-    expect(screen.getByRole("link", { name: "How it works", hidden: true }).getAttribute("href")).toBe(
-      "/methodology#chatbot",
+    const items = [...container.querySelectorAll("li")].map((li) => li.textContent?.replace(/\s+/g, " ") ?? "");
+    expect(items).toHaveLength(5);
+    POINTS.forEach((p, i) => expect(items[i].startsWith(p), p).toBe(true));
+    expect(container.querySelector("li strong")).toBeNull();
+    expect(screen.getByRole("link", { name: "methodology", hidden: true }).getAttribute("href")).toBe(
+      "/methodology#ai-briefings",
     );
   });
 
-  it("is said at more length, in the same order, on the About and methodology pages", () => {
+  it("is said at more length on the About and methodology pages, under the heading AI briefings", () => {
     for (const name of ["about.html", "methodology.html"]) {
       const html = page(name);
-      const section = html.slice(html.indexOf('<h2 id="chatbot">'), html.indexOf('<h2 id="co'));
-      expect(section).toContain(`<h2 id="chatbot">${SUMMARY}</h2>`);
-      expect([...section.matchAll(/<li> <strong>([^<]+)<\/strong>/g)].map((m) => m[1])).toEqual(POINTS);
-      expect(section).toContain(LAST);
-      expect(html).toContain(`<li><a href="#chatbot">${SUMMARY}</a></li>`);
+      const start = html.indexOf('<h2 id="ai-briefings">');
+      expect(start, name).toBeGreaterThan(0);
+      const section = html.slice(start, html.indexOf("<h2 ", start + 10));
+      expect(section).toContain('<h2 id="ai-briefings">AI briefings</h2>');
+      expect(section).toContain("<h3>What the model is given</h3>");
+      expect(section).toContain("<h3>How it is checked</h3>");
+      expect(section).toContain("Briefings are written by AI.");
+      expect(section).toContain("sentences that no source supports are flagged");
+      expect(section).toContain("“No records found”");
+      expect(section).not.toContain("<strong>");
+      expect(html).toContain('<li><a href="#ai-briefings">AI briefings</a></li>');
     }
   });
 });
