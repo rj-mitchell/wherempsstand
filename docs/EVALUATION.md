@@ -1,11 +1,12 @@
 # The test set, and measured performance
 
 The test set and what it showed, then how fast each step runs (at the end). The test set was first run on
-11 October 2026. The questions are in `eval/questions.toml`, the summaries and the question readings in `eval/runs/`
-(the full runs, with every source and briefing, are large and kept out of the repository: `hansard
-eval sources` and `hansard eval briefings` write them again), and the relevance grades in `eval/judgments.jsonl`.
+11 October 2026. The questions are in `eval/questions.toml`, the relevance grades in `eval/judgments.jsonl`, and one
+set of saved question readings in `eval/runs/20261011-plans-reference.json`, which `hansard eval retrieval` uses by
+default. Other runs are kept on the machine that made them, not in the repository: the `hansard eval` commands write
+them again.
 
-## What it is
+## The test set
 
 62 questions covering everything the site understands: plain topics, parties, places, dates, the Lords, ministers and
 the opposition, named people, gender, age, first-term MPs, marginal and safe seats, votes, combinations, loaded or
@@ -14,12 +15,12 @@ records the filters a careful reader would choose.
 
 Three things are scored:
 
-1. **Reading the question**: are the filters (the chips shown above each briefing) right? Every filter counts, and
+1. Reading the question: are the filters (the chips shown above each briefing) right? Every filter counts, and
    adding one the question did not ask for is a mistake.
-2. **Choosing the sources**: how relevant are the 24 sources chosen, and how many parties and speaker groups do they
+2. Choosing the sources: how relevant are the 24 sources chosen, and how many parties and speaker groups do they
    cover? A small model grades each source 0 (off topic), 1 (related) or 2 (directly on the question); each source
    is only ever graded once, so later comparisons are nearly free.
-3. **The briefings**: the automatic checks (citations found word for word in their sources, sentences without
+3. The briefings: the automatic checks (citations found word for word in their sources, sentences without
    support, loaded words), and a blind side-by-side judgement of two models' briefings on the same sources.
 
 Run it with `hansard eval plans`, `hansard eval sources` and `hansard eval briefings` (see `hansard eval --help`).
@@ -34,11 +35,11 @@ alone, for free ([Retrieval only](#retrieval-only-checking-a-change-to-the-searc
 |---|---|---|---|
 | Opus 5.5 | 62 of 62 | 0.43p | 2.6 s |
 | Sonnet 5.5 | 61 of 62 | 0.24p | 2.3 s |
-| **Haiku 5.5** | **60 of 62** | **0.013p** | **1.5 s** |
+| Haiku 5.5 | 60 of 62 | 0.013p | 1.5 s |
 | Built-in rules (free) | 47 of 62 | free | instant |
 
 Haiku's two misses were defensible: it ended "during the pandemic" in mid-2022 rather than at the end of 2022, and
-limited "the Safety of Rwanda Bill" to the months the bill was before Parliament. **Haiku now reads the questions**,
+limited "the Safety of Rwanda Bill" to the months the bill was before Parliament. Haiku now reads the questions,
 including for "Sources only", which used the far weaker built-in rules before. One line in `config/settings.toml`
 (`query_parse_model`) switches back.
 
@@ -64,11 +65,15 @@ test machine (the live server will have all of it).
 The first version of re-ranking narrowed the balance: on average one fewer speaker group per question. That is
 fixed: re-ranking may now change the order of the evidence but never which groups are included.
 
-**Decision: re-ranking is built but off for now.** It gives a modest gain for several seconds' wait on every search.
+### Decision: re-ranking is built but off for now
+
+It gives a modest gain for several seconds' wait on every search.
 It should be tried again on the live server once meaning-based search is complete, because that may change both the
 starting point and the speed. Turning it on is one line (`reranker` in `[ranking]`).
 
-**How far to trust the grades:** Sonnet re-graded a random 120 of Haiku's grades. They agreed on relevant or not 91%
+### Reliability of the grades
+
+Sonnet re-graded a random 120 of Haiku's grades. They agreed on relevant or not 91%
 of the time, and never differed by more than one step. Haiku is a little more generous with "related". Every ranking
 is graded by the same grader, so the comparisons are fair even where the absolute numbers are a little high.
 
@@ -88,18 +93,20 @@ Ten varied questions, each answered by both models from the same sources.
 | …accuracy | better in 2 | better in 2 (6 ties) |
 | …coverage of the arguments | better in 5 | better in 4 |
 
-**Decision at the time (11 October): Opus stayed for briefings.** Both are equally accurate; Opus covers a little
+Decision at the time (11 October): Opus stayed for briefings. Both are equally accurate; Opus covers a little
 more and reads a little better, at twice the price. The judge was Opus itself, which may favour its own writing.
 
-**Since later in October 2026, briefings use Sonnet**, to halve their cost for the same accuracy (`model` in
+Since later in October 2026, briefings use Sonnet, to halve their cost for the same accuracy (`model` in
 `[answer]`, `config/settings.toml`). Switching back to Opus is that one line, if costs allow.
 
 A lesson from the first attempt at judging: the judge was given shortened extracts to save money, and then
 "found" invented quotations that were really in the full speeches. The judge now sees the full sources, and,
-better, **every quotation in every briefing is now checked automatically**, word for word, against the speech it is
+better, every quotation in every briefing is now checked automatically, word for word, against the speech it is
 attributed to (free). Any quotation that cannot be found is shaded for readers.
 
-**Tighter citations (new instructions).** Most uncited text was of two kinds: notes about the evidence ("the records
+### Tighter citations (new instructions)
+
+Most uncited text was of two kinds: notes about the evidence ("the records
 span 2013 to 2026") scattered through the briefing, and summaries of a group's view without an example. The
 instructions now ask for every such summary to carry its quoted, cited example, and for notes about the evidence to
 go in a closing "About the evidence:" paragraph, which is not counted as a claim (unless it reports what someone
@@ -117,7 +124,7 @@ word "said", so the live figure should be a little higher.)
 
 ## Cost of this round of testing
 
-About **$5.10** in all. First round about $2.10: reading the questions with each model about $0.54; grading sources
+About $5.10 in all. First round about $2.10: reading the questions with each model about $0.54; grading sources
 about $0.11; checking the grader with Sonnet about $0.15; Opus briefings about $1.30 (including about $0.10 lost to
 a bug in the scoring script). Second round about $3.00: Sonnet briefings $0.52; two side-by-side judgements $1.33
 (the first, with shortened sources, had to be redone); Opus briefings with the new instructions $1.14.
@@ -146,9 +153,9 @@ docker compose run --rm -T -v /opt/hansardgpt/eval:/app/eval:ro app hansard eval
 
 Measured before decision 26, on Hansard from 1 July to 5 November 2026 (105,154 passages from 410 files, embedded
 with the site's local model, 384 numbers each), with the site's settings (300 results, each re-checked against the
-full vectors, `refine_factor` 5). The full results are in `eval/runs/20261106-retrieval-float16.json`.
+full vectors, `refine_factor` 5).
 
-**The vectors themselves** (`scripts/compare_float16.py`: two 32-bit tables and one 16-bit table from the same
+The vectors themselves (`scripts/compare_float16.py`: two 32-bit tables and one 16-bit table from the same
 embeddings, 376 searches: the 14 sample searches, the 62 questions and 300 headings from the record):
 
 | | Nearest 10 found by both | Same 10 in the same order | Nearest 300 found by both | Similarity change, mean / largest |
@@ -160,7 +167,7 @@ embeddings, 376 searches: the 14 sample searches, the 62 questions and 300 headi
 Each finds the same share of the truly nearest 300 passages: 97.5% for 32-bit, 97.3% for the same rebuilt, 97.3%
 for 16-bit. The largest rounding of any stored number was 0.00012; the table took 86 MB rather than 163 MB.
 
-**The test set, before and after `hansard vectors-f16`** (`hansard eval retrieval --compare`), beside the same
+The test set, before and after `hansard vectors-f16` (`hansard eval retrieval --compare`), beside the same
 comparison after merely rebuilding the 32-bit index, which is how far results move with no change to the numbers
 at all:
 
@@ -168,7 +175,7 @@ at all:
 |---|---|---|---|---|
 | Run twice, nothing changed | 62 of 62 | 100% | 100% | 0 |
 | The 32-bit index rebuilt | 50 of 62 | 99.3% | 100% | 0 |
-| **Converted to 16-bit** | **55 of 62** | **99.4%** | **99.8%** | **0.00006** |
+| Converted to 16-bit | 55 of 62 | 99.4% | 99.8% | 0.00006 |
 
 So 16-bit vectors change what is found less than rebuilding the index does, which `hansard reindex-vectors`
 already does from time to time. A source that changes is one of two passages scored within a hair of each other.
@@ -196,7 +203,7 @@ median time of a search:
 |---|---|---|---|
 | 20 | 63.2%, 15.5 ms | 81.5%, 30.7 ms | 82.4%, 41.7 ms |
 | 40 | 65.5%, 21.2 ms | 87.6%, 33.8 ms | 88.6%, 38.4 ms |
-| 80 | 68.2%, 35.1 ms | **94.0%, 42.1 ms** | 95.1%, 53.6 ms |
+| 80 | 68.2%, 35.1 ms | 94.0%, 42.1 ms | 95.1%, 53.6 ms |
 
 Before the rebuild, the converted table's index with the site's settings then (20 partitions, re-check 5) found
 85.2%, in 26.3 ms. 80 partitions with re-check 5 was recommended and saved to `/data/settings.local.toml`.
@@ -213,14 +220,13 @@ and every rebuild is recorded beside the index (`index/vector-index.json`) for t
 The site's checks, limits, model client, embedder and index now come from the Where They Stand sites' shared
 package (wts-core; [DECISIONS.md](DECISIONS.md)). The move was meant to change nothing a reader sees, and the proof
 of that is the parity tests (`tests/test_parity.py` and its neighbours: what the old code gave, recorded, compared
-with what the new code gives). This section adds a look with a real model, **on the bundled sample data only**
+with what the new code gives). This section adds a look with a real model, on the bundled sample data only
 (`hansard bootstrap --sample`: a few hundred speeches of 2021 to 2026 with the offline search model). It says
 nothing of the live site's figures: the archive there is millions of speeches, with the real search model. The
 whole test set was not run on the archive for this change, because nothing that decides what a briefing says
 changed; the first full `hansard eval run` on the server gives the baseline for the thresholds.
 
-**The same six questions, the same script, old code and new** (one run each; `eval/runs/20261114-sample-before-wts-core.jsonl`
-and `20261115-sample-after-wts-core.jsonl`), with the models the settings name for writing briefings and for reading
+The same six questions, the same script, old code and new (one run each), with the models the settings name for writing briefings and for reading
 questions.
 
 | Question | Code | Sources | First word | Finished | Cost | Citations (not found) | Quotations (not found word for word) | Grounded | Unsupported sentences |
@@ -243,15 +249,17 @@ word was flagged, and the question with nothing on the record was answered "no r
 quotation in the second run was not found word for word, and was marked for the reader as such, as the check is
 there to do.
 
-**Why the number of sources differs.** A model reads each question into a search afresh each time, and does not
+### Differences in the number of sources
+
+A model reads each question into a search afresh each time, and does not
 always choose the same words or filters; the briefing is then written afresh too. With the reading held still, the
 two versions find the same thing: with no model at all (the question read by the site's built-in rules), the old
 code and the new chose exactly the same sources, in the same order, for all six questions (11, 8, 16, 10, 4 and
 24). So the differences in the table are one run against another of a model, not one version of the site against
 another, and six questions are far too few to say that either column is better.
 
-**The shared harness on the same questions** (`HANSARD_EVAL_QUESTIONS=eval/sample-questions.toml hansard eval run
---max-cost 0.5 --record-fixtures …`; `eval/runs/20261115-133604-sample-eval-d6bbd74c699d.json`): six asked, five
+The shared harness on the same questions (`HANSARD_EVAL_QUESTIONS=eval/sample-questions.toml hansard eval run
+--max-cost 0.5 --record-fixtures …`): six asked, five
 briefings and one "no records", no error; 59 citations, none not found; 57 quotations, none not found word for
 word; five unsupported sentences in four of the five briefings; no loaded word; grounded 0.92 on average; the
 first word after 3.2 seconds and the end after 9.9 (medians); 15 cents. The five briefings are kept in
@@ -259,9 +267,13 @@ first word after 3.2 seconds and the end after 9.9 (medians); 15 cents. The five
 eval/fixtures` runs the checks over them again, free, and the tests and CI do so on every change. A change to the
 checks that says less of one of them than it said fails there.
 
-**What it cost:** 18 cents before, 17 cents after, 15 cents for the harness's run: about 51 cents in all.
+### Cost
 
-**On the server.** `hansard eval run` asks the whole test set (62 questions, about $2 to $3 at these prices; it stops at
+18 cents before, 17 cents after, 15 cents for the harness's run: about 51 cents in all.
+
+### On the server
+
+`hansard eval run` asks the whole test set (62 questions, about $2 to $3 at these prices; it stops at
 `[eval] max_cost_usd`) and saves the run in `/data/eval/runs/`, on the data volume, where it is kept between
 deploys. What it spends is not on the admin page and counts towards neither cap: the run says what it spent,
 counting each of a briefing's three model calls, the check of registered interests among them (from wts-core 0.3.0).
@@ -270,7 +282,9 @@ and `briefings` are as they were.
 
 ## The devolved parliaments' lookup (16 November 2026)
 
-**What was slow.** The first evaluation run on the real archive kept readers waiting minutes before the first word
+### The slow step
+
+The first evaluation run on the real archive kept readers waiting minutes before the first word
 of a briefing whenever the question named a period, in proportion to the period's length ("coalition", 2010 to
 2015: 276 s; the last Parliament: 229 s; this year: 30 s; no dates: 14 s; the median of all questions 5 s). Timed
 step by step on the server, with the question already read, it was the lookup in the devolved parliaments'
@@ -278,21 +292,25 @@ record (`DevolvedStore.relevant`, which `Pipeline.find` runs beside the main sea
 between 2010-05-06 and 2015-05-07, 80.7 s for "austerity public spending cuts", against 1.5 s for the main search
 and under 1.5 s for each other lookup.
 
-**Why.** For a question with dates, SQLite's query planner chose to walk every speech of the period in each
+### The cause
+
+For a question with dates, SQLite's query planner chose to walk every speech of the period in each
 parliament by the (legislature, date) index, and to ask the full-text index, for each one in turn, whether it
 matched. Each of those questions to the index costs a search of its own, and several words cost several (with three
 words or more, the lookup also tries every way of leaving one word out, which makes twelve phrases for four words).
 Without dates the planner did the reverse, read the matches from the full-text index and looked each one up, which
 is fast. The code is unchanged since the first release; the record has grown.
 
-**The change.** The query now says which comes first (`speech_text CROSS JOIN speeches`, which SQLite always takes
+### The change
+
+The query now says which comes first (`speech_text CROSS JOIN speeches`, which SQLite always takes
 in the order written): the matches from the full-text index, each looked up by its number, then the filters
 (parliament, a member speaking, at least 300 characters, the dates) and the ranking (bm25, with the same weights) as
 before. Nothing on the server changes: no index is rebuilt and no table altered. Ties in relevance now go to the
 earlier stored speech with or without dates; before, with dates, they went to the earlier day. Exact ties are rare
 (two speeches with the same number of words in each part and the same counts of the words searched for); the comparison below found none.
 
-**Measured** on a synthetic record of the real one's size, made with the site's own schema (1.6 million speeches:
+Measured on a synthetic record of the real one's size, made with the site's own schema (1.6 million speeches:
 the Scottish Parliament from 1999, the Assembly from 1998, the Senedd from 2016; a vocabulary in which "austerity"
 is in 19,793 speeches, mostly 2010 to 2016, "public" in 243,882, "spending" in 84,536 and "cuts" in 63,835; 1.9
 GB), on a 4-vCPU test machine with the file in memory. `relevant` as the pipeline calls it for a summary (eight a
@@ -314,7 +332,9 @@ before, 1.3 s after). The synthetic record makes four words slower against one t
 against 4.6), because its common words are commoner; the cause is the same. On the server's disk, with less of the
 file in memory, both columns will be slower; the size of the difference is the point.
 
-**A time limit for every side lookup.** So that no lookup can hold a briefing up like this again, `Pipeline.find`
+### A time limit for every side lookup
+
+So that no lookup can hold a briefing up like this again, `Pipeline.find`
 now waits for the votes, early day motions, devolved parliaments and committee evidence only until
 `[answer] side_lookup_seconds` (6) after the search began. One still running then is left out of that briefing,
 which goes on with what the others found, and the log says so at WARNING ("side lookup 'devolved' took longer than
@@ -325,8 +345,6 @@ given another thread: a slow kind holds one thread at most. The record of each b
 lookup was left out (the shared package's record has no field for it); the log line is the trace.
 
 ## Measured performance
-
-Moved here from the README on 6 November 2026.
 
 On a 4-vCPU cloud VM, measured when the archive started in 2010 (the record now goes back to 1997):
 

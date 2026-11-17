@@ -1,14 +1,14 @@
 # Where MPs Stand and the shared server (Hostkey, London)
 
-## This is the front door for every site on the shared server
+## The front door for every site on the server
 
 Four of the charity's sites run on one server in London, and **this repository's `deploy/` folder is the front door
 for all of them**, in Where MPs Stand's checkout at `/opt/hansardgpt` (its original name):
 
-- **Caddy**, the web server that answers every domain and passes each site's visitors to its containers (`SITES` in
+- Caddy, the web server that answers every domain and passes each site's visitors to its containers (`SITES` in
   `deploy/.env`; [Other sites on this server](#other-sites-on-this-server));
-- **Cloudflare** set-up for each domain (`deploy/cloudflare.sh`), and the health check (`deploy/check.sh`);
-- **email from the server** (`deploy/mail.sh`) and **failure alerts** for every site's jobs (`alert@.service`;
+- Cloudflare set-up for each domain (`deploy/cloudflare.sh`), and the health check (`deploy/check.sh`);
+- email from the server (`deploy/mail.sh`) and failure alerts for every site's jobs (`alert@.service`;
   [Email from the server](#email-from-the-server));
 - the **watchdog**, which restarts any site that stops answering (`wheretheystand-watchdog.timer`;
   [The watchdog](#the-watchdog));
@@ -33,8 +33,8 @@ Cloudflare, and the server turns away connections that don't come through it.
 Where Lives Stand, the charity's own site (wheretheystand.uk) and the game Understudy: Lumaya run on Cloudflare
 Workers, not on this server.
 
-This guide stays the manual for the shared server until the family's own OPERATIONS document and `server/` folder
-exist (the charity's family plan, decision 6). The other sites' `docs/DEPLOY.md` cover only their own steps and link
+The charity's `family/OPERATIONS.md` describes the server as a whole. This guide keeps the procedures for the parts
+in this repository until they move to a shared `server/` folder. The other sites' `docs/DEPLOY.md` cover only their own steps and link
 here for the rest, so keep the section names below ("Other sites on this server", "Email from the server",
 "Cloudflare protection") as they are, or update those links when they change.
 
@@ -76,7 +76,7 @@ records alone: those deliver your email to admin@wherempsstand.com.
 The charity's own domains (wheretheystand.uk, wheretheystand.co.uk and wheretheystand.org.uk) don't point at this
 server: wheretheystand.uk is the charity's site, served by Cloudflare, and the other two redirect to it there.
 
-**If your domain is on Cloudflare:** set both of these records to **DNS only** (the grey cloud), not
+If your domain is on Cloudflare: set both of these records to **DNS only** (the grey cloud), not
 **Proxied** (the orange cloud, Cloudflare's default), for now. While proxied, `nslookup` shows Cloudflare's addresses
 instead of your server's, and the site cannot get its first HTTPS certificate. Once the site is working, the main
 address can be put behind Cloudflare's proxy: see [Cloudflare protection](#cloudflare-protection-optional) below.
@@ -125,10 +125,10 @@ bash provision.sh
 ```
 
 It asks three questions:
-1. **Main domain name:** `wherempsstand.com`
-2. **Other domain names to redirect:** leave it blank and press Return. (`www.wherempsstand.com` is added
+1. Main domain name: `wherempsstand.com`
+2. Other domain names to redirect: leave it blank and press Return. (`www.wherempsstand.com` is added
    automatically.)
-3. **Anthropic API key:** paste it. Nothing appears as you paste; that is deliberate. Press Return.
+3. Anthropic API key: paste it. Nothing appears as you paste; that is deliberate. Press Return.
 
 The script then:
 - installs Docker, turns on automatic security updates, sets up a firewall that allows only SSH and the web, and
@@ -146,7 +146,9 @@ Logging in with a password works, but a **key** (a pair of files on your compute
 is nothing to guess. Once it is set up, you can turn password logins off. Do this from your **own computer**, not
 the server: if you are still logged in to the server, type `exit` first.
 
-**a. Make the key (once).** In Terminal or PowerShell:
+### a. Make the key (once)
+
+In Terminal or PowerShell:
 
 ```
 ssh-keygen -t ed25519
@@ -155,7 +157,9 @@ ssh-keygen -t ed25519
 Press Return at each question. (A passphrase is optional; if you set one, you type it instead of the server
 password.)
 
-**b. Copy it to the server.** You will be asked for the root password one last time.
+### b. Copy it to the server
+
+You will be asked for the root password one last time.
 
 Windows (PowerShell or Terminal):
 
@@ -169,10 +173,14 @@ Mac:
 ssh-copy-id root@YOUR.SERVER.IP
 ```
 
-**c. Check the key works.** Run `ssh root@YOUR.SERVER.IP` again. It should log you straight in without asking for
+### c. Check the key works
+
+Run `ssh root@YOUR.SERVER.IP` again. It should log you straight in without asking for
 the server password. **Do not go on to step d unless it does.**
 
-**d. Turn off password logins.** Stay logged in, open a *second* Terminal window as a safety net, and log in there
+### d. Turn off password logins
+
+Stay logged in, open a *second* Terminal window as a safety net, and log in there
 too. Then, in one of them, run:
 
 ```
@@ -259,7 +267,7 @@ if something was put right) and withdraw a briefing. A withdrawal reason is show
 
 Your admin token is in `/opt/hansardgpt/deploy/.env` (`HANSARD_ADMIN_TOKEN=`).
 
-**To change the API key**, run this on the server. It asks for the key without showing it (paste it and press
+To change the API key, run this on the server. It asks for the key without showing it (paste it and press
 Return), saves it and restarts the site:
 
 ```
@@ -332,7 +340,9 @@ wherempsstand.com by Cloudflare itself, so no DNS record shows the server's addr
 still reveal it, so this protects against casual abuse and heavy load more than a determined attack on the server
 itself.)
 
-**The charity's domains.** Until 31 October 2026 the site's address was wheretheystand.uk, and wheretheystand.uk,
+### The charity's domains
+
+Until 31 October 2026 the site's address was wheretheystand.uk, and wheretheystand.uk,
 wheretheystand.co.uk and wheretheystand.org.uk all redirected here. Now wheretheystand.uk is the charity's own site
 (the hub, on Cloudflare), and the other two redirect to it there: none of them reaches this server, and their
 Cloudflare settings belong to the hub, not to this guide. Only `www.wherempsstand.com` belongs in `REDIRECT_DOMAINS`
@@ -344,24 +354,24 @@ sed -i 's/^REDIRECT_DOMAINS=.*/REDIRECT_DOMAINS="www.wherempsstand.com"/' /opt/h
 bash /opt/hansardgpt/deploy/update.sh
 ```
 
-1. **Install the latest version** (`bash /opt/hansardgpt/deploy/update.sh`). It fetches Cloudflare's list of
+1. Install the latest version (`bash /opt/hansardgpt/deploy/update.sh`). It fetches Cloudflare's list of
    addresses; that is harmless while nothing is proxied.
-2. **Put the domain on Cloudflare.** At dash.cloudflare.com, choose **Add a domain**, enter wherempsstand.com, pick
+2. Put the domain on Cloudflare. At dash.cloudflare.com, choose **Add a domain**, enter wherempsstand.com, pick
    the **Free** plan, and check the records it found: the **A** records for `@` and `www` from step 2 (set them to **DNS only** for now) and every
    **MX** and **TXT** record (email). Then, at the company where you registered the domain, replace its nameservers
    with the two Cloudflare gives you, and wait for Cloudflare to say the domain is **Active** (usually within an
    hour; it emails you).
-3. **Settings in Cloudflare.** For **wherempsstand.com**:
-   - **SSL/TLS → Overview**: choose **Full (strict)**. (Not "Flexible": that sends visitors round in circles.)
-   - **SSL/TLS → Edge Certificates**: turn on **Always Use HTTPS**.
-   - **Security → Settings** (filter by *Client-side abuse*): turn off **Email Address Obfuscation** (on by default;
+3. Settings in Cloudflare. For **wherempsstand.com**:
+   - SSL/TLS → Overview: choose **Full (strict)**. (Not "Flexible": that sends visitors round in circles.)
+   - SSL/TLS → Edge Certificates: turn on **Always Use HTTPS**.
+   - Security → Settings (filter by *Client-side abuse*): turn off **Email Address Obfuscation** (on by default;
      it rewrites pages).
-   - **Security → Settings** (filter by *Bot traffic*): turn off **Bot fight mode** (it can block the public API
+   - Security → Settings (filter by *Bot traffic*): turn off **Bot fight mode** (it can block the public API
      and sets a cookie), set **Block AI bots** to *Do not block*, and turn off **Managed robots.txt**: the site
      publishes readable text for AI assistants and has its own robots.txt. If **AI Crawl Control** (left-hand menu)
      lists any crawlers as *Block*, set them to *Allow*.
-   - **Speed → Settings → Content Optimization**: make sure **Rocket Loader** is off (off by default).
-   - **Web Analytics** (in the account's left-hand menu, under *Analytics & Logs*, not inside the domain): once the
+   - Speed → Settings → Content Optimization: make sure **Rocket Loader** is off (off by default).
+   - Web Analytics (in the account's left-hand menu, under *Analytics & Logs*, not inside the domain): once the
      domain is proxied, Cloudflare turns it on by itself. Find wherempsstand.com in the list, choose **Manage site**,
      and under automatic setup choose **Disable** (it would add a tracking script; the site has its own cookie-free
      counts).
@@ -371,15 +381,15 @@ bash /opt/hansardgpt/deploy/update.sh
      at *Standard* and *Respect existing headers*, and add no "Cache everything" rule: pages carry live data, and the
      site already tells Cloudflare which files can be kept for a year.
 
-4. **Create the origin certificate** (wherempsstand.com only): **SSL/TLS → Origin Server → Create Certificate**.
+4. Create the origin certificate (wherempsstand.com only): **SSL/TLS → Origin Server → Create Certificate**.
    Keep *Generate private key and CSR with Cloudflare* and key type **RSA (2048)**. Under hostnames, **remove
    `*.wherempsstand.com`** so that only `wherempsstand.com` is listed. Validity: **15 years**. Press **Create** and
    leave the page open, with the format on **PEM**: the private key is shown only once.
-5. **Turn the proxy on for the main address**: in wherempsstand.com's **DNS → Records**, edit the **A** record named
+5. Turn the proxy on for the main address: in wherempsstand.com's **DNS → Records**, edit the **A** record named
    `wherempsstand.com` (`@`) and set it to **Proxied** (orange cloud). If there is an **AAAA** record for `@`, set it
    to Proxied too (or delete it), or visitors using IPv6 would be turned away in the next step. The site carries on
    working (Cloudflare uses the server's current certificate until the next step).
-6. **Switch the server over.** A few minutes later, on the server, run:
+6. Switch the server over. A few minutes later, on the server, run:
 
    ```
    bash /opt/hansardgpt/deploy/cloudflare.sh on
@@ -388,19 +398,19 @@ bash /opt/hansardgpt/deploy/update.sh
    Paste the **Origin Certificate** from the Cloudflare page and press Return, then the **Private Key** and press
    Return. It checks they belong together and are for wherempsstand.com, switches the server over, and checks the
    site through Cloudflare. If that fails, it puts everything back and says what to check.
-7. **Have Cloudflare do the redirect** from www.wherempsstand.com. In wherempsstand.com, open **Rules → Redirect
+7. Have Cloudflare do the redirect from www.wherempsstand.com. In wherempsstand.com, open **Rules → Redirect
    Rules** (in some accounts, **Rules → Overview → Create rule → Redirect Rule**) and create a rule:
-   - **Rule name**: `To wherempsstand.com`.
-   - **If incoming requests match**: choose *Custom filter expression*: field **Hostname**, operator **equals**,
+   - Rule name: `To wherempsstand.com`.
+   - If incoming requests match: choose *Custom filter expression*: field **Hostname**, operator **equals**,
      value `www.wherempsstand.com`.
-   - **Then**: type **Dynamic**, expression `concat("https://wherempsstand.com", http.request.uri.path)`, status
+   - Then: type **Dynamic**, expression `concat("https://wherempsstand.com", http.request.uri.path)`, status
      code **301**, and tick **Preserve query string**.
    - Press **Deploy**.
 
    Then, in **DNS → Records**, edit the `www` record: set it to **Proxied**, and change its **IPv4 address** to
    `192.0.2.1` (an address that goes nowhere: Cloudflare answers this name itself, and the server's address is no
    longer shown). Delete any **AAAA** record for `www`. Leave MX and TXT records alone.
-8. **Hand the redirects over.** A few minutes later, on the server, run:
+8. Hand the redirects over. A few minutes later, on the server, run:
 
    ```
    bash /opt/hansardgpt/deploy/cloudflare.sh redirects on
@@ -409,10 +419,10 @@ bash /opt/hansardgpt/deploy/update.sh
    It checks that Cloudflare redirects each name to the same page on wherempsstand.com, then stops the server doing
    it. If any name is not ready (a brand-new domain's Cloudflare certificate can take a little while), it changes
    nothing and says which; run it again later.
-9. **Check**: `bash /opt/hansardgpt/deploy/check.sh` should say "goes through Cloudflare's proxy" and that each name
+9. Check: `bash /opt/hansardgpt/deploy/check.sh` should say "goes through Cloudflare's proxy" and that each name
    redirects. Then ask a question on the site and check that the briefing appears as it is written.
 
-**To undo the redirects**, point each of those records back at the server's IP address (**DNS only**), delete the
+To undo the redirects, point each of those records back at the server's IP address (**DNS only**), delete the
 redirect rules, then run `bash /opt/hansardgpt/deploy/cloudflare.sh redirects off`. **To undo the proxy** for the
 main address, run `bash /opt/hansardgpt/deploy/cloudflare.sh off` on the server **first**, then set its A record back
 to **DNS only**. The certificate is kept, so `cloudflare.sh on` switches back without pasting it again (add
@@ -431,12 +441,12 @@ headers), and passes each site's visitors to its container over a shared Docker 
 `SITES` in `deploy/.env` lists them, as `domain=container` pairs (see `deploy/.env.example`). A site is served once
 its Cloudflare origin certificate is added; until then Caddy leaves its domain alone.
 
-**Adding a site** (the site's own `docs/DEPLOY.md` has its details, such as the first data load):
+Adding a site (the site's own `docs/DEPLOY.md` has its details, such as the first data load):
 
-1. **Cloudflare**, for the site's domain: the settings in step 3 of "Cloudflare protection" above; an **A** record
+1. Cloudflare, for the site's domain: the settings in step 3 of "Cloudflare protection" above; an **A** record
    for `@` pointing at this server, **Proxied**; `www` redirected by a redirect rule (step 7 above); and an origin
    certificate (step 4 above), with the page left open.
-2. **The site itself**, on the server:
+2. The site itself, on the server:
 
    ```
    git clone https://github.com/rj-mitchell/<site> /opt/<site>
@@ -445,16 +455,18 @@ its Cloudflare origin certificate is added; until then Caddy leaves its domain a
    ```
 
    `update.sh` builds and starts it, and installs its update and backup timers.
-3. **The front door:** make sure the site is in `SITES` in `/opt/hansardgpt/deploy/.env`, then paste its
+3. The front door: make sure the site is in `SITES` in `/opt/hansardgpt/deploy/.env`, then paste its
    certificate:
 
    ```
    bash /opt/hansardgpt/deploy/cloudflare.sh site <domain>
    ```
 
-4. **Check:** `bash /opt/hansardgpt/deploy/check.sh` lists each site, and the memory left.
+4. Check: `bash /opt/hansardgpt/deploy/check.sh` lists each site, and the memory left.
 
-**Keeping out of each other's way.** Each site's updates run at their own time:
+### Keeping out of each other's way
+
+Each site's updates run at their own time:
 this site at 7.15am and 7.15pm (UK time), Where Councils Stand at 3.17am and Where Countries Stand at 5.41am and
 5.41pm (UTC), and Where Landlords Stand on Thursdays at 11.40am (UK time). A long update can still run into the
 next one (Where Councils Stand's first load, say), so each site's scheduled update also takes one server-wide lock
@@ -468,11 +480,13 @@ update holds the lock: `fuser -v /var/lock/wheretheystand-update.lock`. Each sit
 `flock /var/lock/wheretheystand-update.lock`, so a new site joins by doing the same. If `check.sh` reports less than 3 GB of memory free for
 long, it is time for more memory or a second server.
 
-**An idea for later.** Not needed now; worth doing if the server gets busier or a site misbehaves. It was worked out
+### An idea for later
+
+Not needed now; worth doing if the server gets busier or a site misbehaves. It was worked out
 in `rj-mitchell/parentwheretheystand` (archived November 2026), an earlier plan to run every site from one combined
 setup, so its code can be copied from there.
 
-* **A share of the processors for jobs.** Memory limits stop a runaway update, but an update can still keep every
+* A share of the processors for jobs. Memory limits stop a runaway update, but an update can still keep every
   processor busy and slow the sites while it runs. Running each update in a container limited to part of the
   processors (`cpus:` in its compose file) keeps the sites quick. (A `Nice=` in a systemd unit does not reach the
   work: Docker starts the container, not the unit.)
@@ -492,11 +506,11 @@ the alerts address. It is careful not to make things worse:
 
 - an app that isn't running, or is still starting, is left alone: an update is rebuilding it, say. So is an update's
   own one-off container, which carries the same health check;
-- **while an update holds the update lock** (`/var/lock/wheretheystand-update.lock`) it restarts nothing: a site that
+- while an update holds the update lock (`/var/lock/wheretheystand-update.lock`) it restarts nothing: a site that
   slows down during a long update is left to the update, and an email says the watchdog is waiting. Once the update
   has finished, the next check restarts the site if it is still unhealthy. The watchdog holds the lock itself while it
   restarts a site, so no update starts in the middle;
-- **it backs off**: after restarting a site it leaves that site alone for 10 minutes, then 20 after the next restart;
+- it backs off: after restarting a site it leaves that site alone for 10 minutes, then 20 after the next restart;
   after **three restarts in six hours** it stops, and emails that a person needs to look. It tries again once the
   oldest of those restarts is six hours old.
 
@@ -517,9 +531,9 @@ The server's disk holds every site's data, and Where MPs Stand's is by far the l
 watch it, for every site on the server. Both are installed by `update.sh` and email the alerts address
 ([Email from the server](#email-from-the-server)):
 
-- **every hour**, `deploy/disk-check.sh` emails if the disk is **80% full** or more, with what is using it. While it
+- every hour, `deploy/disk-check.sh` emails if the disk is **80% full** or more, with what is using it. While it
   stays that full, it emails again at most every six hours;
-- **on the 1st of each month**, `deploy/disk-report.sh` emails where the disk is going: each site's data and its
+- on the 1st of each month, `deploy/disk-report.sh` emails where the disk is going: each site's data and its
   largest folders, the search indexes and how many old versions each keeps, Docker's images and build cache, swap,
   the system log, and last month's figure for comparison. It also gives the memory each container is using at that
   moment (`docker stats`), with its limit, and how much swap has been used since the server started. And it gives
@@ -529,7 +543,9 @@ watch it, for every site on the server. Both are installed by `update.sh` and em
   command). If no rebuild has been recorded (`/data/index/vector-index.json`, written by `reindex-vectors` and
   `vectors-f16` since 7 November 2026), it says to run one once meaning-based search has caught up.
 
-**Memory limits.** The other sites' containers have memory limits (4 GB for Where Countries Stand and Where Councils
+### Memory limits
+
+The other sites' containers have memory limits (4 GB for Where Countries Stand and Where Councils
 Stand, 1 GB for Where Landlords Stand), so a runaway update stops itself rather than slowing every site. Where MPs
 Stand has none yet, because nothing has been measured: `mem_limit` in `deploy/docker-compose.yml` is left commented
 out until it has. To measure, run `docker stats --no-stream` every so often while a sync runs, and read the monthly
@@ -542,7 +558,7 @@ capped at 500 MB, and apt deletes out-of-date downloaded packages once a week.
 `check.sh` also marks the disk ✗ from 80%. To see the report now, run `bash /opt/hansardgpt/deploy/disk-report.sh`
 (it prints it, and emails it too).
 
-**If the disk is filling**, these are safe at any time and free space at once:
+If the disk is filling, these are safe at any time and free space at once:
 
 ```
 docker builder prune -f            # Docker's build cache: rebuilt as needed
@@ -551,7 +567,9 @@ journalctl --vacuum-size=500M      # the system log (it is kept under 500 MB any
 apt-get clean                      # downloaded updates that are already installed
 ```
 
-**Docker's log limit (once, at a quiet time).** Each site's containers keep at most 30 MB of logs, set in its
+### Docker's log limit (once, at a quiet time)
+
+Each site's containers keep at most 30 MB of logs, set in its
 compose file. A default for any other container belongs in `/etc/docker/daemon.json`; `provision.sh` writes it on a
 new server, but a server set up before November 2026 needs it added by hand. Applying it restarts Docker, which
 stops every site on the server for up to a minute, so do it at a quiet time and away from the update times (see
@@ -572,12 +590,13 @@ bash /opt/hansardgpt/deploy/check.sh
 Every site's containers start again by themselves. If the file already exists, add the two settings to it by hand
 instead of replacing it.
 
-**Never run `docker volume prune`**: it deletes every site's data that isn't running at that moment. If those are
-not enough, the next steps are the site's own (each site's search indexes, and Where MPs Stand's raw Hansard files):
-the charity's server review, `plans/family/audits/server.md` in the `wheretheystand-charity` repository, lists them
-with the commands to measure first.
+Never run `docker volume prune`: it deletes every site's data that isn't running at that moment. If those are
+not enough, the next steps are each site's own (its search indexes, and Where MPs Stand's raw Hansard files, below);
+measure first.
 
-**Compressing Where MPs Stand's raw Hansard files (once).** Since November 2026 the sync fetches TheyWorkForYou's
+### Compressing Where MPs Stand's raw Hansard files (once)
+
+Since November 2026 the sync fetches TheyWorkForYou's
 files over HTTPS and stores each one gzipped (`<name>.xml.gz`, about a quarter of the size; decision 25 in
 [DECISIONS.md](DECISIONS.md)). The files already on the server stay as they are until this one-off command compresses
 them, which frees about 7–8 GB. It keeps each file's modification time, and the site's record of what it has read
@@ -614,7 +633,9 @@ that are unchanged are kept as they are (`unchanged`) and not read again.
 To keep a full uncompressed mirror by rsync instead (TheyWorkForYou's own method), set `compress_raw_xml = false`
 under `[sources]` in `/data/settings.local.toml`; `hansard fetch --transport rsync` does one such fetch.
 
-**Halving the meaning-search vectors (once).** Since November 2026 new search vectors are stored as 16-bit numbers
+### Halving the meaning-search vectors (once)
+
+Since November 2026 new search vectors are stored as 16-bit numbers
 rather than 32-bit, half the space, with no measurable change in what is found (decision 26 in
 [DECISIONS.md](DECISIONS.md); the measurements are in [EVALUATION.md](EVALUATION.md), "Retrieval only"). The vectors
 already on the server (`index/vectors.lance`, about 13 GB, and `evidence_index/turns.lance`, about 1.7 GB) stay
