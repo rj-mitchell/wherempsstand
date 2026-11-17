@@ -283,8 +283,7 @@ def test_what_the_nightly_tidy_deletes_is_gone_from_the_files_bytes_and_from_the
 
     status, said = tidy(settings, "2026-11-14T03:35:00+00:00")  # the night after
     assert status == 0, said
-    # Every line, in the order the shared command works in (wts-core CHANGELOG 0.3.0, "The nightly tidy does
-    # more, in a fixed order"): its own deletions; then the right of reply's, the one step the site gives; then
+    # Every line, in the order the shared command works in (wts-core 0.3.0): its own deletions; then the right of reply's, the one step the site gives; then
     # the old tables, after it, so that what the right of reply deleted tonight is gone from the old rows tonight;
     # and last the file written out afresh. (On 0.2.1 the site added five steps of its own for what the command
     # now does itself, and went over the old tables a second time.)
@@ -436,7 +435,7 @@ def test_the_tidy_removes_an_unfinished_copy_of_the_database_left_by_a_start_tha
         os.utime(left, (night - 7 * 86400, night - 7 * 86400))
     os.utime(fresh, (night - 60, night - 60))
     status, said = tidy(settings, "2026-11-20T03:35:00+00:00")
-    # the count of what went is in the package's line for copies (wts-core 0.3.0, UPGRADING, "Where MPs Stand"):
+    # the count of what went is in the package's line for copies (wts-core 0.3.0):
     # the site's own line for them, "Deleted 2 files of an unfinished copy…", is gone with its step
     assert status == 0 and "Deleted 2 copies of the database made before an import, older than 14 days." in said
     assert not stale.exists() and not journal.exists() and fresh.exists()

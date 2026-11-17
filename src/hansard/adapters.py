@@ -42,7 +42,7 @@ def models_dir(settings: Settings):
     return settings.data_dir / "models"
 
 
-# What the models folder holds, and so what may be done with it (wts-core docs/UPGRADING.md, "The embedder's id").
+# What the models folder holds, and so what may be done with it (wts-core docs/EXTENDING.md, section 7).
 # The site's code before the shared package downloaded the re-ranker into data/models beside the embedder, and a
 # server set up then still has it there. From wts-core 0.3.0 the embedding model's id covers its own files only,
 # where they can be told from the others; the index takes that id when it is first opened on this version (one made

@@ -85,9 +85,9 @@ def test_check_keeps_only_real_matches():
 
 def test_an_answer_with_nothing_in_it_means_no_matches_and_is_still_counted_for_what_it_cost():
     """As before the shared model client: the check takes such an answer for no matches and the briefing carries
-    on. The call was billed, so its usage is handed back to be recorded (wts-core CHANGELOG, 0.3.0:
-    "ModelClient.structured raises ports.NoStructuredAnswer whenever an answered call cannot be read into the
-    schema"; on 0.2.1 the error did not carry it, and this test was
+    on. The call was billed, so its usage is handed back to be recorded (from wts-core 0.3.0,
+    ModelClient.structured raises ports.NoStructuredAnswer whenever an answered call cannot be read into the
+    schema; on 0.2.1 the error did not carry it, and this test was
     ``test_an_answer_with_nothing_in_it_means_no_matches``, which expected no usage)."""
     commons = Register({"uk.org.publicwhip/person/1": [GIFT]})
     client = Client(None)

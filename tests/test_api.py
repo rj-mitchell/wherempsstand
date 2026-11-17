@@ -807,8 +807,8 @@ def test_the_owners_list_of_briefings_and_the_days_spending_read_as_they_always_
 
 def test_a_reading_and_an_interests_check_that_answer_nothing_are_paid_for_and_count_towards_the_caps(
         indexed_settings, tmp_path):
-    """wts-core CHANGELOG, 0.3.0: "ModelClient.structured raises ports.NoStructuredAnswer whenever an answered
-    call cannot be read into the schema", and the error carries what the call cost. The small model answers both
+    """wts-core 0.3.0: ModelClient.structured raises ports.NoStructuredAnswer whenever an answered call cannot be
+    read into the schema, and the error carries what the call cost. The small model answers both
     of its calls with nothing in them: the question is read by the built-in rules and no interests are flagged,
     as always, and each call is in the spending record once and counted by the caps."""
     from types import SimpleNamespace as NS

@@ -195,7 +195,7 @@ IMPORTS = (
         # in every state database since the site's first release; a new site has neither, and nothing to bring
         needs=("usage", "briefings"),
         # Which column of each old table holds the time a row was written (wts-core docs/UPGRADING.md, "Going
-        # back, and coming forward again", the line for this site): with these the shared package refuses a
+        # back to the old code", the line for this site): with these the shared package refuses a
         # database the old code has added rows to since the move. It alone decides that, here and in the look
         # below; the old tables' other times (a report's closing, a statement's deciding) are the site's to read.
         written_at={"usage": "at", "answer_cache": "created_at", "briefings": "created_at", "failures": "at",
@@ -220,7 +220,7 @@ IMPORTS = (
 #   the old site is stopped (`hansard check-settings`, in deploy/update.sh), and before anything is opened for
 #   writing.
 # * **A row the old code changed** that was already there (a briefing withdrawn, a report closed, a statement
-#   published, updated or decided): the package cannot see this ("What it cannot see", in its UPGRADING), and the
+#   published, updated or decided): the package cannot see this (its docs/UPGRADING.md, "Going back to the old code"), and the
 #   site's look decides it by those rows' own times, which the package's line does not name.
 #
 # What the site adds besides is its words: they count what each side has taken in since the move and name both

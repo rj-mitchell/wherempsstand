@@ -147,8 +147,7 @@ def test_the_interests_check_asks_the_model_the_same_and_makes_the_same_of_its_a
     to be recorded, case for case: an answer with nothing in it among them, which finds no matches and is still
     counted for what it cost (400 tokens in and 30 out in the recording), as the site's own code did before the
     shared package. (On wts-core 0.2.1 the client's error did not carry the usage and this test held that
-    shortfall with ``usage is None``; CHANGELOG 0.3.0, "ModelClient.structured raises
-    ports.NoStructuredAnswer…", closed it.) The stand-in for the SDK here has only ``messages.parse``, which is
+    shortfall with ``usage is None``; wts-core 0.3.0 closed it.) The stand-in for the SDK here has only ``messages.parse``, which is
     the path of the shared client these tests exercise; the package's own wire test holds its other path, on a
     real client, to the same request."""
     from hansard.rag import interests

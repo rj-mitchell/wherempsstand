@@ -177,11 +177,11 @@ def test_a_statement_never_reaches_the_model_the_embedder_the_index_the_record_o
 
 def test_once_its_day_is_over_no_briefing_is_tied_to_the_account_or_the_visitor_that_asked(site):
     """The one site with signed-in accounts: wts-core 0.3.0's check of what it promises of them (its
-    ``testing.assert_briefings_tied_to_no_one``; docs/adr/0012, "What is promised"). A member of the public and a
-    signed-in account each have a briefing written; once the day is over (the next day's first model call, or the
-    nightly tidy) the spending rows keep the day and no time, no visitor's code and no account, the account's
-    calls and cost are one line for the month, to the cent, and the attack the check makes on what is kept gives
-    no briefing to anyone. (The check needs another asker beside the account: alone in its month, an account's
+    ``testing.assert_briefings_tied_to_no_one``; docs/adr/0012, "What is kept about spending, and what can be
+    promised"). A member of the public and a signed-in account each have a briefing written; once the day is over
+    (the next day's first model call, or the nightly tidy) the spending rows keep the day and no time, no
+    visitor's code and no account, the account's calls and cost are one line for the month, to the cent, and the
+    attack the check makes on what is kept gives no briefing to anyone. (The check needs another asker beside the account: alone in its month, an account's
     total is made up of its own briefings and nothing else, which the privacy notice does not promise against.)"""
     from wts_core.testing import assert_briefings_tied_to_no_one
     from wts_core.usage import forget_earlier_days
@@ -232,8 +232,8 @@ def test_the_privacy_notice_says_what_the_site_now_keeps():
             "backup until then.") in page
     assert BACKUPS.keep_offsite == 60  # one a night: about two months
     assert "requests are not logged" in page  # and the structured log holds no request: stages and times only
-    # what wts-core 0.3.0 keeps of a day gone by, and of an account (its docs/adr/0012, "What is promised" and
-    # "What is not promised"): the test above makes the attack on it
+    # what wts-core 0.3.0 keeps of a day gone by, and of an account (its docs/adr/0012, "What is kept about
+    # spending, and what can be promised"): the test above makes the attack on it
     assert ("The code is kept with what each of your briefings cost for that day only; after the day, that record "
             "keeps the day and the cost, and no code and no time of day.") in page
     assert ("After the day, the site keeps, for each account, one line a calendar month: how many questions it "
