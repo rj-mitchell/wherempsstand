@@ -123,6 +123,8 @@
 .wts-endorse .wts-spine { block-size: 2em; inline-size: auto; }
 .wts-endorse__line { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 0.2em; }
 .wts-endorse:is(:hover, :focus-visible, :active) .wts-endorse__line { text-decoration-color: currentColor; }
+/* On a cloth-coloured band, add wts-endorse--on-cloth so the spine stands out from the band */
+.wts-endorse--on-cloth .wts-spine { outline: 1px solid color-mix(in srgb, currentColor 60%, transparent); }
 :where(.wts-endorse:focus-visible) {
   outline: var(--wts-focus-width) solid var(--wts-focus);
   outline-offset: var(--wts-focus-offset);
