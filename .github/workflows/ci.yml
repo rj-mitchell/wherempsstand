@@ -33,7 +33,7 @@ jobs:
   kit:
     uses: rj-mitchell/wts-core/.github/workflows/kit.yml@v0.3.0
     with:
-      version: "1.4.0"
+      version: "2.0.0"
       site: mps
       path: web/public/family
 
