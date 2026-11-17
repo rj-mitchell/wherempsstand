@@ -1,5 +1,5 @@
-"""The server's files (deploy/): the order `update.sh` works in, the nightly unit's time limit, the read-only look
-at the old database before the move onto the shared package, and the script for going back.
+"""The server's files (deploy/): the order `update.sh` works in, the nightly unit's time limit, the move from the
+old database onto the shared package, and the scripts for going back.
 
 Independent reviews of the sister sites' adoptions found three faults in how a deploy would have gone. `update.sh`
 installed the new timers before it built the new image, so after a failed build they would have run commands the
@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import json
 import os
-import runpy
 import shutil
 import sqlite3
 import subprocess
@@ -256,9 +255,7 @@ def test_the_housekeeping_after_the_backup_has_its_own_time_limit_and_every_time
         assert "OnFailure=alert@%n.service" in text, job
 
 
-# a look at the state database before the move (deploy/before-wts-core.py)
-
-LOOK = DEPLOY / "before-wts-core.py"
+# the move from a state database the old code made
 
 
 @pytest.fixture
@@ -268,94 +265,38 @@ def old(settings):
     return settings
 
 
-def test_what_would_lapse_is_shown_before_the_deploy_and_is_what_then_lapses(old):
+def test_what_has_waited_three_months_lapses_at_the_first_listing_after_the_move(old):
     """The first write or listing after the move lapses whatever has already waited three months: a statement is
-    declined, and an open report loses its contact details. The owner is shown which beforehand, by a script that
-    runs on the old site as it stands (no `hansard` command: one on new code would make the move), reads only, and
-    names nobody. It says what the package's own ``would_lapse`` says after the move, and that is what happens."""
-    script = runpy.run_path(str(LOOK))
+    declined, and an open report loses its contact details. The package's own ``would_lapse`` says which
+    beforehand, and that is what happens."""
     clock = FixedClock(shared.START)
-    before = dump(old.state_db)
-    cutoff, statements, reports = script["would_lapse"](str(old.state_db), clock.now())
-    said, stops = script["lines"](str(old.state_db), clock.now())
-    assert dump(old.state_db) == before  # read, and nothing changed: the old database is as it was
-    assert [sid for sid, _ in statements] == [7] and [rid for rid, _ in reports] == [1]
-    assert said[0] == "Sent before 2026-08-13 and still undecided: 1 statements, 1 reports with contact details."
-    assert said[1].startswith("  statement 7: sent 2026-07-01, 135 days ago: it would be declined as lapsed")
-    assert said[2].startswith("  report 1: sent 2026-07-01, 135 days ago: it would stay open, and its contact")
-    assert said[3:] == ["Nothing would stop the move."] and not stops
-    for kept_back in ("example.org", "Waiting Too Long", "Nobody decided", "An old report"):
-        assert kept_back not in "\n".join(said)
-    assert "The database is " in script["room"](str(old.state_db))
-
-    # after the move, and before anything is listed or written: the package says the same of its own tables, and
-    # so does the script, which reads them now
     open_core(old, clock)
     desk = replies_for(old, clock)
     would = desk.would_lapse()
-    assert would.before == cutoff
-    assert [(s.id, s.at) for s in would.statements] == statements
-    assert [(r.id, r.at) for r in would.reports] == reports
-    assert script["would_lapse"](str(old.state_db), clock.now()) == (cutoff, statements, reports)
+    assert [s.id for s in would.statements] == [7] and [r.id for r in would.reports] == [1]
     # the first listing does it: exactly those, and no others
     waiting = {s["id"] for s in desk.statements(status="pending")}
     assert waiting == {2} and desk.statement(7)["status"] == "declined" and not desk.statement(7)["email"]
     open_reports = {r["id"]: r for r in desk.reports()}
     assert open_reports[1]["contact"] is None and open_reports[2]["contact"] == "reader@example.org"
-    assert script["lines"](str(old.state_db), clock.now()) == ([
-        "Sent before 2026-08-13 and still undecided: 0 statements, 0 reports with contact details.",
-        "This database has already been moved onto the shared package."], False)
 
 
-def test_a_row_that_would_stop_the_move_is_named_beforehand_with_how_to_mend_it(old):
+def test_a_row_that_would_stop_the_move_stops_it_with_nothing_half_copied(old):
     """The move copies the old rows in one transaction when the new code first opens the database. The old tables
     have required every column the package's need since the site's first release, so nothing the old code wrote
-    stops it; a row put in by hand without one would. The look beforehand names it and the mend; and it would
-    indeed have stopped the move, with nothing half copied."""
-    script = runpy.run_path(str(LOOK))
+    stops it; a row put in by hand without one would, with nothing half copied. Mended, the move goes through."""
     clock = FixedClock(shared.START)
     with sqlite3.connect(old.state_db) as con:  # a failure's note with no time, as a hand-made table would allow
         con.execute("ALTER TABLE failures RENAME TO failures_as_made")
         con.execute("CREATE TABLE failures (id INTEGER PRIMARY KEY, at TEXT, kind TEXT, question TEXT, error TEXT)")
         con.execute("INSERT INTO failures (kind, error) VALUES ('briefing', 'no time was kept')")
-    before = dump(old.state_db)
-    said, stops = script["lines"](str(old.state_db), clock.now())
-    assert stops and dump(old.state_db) == before
-    (line,) = [line for line in said if "would stop the move" in line]
-    assert line.startswith("In failures, 1 row(s) have no at and would stop the move (rowid 1).")
-    assert "DELETE FROM failures WHERE at IS NULL;" in line and "no time was kept" not in line
-    done = subprocess.run([sys.executable, str(LOOK), str(old.state_db)], capture_output=True, text=True)
-    assert done.returncode == 1 and "would stop the move" in done.stdout
-    with pytest.raises(sqlite3.IntegrityError):  # and it would
+    with pytest.raises(sqlite3.IntegrityError):
         open_core(old, clock)
     assert rows(old.state_db, "SELECT count(*) FROM wts_spending") == [(0,)]  # with nothing half copied
-    with sqlite3.connect(old.state_db) as con:  # mended as the script says, the move goes through
+    with sqlite3.connect(old.state_db) as con:  # mended, the move goes through
         con.execute("DELETE FROM failures WHERE at IS NULL")
-    assert script["would_stop_the_move"](str(old.state_db)) == []
     open_core(old, clock)
     assert rows(old.state_db, "SELECT count(*) FROM wts_spending") == [(13,)]
-    assert subprocess.run([sys.executable, str(LOOK), str(old.state_db)], capture_output=True).returncode == 0
-
-
-def test_the_look_says_when_the_database_is_not_the_old_codes_and_reads_a_new_site(tmp_path, settings):
-    script = runpy.run_path(str(LOOK))
-    now = FixedClock(shared.START).now()
-    # a database with one of the two tables the move waits for, and not the other: the move would be passed over
-    partial = tmp_path / "state.sqlite"
-    con = sqlite3.connect(partial)
-    con.execute("CREATE TABLE usage (id INTEGER PRIMARY KEY, at TEXT, kind TEXT)")
-    con.commit()
-    con.close()
-    said, stops = script["lines"](str(partial), now)
-    assert stops and "There is no briefings table" in said[-1]
-    # a new site on the new code (none of the old tables): nothing to bring, nothing wrong
-    open_core(settings, FixedClock(shared.START))
-    assert script["lines"](str(settings.state_db), now) == ([
-        "Sent before 2026-08-13 and still undecided: 0 statements, 0 reports with contact details.",
-        "Nothing would stop the move."], False)
-    # and no database at all (a first install): nothing to look at
-    done = subprocess.run([sys.executable, str(LOOK), str(tmp_path / "none.sqlite")], capture_output=True, text=True)
-    assert done.returncode == 0 and "nothing to look at" in done.stdout
 
 
 # going back to the code before the move (deploy/undo-wts-core.sql)
@@ -508,8 +449,8 @@ def test_going_back_after_some_days_of_use_gives_the_old_code_everything_the_sit
 
 def test_going_back_after_the_forgetting_gives_back_what_is_said_and_a_second_move_counts_no_account_twice(
         old, monkeypatch):
-    """wts-core 0.3.0 (CHANGELOG, "A spending row says who it was for, and what time of day it was made, for its own
-    day only"; UPGRADING, "What the undo script must clear"). Once a day is over its spending rows keep no account
+    """wts-core 0.3.0: a spending row says who it was for, and what time of day it was made, for its own day only
+    (its docs/UPGRADING.md, "Going back to the old code", says what the undo script must clear). Once a day is over its spending rows keep no account
     and no time of day, and each account's month is kept in ``wts_account_months``. So the undo gives back, for a
     row of a day gone by, no user_id, no visitor and the day's midnight, with its cost and day exact; today's rows
     whole. The script itself empties the month totals with the spending rows, so that coming forward again does not
@@ -790,8 +731,8 @@ def test_the_two_scripts_refuse_a_database_that_has_not_been_moved_and_a_second_
 def test_a_row_the_old_code_added_is_decided_by_the_shared_packages_guard_alone_and_one_it_changed_by_the_sites(
         old):
     """From wts-core 0.3.0 the package itself refuses a database whose old tables hold a row written after the
-    import ran (``Import(written_at=…)``; its CHANGELOG, "state.StateError, and Import(written_at=…)"), with the
-    exact line its UPGRADING gives for this site. That guard alone decides a row added: the site's look asks it,
+    import ran (``Import(written_at=…)`` and ``state.StateError``), with the exact line its docs/UPGRADING.md gives
+    for this site. That guard alone decides a row added: the site's look asks it,
     over a scratch copy, so that it can be asked read-only before the old site is stopped. The site keeps of its
     own what the package does not do: a row the old code changed (a report closed), and words that count both
     sides and name both mends. On the site's golden old database, each kind of row the old code adds (a spending

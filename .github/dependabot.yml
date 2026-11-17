@@ -1,9 +1,9 @@
-# Dependency updates: the same shape in every Where They Stand repository (the charity's family/TOOLCHAIN.md).
+# Dependency updates, set up the same way in every Where They Stand repository.
 # Each Monday Dependabot looks for newer versions and opens a few grouped pull requests, at most three open at a
 # time for each kind of dependency. It proposes; nothing is merged without a review and a green CI run.
 #
 # The Python minor version, the Node major version and the uv version are the family's toolchain. They are set once,
-# in family/TOOLCHAIN.md, and changed in every repository in the same week, so they are not Dependabot's to move:
+# in wts-core's toolchain.toml, and changed in every repository in the same week, so they are not Dependabot's to move:
 # the Docker section below takes newer releases of Python 3.12 and Node 22 only.
 version: 2
 updates:

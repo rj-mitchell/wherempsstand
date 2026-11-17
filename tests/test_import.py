@@ -328,7 +328,7 @@ def test_reports_and_statements_read_the_same_after_the_import_but_for_what_thre
 
     desk, archive = after.app.state.replies, after.app.state.parts.archive
     # what the owner can be shown before anything lapses: numbers and ages only (`hansard would-lapse`, read and
-    # not done; before the very first deploy the same is read from the old tables by deploy/before-wts-core.py)
+    # not done)
     from typer.testing import CliRunner as Runner
 
     from hansard import cli as command_line

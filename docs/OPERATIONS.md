@@ -1,8 +1,9 @@
 # Running Where MPs Stand
 
 How to run Where MPs Stand and look after it on the server: the commands, day-to-day tasks, readers' reports and
-statements, backups, monitoring, deploying new code, and the one-off move onto wts-core. Setting up the server, and
-what it runs for every site on it, is in [HOSTING.md](HOSTING.md). What costs money is in [COSTS.md](COSTS.md).
+statements, backups, monitoring, deploying new code, and going back to the code from before wts-core. Setting up
+the server, and what it runs for every site on it, is in [HOSTING.md](HOSTING.md). What costs money is in
+[COSTS.md](COSTS.md).
 
 On the server the site is checked out at `/opt/hansardgpt`, and its commands run inside the app container, from
 `/opt/hansardgpt/deploy`: `docker compose exec app hansard <command>`. [Names kept from
@@ -332,11 +333,11 @@ told.
 
 ## Moving onto wts-core
 
-The first deploy of a version built on wts-core (0.3.0 or later) onto a server still running the site's earlier
-code moves the state database into wts-core's tables. This section is for that one deploy, and for the way back,
-which is open until 1 February 2027. Three files in `deploy/` serve it:
+The site moved onto wts-core (version 0.3.0) in November 2026: the first start of the new code moved the state
+database into wts-core's tables. Until 1 February 2027 the move can be undone and the site put back on its earlier
+code, which is kept in the private archived repository `rj-mitchell/wherempsstand_old`. Two files in `deploy/`
+serve this:
 
-- `before-wts-core.py`, a read-only look at the database before the deploy;
 - `undo-wts-core.sql`, which takes the database back for the earlier code;
 - `redo-wts-core.sql`, which makes the move again if the earlier code wrote to a moved database.
 
@@ -347,8 +348,8 @@ Each file's opening comment says exactly what it does, keeps and discards.
 On its first start the new code copies `state.sqlite` to `state.pre-wts-core.<date>.sqlite` beside it, then copies
 every row of the old tables (`usage`, `answer_cache`, `briefings`, `failures`, `reports`, `statements`, and the
 secret in `kv`) into the `wts_` tables, in one transaction, keeping their ids, so every saved briefing keeps its
-address. If a row cannot be copied, nothing is, the site does not start, and the log names the row. On a 430 MB
-database this took 3 seconds on a test machine.
+address. If a row cannot be copied, nothing is, the site does not start, and the log names the row. The same
+happens when the site comes forward again after going back (below).
 
 The old tables stay in the file, unread, so the move can be undone. Each night the tidy deletes from them what it
 deletes from the new tables, deletes the copy once it is 14 days old, and on 1 February 2027 drops the old tables.
@@ -360,65 +361,29 @@ unchanged. The first time anything writes or lists reports and statements, state
 three months are declined and their senders' addresses deleted, and reports open that long lose their contact
 details. Neither can be undone.
 
-### Before the deploy
-
-On the server, with the site running its earlier code:
-
-1. Before the checkout is updated, note the commit the server is on, `git -C /opt/hansardgpt rev-parse HEAD`:
-   going back means checking it out. That code is not in this repository's history.
-2. Look at the database. This changes nothing, and prints numbers, dates and sizes only:
-
-   ```bash
-   cd /opt/hansardgpt
-   git fetch origin
-   git show origin/main:deploy/before-wts-core.py | docker compose -f deploy/docker-compose.yml exec -T app python -
-   ```
-
-   It lists the statements and reports that will lapse (decide any that deserve a decision now, on the earlier
-   code), anything that would stop the move (it then ends with status 1 and says how to mend it), and the database's
-   size against the free space: the first night needs about three times the database's size free.
-3. If `/data/settings.local.toml` names a model with no prices in `config/settings.toml`, add its prices there as
-   `[usage.models."<name>"]` with the three prices: the new code will not start with a model it cannot cost.
-4. Take a backup: `sudo systemctl start hansard-backup.service`.
-5. Leave `/data/models` as it is ([The models folder](#the-models-folder)).
-
-### The deploy, and afterwards
-
-Run `bash /opt/hansardgpt/deploy/update.sh` as usual, away from the timers' hours. It also installs two new timers,
-`hansard-backup-check` and `hansard-weekly-report`, and the nightly backup now ends with `hansard tidy`.
-
-Then check:
-
-- the end of `update.sh`'s output: the health check, with a tick for each timer and "Search by meaning is on.";
-- `docker compose logs --tail 50 app`: no line about an import skipped or a row that could not be copied;
-- the admin page: spending, recent briefings and statements as before, and a saved briefing opens at its address;
-- `docker compose exec app hansard waiting`: what is waiting, after anything that lapsed;
-- the next morning, `journalctl -u hansard-backup -n 30`: the backup, then the tidy's lines, ending "Wrote the
-  database out afresh: nothing deleted is left in the file."
-
 ### The models folder
 
-`/data/models` holds the embedding model's files, and also an old copy of the re-ranker's that the earlier code
-fetched there (the re-ranker now has `/data/reranker-models`). The index's record of which model made its vectors
-is taken afresh on the first search by meaning after the move, and the site's note of the weights at the next
-update. Until both have happened, change nothing in `/data/models`, or search by meaning switches off until every
-vector is made again. The health check's line about the models folder (`hansard meaning-check`) says which case
-applies:
+`/data/models` holds the embedding model's files, and may also hold an old copy of the re-ranker's that the
+earlier code fetched there (the re-ranker now has `/data/reranker-models`). The index records which model made its
+vectors, and the site notes the model's weights. Change nothing in `/data/models` until the health check's line
+about the models folder (`hansard meaning-check`) says it may be, or search by meaning switches off until every
+vector is made again. That line says which case applies:
 
-- "…anything else … may be moved or removed": the re-ranker's old files may now be deleted, or left;
+- "…anything else … may be moved or removed": the re-ranker's old files may be deleted, or left;
 - "…has not yet taken that id on this version: change nothing…": wait for the next update and check again;
 - "…cannot be told from another model's there…": leave the folder exactly as it is. Separating the models then
   means making every vector again (`hansard embed --start-again`), as one planned step.
 
-Before a deploy, `docker compose run --rm --no-deps -T app hansard meaning-check --look` on the new image reads only
-the index's note and the folder, and prints the same line.
+`docker compose run --rm --no-deps -T app hansard meaning-check --look` reads only the index's note and the folder,
+without loading a model, and prints the same line.
 
 ### Going back, and coming forward again
 
 Until 1 February 2027 the site can go back to its earlier code and forward again without losing anything:
 
 1. Going back. Stop the site, run `deploy/undo-wts-core.sql` (the command is at the top of the file), check out
-   the commit noted before the deploy, and start it with `docker compose up -d --build`. The undo writes the old
+   the earlier code (the last commit before the move, from `rj-mitchell/wherempsstand_old`), and start it with
+   `docker compose up -d --build`. The undo writes the old
    tables again from wts-core's, including everything taken in since the move. It cannot carry back the log of
    what was done to each statement or hidden briefings (they are shown again), and spending rows of earlier days
    come back with no account or visitor.
