@@ -1,24 +1,25 @@
 # Method
 
-How the record is read, stored and searched, how the evidence for a briefing is chosen and ranked, and how a
-briefing is kept to what the record says. The reader-facing version is the site's [methodology
-page](https://wherempsstand.com/methodology) (`web/methodology.html`); this is the technical one.
+The technical method behind Where MPs Stand: how the record is read, stored and searched, how the evidence for a
+briefing is chosen and ranked, how a briefing is kept to what the record says, and the known limitations. The
+version for readers is the site's [methodology page](https://wherempsstand.com/methodology)
+(`web/methodology.html`).
 
 ## Contents
 
 1. [From the record to an answer](#from-the-record-to-an-answer)
 2. [Ranking: recency and role weighting](#ranking-recency-and-role-weighting)
 3. [Keeping answers grounded](#keeping-answers-grounded)
-4. [Sources](#sources)
+4. [Known limitations](#known-limitations)
 
 ## From the record to an answer
 
 ```
  TheyWorkForYou scrapedxml ──► streaming parser ──► Parquet (zstd, by source & year) ──► DuckDB SQL
- (rsync or HTTPS, daily)        (lxml iterparse)            │
+ (HTTPS, twice a day)          (lxml iterparse)            │
                                                            ▼
  mysociety/parlparse members/ ──► reference tables ──► speaker-on-date enrichment
- (git pull, daily)                (people, seats, offices,      │
+ (git pull, each update)          (people, seats, offices,      │
  ONS / mySociety boundaries       regions, parties)             ▼
                                                   LanceDB: BM25 passages + vectors (local model)
                                                            │
@@ -29,9 +30,7 @@ page](https://wherempsstand.com/methodology) (`web/methodology.html`); this is t
 ```
 
 * Ingest. `lxml.etree.iterparse` streams each file and frees elements as it goes, so memory stays flat
-  however large the file is. Ingesting everything since 2010 (24,695 files, 3.7 million records) took about
-  3 minutes with a peak of 664 MB across all worker processes, measured when the archive started in 2010
-  ([EVALUATION.md](EVALUATION.md#measured-performance)).
+  however large the file is ([EVALUATION.md](EVALUATION.md#measured-performance) has the timings).
 * Storage. Zstd-compressed Parquet, partitioned by source and year. Each sitting day is replaced atomically
   when Hansard issues a correction. Days older than 90 days are compacted into one file per partition, so
   queries spanning many years run in tens of milliseconds.
@@ -45,8 +44,9 @@ page](https://wherempsstand.com/methodology) (`web/methodology.html`); this is t
   data are removed and overlapping spells merged. Each join is aggregated per record, so a minister with two
   posts never duplicates a speech.
 * Search. LanceDB holds a BM25 full-text index over 4.7 million passages, plus vectors from a local
-  open-source embedding model (`snowflake-arctic-embed-xs`, run on CPU). Both are filtered by date, House,
-  region, party, person and role. A Labour filter also includes Labour/Co-operative MPs.
+  open-source embedding model (`snowflake-arctic-embed-xs`, run on CPU; its weights are downloaded once from
+  Hugging Face and pinned by SHA-256). Both are filtered by date, House, region, party, person and role. A Labour
+  filter also includes Labour/Co-operative MPs.
 * Balanced evidence. The best-ranked candidates (eight per source wanted, at least 150) are grouped into
   government ministers, opposition frontbench, select committee chairs, backbench MPs in city, town and rural
   seats, and backbench peers. Members who raised the subject on three or more separate days among them (not
@@ -112,7 +112,7 @@ page](https://wherempsstand.com/methodology) (`web/methodology.html`); this is t
 
 ## Ranking: recency and role weighting
 
-Ranking is soft. Nothing is excluded unless you set a filter.
+Ranking is soft: nothing is excluded unless a filter is set.
 
 ```
 score = relevance × recency × authority
@@ -146,7 +146,7 @@ The authority multiplier `m` depends on the speaker's role on the date of the re
 
 1. Editable filters. The question becomes an editable filter plan: dates, Houses, regions, parties,
    speakers, roles and boosted portfolios. "Northern MPs" means the North East, North West, and Yorkshire and
-   The Humber; you can change this in settings. You see and can edit every filter.
+   The Humber (`[regions]` in `config/settings.toml`). Readers see and can edit every filter.
 2. Synthesis rules. The model is told to synthesise rather than list, to group speakers by the attributes
    given in each source's title (role on the date, party, seat type, region), and to use no other attributes.
    It characterises each group's stance with one to three cited examples, preferably short exact quotations,
@@ -165,33 +165,27 @@ The authority multiplier `m` depends on the speaker's role on the date of the re
 6. Sources only. Claude (Sonnet 5.5) receives only those sources, as search-result blocks with citations
    enabled, under rules that forbid outside knowledge. When the sources don't answer the question, it must say
    "No records found."
-7. Verification. Every citation is re-checked against our copy of the source text. Any uncited
+7. Verification. Every citation is re-checked against the site's copy of the source text. Any uncited
    substantive sentence is flagged in the UI as unsupported, never passed off as sourced.
 8. No guessing on empty results. If retrieval finds nothing, the model is not called at all.
 
-## Sources
+Every data source, its licence and how it is credited is in [ATTRIBUTION.md](../ATTRIBUTION.md).
 
-* Proceedings: [TheyWorkForYou / ParlParse](https://parser.theyworkforyou.com/hansard.html) XML (mySociety),
-  under the Open Parliament Licence v3.0. The Commons division lists of 1997–2001, which those files lack, come
-  from [Public Whip](https://www.publicwhip.org.uk/)'s vote matrix (`data_static/votes`).
-* Members, offices and committees: [mysociety/parlparse](https://github.com/mysociety/parlparse)
-  `members/`, comprising `people.json`, `ministers-2010.json` and `posts/westminster-parliament-posts.json`.
-* Early day motions and committees: the UK Parliament [oral questions and motions](https://oralquestionsandmotions-api.parliament.uk/)
-  and [Committees](https://committees-api.parliament.uk/) APIs, under the Open Parliament Licence v3.0.
-* Register of Members' Financial Interests, devolved parliaments and vote descriptions: TheyWorkForYou's
-  published data (`pwdata/scrapedxml/regmem`, `sp-new`, `senedd`, `ni`, `pwdata/votes`), with thanks to mySociety.
-* Election results, members' gender and Parliament IDs: the UK Parliament
-  [Members API](https://members-api.parliament.uk/); general elections of 1997–2005 and by-elections of 2001–2010
-  from the House of Commons Library, and by-elections of 1997–2001 from the Commons Information Office's Factsheet
-  M16 (`data_static/elections`).
-* Political donations: the Electoral Commission's register. Company roles: Companies House. Dates of
-  birth: Wikidata. All-party groups: the Register of All-Party Parliamentary Groups.
-* Constituency → region: ONS (Dec 2021 constituency names and codes) and mySociety's
-  [2025-constituencies](https://github.com/mysociety/2025-constituencies) data, under the Open Government
-  Licence v3.0. The vendored lookup in `data_static/geo/` is rebuilt by `scripts/build_geo_lookups.py`.
+## Known limitations
 
-The app shows these attributions on every page; [ATTRIBUTION.md](../ATTRIBUTION.md) gives every source and its
-licence in full.
-
-Hugging Face is used only for a one-off download of the embedding model's weights, which are pinned by SHA-256. No
-data comes from there.
+- Hansard's XML has no official URL for each speech. For debates, the official link opens the sitting day, and the
+  column number and the TheyWorkForYou link identify the speech. Written questions and statements link to the exact
+  official record.
+- Region filters apply to MPs only, since peers have no constituencies.
+- Party on a date comes from parlparse memberships, so any gaps there are gaps here. Committee and role data are as
+  current as mySociety's daily updates.
+- Seats before the 2010 boundaries have no ONS code. They take their region and seat type from the later seat of the
+  same name, or their region from `data_static/geo/pre2010_regions.csv` (117 seats abolished or renamed, with no seat
+  type). Posts of members who left before 2010 come from parlparse's `ministers.json`, and their select committee
+  places from a saved copy of Parliament's records (`data_static/committees_before_2010.json`). Committee pages start
+  in 2010.
+- Sixteen MPs of 1997 to 2010 could not be matched safely to Parliament's records, so their pages show no election
+  results.
+- About 110 members since 2010, mostly peers, have no recorded date of birth and are left out of groupings by age.
+- Of Public Whip's 1,273 divisions of 1997 to 2001, about 1,165 are matched to the result printed in Hansard. The
+  rest keep Public Whip's title and link to the day.
