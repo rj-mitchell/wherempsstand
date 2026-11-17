@@ -151,13 +151,13 @@ def test_what_the_forms_and_the_public_pages_answer(played):
     assert len(WAS["http"]) == 62
     assert differences(played, "http") == {
         # R: a report of nothing but spaces was thanked and kept, empty; it is refused, in the words for one too
-        # short (wts-core docs/MIGRATION.md 1.9). Those words are the family's, the same on every Where They Stand
+        # short. Those words are the family's, the same on every Where They Stand
         # site: the owner asked for the family's wording to be the same (16 November 2026); they were "Please say
         # what is wrong: a sentence or more."
         SPACES: {"status": (200, 400), "json.ok": (True, "(absent)"),
                  "json.detail": ("(absent)", "Please say what is wrong, in a few words.")},
-        # R: with two things wrong, the words are checked before the name (wts-core docs/AS-BUILT.md, replies:
-        # the order of the checks); each fault alone is answered as before
+        # R: with two things wrong, the words are checked before the name (wts-core's
+        # order of the checks); each fault alone is answered as before
         "a statement with two things wrong: the name and the words": {"json.detail": (
             "Please give the name the statement is from.", "A statement can be up to 150 words. This one is 151.")},
         # the report filed in the place of the one of spaces, so that the rest keep their numbers
@@ -182,7 +182,7 @@ def test_what_the_forms_and_the_public_pages_answer(played):
 
 def test_what_the_owners_commands_print(played):
     """The commands as they were typed before wts-core: the same lines for whatever was done, and a plainer
-    reason for whatever was not (O: wts-core docs/AS-BUILT.md, cli)."""
+    reason for whatever was not (O: wts-core's commands)."""
     assert differences(played, "cli") == {
         "publish with an empty note": {"output": (
             "Please say how you confirmed who sent it: it is kept privately.\n",

@@ -10,7 +10,7 @@ voice are highlighted (never hidden, and never inside a quotation). What is this
 * what counts as a note about the evidence, which is not a claim to check. This site has the wider of the family's
   two forms, as it always has: a sentence saying something "was supplied" or "were retrieved" counts as one (so
   "Gas was supplied to two million homes" is not marked). Narrowing it is a change of its own, to be made with an
-  evaluation run before and after (wts-core docs/MIGRATION.md 1.4); tests/test_rag.py holds it where it is.
+  evaluation run before and after; tests/test_rag.py holds it where it is.
 """
 
 from __future__ import annotations

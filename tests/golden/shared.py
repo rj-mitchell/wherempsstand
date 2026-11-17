@@ -796,7 +796,7 @@ def sources_only_while_the_model_cannot_read(side: Side) -> list[Any]:
 
 
 AT_ONCE = "briefings_at_once_per_reader"
-# Every case of wts-core's docs/adr/0009 "Parity", and what only this site has (docs/MIGRATION.md 1.8).
+# Every scenario compared before and after the move onto wts-core, including what only this site has.
 # name -> (what is done, has a model, settings for the telling: [usage] keys, and "auth" for sign-in required)
 SCRIPTED: dict[str, tuple[Callable[[Side], list[Any]], bool, dict[str, Any]]] = {
     "a fresh question, and the same again from the cache": (

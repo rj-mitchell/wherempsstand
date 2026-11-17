@@ -1,7 +1,7 @@
 [project]
 name = "hansard"
 version = "0.1.0"
-description = "Verifiable UK Parliamentary research engine over Hansard, with cited, auditable answers."
+description = "Where MPs Stand: sourced briefings and pages built from the record of the UK Parliament."
 readme = "README.md"
 license = "AGPL-3.0-only"
 requires-python = ">=3.12"

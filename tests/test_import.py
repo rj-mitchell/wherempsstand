@@ -77,8 +77,8 @@ def test_every_old_row_is_brought_across_and_the_old_tables_are_left_as_they_wer
     open_core(old, FixedClock(NOW))
 
     # The old tables, and every table of the site's own, byte for byte: but for the one row the import deletes,
-    # a permanent visitor secret from the site's first weeks (wts-core docs/AS-BUILT.md, usage: "the package
-    # deletes old secrets from wts_kv only")
+    # a permanent visitor secret from the site's first weeks (the package
+    # deletes old secrets from wts_kv only)
     assert not_the_packages(dump(old.state_db)) == [line for line in not_the_packages(before)
                                                     if line != UNDATED_SECRET]
     path = old.state_db
@@ -118,7 +118,7 @@ def test_every_old_row_is_brought_across_and_the_old_tables_are_left_as_they_wer
               "public_note FROM reports ORDER BY id")
     assert rows(path, "SELECT count(*) FROM reports WHERE visitor IS NOT NULL") == [(3,)]
     # statements: the address is the item, the member whom it is about; one taken down after it was published
-    # was "declined" and is "removed" (wts-core docs/MIGRATION.md 1.9)
+    # was "declined" and is "removed" (wts-core's statuses)
     assert rows(path, "SELECT id, at, item, part, about, name, role, text, link, email, status, published_at, "
                       "updated_at, closed_at, reason FROM wts_statements ORDER BY id") == rows(
         path, "SELECT id, at, item_path, '', CAST(person AS TEXT), name, role, text, link, email, "
@@ -310,7 +310,7 @@ def test_the_topics_command_lists_each_topic_with_its_briefing_after_the_import(
 
 def test_reports_and_statements_read_the_same_after_the_import_but_for_what_three_months_end(after, monkeypatch):
     """What the owner and the public are shown of the old reports and statements. Four differences, each from the
-    shared package's rules (wts-core docs/MIGRATION.md 1.9; CHANGELOG 0.2.1):
+    shared package's rules (wts-core 0.2.1):
 
     * R: a statement nobody decided in three months lapses, the first time the owner's list is read: it is
       declined with a reason that says so, and its sender's address deleted. An open report three months old

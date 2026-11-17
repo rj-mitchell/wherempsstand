@@ -16,7 +16,7 @@ record_dirs = ["debates", "westminhall", "lordspages", "wrans", "lordswrans", "w
 [sources]
 twfy_rsync = "data.theyworkforyou.com::parldata/scrapedxml"
 twfy_https = "https://www.theyworkforyou.com/pwdata/scrapedxml"
-# Store the raw Hansard files gzipped (about a quarter of the size; owner's decision 14), fetched over HTTPS. Set to
+# Store the raw Hansard files gzipped (about a quarter of the size; docs/DECISIONS.md, 25), fetched over HTTPS. Set to
 # false for a full uncompressed mirror by rsync (TheyWorkForYou's own method), when port 873 is reachable.
 compress_raw_xml = true
 parlparse_repo = "https://github.com/mysociety/parlparse"
@@ -44,8 +44,8 @@ vector_refine_factor = 5
 bm25_weight = 0.5
 # Recency factor = floor + (1 - floor) * 0.5 ** (age_years / half_life).
 # Slider s in [0, 1]: s = 0 disables decay; otherwise half_life = min_half_life_years / s.
-# 12 November 2026 (owner, from testers' feedback): the shortest half-life is 6 months (was 2 years), and the default
-# 2 years (was 4), so recent contributions lead more by default and much more when a reader asks for it.
+# The shortest half-life is 6 months and the default 2 years (docs/DECISIONS.md, 27), so recent contributions lead
+# by default, and more when a reader asks for it.
 recency_floor = 0.35
 min_half_life_years = 0.5
 default_recency = 0.25

@@ -85,7 +85,7 @@ def test_the_backup_commands_and_the_alerts_are_what_they_were(tmp_path, monkeyp
     assert "File'<tmp>/backups/missing.tar.gz'doesnotexist." in words(now["commands"][10])["output"]
     kept = "<tmp>/data/state.sqlite.before-restore is still there from an earlier restore: move or delete it first"
     assert differ == {
-        # O: the sentence ends without its full stop (wts-core docs/AS-BUILT.md, ops: the refusal's words)
+        # O: the sentence ends without its full stop (wts-core's words for the refusal)
         "a second restore never writes over the kept copy": (f"Not restored: {kept}.\n", f"Not restored: {kept}\n"),
     }
     assert now["alerts"] == was["alerts"]

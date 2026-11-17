@@ -2,7 +2,7 @@
  * The Where They Stand family kit, for the parts React draws. The kit's files are in public/family/, copied in by the
  * kit's sync.mjs and never edited here; the static pages include the same partials at build time (vite.config.ts),
  * so the home page and the static pages show exactly the same endorsement and footer shelf. See docs/DESIGN.md,
- * "The family binding".
+ * "The family kit".
  */
 import endorsement from "../public/family/endorsement.html?raw";
 import shelf from "../public/family/shelf.html?raw";

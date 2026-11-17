@@ -8,7 +8,7 @@ const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 /** Static pages share one header and footer: <!--#include header--> pulls in partials/header.html, and
  * <!--#include family/shelf--> the Where They Stand family kit's public/family/shelf.html (copied in by the kit's
- * sync.mjs; see docs/DESIGN.md, "The family binding"). */
+ * sync.mjs; see docs/DESIGN.md, "The family kit"). */
 function partials(): Plugin {
   return {
     name: "html-partials",

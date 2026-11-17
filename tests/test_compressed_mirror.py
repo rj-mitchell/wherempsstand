@@ -1,4 +1,4 @@
-"""Raw Hansard files stored gzipped (owner's decision 14): compressing the mirror parses nothing again, while
+"""Raw Hansard files stored gzipped (docs/DECISIONS.md, 25): compressing the mirror parses nothing again, while
 corrections and new days still arrive."""
 
 import dataclasses

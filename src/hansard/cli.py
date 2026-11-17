@@ -145,7 +145,7 @@ def fetch_xml(settings: Settings, since: date | None = None, transport: str = "a
     since = since or settings.archive_start
     dirs = [*settings.record_dirs, *sorted(DIVISION_DIRS)]
     src = settings.sources
-    # Stored gzipped (owner's decision 14): rsync can only write plain files, so it is used only when asked for.
+    # Stored gzipped (docs/DECISIONS.md, 25): rsync can only write plain files, so it is used only when asked for.
     compress = bool(src.get("compress_raw_xml", True))
     wants_rsync = transport == "rsync" or (transport == "auto" and not compress)
     if wants_rsync and rsync_available(src["twfy_rsync"]):

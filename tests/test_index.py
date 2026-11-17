@@ -71,7 +71,7 @@ def test_an_index_built_before_the_move_opens_and_searches_the_same(old):
     found["passages_for"] = {p: {k: str(v) for k, v in sorted(row.items())
                                  if k in ("record_id", "source_key", "house", "date", "heading")}
                              for p, row in sorted(index.passages_for(passages[:3]).items())}
-    # ``unmerged`` now counts vectors waiting for the meaning-search index too (wts-core docs/AS-BUILT.md,
+    # ``unmerged`` now counts vectors waiting for the meaning-search index too (wts-core's
     # adapters): here there are none of either, as before
     assert index.unmerged() == GOLDEN["unmerged"] == 0
     assert found == {k: v for k, v in GOLDEN.items() if k != "unmerged"}

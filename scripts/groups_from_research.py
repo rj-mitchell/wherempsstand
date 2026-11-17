@@ -13,22 +13,19 @@ The owner's decisions (12 November 2026), applied here:
 
 1. IPSA records of MPs paying for a group's pooled research service are kept, as their own kind ("ipsa"), shown as
    "paid for the group's research service (IPSA records, <years>)", never as membership. Whether they are shown at
-   all is a setting ([groups] show_ipsa), off until the charity has legal advice.
+   all is a setting ([groups] show_ipsa); see 8.
 2. The Socialist Parliamentary Research Group stays a group of its own, not merged with the Socialist Campaign Group.
 3. The contributors to the Socialist Campaign Group's 2026 pamphlet are left out (authors, not signatories).
 4. Mainstream is included, as signatories of its founding statement.
 5. The Conservative Environment Network's own page: sitting UK MPs and peers only (its Fellows, former MPs, and MSPs
    are left out); the page is undated, so its "accessed" date is kept, with a note that it should be checked again.
 6. The party a member had on the date of the list, never their latest party.
-7. (12 November 2026, later) The Common Sense Group's letter of 9 November 2020, reproduced in full by a signatory,
-   is used as signatories. The Net Zero Scrutiny Group's letter of 2 January 2022 is held back until it is checked
-   against the archived original: its names come from The Week's prose account, not a copy of the letter
-   (``--include-pending`` uses it once the owner has checked it). The owner checked it on 12 November 2026 against
-   the archived copy of the Telegraph letter (archive.ph/LaeNS): all 20 names match, so it is used, citing the
-   original. The letter of 28 June 2023 that the Net Zero
+7. The Common Sense Group's letter of 9 November 2020, reproduced in full by a signatory, is used as signatories.
+   The Net Zero Scrutiny Group's letter of 2 January 2022 is used, citing the original: the owner checked its 20
+   names against the archived copy of the Telegraph letter (archive.ph/LaeNS). A list not yet checked against its
+   original is held back as pending (``--include-pending`` uses it). The letter of 28 June 2023 that the Net Zero
    Scrutiny Group's chair coordinated is not used: signing a letter a group's chair organised is not evidence of
    belonging to the group, and the reproduction's count of signatories disagrees with its own list.
-
 8. (12 November 2026) IPSA records are used (settings: [groups] show_ipsa), labelled as payments for a group's
    research service, never as membership, on the basis in the charity's policies/special-category-data.md. A claim
    whose IPSA service name and the claim's own description name different groups is left out, as unclear (one in

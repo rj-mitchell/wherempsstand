@@ -20,7 +20,7 @@ const walk = (dir: string, prefix = ""): string[] =>
 describe("the Where They Stand family binding", () => {
   it("is the kit's copy, unedited", () => {
     // sync.mjs writes a hash of every file it copies into VERSION; editing a copy here breaks the match. To change
-    // anything in public/family/, change the kit and sync again (docs/DESIGN.md, "The family binding").
+    // anything in public/family/, change the kit and sync again (docs/DESIGN.md, "The family kit").
     const dir = join(web, "public/family");
     const version = read("public/family/VERSION");
     const hash = createHash("sha256");
