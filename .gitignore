@@ -8,7 +8,7 @@ __pycache__/
 dist/
 build/
 
-# Local data (fetched / generated; never committed)
+# Local data (fetched or generated, including data/settings.local.toml from `hansard bootstrap --sample`)
 /data/
 /var/
 
@@ -37,7 +37,7 @@ deploy/backups/
 # scripts' cache of downloaded answers
 /.cache/
 
-# full test-set runs (large; their summaries are kept)
-/eval/runs/*-sources-*.json
-!/eval/runs/*-sources-summary.json
-/eval/runs/*-briefings-*.json
+# evaluation runs stay on the machine that made them; the saved question readings that `hansard eval retrieval`
+# uses by default are kept
+/eval/runs/*
+!/eval/runs/20261011-plans-reference.json

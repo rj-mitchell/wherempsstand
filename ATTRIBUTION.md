@@ -40,6 +40,12 @@ descriptions of some divisions
 licensed under the Open Parliament Licence and the equivalent licences of the Scottish Parliament, the Senedd and
 the Northern Ireland Assembly.
 
+TheyWorkForYou Votes states no licence for its descriptions of divisions (from
+`theyworkforyou.com/pwdata/votes/divisions.parquet`), and the API terms that put mySociety's own data under CC BY-SA
+2.5 do not mention them. The site labels each description "(TheyWorkForYou Votes)" and credits mySociety on the
+methodology page and here. mySociety has been asked to confirm the terms (`outreach/2026-11/mysociety.txt`). If the
+descriptions may not be used, they will be removed; the site's own labels for kinds of vote are not affected.
+
 ## Registers of interests
 
 The Register of Members' Financial Interests and the registers of the Scottish Parliament, the Senedd and the
@@ -54,14 +60,18 @@ Donations to MPs and to their local parties come from the
 [Electoral Commission's register of donations](https://search.electoralcommission.org.uk/), refreshed weekly,
 with donors' addresses and postcodes left out. Matching donations to MPs is this site's own work (see the
 methodology page); each entry links to the Commission's record of it. Contains Electoral Commission Information ©
-Electoral Commission and/or database right.
+Electoral Commission and/or database right. The register is downloaded once a week with the search site's own CSV
+export, and credited as the Commission asks (checked on 12 October 2026).
 
 ## Company roles
 
 Directorships and other company roles come from the [Companies House](https://find-and-update.company-information.service.gov.uk/)
 register, through its free public data API, with addresses, nationality and dates of birth left out. Contains
 Companies House data. Matching Companies House records to members (by name and month and year of birth) is this
-site's own work; each entry links to the Companies House record.
+site's own work; each entry links to the Companies House record. The developer guidelines that come with the API key
+(checked on 8 November 2026) set no attribution wording. The site keeps under their limit of 600 requests in five
+minutes (with a 0.6-second pause between requests), waits when it is answered "429 Too Many Requests", and keeps
+the key out of the repository (in the server's `deploy/.env`).
 
 ## All-party and cross-party groups
 

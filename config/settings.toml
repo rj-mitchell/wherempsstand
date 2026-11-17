@@ -83,7 +83,7 @@ rerank_query = "both"       # what passages are compared with: question | keywor
 
 [answer]
 # Sonnet: about 13s and 5 US cents a briefing on the test set, against Opus's 21s and 11 cents, with similar
-# accuracy (eval/runs, October 2026). "claude-opus-5-5" writes slightly fuller briefings if cost allows.
+# accuracy (docs/EVALUATION.md, October 2026). "claude-opus-5-5" writes slightly fuller briefings if cost allows.
 model = "claude-sonnet-5-5"
 summary_sources = 24
 comprehensive_sources = 40
