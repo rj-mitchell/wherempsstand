@@ -158,12 +158,6 @@ html {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
 body {
   background: var(--paper);
   color: var(--ink);
@@ -2871,7 +2865,7 @@ main:focus {
   margin-block: var(--space-m) var(--space-s);
 }
 
-.support-actions .button {
+.support-actions .donate-link {
   font-family: var(--sans);
   font-size: var(--step--1);
   font-weight: 600;

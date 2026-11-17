@@ -688,8 +688,8 @@ function InterestBox({ flag, date }: { flag: InterestFlag; date: string }) {
       </ul>
       <p className="muted small">
         From the {[...new Set(flag.items.map((i) => i.register ?? flag.register))].join(" and the ")}: entries made before
-        this contribution on {fmtDate(date)} that an AI judged to concern the same subject. A link to check, not a
-        finding of wrongdoing.
+        this contribution on {fmtDate(date)} that an AI judged to concern the same subject. It is a link to check and is
+        not a finding of wrongdoing.
         {flag.link && (
           <>
             {" "}
