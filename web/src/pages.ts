@@ -142,7 +142,7 @@ async function showCorrections(el: HTMLElement) {
     }
     el.replaceChildren(ol);
   } catch {
-    el.textContent = "The corrections log could not be loaded. Please try again later.";
+    el.textContent = "The list of corrections did not load. Reload the page to try again.";
   }
 }
 

@@ -40,7 +40,7 @@ function WhatWasSaid() {
   }, [q]);
   return (
     <section aria-labelledby="h-said">
-      <h2 id="h-said">What witnesses said</h2>
+      <h2 id="h-said">Witnesses' evidence</h2>
       <p className="muted small">Search the transcripts of oral evidence sessions collected so far (from 2014, added a few hundred at a time).</p>
       <form
         className="people-search-form"
@@ -53,7 +53,7 @@ function WhatWasSaid() {
       >
         <label htmlFor="said-q">Words to find in the transcripts</label>
         <div className="ask-row">
-          <input id="said-q" name="q" placeholder="For example: grid connections" />
+          <input id="said-q" name="q" placeholder="for example grid connections" />
           <button type="submit" className="primary">
             Search
           </button>
@@ -69,8 +69,8 @@ function WhatWasSaid() {
               <li key={`${i.session_id}-${i.ord}`}>
                 <p className="timeline-date">
                   <a href={`/evidence/${i.session_id}#t${i.ord}`}>{i.date ? fmtDate(i.date) : "Session"}</a>
-                  {i.committees ? ` · ${i.committees}` : ""}
-                  {i.inquiry ? ` · ${i.inquiry}` : ""}
+                  {i.committees ? `, ${i.committees}` : ""}
+                  {i.inquiry ? `, ${i.inquiry}` : ""}
                 </p>
                 <p>
                   <strong>{i.speaker}</strong>: <Snippet text={i.snippet} />
@@ -108,7 +108,7 @@ function Witnesses() {
       >
         <label htmlFor="w-q">Organisation or person</label>
         <div className="ask-row">
-          <input id="w-q" name="q" defaultValue={q} placeholder="For example: NHS England, Which?, Greenpeace" />
+          <input id="w-q" name="q" defaultValue={q} placeholder="for example NHS England" />
           <button type="submit" className="primary">
             Search
           </button>
@@ -151,7 +151,7 @@ function Witnesses() {
                           </span>
                         )}
                         {o.committees && o.committees.length > 0 && (
-                          <span className="muted small"> · {o.committees.slice(0, 4).join("; ")}{o.committees.length > 4 ? "…" : ""}</span>
+                          <span className="muted small">, {o.committees.slice(0, 4).join("; ")}{o.committees.length > 4 ? " and others" : ""}</span>
                         )}
                       </td>
                       <td>{o.sessions}</td>
@@ -185,10 +185,10 @@ function Witnesses() {
                     {s.role || s.organisation ? `, ${[s.role, s.organisation].filter(Boolean).join(", ")}` : ""}
                     <span className="muted small">
                       {" "}
-                      · {s.committees}
+                      , {s.committees}
                       {s.inquiry_id && s.inquiry ? (
                         <>
-                          {" · "}
+                          {", "}
                           <a href={`/inquiries/${s.inquiry_id}`}>{s.inquiry}</a>
                         </>
                       ) : null}

@@ -38,7 +38,7 @@ function Sitting({ path }: { path: string }) {
       })
       .then((x) => {
         setD(x);
-        document.title = `${x.body}, ${fmtDate(x.date)} — Where MPs Stand`;
+        document.title = `${x.body}, ${fmtDate(x.date)} | Where MPs Stand`;
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not load."));
   }, [path]);
@@ -56,16 +56,16 @@ function Sitting({ path }: { path: string }) {
         {error} <a href="/devolved">Devolved parliaments</a>
       </p>
     );
-  if (!d) return <p className="muted" role="status">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Fetching the day's official report.</p>;
   const headings = d.items.filter((i) => i.kind === "heading");
   let minor: string | null = null;
   return (
     <article className="debate">
-      <p className="eyebrow">
-        <a href="/devolved">Devolved parliaments</a> · {d.body}
+      <p className="page-context">
+        <a href="/devolved">Devolved parliaments</a>, {d.body}
       </p>
       <h1>{fmtDate(d.date)}</h1>
-      <p className="lede">
+      <p className="intro-text">
         {d.contributions} contributions from {d.speakers} members, as recorded in the official report. Each{" "}
         {d.member} is shown with their party and seat on the day.
       </p>
@@ -114,11 +114,11 @@ function Sitting({ path }: { path: string }) {
                 ))}
                 {i.kind === "said" && (
                   <p className="contrib-ref muted small">
-                    {i.time ? `${i.time} · ` : ""}
+                    {i.time ? `${i.time}, ` : ""}
                     <a href={`#${i.id}`}>Link</a>
                     {i.url && (
                       <>
-                        {" · "}
+                        {", "}
                         <a href={i.url} target="_blank" rel="noreferrer">
                           Official report
                         </a>

@@ -120,7 +120,8 @@ describe("sending a statement", () => {
     const html = readFileSync(resolve(__dirname, "../../named.html"), "utf8");
     expect(html).toContain("<h1>If you're named</h1>");
     expect(html).toContain("We reply within 5 working days, and decide within 20 working days.");
-    for (const route of ["Something is wrong", "You've been characterised unfairly", "Add a statement in your own words"])
+    // the family's three routes, as headings (the charity's family/GLOSSARY.md, "Corrections and the right of reply")
+    for (const route of ["<h3 id=\"wrong\">Errors</h3>", "<h3 id=\"unfair\">Unfair descriptions</h3>", "<h3 id=\"own-words\">Statements in your own words</h3>"])
       expect(html).toContain(route);
     for (const field of ["name", "role", "item", "text", "link", "email", "website"]) expect(html).toContain(`name="${field}"`);
     expect(html).toContain('href="/corrections?kind=correction#report"');

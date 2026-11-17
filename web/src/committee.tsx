@@ -28,7 +28,7 @@ function Page({ id }: { id: string }) {
     getJSON<Committee>(`/api/committees/${id}`, "There is no committee with that number.")
       .then((x) => {
         setC(x);
-        document.title = `${x.name} — Where MPs Stand`;
+        document.title = `${x.name} | Where MPs Stand`;
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not load."));
   }, [id]);
@@ -38,7 +38,7 @@ function Page({ id }: { id: string }) {
         {error} <a href="/committees">All committees</a>
       </p>
     );
-  if (!c) return <p className="muted" role="status">Loading…</p>;
+  if (!c) return <p className="muted" role="status">Fetching the committee's inquiries and reports.</p>;
   const current = c.inquiries.filter((i) => !i.close);
   const past = c.inquiries.filter((i) => i.close);
   const list = (items: Committee["inquiries"]) => (
@@ -48,11 +48,11 @@ function Page({ id }: { id: string }) {
           <a href={`/inquiries/${i.id}`}>{i.title}</a>
           <span className="muted small">
             {" "}
-            {i.type && i.type !== "Inquiry" ? `${i.type} · ` : ""}
+            {i.type && i.type !== "Inquiry" ? `${i.type}, ` : ""}
             {i.open && i.close && i.open === i.close
               ? `on ${fmtDate(i.open)}`
               : `${i.open ? `from ${fmtDate(i.open)}` : ""}${i.close ? ` to ${fmtDate(i.close)}` : ""}`}
-            {` · ${i.sessions} evidence session${i.sessions === 1 ? "" : "s"}`}
+            {`, ${i.sessions} evidence session${i.sessions === 1 ? "" : "s"}`}
             {i.reports ? `, ${i.reports} report${i.reports === 1 ? "" : "s"}` : ""}
           </span>
         </li>
@@ -61,17 +61,17 @@ function Page({ id }: { id: string }) {
   );
   return (
     <article>
-      <p className="eyebrow">
-        <a href="/committees">Committees</a> · {HOUSE_NAME[c.house] ?? c.house}
+      <p className="page-context">
+        <a href="/committees">Committees</a>, {HOUSE_NAME[c.house] ?? c.house}
       </p>
       <h1>{c.name}</h1>
-      {c.purpose && <p className="lede">{c.purpose}</p>}
+      {c.purpose && <p className="intro-text">{c.purpose}</p>}
       {c.departments && <p>Scrutinises: {c.departments}.</p>}
       <p className="small">
         <a href={c.url} target="_blank" rel="noreferrer">
           The committee's page on Parliament's website
         </a>
-        {c.end ? ` · This committee ended on ${fmtDate(c.end)}.` : ""}
+        {c.end ? `. This committee ended on ${fmtDate(c.end)}.` : ""}
       </p>
       {!!c.reports && (
         <p className="small">

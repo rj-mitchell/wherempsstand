@@ -10,7 +10,7 @@ interface Props {
 export const MIN_HALF_LIFE_YEARS = 0.5;
 
 export function recencyLabel(v: number, minHalfLife: number = MIN_HALF_LIFE_YEARS): string {
-  if (v <= 0) return "Off — all years ranked on relevance alone";
+  if (v <= 0) return "Off: all years ranked on relevance alone";
   const halfLife = minHalfLife / v;
   if (halfLife < 1) {
     const months = Math.round(halfLife * 12);

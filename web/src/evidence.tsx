@@ -26,7 +26,7 @@ function Page({ id }: { id: string }) {
     getJSON<Transcript>(`/api/evidence/${id}`, "There is no transcript for that session here yet.")
       .then((x) => {
         setT(x);
-        document.title = `${x.title ?? "Oral evidence"} — Where MPs Stand`;
+        document.title = `${x.title ?? "Oral evidence"} | Where MPs Stand`;
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not load."));
   }, [id]);
@@ -44,21 +44,21 @@ function Page({ id }: { id: string }) {
         {error} <a href="/committees">Committees</a>
       </p>
     );
-  if (!t) return <p className="muted" role="status">Loading…</p>;
+  if (!t) return <p className="muted" role="status">Fetching the evidence transcript.</p>;
   const witnessNames = new Set((t.witnesses ?? []).map((w) => w.name));
   return (
     <article className="debate">
-      <p className="eyebrow">
+      <p className="page-context">
         <a href="/committees">Committees</a>
         {t.committee_id && t.committees ? (
           <>
-            {" · "}
+            {", "}
             <a href={`/committees/${t.committee_id}`}>{t.committees}</a>
           </>
         ) : null}
       </p>
       <h1>{t.inquiry ?? t.title ?? "Oral evidence"}</h1>
-      <p className="lede">
+      <p className="intro-text">
         Oral evidence{t.date ? `, ${fmtDate(t.date)}` : ""}. Witnesses answer the committee's questions; what they
         say is their evidence, not a view of Parliament.
       </p>
@@ -66,7 +66,7 @@ function Page({ id }: { id: string }) {
         {t.inquiry_id && <a href={`/inquiries/${t.inquiry_id}`}>The inquiry</a>}
         {t.url && (
           <>
-            {" · "}
+            {", "}
             <a href={t.url} target="_blank" rel="noreferrer">
               The transcript on Parliament's website
             </a>

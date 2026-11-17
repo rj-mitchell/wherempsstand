@@ -171,3 +171,14 @@ describe("group labels", () => {
     expect(renderAnswer("A **bold** word.\nNext line.")).toContain("<strong>bold</strong> word.");
   });
 });
+
+describe("register field names", () => {
+  it("are shown in sentence case, keeping abbreviations", async () => {
+    const { sentenceCase } = await import("../render");
+    expect(sentenceCase("Regularity Of Payment")).toBe("Regularity of payment");
+    expect(sentenceCase("Is Sole Beneficiary")).toBe("Is sole beneficiary");
+    expect(sentenceCase("Donor Other Details")).toBe("Donor other details");
+    expect(sentenceCase("Value")).toBe("Value");
+    expect(sentenceCase("Received Date In UK")).toBe("Received date in UK");
+  });
+});

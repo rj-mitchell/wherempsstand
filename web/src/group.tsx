@@ -73,28 +73,28 @@ function Page({ parliament, slug }: { parliament: string; slug: string }) {
   useEffect(() => {
     fetch(`/api/groups/${encodeURIComponent(parliament)}/${encodeURIComponent(slug)}`)
       .then(async (r) => {
-        if (!r.ok) throw new Error(r.status === 404 ? "There is no group at this address." : "The group could not be loaded.");
+        if (!r.ok) throw new Error(r.status === 404 ? "There is no group at this address." : "The group's page did not load. Reload the page to try again.");
         return r.json() as Promise<Group>;
       })
       .then((d) => {
         setG(d);
-        document.title = `${d.title} — Where MPs Stand`;
+        document.title = `${d.title} | Where MPs Stand`;
       })
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : "The group could not be loaded."));
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "The group's page did not load. Reload the page to try again."));
   }, [parliament, slug]);
   if (error) return <p role="alert">{error} <a href="/groups">All groups</a></p>;
-  if (!g) return <p className="muted" role="status">Loading…</p>;
+  if (!g) return <p className="muted" role="status">Fetching the group's officers, members and benefits.</p>;
   const officers = g.members.filter((m) => m.is_officer);
   const members = g.members.filter((m) => !m.is_officer);
   const linked = members.filter((m) => m.member);
   const others = members.filter((m) => !m.member);
   return (
     <article>
-      <p className="eyebrow">
-        <a href={`/groups${g.parliament === "uk" ? "" : `?parliament=${g.parliament}`}`}>Groups</a> · {g.parliament_name}
+      <p className="page-context">
+        <a href={`/groups${g.parliament === "uk" ? "" : `?parliament=${g.parliament}`}`}>Groups</a>, {g.parliament_name}
       </p>
       <h1>{g.title}</h1>
-      {g.purpose && <p className="lede">{g.purpose}</p>}
+      {g.purpose && <p className="intro-text">{g.purpose}</p>}
       <p className="small">
         {g.category && <>{g.category}. </>}
         {g.agm && <>Last annual general meeting {fmtDate(g.agm)}. </>}
@@ -103,7 +103,7 @@ function Page({ parliament, slug }: { parliament: string; slug: string }) {
             <a href={g.website} rel="noreferrer">
               The group's website
             </a>
-            {" · "}
+            {", "}
           </>
         )}
         {g.source_url && <a href={g.source_url}>The official register entry</a>}
@@ -137,12 +137,12 @@ function Page({ parliament, slug }: { parliament: string; slug: string }) {
                 {g.benefits.map((b, i) => (
                   <tr key={i}>
                     <td>
-                      {b.funder ? <a href={`/groups?funder=${encodeURIComponent(b.funder)}`}>{b.funder}</a> : "—"}
+                      {b.funder ? <a href={`/groups?funder=${encodeURIComponent(b.funder)}`}>{b.funder}</a> : "Not given"}
                       {b.description && <p className="small muted">{b.description}</p>}
                     </td>
                     <td className="small">{b.type}</td>
-                    <td>{b.value ?? "—"}</td>
-                    <td>{b.received ? fmtDate(b.received) : "—"}</td>
+                    <td>{b.value ?? "Not given"}</td>
+                    <td>{b.received ? fmtDate(b.received) : "Not given"}</td>
                   </tr>
                 ))}
               </tbody>

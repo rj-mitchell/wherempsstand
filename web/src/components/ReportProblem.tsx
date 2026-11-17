@@ -3,8 +3,8 @@ import { api, ApiError, type ReportInput } from "../api";
 
 // the routes of the charity's impartiality policy, section 7.1, by their names in the family glossary
 const KINDS: { value: ReportInput["kind"]; label: string }[] = [
-  { value: "correction", label: "Something is wrong: a fact, quotation, label or grouping in this briefing" },
-  { value: "complaint", label: "You've been characterised unfairly: the record is right, but the briefing isn't fair" },
+  { value: "correction", label: "An error: a fact, quotation, label or grouping in this briefing is wrong" },
+  { value: "complaint", label: "An unfair description: the record is right, but the briefing isn't fair" },
   { value: "general", label: "Something else" },
 ];
 

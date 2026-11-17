@@ -2,7 +2,7 @@
 <html lang="en-GB">
   <head>
     <!--#include head-->
-    <title>Methodology — Where MPs Stand</title>
+    <title>Methodology | Where MPs Stand</title>
     <meta name="description" content="How Where MPs Stand answers questions about the UK Parliament: what it searches, how sources are chosen and checked, how speakers are described, and how it stays neutral." />
     <link rel="canonical" href="https://wherempsstand.com/methodology" />
   </head>
@@ -11,35 +11,37 @@
       <!--#include header-->
       <main id="main" tabindex="-1" class="prose">
         <h1>Methodology</h1>
-        <p class="lede">
-          How Where MPs Stand answers a question, where its information comes from, how it checks itself, and how
-          it stays neutral.
+        <p class="intro-text">
+          This page sets out how Where MPs Stand answers a question, where its information comes from, how it checks
+          itself, and how it stays neutral.
         </p>
 
         <nav class="toc" aria-label="On this page">
           <ol>
-            <li><a href="#what">What it does, and what it does not</a></li>
-            <li><a href="#chatbot">Why use this rather than a chatbot?</a></li>
-            <li><a href="#coverage">What is covered</a></li>
-            <li><a href="#how">How a question is answered</a></li>
+            <li><a href="#what">Scope</a></li>
+            <li><a href="#ai-briefings">AI briefings</a></li>
+            <li><a href="#coverage">Coverage</a></li>
+            <li><a href="#how">From question to briefing</a></li>
             <li><a href="#people">Who said it, as they were at the time</a></li>
             <li><a href="#seats">City, town and rural seats</a></li>
             <li><a href="#age-gender">Age and gender</a></li>
             <li><a href="#majorities">Majorities, who came second, and first-term MPs</a></li>
-            <li><a href="#votes">What each vote was on</a></li>
+            <li><a href="#votes">Kinds of vote</a></li>
             <li><a href="#devolution">Devolved subjects</a></li>
             <li><a href="#donations">Donations</a></li>
+            <li><a href="#directorships">Company roles</a></li>
+            <li><a href="#interests">Registered interests in briefings</a></li>
             <li><a href="#groups">All-party groups</a></li>
             <li><a href="#party-groups">Party groups and caucuses</a></li>
             <li><a href="#neutrality">Neutrality</a></li>
-            <li><a href="#warnings">What the warnings mean</a></li>
+            <li><a href="#warnings">Warnings</a></li>
             <li><a href="#saved">Saved and shared briefings</a></li>
             <li><a href="#limits">Limitations</a></li>
             <li><a href="#sources">Data sources and licences</a></li>
           </ol>
         </nav>
 
-        <h2 id="what">What it does, and what it does not</h2>
+        <h2 id="what">Scope</h2>
         <p>
           Hansard is the official, word-for-word record of Parliament.
           <a href="https://hansard.parliament.uk/search">Parliament's own Hansard search</a> is the right tool for
@@ -47,61 +49,48 @@
           fast, complete and authoritative, and every source shown here links back to the official record.
         </p>
         <p>
-          Where MPs Stand answers questions instead. Ask, in plain English, what has been said on a subject and by
-          whom, and it writes a short briefing on the positions taken, grouped by who holds them, with every point
-          linked to the speech it came from.
+          Where MPs Stand is for questions. Ask in your own words what has been said on a subject and by whom, and it
+          writes a short briefing on the positions taken, grouped by who holds them, with every point linked to the
+          speech it came from.
         </p>
 
-        <h2 id="chatbot">Why use this rather than a chatbot?</h2>
+        <h2 id="ai-briefings">AI briefings</h2>
         <p>
-          Anyone can put a question about Parliament to a general AI chatbot. This is what Where MPs Stand does
-          instead; the rest of this page gives the detail.
+          Briefings are written by AI. Anyone can put a question about Parliament to a general AI chatbot; the
+          difference here is what the AI is given and how its work is checked. The rest of this page gives the detail.
         </p>
-        <ul>
-          <li>
-            <strong>Only the record.</strong> The AI that writes a briefing is given only the records found for your
-            question, and may use nothing else (<a href="#how">step 5</a>): Hansard and, where they bear on the
-            question, early day motions, committee evidence and the devolved parliaments' official reports. A
-            follow-up question also carries a short summary of the briefings before it, for context only.
-          </li>
-          <li>
-            <strong>Every point linked and checked.</strong> Each point links to its source. Citations are checked
-            against the source text, and one that does not match is removed. Quotations are checked word for word,
-            and sentences no source supports are flagged: they are counted under the briefing and can be shown
-            (<a href="#how">step 6</a>; <a href="#warnings">what the warnings mean</a>).
-          </li>
-          <li>
-            <strong>Up to date.</strong> Hansard is read in twice a day, at about 07:15 and 19:15 UK time. The
-            <a href="/status">status page</a> shows the most recent record and the last update.
-          </li>
-          <li>
-            <strong>It says when there is nothing.</strong> If the record holds nothing relevant, you see "No records
-            found", not a guess, and no briefing is written (<a href="#how">step 7</a>).
-          </li>
-          <li>
-            <strong>Balanced by design.</strong> Evidence is chosen across ministers, opposition and backbenchers, not
-            only by relevance, with no more than two contributions from any one speaker, and the spread is shown with
-            each briefing (<a href="#how">step 3</a>). Briefings report in neutral words
-            (<a href="#neutrality">neutrality</a>).
-          </li>
-          <li>
-            <strong>Records searched in full.</strong> Parliament's debates and votes since 1997 (written answers
-            since 2001), each MP's votes, interests and donations, all searchable and linked.
-            <a href="#coverage">What is covered</a> gives the date each part starts. Every record is found by keyword
-            search; meaning-based search is built gradually, newest records first (<a href="#limits">limitations</a>).
-          </li>
-          <li>
-            <strong>Open.</strong> The method is this page, and the
-            <a href="https://github.com/rj-mitchell/wherempsstand">code</a> is published. Every briefing is labelled
-            as written by AI, the site is free, and it doesn't track you (<a href="/privacy">privacy</a>).
-          </li>
-        </ul>
+        <h3>What the model is given</h3>
         <p>
-          Briefings here are written by AI too. The difference is what the AI is given and how it is checked.
-          <a href="#how">How it works</a>
+          The AI is given only the records found for your question and may use nothing else
+          (<a href="#how">step 5</a>): Hansard and, when they bear on the question, early day motions, committee
+          evidence and the devolved parliaments' official reports. A follow-up question also carries a short summary of
+          the briefings before it, for context only. Hansard is read in twice a day, at about 07:15 and 19:15 UK time,
+          and the <a href="/status">status page</a> shows the most recent record and the last update.
+        </p>
+        <p>
+          Evidence is drawn from across ministers, the opposition and backbenchers, with no more than two contributions
+          from any one speaker, and the spread is shown with each briefing (<a href="#how">step 3</a>). The site holds
+          Parliament's debates and votes since 1997 (written answers since 2001), each MP's votes, interests and
+          donations, all searchable and linked; <a href="#coverage">Coverage</a> gives the date each part starts. Every
+          record is found by keyword search, and meaning-based search is built gradually, newest records first
+          (<a href="#limits">limitations</a>).
+        </p>
+        <h3>How it is checked</h3>
+        <p>
+          Each point links to its source. Citations are checked against the source text, quotations are checked word
+          for word, and sentences that no source supports are flagged. A citation that does not match is removed, and
+          unsupported sentences are counted under the briefing and can be shown (<a href="#how">step 6</a>;
+          <a href="#warnings">warnings</a>). If the record holds nothing relevant, the site says “No records found”
+          and no briefing is written (<a href="#how">step 7</a>). Briefings report in neutral words
+          (<a href="#neutrality">neutrality</a>).
+        </p>
+        <p>
+          The method is this page, and the <a href="https://github.com/rj-mitchell/wherempsstand">code</a> is
+          published. Every briefing is labelled as written by AI, the site is free, and it doesn't track you
+          (<a href="/privacy">privacy</a>).
         </p>
 
-        <h2 id="coverage">What is covered</h2>
+        <h2 id="coverage">Coverage</h2>
         <ul>
           <li>House of Commons and House of Lords debates, and Westminster Hall debates.</li>
           <li>Written questions and answers, and written ministerial statements, from both Houses.</li>
@@ -109,7 +98,7 @@
           <li>Every division (vote) in both Houses, with how each member voted. TheyWorkForYou's files for the 1997
             Parliament (May 1997 to May 2001) have no division lists, so the Commons votes of those years come from
             <a href="https://www.publicwhip.org.uk/">Public Whip</a>, which took them from Hansard, with thanks. Each is matched to the
-            result printed in Hansard ("The House divided: Ayes …, Noes …") by its counts, which gives it its place in
+            result printed in Hansard (“The House divided: Ayes …, Noes …”) by its counts, which gives it its place in
             the debate and its kind of vote; the few that cannot be matched keep Public Whip's title and link to the
             day's debates.</li>
         </ul>
@@ -118,17 +107,17 @@
           <a href="/status">status page</a> shows the most recent record and the last update.
         </p>
 
-        <h2 id="how">How a question is answered</h2>
+        <h2 id="how">From question to briefing</h2>
         <ol>
           <li>
-            <strong>The question becomes filters you can see and change.</strong> A language model turns the
+            The question becomes filters you can see and change. A language model turns the
             question into search terms and filters: dates, House, regions, parties, named members, roles (such as
-            government ministers) and the policy areas involved. "Northern MPs" means MPs for seats in the North
+            government ministers) and the policy areas involved. “Northern MPs” means MPs for seats in the North
             East, North West, and Yorkshire and the Humber. The filters are shown with every briefing and can be
             edited and re-run.
           </li>
           <li>
-            <strong>The record is searched by words and by meaning.</strong> Keyword search finds the exact terms;
+            The record is searched by words and by meaning. Keyword search finds the exact terms;
             meaning-based search finds speeches that make the same point in different words. Results are ranked by
             relevance, by how recent they are, and by whether the speaker held a relevant office at the time, such
             as the minister for the department concerned (or, with less weight, a seat on a select committee on the
@@ -139,18 +128,18 @@
             filters and settings always return the same sources.
           </li>
           <li>
-            <strong>Evidence is chosen for balance, not just for matches.</strong> The sources passed on are
+            Evidence is chosen to cover the different groups of speakers. The sources passed on are
             spread across speaker groups, such as government, opposition and backbenches, with no more than two
             contributions from any one speaker. Members who raised the subject on three or more separate days among
             the records found (not counting what they said as ministers) are included first, up to four of them, so
             that a backbencher who keeps returning to a subject is not crowded out by members who mentioned it once;
             the briefing may say that they raised it repeatedly. It gives no number of days, since that depends on
-            which records a search finds. A summary computed from the data, not written by the model,
+            which records a search finds. A summary computed from the data (the model does not write it)
             shows how many contributions came from which groups, parties and kinds of seat, and who raised the
             subject most often.
           </li>
           <li>
-            <strong>The rest of the record takes the room its relevance earns.</strong> Early day motions, the
+            The rest of the record takes the room its relevance earns. Early day motions, the
             Scottish Parliament, the Senedd, the Northern Ireland Assembly and witnesses' evidence to committees are
             searched alongside. Everything found is compared in meaning with the question by the same local model, so
             all of it is on one scale: a weak match is left out, and the closest take up to ten places (fifteen in
@@ -161,7 +150,7 @@
             committee brings in more of that record, and the number of sources stays the same.
           </li>
           <li>
-            <strong>The briefing is written only from those sources.</strong> The briefing is written by an AI model
+            The briefing is written only from those sources. The briefing is written by an AI model
             (Claude, made by Anthropic). It receives only the sources found, is instructed to use no other knowledge,
             and must attach a citation to every statement about what anyone said. It connects the sources where they
             meet (a concern raised in the Commons and put to witnesses, a policy decided differently in Holyrood),
@@ -169,22 +158,22 @@
             as the view of Parliament.
           </li>
           <li>
-            <strong>The briefing is then checked automatically.</strong> Every passage behind a citation is checked
+            The briefing is then checked automatically. Every passage behind a citation is checked
             against the original text, and any citation that does not match is removed. Every quotation the briefing
             puts in quotation marks is also checked, word for word, against the speech it is attributed to; one that
             cannot be found is marked. Statements without a source are counted under the briefing, and can be shown. Judgemental words used in the briefing's own voice are underlined. Spelling is set to
             British English, never inside quotations.
           </li>
           <li>
-            <strong>When the record has nothing, it says so.</strong> If no sufficiently relevant records are found,
-            the answer is "No records found", and no briefing is written.
+            When the record has nothing, the site says so. If no sufficiently relevant records are found,
+            the answer is “No records found”, and no briefing is written.
           </li>
         </ol>
         <p>
-          The <strong>Where they stand</strong> table at the top of a briefing is taken from the briefing's own section
-          headings ("Ministers: setting out measures"), with the number of sources each section cites; it adds no
-          judgement of its own, so it always matches the text below it. On a member's page, <strong>Speaks most
-          about</strong> counts the debate titles and question topics they spoke or asked about on the most separate days
+          The “Where they stand” table at the top of a briefing is taken from the briefing's own section
+          headings (“Ministers: setting out measures”), with the number of sources each section cites; it adds no
+          judgement of its own, so it always matches the text below it. On a member's page, “Speaks most
+          about” counts the debate titles and question topics they spoke or asked about on the most separate days
           in their last two years in Parliament, leaving out routine business such as Prime Minister's engagements. No
           AI is used for it.
         </p>
@@ -200,17 +189,17 @@
 
         <h2 id="seats">City, town and rural seats</h2>
         <p>
-          Seat types are defined by the size of the built-up area that people live in, not by whether a place has
-          official city status. Some small places are cities, and some large ones are towns, so official status says
-          little about what a constituency is like.
+          Seat types are defined by the size of the built-up area that people live in. Official city status is not
+          used: some small places are cities, and some large ones are towns, so it says little about what a
+          constituency is like.
         </p>
         <ul>
           <li>
-            <strong>City seat:</strong> most of the constituency's residents live in one urban area of about 200,000
+            A city seat is one where most of the constituency's residents live in one urban area of about 200,000
             people or more. Reading and Bolton can count; small cathedral cities do not.
           </li>
-          <li><strong>Rural seat:</strong> fewer than half of its residents live in urban areas of 10,000 or more.</li>
-          <li><strong>Town seat:</strong> everything in between.</li>
+          <li>A rural seat is one where fewer than half of the residents live in urban areas of 10,000 or more.</li>
+          <li>Every other seat is a town seat.</li>
         </ul>
         <p>
           The calculation uses official data from each nation: the Office for National Statistics' built-up areas
@@ -223,19 +212,19 @@
         <h2 id="age-gender">Age and gender</h2>
         <p>
           A question can ask how women and men, or older and younger members, have differed on an issue, or can be
-          limited to one group ("what have female MPs said about childcare?"). Briefings mention gender or age only
+          limited to one group (“what have female MPs said about childcare?”). Briefings mention gender or age only
           when the question asks about them, and never generalise beyond the speeches cited.
         </p>
         <ul>
           <li>
-            <strong>Age is the member's age on the day they spoke</strong>, not their age today. Age groups are under
+            Age is the member's age on the day they spoke. Age groups are under
             40, 40 to 54, 55 to 69, and 70 and over.
           </li>
           <li>
             Dates of birth come from Wikidata, matched to each member by their UK Parliament identifier. For the
             few members Wikidata has no date for (mostly recently elected MPs and new peers), the date in the
             birth-date field of their English Wikipedia article is used, found through the same Wikidata entry,
-            never by name. Where only the year of birth is recorded, the age is shown as approximate ("about 54").
+            never by name. Where only the year of birth is recorded, the age is shown as approximate (“about 54”).
             Some members' dates of birth are not published anywhere, and they are left out of age groupings.
           </li>
           <li>
@@ -243,31 +232,30 @@
             in the details of each source and is never inferred from a name.
           </li>
           <li>
-            When a date of birth or gender is not recorded, the source says "not known" and the member is left out
+            When a date of birth or gender is not recorded, the source says “not known” and the member is left out
             of any age or gender filter. The evidence summary shows how many contributions fall into each group.
           </li>
         </ul>
 
         <h2 id="majorities">Majorities, who came second, and first-term MPs</h2>
         <p>
-          Each MP's source shows their majority <strong>at the time they spoke</strong>, from the most recent election
+          Each MP's source shows their majority at the time they spoke, from the most recent election
           in their seat before that day (a general election or a by-election), the party that
-          <strong>came second</strong> at that same election, and, for current MPs, their majority now. Questions can
+          came second at that same election, and, for current MPs, their majority now. Questions can
           be limited to, or compare, MPs in marginal and safe seats, MPs in seats where a given party came second, or
           newly elected MPs and those re-elected at least once.
         </p>
         <ul>
           <li>
             Majority is shown as a number of votes and as a share of all valid votes cast. Seats are grouped as
-            <strong>marginal</strong> (majority under 10%), <strong>10% to 20%</strong>, and <strong>safe</strong>
-            (over 20%).
+            marginal (majority under 10%), 10% to 20%, and safe (over 20%).
           </li>
           <li>
-            <strong>Who came second</strong> is the party that came second in the MP's seat at the most recent election
+            Who came second is the party that came second in the MP's seat at the most recent election
             before the day they spoke, with its votes; the MP's majority is their margin over it. It is the result of
-            that election, not a prediction: the site uses no polls or projections, and does not decide which seats
-            are "threatened", "at risk" or "targets". A question worded that way ("seats threatened by Reform",
-            "Reform-facing seats") is read as the fact, and the filter shown with the briefing says so: seats where
+            that election: the site uses no polls or projections, and does not decide which seats
+            are “threatened”, “at risk” or “targets”. A question worded that way (“seats threatened by Reform”,
+            “Reform-facing seats”) is read as the fact, and the filter shown with the briefing says so: seats where
             Reform UK came second at the last election before they spoke. The Brexit Party is counted as Reform UK,
             since it is the same registered party, renamed in January 2021, but each result names the party as it
             stood at that election. The Green parties of England and Wales, Scotland and Northern Ireland are counted
@@ -280,7 +268,7 @@
             parties traditionally do not stand, so the runner-up there is often an independent or a smaller party.
           </li>
           <li>
-            A <strong>first-term MP</strong> is one still in the Parliament they were first elected to, including those
+            A first-term MP is one still in the Parliament they were first elected to, including those
             who arrived at a by-election. An MP who served before, left and later returned counts as re-elected.
           </li>
           <li>
@@ -299,11 +287,11 @@
           </li>
         </ul>
 
-        <h2 id="votes">What each vote was on</h2>
+        <h2 id="votes">Kinds of vote</h2>
         <p>
           A division's title usually names only the bill or the debate, so a vote can look like a vote on a whole policy
           when it was on an amendment, a single clause, the timetable, or a motion to decline the bill. Each division is
-          therefore labelled with the <strong>kind of vote</strong> it was, read from the record itself: the question put
+          therefore labelled with the kind of vote it was, read from the record itself: the question put
           just before the division (for example “That the Bill be now read a Second time”) and the outcome recorded just
           after it.
         </p>
@@ -321,15 +309,15 @@
             amendment or a procedural motion as a vote for or against a whole bill or policy.
           </li>
           <li>
-            For about 1,600 votes, a plain-English sentence on what voting aye (and sometimes no) meant is shown too,
+            For about 1,600 votes, a one-sentence summary of what voting aye (and sometimes no) meant is shown too,
             from <a href="https://votes.theyworkforyou.com/">TheyWorkForYou Votes</a> (mySociety), with thanks. Where
             TheyWorkForYou Votes reports how a party whipped a vote (for example, that it allowed a free vote), that
             is shown too, and members voting differently from their colleagues in a reported free vote are not counted
             as rebelling. Whips are reported only for some votes, so a vote without one may still have been free.
           </li>
           <li>
-            A label describes the procedure, not anyone's reasons. Members vote against amendments they agree with for
-            many reasons, and the record seldom says why.
+            A label describes the procedure only. Members vote against amendments they agree with for many reasons,
+            and the record seldom says why.
           </li>
         </ul>
 
@@ -347,7 +335,7 @@
             by AI and are not part of the briefing itself.
           </li>
           <li>
-            They simplify the devolution settlements, which have many exceptions. The UK government's
+            They simplify the devolution settlements, which have many exceptions. The UK Government's
             <a href="https://www.gov.uk/guidance/devolution-of-powers-to-scotland-wales-and-northern-ireland">guidance
             on devolution</a> sets out the full position.
           </li>
@@ -365,7 +353,7 @@
         </p>
         <ul>
           <li>
-            <strong>Donations to an MP</strong> (recorded by the Commission as given to an MP, a party leadership
+            Donations to an MP (recorded by the Commission as given to an MP, a party leadership
             candidate or a party member) are matched only to MPs sitting at the time of each donation, using the names
             they went by then. A match must be unique: if two sitting MPs share a name, the donation is not linked to
             either. Short forms of first names (Tom and Thomas), hyphens, titles and one-letter spelling slips in the
@@ -374,10 +362,9 @@
             must point to the same MP; if they point to different people, none is linked.
           </li>
           <li>
-            <strong>Donations to an MP's local party</strong> are linked only when the local party's name is exactly
-            the constituency's name (apart from words such as "CLP" or "Conservative Association") and the seat's MP
-            on that date was from the same party. They are shown separately, as donations to the local party, not to
-            the MP.
+            Donations to an MP's local party are linked only when the local party's name is exactly
+            the constituency's name (apart from words such as “CLP” or “Conservative Association”) and the seat's MP
+            on that date was from the same party. They are shown separately, as donations to the local party.
           </li>
         </ul>
         <p>
@@ -408,7 +395,7 @@
           every entry links to the Companies House record, a wrong match can be reported and is then removed, and a
           company also named in the member's register of interests is marked as such. Addresses and nationality are
           not shown. Companies House records no resignation when a company is dissolved, so a role in a dissolved
-          company is shown as ended ("until the company closed"), not as current. Members are checked a few hundred
+          company is shown as ended (“until the company closed”), not as current. Members are checked a few hundred
           at a time at each update and again about every four weeks.
           Holding a company role is not a finding of wrongdoing.
         </p>
@@ -431,7 +418,7 @@
           under the briefing lists who was flagged, and the source panel opens on the entries.
         </p>
         <p>
-          A match is a connection to check, not a finding: members register interests so that they can be seen, and
+          A match is a connection to check. Members register interests so that they can be seen, and
           having one is not wrongdoing. The model can miss a relevant entry or link one that is not. For MPs,
           every edition of the Commons register since November 2000 is kept, so an MP's entries are those on the
           register at the time they spoke (registered by then and still listed then), including interests that have
@@ -449,11 +436,11 @@
         </p>
         <ul>
           <li>
-            <strong>Officers, secretariats and registered benefits</strong> are as given in the register. Benefits in
+            Officers, secretariats and registered benefits are as given in the register. Benefits in
             kind are registered in bands of £1,500, so funders' totals are the least they could be.
           </li>
           <li>
-            <strong>Members</strong> other than officers come from lists the groups supplied (or the devolved
+            Members other than officers come from lists the groups supplied (or the devolved
             parliaments' official lists), so they may be incomplete or out of date. Lists that mySociety found by AI web
             search are left out, because mySociety says they are not yet checked.
           </li>
@@ -469,44 +456,46 @@
         <p>
           Groups within a party, such as the Socialist Campaign Group, the Labour Growth Group or the Conservative
           Environment Network, are not recorded by Parliament, and most of them publish no list of members. The site
-          counts a member as in a group only on <strong>published evidence</strong>, and shows the evidence every time,
+          counts a member as in a group only on published evidence, and shows the evidence every time,
           with a link to it:
         </p>
         <ul>
           <li>
-            <strong>The group's own list</strong> of its parliamentarians, such as the Conservative Environment
+            The group's own list of its parliamentarians, such as the Conservative Environment
             Network's page (undated, so it is shown with the date it was read, and checked again from time to time;
             only sitting MPs and peers are taken from it, not its Fellows or MSPs).
           </li>
           <li>
-            <strong>A letter or statement they signed</strong> that the group published with its signatories' names,
+            A letter or statement they signed that the group published with its signatories' names,
             such as the Labour Growth Group's letter of July 2024, Mainstream's founding statement of September 2025,
             the Socialist Campaign Group's statements of 2020 and 2021 or the Common Sense Group's letter of November
             2020. The source is named, including where it is a reproduction of the group's letter by a news site or a
             signatory.
           </li>
           <li>
-            <strong>Their own words in Parliament</strong>: "I am a member of the European Research Group", "the
-            Tribune group, which I chair", or in the Lords "I declare that I am part of the caucus of…". These are found
+            Their own words in Parliament: “I am a member of the European Research Group”, “the
+            Tribune group, which I chair”, or in the Lords “I declare that I am part of the caucus of…”. These are found
             by rule in what the member said: first person only, and not when the words are a negation, a question, a
             hypothesis, a quotation, about someone else, a minister answering a group, or from a member of another
-            party. Names that are also everyday phrases ("campaign group", "growth group", "one nation", "common sense",
+            party. Names that are also everyday phrases (“campaign group”, “growth group”, “one nation”, “common sense”,
             the magazine Tribune) count only in a form that can only mean the group. Some real statements are missed
             rather than risk counting wrong ones.
           </li>
         </ul>
+        <h3>Which Parliament</h3>
         <p>
-          <strong>Which Parliament.</strong> Evidence counts for the Parliament it belongs to, from one general
+          Evidence counts for the Parliament it belongs to, from one general
           election to the next: a letter signed in 2020 for what the member said in the 2019–24 Parliament, a list or
           letter from after July 2024 for what they have said since, and a statement in Parliament for the whole
           Parliament in which it was made. Groups change between Parliaments, so nothing is carried from one to the
           next.
         </p>
+        <h3>Payments for a group's research service</h3>
         <p>
-          <strong>Payments for a group's research service.</strong> Some groups, such as the European Research Group,
+          Some groups, such as the European Research Group,
           run a research service that MPs can pay for from their office budgets, as the Independent Parliamentary
           Standards Authority (IPSA) allows. IPSA publishes these payments by law. Where an MP's office paid, the site
-          says exactly that: "Paid for the group's research service (IPSA records, years)". It is not membership, and
+          says exactly that: “Paid for the group's research service (IPSA records, years)”. It is not membership, and
           the site never calls it that: IPSA says paying for a service is not the same as belonging to a group, and
           some members of a group don't pay while some who pay aren't members. The site shows only that a payment was
           made, and in which years: not amounts, and no view on the group's research. A claim that IPSA's records
@@ -514,8 +503,9 @@
           used under the Open Government Licence.
         </p>
 
+        <h3>Limits</h3>
         <p>
-          <strong>Limits.</strong> Coverage is uneven between groups and between parties, because some groups publish
+          Coverage is uneven between groups and between parties, because some groups publish
           names and others never do; a group with no evidence for anyone is not offered at all. Signatory lists
           under-count a group, since not every member signs every letter. No evidence is not evidence that someone does
           not belong, and briefings never say so. Press estimates and lists, Wikipedia and lists of authors or
@@ -530,7 +520,7 @@
         <ul>
           <li>
             Briefings use plain reporting words, such as said, argued, criticised, supported and opposed. Loaded
-            words such as "lied", "misled" or "U-turn" may appear only inside a quotation from the member who used
+            words such as “lied”, “misled” or “U-turn” may appear only inside a quotation from the member who used
             them, and the briefing never says that an individual contradicted themselves: it gives what they said on
             each date.
           </li>
@@ -546,7 +536,7 @@
           </li>
         </ul>
 
-        <h2 id="warnings">What the warnings mean</h2>
+        <h2 id="warnings">Warnings</h2>
         <dl class="defs">
           <dt><span class="show-uncited"><span class="unsupported">Statements not tied to a source</span></span></dt>
           <dd>Statements in the briefing that no cited source directly supports, including any whose citations all
@@ -557,7 +547,7 @@
           <dt><span class="misquote">Shaded quotation</span></dt>
           <dd>Words in quotation marks that were not found, word for word, in the source cited for them. Check the
             source before relying on them.</dd>
-          <dt>"No records found"</dt>
+          <dt>“No records found”</dt>
           <dd>The record, with the filters shown, contains nothing sufficiently relevant. No briefing was written.</dd>
         </dl>
 
@@ -569,7 +559,7 @@
           anywhere on the site, and search engines are asked not to index them.
         </p>
         <p>
-          The record keeps changing, so a saved briefing can fall out of date; "Ask again" writes a new one from the
+          The record keeps changing, so a saved briefing can fall out of date; “Ask again” writes a new one from the
           current record. A briefing that is found to be wrong or unfair can be withdrawn; its address then says so.
           Questions are saved with their briefings, so please do not include personal details in a question.
         </p>
@@ -631,7 +621,7 @@
             are left out. A registered interest is a declaration, not a finding of wrongdoing.
           </li>
           <li>
-            Committees, inquiries, reports, government responses and oral evidence witnesses from the UK Parliament
+            Committees, inquiries, reports, Government responses and oral evidence witnesses from the UK Parliament
             <a href="https://committees.parliament.uk/">Committees</a> data, under the Open Parliament Licence v3.0,
             refreshed weekly. Organisations are counted by name as given, so one body listed under two names is
             counted twice. Oral evidence transcripts (from 2014) come from the same service. Briefings may cite

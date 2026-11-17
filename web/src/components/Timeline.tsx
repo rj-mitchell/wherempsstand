@@ -58,7 +58,7 @@ export function Timeline({ query, showSpeaker }: { query: string; showSpeaker: b
   }, [query]);
 
   if (error) return <p className="form-error" role="alert">{error}</p>;
-  if (!data) return <p className="muted" role="status">Building the timeline…</p>;
+  if (!data) return <p className="muted" role="status">Building the timeline.</p>;
   if (!data.items.length) return <p className="muted">Nothing found on “{data.topic}”. Try other words.</p>;
   return (
     <section className="timeline" aria-label={`Timeline: ${data.topic}`}>

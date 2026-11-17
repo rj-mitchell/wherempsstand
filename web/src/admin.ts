@@ -65,7 +65,7 @@ interface Report {
 
 function reportCard(r: Report): HTMLElement {
   const box = el("article", undefined, "report-form");
-  box.append(el("h3", `${r.kind[0].toUpperCase()}${r.kind.slice(1)} · ${when(r.at)}`));
+  box.append(el("h3", `${r.kind[0].toUpperCase()}${r.kind.slice(1)}, ${when(r.at)}`));
   if (r.briefing_id) {
     const a = el("a", `Briefing /b/${r.briefing_id}`);
     a.href = `/b/${r.briefing_id}`;
@@ -134,7 +134,7 @@ async function act(path: string, body: unknown, what: string) {
 /** A statement to publish, decline, update or withdraw. Its words are shown as text, never as HTML. */
 function statementCard(s: AdminStatement): HTMLElement {
   const box = el("article", undefined, "report-form");
-  box.append(el("h3", `#${s.id} ${s.status} · ${s.name}, ${s.role} · received ${when(s.at)}`));
+  box.append(el("h3", `#${s.id} ${s.status}, ${s.name}, ${s.role}, received ${when(s.at)}`));
   const about = el("a", `About ${s.item_path}`);
   about.href = s.item_path;
   about.target = "_blank";

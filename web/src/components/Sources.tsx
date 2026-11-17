@@ -5,7 +5,7 @@ import { besideAnchor, besideCards, StatementBox } from "./Statements";
 import type { Statement } from "../statements";
 import { GROUPS_CAVEAT, PartyGroupList } from "./PartyGroups";
 import { ageLabel, attribution, houseOf, majorityText, reference, roleTitles, runnerUpText, seatTypeLabel } from "../people";
-import { fmtDate, highlightParts } from "../render";
+import { fmtDate, highlightParts, showHeading } from "../render";
 import type { Highlight, InterestFlag, SourceCard, Speaker } from "../types";
 
 export { roleTitles };
@@ -86,7 +86,7 @@ function SourceItem({ source: s, onOpen }: { source: SourceCard; onOpen: (h: Hig
       data-house={houseOf(s)}
       onClick={() => onOpen({ source: s.n, quotes: [] })}
     >
-      <span className="badge">{s.n}</span>
+      <span className="source-number">{s.n}</span>
       <span className="source-meta">
         {s.kind === "division" ? (
           <span className="att">
@@ -116,8 +116,8 @@ function SourceItem({ source: s, onOpen }: { source: SourceCard; onOpen: (h: Hig
         {s.declared && <span className="seat">Declared an interest when speaking</span>}
         {s.interest && <span className="interest-flag">Registered interest that may relate to this</span>}
         <span className="where">
-          <time dateTime={s.date}>{fmtDate(s.date)}</time> · {s.chamber}
-          {s.heading ? ` · ${s.heading}` : ""}
+          <time dateTime={s.date}>{fmtDate(s.date)}</time>, {s.chamber}
+          {s.heading ? `, ${showHeading(s.heading)}` : ""}
         </span>
       </span>
       {ref && <span className="colref">{ref}</span>}
@@ -177,7 +177,7 @@ export function SourceDrawer({
       ref={ref}
     >
       <header className="drawer-head">
-        <span className="badge">{source.n}</span>
+        <span className="source-number">{source.n}</span>
         <h2>
           {source.kind === "division"
             ? `Division ${source.number}`
@@ -217,14 +217,14 @@ export function SourceDrawer({
                 )}
               </dd>
               <dt>Party</dt>
-              <dd>{sp?.party ?? "—"}</dd>
+              <dd>{sp?.party ?? "Not recorded"}</dd>
               <dt>{sp?.house === "lords" ? "House" : "Constituency"}</dt>
               <dd>
                 {sp?.constituency
                   ? `${sp.constituency}${sp.region ? ` (${sp.region})` : ""}`
                   : sp?.house === "lords"
                     ? "House of Lords"
-                    : "—"}
+                    : "Not recorded"}
               </dd>
               {seat && (
                 <>
@@ -243,7 +243,7 @@ export function SourceDrawer({
                       (in their own words)
                       {sp?.house === "commons" && sp.person_id && (
                         <>
-                          {" · "}
+                          {", "}
                           <a href={`/people/${sp.person_id.split("/").pop()}#h-interests`}>Their registered interests</a>
                         </>
                       )}
@@ -314,7 +314,7 @@ export function SourceDrawer({
           <dd>
             {source.chamber}, {fmtDate(source.date)}
             {source.time ? `, ${source.time}` : ""}
-            {source.heading ? ` — ${source.heading}` : ""}
+            {source.heading ? `, ${showHeading(source.heading)}` : ""}
           </dd>
           <dt>{source.colnum ? "Hansard column" : source.uin ? "Reference" : "Column"}</dt>
           <dd className="num">{source.colnum ?? source.uin ?? "Not given in the source data"}</dd>
@@ -342,7 +342,7 @@ export function SourceDrawer({
               <span>{source.chamber}</span>
               {colRef && <span>{colRef}</span>}
             </p>
-            {source.heading && <h3 className="page-heading">{source.heading}</h3>}
+            {source.heading && <h3 className="page-heading">{showHeading(source.heading)}</h3>}
             {source.context && (
               <blockquote className="question">
                 <strong>Question asked:</strong> {source.context}
@@ -383,18 +383,18 @@ export function SourceDrawer({
 
         {source.ranking && (
           <details className="ranking">
-            <summary>Why this source ranked here</summary>
+            <summary>This source's ranking</summary>
             <dl>
               <dt>Relevance</dt>
               <dd>
-                {source.ranking.relevance.toFixed(2)} (keyword {source.ranking.keyword?.toFixed(2) ?? "—"}, semantic{" "}
-                {source.ranking.semantic?.toFixed(2) ?? "—"})
+                {source.ranking.relevance.toFixed(2)} (keyword {source.ranking.keyword?.toFixed(2) ?? "none"}, semantic{" "}
+                {source.ranking.semantic?.toFixed(2) ?? "none"})
               </dd>
               <dt>Recency factor</dt>
               <dd>×{source.ranking.recency.toFixed(2)}</dd>
               <dt>Role factor</dt>
               <dd>
-                ×{source.ranking.authority.toFixed(2)} — {source.ranking.authority_reason}
+                times {source.ranking.authority.toFixed(2)}: {source.ranking.authority_reason}
               </dd>
               <dt>Score</dt>
               <dd>{source.ranking.score.toFixed(3)}</dd>
@@ -405,7 +405,7 @@ export function SourceDrawer({
       </div>
       <footer className="drawer-foot">
         <button type="button" className="secondary" onClick={onClose}>
-          <span aria-hidden="true">← </span>Back to the briefing
+          Back to the briefing
         </button>
       </footer>
     </aside>
@@ -460,7 +460,7 @@ function DivisionDetail({ source }: { source: SourceCard }) {
   return (
     <section className="division">
       <p>
-        <strong>{[source.major_heading, source.minor_heading].filter(Boolean).join(" — ")}</strong>
+        <strong>{[source.major_heading, source.minor_heading].filter(Boolean).join(": ")}</strong>
       </p>
       {source.vote_type && (
         <p className="small">
@@ -524,11 +524,11 @@ function EdmDetail({ source, quotes }: { source: SourceCard; quotes: string[] })
         <dd>{source.edm_title}</dd>
         <dt>Tabled by</dt>
         <dd>
-          {sp?.number && sp.slug ? <a href={`/people/${sp.number}/${sp.slug}`}>{sp.name}</a> : (sp?.name ?? "—")}
+          {sp?.number && sp.slug ? <a href={`/people/${sp.number}/${sp.slug}`}>{sp.name}</a> : (sp?.name ?? "Not recorded")}
           {sp?.party ? ` (${sp.party})` : ""}
         </dd>
         <dt>Tabled on</dt>
-        <dd>{source.date ? fmtDate(source.date) : "—"}</dd>
+        <dd>{source.date ? fmtDate(source.date) : "Not recorded"}</dd>
         <dt>Signatures</dt>
         <dd>
           {signed || source.sponsors_count || 0}
@@ -571,15 +571,15 @@ function DevolvedDetail({ source, quotes }: { source: SourceCard; quotes: string
     <>
       <dl className="facts">
         <dt>Member</dt>
-        <dd>{m?.number && m.slug ? <a href={`/people/${m.number}/${m.slug}`}>{m.name}</a> : (m?.name ?? "—")}</dd>
+        <dd>{m?.number && m.slug ? <a href={`/people/${m.number}/${m.slug}`}>{m.name}</a> : (m?.name ?? "Not recorded")}</dd>
         <dt>Party</dt>
-        <dd>{m?.party ?? "—"}</dd>
+        <dd>{m?.party ?? "Not recorded"}</dd>
         <dt>Seat</dt>
-        <dd>{m?.seat ?? "—"}</dd>
+        <dd>{m?.seat ?? "Not recorded"}</dd>
         <dt>Where</dt>
         <dd>
           {source.chamber}, {fmtDate(source.date)}
-          {source.heading ? ` — ${source.heading}` : ""}
+          {source.heading ? `, ${showHeading(source.heading)}` : ""}
         </dd>
         <dt>Links</dt>
         <dd className="links">
@@ -613,9 +613,9 @@ function EvidenceDetail({ source, quotes }: { source: SourceCard; quotes: string
     <>
       <dl className="facts">
         <dt>Witness</dt>
-        <dd>{w?.name ?? "—"}</dd>
+        <dd>{w?.name ?? "Not recorded"}</dd>
         <dt>Role</dt>
-        <dd>{[w?.role, w?.organisation].filter(Boolean).join(", ") || "—"}</dd>
+        <dd>{[w?.role, w?.organisation].filter(Boolean).join(", ") || "Not recorded"}</dd>
         <dt>Committee</dt>
         <dd>
           {source.committee}, {fmtDate(source.date)}
@@ -675,7 +675,7 @@ function InterestBox({ flag, date }: { flag: InterestFlag; date: string }) {
               ({i.category}, {i.kind === "donation" ? "accepted" : "registered"} {fmtDate(i.registered)}
               {i.url && (
                 <>
-                  {" · "}
+                  {", "}
                   <a href={i.url}>the record</a>
                 </>
               )}

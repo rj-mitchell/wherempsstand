@@ -26,8 +26,8 @@ export function EdmList({ items }: { items: EdmRow[] }) {
             {" "}
             {e.uin ? `EDM ${e.uin}, ` : ""}
             {e.date_tabled ? <span className="nowrap">{fmtDate(e.date_tabled)}</span> : ""}
-            {e.sponsor.name ? ` · ${e.sponsor.name}${e.sponsor.party ? ` (${e.sponsor.party})` : ""}` : ""}
-            {e.sponsors_count != null ? ` · ${e.sponsors_count} signature${e.sponsors_count === 1 ? "" : "s"}` : ""}
+            {e.sponsor.name ? `, ${e.sponsor.name}${e.sponsor.party ? ` (${e.sponsor.party})` : ""}` : ""}
+            {e.sponsors_count != null ? `, ${e.sponsors_count} signature${e.sponsors_count === 1 ? "" : "s"}` : ""}
           </span>
         </li>
       ))}

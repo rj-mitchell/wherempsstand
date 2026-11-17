@@ -29,7 +29,7 @@ export function GroupsSection({ groups, name }: { groups: MemberGroup[]; name: s
       {g.benefits > 0 && (
         <span className="muted small">
           {" "}
-          · {g.benefits} registered benefit{g.benefits === 1 ? "" : "s"}
+          , {g.benefits} registered benefit{g.benefits === 1 ? "" : "s"}
         </span>
       )}
     </li>

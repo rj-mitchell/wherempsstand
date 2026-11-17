@@ -4,7 +4,7 @@ import type { Evidence, Settings } from "../types";
 
 const SEAT_LABEL: Record<string, string> = { city: "City", town: "Town", rural: "Rural" };
 
-/** One labelled row of counts, e.g. Parties: Labour 7 · Conservative 4. Shown so readers can judge balance. */
+/** One labelled row of counts, e.g. Parties: Labour 7, Conservative 4. Shown so readers can judge balance. */
 function EvidenceRow({ label, counts }: { label: string; counts: Record<string, number> }) {
   const entries = Object.entries(counts);
   if (!entries.length) return null;
@@ -66,7 +66,7 @@ export function EvidenceBar({
   return (
     <section className="evidence" aria-label="Evidence base">
       <p className="evidence-head">
-        <strong>Evidence base:</strong> {evidence.records} contribution{evidence.records === 1 ? "" : "s"} from{" "}
+        The evidence: {evidence.records} contribution{evidence.records === 1 ? "" : "s"} from{" "}
         {evidence.speakers} speaker{evidence.speakers === 1 ? "" : "s"}
         {years ? `, ${years}` : ""}
         {evidence.divisions ? `, plus ${evidence.divisions} division${evidence.divisions === 1 ? "" : "s"}` : ""}
@@ -89,7 +89,7 @@ export function EvidenceBar({
       )}
       {evidence.devolution?.map((d) => (
         <p key={d.subject} className="evidence-note">
-          <strong>Devolution:</strong> {d.text}{" "}
+          {d.text}{" "}
           <a href="/methodology#devolution">About these notes</a>
         </p>
       ))}

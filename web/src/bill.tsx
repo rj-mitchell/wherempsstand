@@ -1,4 +1,4 @@
-/** One bill: its journey through Parliament sitting by sitting, its divisions, and a way to ask about it. */
+/** One bill: its stages in Parliament sitting by sitting, its divisions, and a way to ask about it. */
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
@@ -46,27 +46,27 @@ function Bill({ slug }: { slug: string }) {
   useEffect(() => {
     fetch(`/api/bills/${slug}`)
       .then(async (r) => {
-        if (!r.ok) throw new Error(r.status === 404 ? "There is no bill at this address." : "The bill could not be loaded.");
+        if (!r.ok) throw new Error(r.status === 404 ? "There is no bill at this address." : "The bill's page did not load. Reload the page to try again.");
         return r.json() as Promise<BillData>;
       })
       .then((d) => {
         setB(d);
-        document.title = `${d.name} — Where MPs Stand`;
+        document.title = `${d.name} | Where MPs Stand`;
       })
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : "The bill could not be loaded."));
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "The bill's page did not load. Reload the page to try again."));
   }, [slug]);
 
   if (error) return <p role="alert">{error} <a href="/bills">All bills</a></p>;
-  if (!b) return <p className="muted" role="status">Loading…</p>;
+  if (!b) return <p className="muted" role="status">Fetching the bill's stages and votes.</p>;
   const range = `between ${fmtDate(b.first)} and ${fmtDate(b.last)}`;
   const question = `What arguments were made for and against the ${b.name} ${range}?`;
   return (
     <article className="bill">
-      <p className="eyebrow">
-        <a href="/bills">Bills</a> · {b.houses.map((h) => HOUSE[h]).join(" and ")}
+      <p className="page-context">
+        <a href="/bills">Bills</a>, {b.houses.map((h) => HOUSE[h]).join(" and ")}
       </p>
       <h1>{b.name}</h1>
-      <p className="lede">
+      <p className="intro-text">
         Debated {range}: {b.sittings.length} sitting{b.sittings.length === 1 ? "" : "s"} and {b.divisions.length} vote
         {b.divisions.length === 1 ? "" : "s"} in the record.
       </p>
@@ -82,31 +82,31 @@ function Bill({ slug }: { slug: string }) {
         <p className="muted small">Opens the question on the main page, where you can change it before asking.</p>
       </form>
 
-      <h2 id="h-journey">Its journey through Parliament</h2>
+      <h2 id="h-journey">Stages in Parliament</h2>
       <ol className="timeline-list">
         {b.sittings.map((s) => (
           <li key={`${s.date}-${s.house}-${s.source}`} className="timeline-item">
             <p className="timeline-date">
-              <time dateTime={s.date}>{fmtDate(s.date)}</time> · {HOUSE[s.house] ?? s.house}
+              <time dateTime={s.date}>{fmtDate(s.date)}</time>, {HOUSE[s.house] ?? s.house}
             </p>
             <p className="timeline-head">{s.stages.join("; ")}</p>
             <p className="timeline-excerpt small">
               {s.contributions} contribution{s.contributions === 1 ? "" : "s"}
               {s.contributions > 0 && (
                 <>
-                  {" · "}
+                  {", "}
                   <a href={`/?q=${encodeURIComponent(stageQuestion(b.name, s))}`}>Ask about this stage</a>
                 </>
               )}
               {s.path ? (
                 <>
-                  {" · "}
+                  {", "}
                   <a href={s.path}>Read the debate</a>
                 </>
               ) : (
                 s.url && (
                   <>
-                    {" · "}
+                    {", "}
                     <a href={s.url} target="_blank" rel="noreferrer">
                       Read the record
                     </a>
@@ -166,7 +166,7 @@ function Bill({ slug }: { slug: string }) {
               </tbody>
             </table>
           </div>
-          <h3>What these kinds of vote mean</h3>
+          <h3>Kinds of vote</h3>
           <VoteKindKey types={b.divisions.map((d) => d.vote_type)} />
         </section>
       )}

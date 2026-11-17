@@ -44,7 +44,7 @@ function Moments({ items, laugh }: { items: Moment[]; laugh: boolean }) {
             <p className="muted small">
               {m.member?.number ? <a href={`/people/${m.member.number}/${m.member.slug}`}>{who}</a> : who}
               {m.member?.party ? ` (${m.member.party})` : ""}, {fmtDate(m.date)}
-              {m.heading ? ` · ${m.heading}` : ""} ·{" "}
+              {m.heading ? `, ${m.heading}` : ""},{" "}
               {m.debate_path ? <a href={m.debate_path}>read it in context</a> : m.twfy_url && <a href={m.twfy_url}>read it in context</a>}
             </p>
           </li>
@@ -62,12 +62,12 @@ function Lighter() {
       .then((r) => (r.ok ? (r.json() as Promise<Data>) : Promise.reject(new Error())))
       .then(setD, () => setError(true));
   }, []);
-  if (error) return <p role="alert">This page could not be loaded. Please try again later.</p>;
-  if (!d) return <p className="muted" role="status">Loading…</p>;
+  if (error) return <p role="alert">The lighter moments did not load. Reload the page to try again.</p>;
+  if (!d) return <p className="muted" role="status">Fetching the lighter moments.</p>;
   return (
     <>
       <section aria-labelledby="h-laughter">
-        <h2 id="h-laughter">What made the House laugh</h2>
+        <h2 id="h-laughter">Laughter in the House</h2>
         <p className="muted small">The most recent moments the Official Report marks as laughter, newest first.</p>
         <Moments items={d.laughter} laugh />
       </section>

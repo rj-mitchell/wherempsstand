@@ -15,8 +15,8 @@ export function TopicHeader({
   const every = topic.refresh_days === 7 ? "once a week" : `once every ${topic.refresh_days} days`;
   return (
     <header className="topic-header">
-      <p className="eyebrow">
-        <a href="/topics">Topic briefings</a> · {topic.area}
+      <p className="page-context">
+        <a href="/topics">Topic briefings</a>, {topic.area}
       </p>
       <h1 className="topic-title">{topic.title}</h1>
       {topic.description && <p className="topic-description">{topic.description}</p>}

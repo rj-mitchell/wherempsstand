@@ -26,14 +26,14 @@ function Index() {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not load."));
   }, []);
   if (error) return <p role="alert">{error}</p>;
-  if (!rows) return <p className="muted" role="status">Loading…</p>;
+  if (!rows) return <p className="muted" role="status">Fetching the list of committees.</p>;
   const houses = ["Commons", "Lords", "Joint"].filter((h) => rows.some((r) => r.house === h));
   return (
     <>
       <form className="people-search-form" role="search" action="/witnesses" method="get">
         <label htmlFor="w-q">Who gave evidence? Search an organisation or person</label>
         <div className="ask-row">
-          <input id="w-q" name="q" placeholder="For example: NHS England, Which?, Greenpeace" />
+          <input id="w-q" name="q" placeholder="for example NHS England" />
           <button type="submit" className="primary">
             Search
           </button>
@@ -51,7 +51,7 @@ function Index() {
                   <span className="muted small">
                     {" "}
                     {r.inquiries} inquir{r.inquiries === 1 ? "y" : "ies"}, {r.reports} report{r.reports === 1 ? "" : "s"}
-                    {r.last_active ? ` · last active ${fmtDate(r.last_active)}` : ""}
+                    {r.last_active ? `, last active ${fmtDate(r.last_active)}` : ""}
                   </span>
                 </li>
               ))}

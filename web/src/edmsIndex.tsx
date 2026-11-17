@@ -49,7 +49,7 @@ function Edms() {
       >
         <label htmlFor="edm-q">Search the motions</label>
         <div className="ask-row">
-          <input id="edm-q" name="q" defaultValue={q} placeholder="For example: hospices, rail fares, Gaza" />
+          <input id="edm-q" name="q" defaultValue={q} placeholder="for example hospices" />
           <button type="submit" className="primary">
             Search
           </button>
@@ -77,7 +77,7 @@ function Edms() {
             <nav className="week-nav" aria-label="Pages">
               {page > 1 ? (
                 <button type="button" className="secondary" onClick={() => setPage(page - 1)}>
-                  ← Newer
+                  Newer motions
                 </button>
               ) : (
                 <span />
@@ -87,7 +87,7 @@ function Edms() {
               </span>
               {page < pages ? (
                 <button type="button" className="secondary" onClick={() => setPage(page + 1)}>
-                  Older →
+                  Older motions
                 </button>
               ) : (
                 <span />

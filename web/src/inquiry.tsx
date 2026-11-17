@@ -1,4 +1,4 @@
-/** One inquiry: its reports and the government's responses, and every oral evidence session with its witnesses. */
+/** One inquiry: its reports and the Government's responses, and every oral evidence session with its witnesses. */
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
@@ -29,7 +29,7 @@ function Page({ id }: { id: string }) {
     getJSON<Inquiry>(`/api/inquiries/${id}`, "There is no inquiry with that number.")
       .then((x) => {
         setD(x);
-        document.title = `${x.title} — Where MPs Stand`;
+        document.title = `${x.title} | Where MPs Stand`;
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not load."));
   }, [id]);
@@ -39,21 +39,21 @@ function Page({ id }: { id: string }) {
         {error} <a href="/committees">All committees</a>
       </p>
     );
-  if (!d) return <p className="muted" role="status">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Fetching the inquiry's reports and witnesses.</p>;
   const question = `What have MPs and peers said about ${d.title.replace(/\.$/, "")}?`;
   return (
     <article>
-      <p className="eyebrow">
+      <p className="page-context">
         <a href="/committees">Committees</a>
         {d.committees.map((c) => (
           <span key={c.id}>
-            {" · "}
+            {", "}
             <a href={`/committees/${c.id}`}>{c.name}</a>
           </span>
         ))}
       </p>
       <h1>{d.title}</h1>
-      <p className="lede">
+      <p className="intro-text">
         {d.type ?? "Inquiry"}
         {d.open ? ` opened ${fmtDate(d.open)}` : ""}
         {d.close ? `, closed ${fmtDate(d.close)}` : ""}. {d.sessions.length} oral evidence session
@@ -90,20 +90,20 @@ function Page({ id }: { id: string }) {
                 <span className="muted small">
                   {" "}
                   {p.date ? fmtDate(p.date) : ""}
-                  {p.hc ? ` · ${/^HC/i.test(p.hc) ? p.hc : `HC ${p.hc}`}` : ""}
-                  {p.hl ? ` · ${/^HL/i.test(p.hl) ? p.hl : `HL Paper ${p.hl}`}` : ""}
-                  {p.days_after_report != null ? ` · ${p.days_after_report} days after the report` : ""}
+                  {p.hc ? `, ${/^HC/i.test(p.hc) ? p.hc : `HC ${p.hc}`}` : ""}
+                  {p.hl ? `, ${/^HL/i.test(p.hl) ? p.hl : `HL Paper ${p.hl}`}` : ""}
+                  {p.days_after_report != null ? `, ${p.days_after_report} days after the report` : ""}
                 </span>
               </li>
             ))}
           </ul>
-          <p className="muted small">The government usually aims to respond to a committee report within two months.</p>
+          <p className="muted small">The Government usually aims to respond to a committee report within two months.</p>
         </>
       )}
 
       {d.sessions.length > 0 && (
         <>
-          <h2 id="h-sessions">Who gave oral evidence</h2>
+          <h2 id="h-sessions">Oral evidence sessions</h2>
           <ol className="edm-list">
             {d.sessions.map((s) => (
               <li key={s.id}>

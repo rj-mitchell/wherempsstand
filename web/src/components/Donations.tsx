@@ -64,12 +64,12 @@ function Rows({ items, local = false }: { items: Donation[]; local?: boolean }) 
         <tbody>
           {items.map((d) => (
             <tr key={d.ec_ref}>
-              <td>{d.accepted ? fmtDate(d.accepted) : "—"}</td>
+              <td>{d.accepted ? fmtDate(d.accepted) : "Not given"}</td>
               <td>
                 {donorLink(d.donor)}
                 {d.donor_status && <span className="muted small"> ({d.donor_status.toLowerCase()})</span>}
               </td>
-              <td>{d.value != null ? MONEY.format(d.value) : "—"}</td>
+              <td>{d.value != null ? MONEY.format(d.value) : "Not given"}</td>
               <td className="small">
                 {what(d)}
                 {KIND[d.kind] && <span className="muted"> {KIND[d.kind]}</span>}

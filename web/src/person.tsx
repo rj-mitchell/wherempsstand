@@ -109,7 +109,7 @@ function Person({ number }: { number: string }) {
     const once = (name: string) =>
       fetch(`/api/people/${number}?part=${name}`).then(async (r) => {
         if (!r.ok) {
-          const err = new Error((await r.json().catch(() => ({}))).detail ?? "This member could not be loaded.");
+          const err = new Error((await r.json().catch(() => ({}))).detail ?? "This member's page did not load.");
           (err as Error & { status: number }).status = r.status;
           throw err;
         }
@@ -123,7 +123,7 @@ function Person({ number }: { number: string }) {
     part("core")
       .then((d) => {
         setCore(d);
-        document.title = `${d.name} — Where MPs Stand`;
+        document.title = `${d.name} | Where MPs Stand`;
         const want = `/people/${d.number}/${d.slug}`;
         if (window.location.pathname !== want) window.history.replaceState(null, "", want);
       })
@@ -133,7 +133,7 @@ function Person({ number }: { number: string }) {
   }, [number]);
 
   if (error) return <p role="alert">{error}</p>;
-  if (!core) return <p className="muted" role="status">Loading…</p>;
+  if (!core) return <p className="muted" role="status">Fetching this member's record.</p>;
   const p: PersonData = {
     ...core,
     ...(activity && activity !== "error" ? activity : {}),
@@ -141,16 +141,16 @@ function Person({ number }: { number: string }) {
   };
   const pending = (part: Partial<PersonData> | "error" | null, what: string) =>
     part === null ? (
-      <p className="muted small">Loading {what}…</p>
+      <p className="muted small">Fetching {what}.</p>
     ) : part === "error" ? (
-      <p className="muted small">The {what} could not be loaded. Please try again later.</p>
+      <p className="muted small">The {what} did not load. Reload the page to try again.</p>
     ) : null;
   const ask = (q: string) => `/?q=${encodeURIComponent(q)}`;
   return (
     <article>
-      <p className="eyebrow">{p.current?.house === "lords" ? "House of Lords" : p.current ? "House of Commons" : "Former member"}</p>
+      <p className="page-context">{p.current?.house === "lords" ? "House of Lords" : p.current ? "House of Commons" : "Former member"}</p>
       <h1>{p.name}</h1>
-      <p className="lede">
+      <p className="intro-text">
         {p.status}
         {p.age != null && `. Age ${p.age_approximate ? "about " : ""}${p.age}`}
         {p.first_elected && p.memberships.some((m) => m.house === "commons") && `. First elected ${fmtDate(p.first_elected)}`}.
@@ -174,9 +174,9 @@ function Person({ number }: { number: string }) {
           window.location.href = ask(`What has ${p.name} said about ${topic.trim()}?`);
         }}
       >
-        <label htmlFor="topic">What has {p.name} said about…</label>
+        <label htmlFor="topic">Ask what {p.name} has said about a topic</label>
         <div className="ask-row">
-          <input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="a topic, e.g. housing" />
+          <input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="for example housing" />
           <button type="submit" className="primary">
             Ask
           </button>
@@ -272,8 +272,8 @@ function Person({ number }: { number: string }) {
                         ? `majority ${r.majority.toLocaleString("en-GB")}`
                         : "won (majority not known: the source counts smaller parties and independents together)"}
                       {r.pct != null && `, ${r.pct}% of votes cast`}
-                      {r.band && <span className="muted"> · {BAND[r.band]}</span>}
-                      {r.runner_up && <span className="muted"> · second: {r.runner_up}</span>}
+                      {r.band && <span className="muted">, {BAND[r.band]}</span>}
+                      {r.runner_up && <span className="muted">, {r.runner_up} second</span>}
                     </li>
                   ))}
                 </ul>
@@ -300,7 +300,7 @@ function Person({ number }: { number: string }) {
         <ul>
           {[...p.memberships].reverse().map((m) => (
             <li key={m.house + m.start}>
-              {m.house === "commons" ? `MP for ${m.constituency ?? "—"}` : "House of Lords"}
+              {m.house === "commons" ? (m.constituency ? `MP for ${m.constituency}` : "MP") : "House of Lords"}
               {m.party ? `, ${m.party}` : ""} <span className="muted small">({span(m.start, m.end)})</span>
             </li>
           ))}
@@ -352,7 +352,7 @@ function Person({ number }: { number: string }) {
                   <li key={`${c.key}-${c.ord}`}>
                     <p className="muted small">
                       {fmtDate(c.date)}
-                      {c.major ? ` · ${c.major}` : ""}
+                      {c.major ? `, ${c.major}` : ""}
                     </p>
                     <p>{c.excerpt.length >= 320 ? `${c.excerpt.trimEnd()}…` : c.excerpt}</p>
                     <p className="small">
@@ -380,7 +380,7 @@ function Person({ number }: { number: string }) {
                   {s.date ? fmtDate(s.date) : "Session"}
                 </a>
                 : {s.committees}
-                {s.inquiry ? ` · ${s.inquiry}` : ""}
+                {s.inquiry ? `, ${s.inquiry}` : ""}
                 {s.role && <span className="muted small"> ({s.role})</span>}
               </li>
             ))}
@@ -447,8 +447,8 @@ function Glance({
               <>
                 : majority {result.majority.toLocaleString("en-GB")}
                 {result.pct != null && ` (${result.pct}%)`} at the {result.election}
-                {result.band && <span className="muted"> · {BAND[result.band]}</span>}
-                {result.runner_up && <span className="muted"> · second: {result.runner_up}</span>}
+                {result.band && <span className="muted">, {BAND[result.band]}</span>}
+                {result.runner_up && <span className="muted">, {result.runner_up} second</span>}
               </>
             )}{" "}
             <a href="#h-seats" className="small">
@@ -476,14 +476,14 @@ function Glance({
         <dt>Speaks most about</dt>
         <dd>
           {activity === null ? (
-            <span className="muted small">Counting…</span>
+            <span className="muted small">Counting their subjects.</span>
           ) : !p.topics ? (
             <span className="muted small">Not available yet.</span>
           ) : topics.length > 0 ? (
             <>
               <span className="glance-topics">
                 {topics.map((t) => (
-                  <button key={t.subject} type="button" className="chip-button" onClick={() => onTopic(t.subject)}>
+                  <button key={t.subject} type="button" className="topic-button" onClick={() => onTopic(t.subject)}>
                     {t.subject} <span className="count">{t.days}</span>
                   </button>
                 ))}
@@ -585,15 +585,15 @@ function Contributions({ number, first, more }: { number: number; first: Contrib
         {items.slice(0, shown).map((c) => (
           <li key={c.record_id}>
             <p className="muted small">
-              {fmtDate(c.date)} · {c.chamber}
-              {c.heading ? ` · ${c.heading}` : ""}
+              {fmtDate(c.date)}, {c.chamber}
+              {c.heading ? `, ${c.heading}` : ""}
             </p>
             <p>{c.excerpt.length >= 320 ? `${c.excerpt.trimEnd()}…` : c.excerpt}</p>
             <p className="small">
               <a href={c.debate_path ?? c.twfy_url}>Read in full</a>
               {c.official_url && (
                 <>
-                  {" · "}
+                  {", "}
                   <a href={c.official_url}>Official record</a>
                 </>
               )}
@@ -604,7 +604,7 @@ function Contributions({ number, first, more }: { number: number; first: Contrib
       {(shown < items.length || hasMore) && (
         <p>
           <button type="button" className="secondary" onClick={() => void showMore()} disabled={busy}>
-            {busy ? "Loading…" : "Show more contributions"}
+            {busy ? "Fetching more contributions" : "Show more contributions"}
           </button>
         </p>
       )}

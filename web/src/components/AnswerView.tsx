@@ -53,7 +53,7 @@ export function AnswerView({
   return (
     <div className="answer">
       <p className="answer-head">
-        <span className="answer-label">Briefing · written by AI</span>
+        <span className="answer-label">Briefing written by AI</span>
         {answer && !answer.no_records && <CheckBadge answer={answer} target={checkId} />}
       </p>
       {stances.length > 0 && <WhereTheyStand stances={stances} body={body} />}
@@ -219,7 +219,7 @@ function ShareButton({ url, title }: { url: string; title: string }) {
   const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
   async function share() {
     try {
-      if (canShare) await navigator.share({ url, title: `${title} — Where MPs Stand` });
+      if (canShare) await navigator.share({ url, title: `${title} | Where MPs Stand` });
       else {
         await navigator.clipboard.writeText(url);
         setDone(true);

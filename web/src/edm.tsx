@@ -49,7 +49,7 @@ function Edm({ id }: { id: string }) {
       })
       .then((x) => {
         setE(x);
-        document.title = `${x.title} (early day motion) — Where MPs Stand`;
+        document.title = `${x.title} (early day motion) | Where MPs Stand`;
       })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not load."));
   }, [id]);
@@ -60,19 +60,19 @@ function Edm({ id }: { id: string }) {
         {error} <a href="/edms">All early day motions</a>
       </p>
     );
-  if (!e) return <p className="muted" role="status">Loading…</p>;
+  if (!e) return <p className="muted" role="status">Fetching the motion and its signatures.</p>;
   const supporters = e.sponsors.filter((s) => !s.withdrawn);
   const withdrawn = e.sponsors.filter((s) => s.withdrawn);
   const question = `What have MPs said in Parliament about ${e.title.replace(/\.$/, "")}?`;
   return (
     <article className="edm">
-      <p className="eyebrow">
+      <p className="page-context">
         <a href="/edms">Early day motions</a>
-        {e.uin ? ` · EDM ${e.uin}` : ""}
-        {e.date_tabled ? ` · tabled ${fmtDate(e.date_tabled)}` : ""}
+        {e.uin ? `, EDM ${e.uin}` : ""}
+        {e.date_tabled ? `, tabled ${fmtDate(e.date_tabled)}` : ""}
       </p>
       <h1>{e.title}</h1>
-      <p className="lede">
+      <p className="intro-text">
         Tabled by <Member m={e.sponsor} />
         {e.sponsors_count != null && `, with ${e.sponsors_count} signature${e.sponsors_count === 1 ? "" : "s"}`}.
       </p>
@@ -105,7 +105,7 @@ function Edm({ id }: { id: string }) {
         <p className="muted small">Opens the question on the main page, where you can change it before asking.</p>
       </form>
 
-      <h2 id="h-signed">Who signed</h2>
+      <h2 id="h-signed">Signatures</h2>
       {!e.signatures_known ? (
         <p className="muted">The list of signatures has not been collected yet; it will appear after an update.</p>
       ) : (
@@ -155,7 +155,7 @@ function Edm({ id }: { id: string }) {
             {e.amendments.map((a) => (
               <li key={a.id}>
                 <a href={`/edms/${a.id}`}>{a.title}</a>
-                {a.sponsors_count != null && <span className="muted small"> · {a.sponsors_count} signatures</span>}
+                {a.sponsors_count != null && <span className="muted small">, {a.sponsors_count} signatures</span>}
               </li>
             ))}
           </ul>

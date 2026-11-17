@@ -186,7 +186,7 @@ function Charts() {
                       {data.series.map((s) => (
                         <td key={s.key}>
                           {s.counts[i] == null
-                            ? "—"
+                            ? "No data"
                             : `${s.counts[i]!.toLocaleString("en-GB")} of ${(s.totals[i] ?? 0).toLocaleString("en-GB")}`}
                           {s.rate[i] != null && <span className="muted"> ({s.rate[i]} per 10,000)</span>}
                         </td>

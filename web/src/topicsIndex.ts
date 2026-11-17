@@ -64,7 +64,7 @@ async function load() {
       document.getElementById("featured")!.hidden = false;
     }
   } catch {
-    live.replaceChildren(el("p", "form-error", "The topics could not be loaded just now. Please try again later."));
+    live.replaceChildren(el("p", "form-error", "The list of topic briefings did not load. Reload the page to try again."));
   }
 }
 

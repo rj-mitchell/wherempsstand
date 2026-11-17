@@ -139,3 +139,15 @@ export function keepTogether(s: string): string {
 
 /** Lists on member pages are shown open; one longer than this starts folded, with its count in the heading. */
 export const LONG = 25;
+
+/** A record's heading as shown: the index joins Hansard's headings with a dash, shown here with a colon. */
+export const showHeading = (h: string) => h.replace(/ — /g, ": ");
+
+/** A field name from a register in sentence case ("Regularity Of Payment" → "Regularity of payment"), keeping
+ *  capitalised abbreviations ("UK", "MP") as they are. */
+export function sentenceCase(label: string): string {
+  return label
+    .split(" ")
+    .map((w, i) => (i > 0 && /^[A-Z][a-z]/.test(w) ? w.toLowerCase() : w))
+    .join(" ");
+}

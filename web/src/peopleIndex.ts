@@ -119,7 +119,7 @@ async function load() {
     render();
     lookUp();
   } catch {
-    live.textContent = "The list of members could not be loaded. Please try again later.";
+    live.textContent = "The list of MPs and peers did not load. Reload the page to try again.";
   }
 }
 void load();

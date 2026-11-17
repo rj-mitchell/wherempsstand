@@ -24,7 +24,7 @@ function row(b: BillRow): HTMLLIElement {
   const meta = document.createElement("p");
   meta.className = "muted small";
   const years = b.first.slice(0, 4) === b.last.slice(0, 4) ? b.first.slice(0, 4) : `${b.first.slice(0, 4)}–${b.last.slice(0, 4)}`;
-  meta.textContent = `${years} · ${b.sittings} sitting${b.sittings === 1 ? "" : "s"} · ${b.divisions} vote${b.divisions === 1 ? "" : "s"} · latest: ${b.latest}, ${keepTogether(fmtDate(b.last))}`;
+  meta.textContent = `${years}, ${b.sittings} sitting${b.sittings === 1 ? "" : "s"}, ${b.divisions} vote${b.divisions === 1 ? "" : "s"}, latest: ${b.latest}, ${keepTogether(fmtDate(b.last))}`;
   li.append(a, meta);
   return li;
 }
@@ -50,7 +50,7 @@ async function load() {
     input.addEventListener("input", render);
     render();
   } catch {
-    live.replaceChildren(Object.assign(document.createElement("p"), { className: "form-error", textContent: "The bills could not be loaded just now." }));
+    live.replaceChildren(Object.assign(document.createElement("p"), { className: "form-error", textContent: "The list of bills did not load. Reload the page to try again." }));
   }
 }
 

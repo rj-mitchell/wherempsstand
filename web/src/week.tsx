@@ -68,7 +68,7 @@ function PauseNote({ p }: { p: Pause }) {
     <p className="shared-note" role="status" style={{ marginBlockEnd: "var(--space-m)" }}>
       {p.recess ? (
         <>
-          <strong>Parliament is in recess:</strong> {houses}. Here is the last week it sat.
+          Parliament is in recess ({houses}). This is the last week it sat.
           {since.length > 0 && ` Since then, ${since.join(" and ")}.`} Sittings appear here the morning after they
           happen.
         </>
@@ -92,14 +92,14 @@ function Week({ start }: { start: string | null }) {
   useEffect(() => {
     fetch(start ? `/api/week?start=${start}` : "/api/week")
       .then(async (r) => {
-        if (!r.ok) throw new Error(r.status === 404 ? "Parliament did not sit that week." : "The week could not be loaded.");
+        if (!r.ok) throw new Error(r.status === 404 ? "Parliament did not sit that week." : "The week did not load. Reload the page to try again.");
         return r.json() as Promise<WeekData>;
       })
       .then((x) => {
         setW(x);
-        document.title = `In Parliament, week of ${fmtDate(x.start)} — Where MPs Stand`;
+        document.title = `In Parliament, week of ${fmtDate(x.start)} | Where MPs Stand`;
       })
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : "The week could not be loaded."));
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "The week did not load. Reload the page to try again."));
   }, [start]);
 
   if (error)
@@ -108,16 +108,16 @@ function Week({ start }: { start: string | null }) {
         {error} <a href="/this-week">The latest week</a>
       </p>
     );
-  if (!w) return <p className="muted" role="status">Loading…</p>;
+  if (!w) return <p className="muted" role="status">Fetching the week's business.</p>;
   const debates = w.days.reduce((n, d) => n + d.chambers.reduce((m, c) => m + c.debates.length, 0), 0);
   return (
     <article className="week">
       {w.pause && <PauseNote p={w.pause} />}
-      <p className="eyebrow">In Parliament</p>
+      <p className="page-context">In Parliament</p>
       <h1>
         Week of {fmtDate(w.start)}
       </h1>
-      <p className="lede">
+      <p className="intro-text">
         {w.days.length} sitting day{w.days.length === 1 ? "" : "s"}, {debates} debates and statements,{" "}
         {votesText(w)} and {w.written_questions.toLocaleString("en-GB")} written answers, from the official record.
         Every debate can be read in full.
@@ -135,8 +135,8 @@ function Week({ start }: { start: string | null }) {
         lists what is coming up.
       </p>
       <nav className="week-nav" aria-label="Other weeks">
-        {w.previous ? <a href={`/weeks/${w.previous}`}>← Week of {fmtDate(w.previous)}</a> : <span />}
-        {w.next && <a href={`/weeks/${w.next}`}>Week of {fmtDate(w.next)} →</a>}
+        {w.previous ? <a href={`/weeks/${w.previous}`}>Previous week, starting {fmtDate(w.previous)}</a> : <span />}
+        {w.next && <a href={`/weeks/${w.next}`}>Next week, starting {fmtDate(w.next)}</a>}
       </nav>
 
       {w.days.map((d) => (

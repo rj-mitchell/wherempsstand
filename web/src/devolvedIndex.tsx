@@ -76,7 +76,7 @@ function Search({ bodies }: { bodies: Body[] }) {
       >
         <label htmlFor="dv-q">Words to find</label>
         <div className="ask-row">
-          <input id="dv-q" name="q" defaultValue={q} placeholder="For example: waiting times, ferries, teacher pay" />
+          <input id="dv-q" name="q" defaultValue={q} placeholder="for example ferries" />
           <label className="visually-hidden" htmlFor="dv-leg">
             Parliament
           </label>
@@ -102,8 +102,8 @@ function Search({ bodies }: { bodies: Body[] }) {
             {res.items.map((h) => (
               <li key={h.id}>
                 <p className="timeline-date">
-                  {h.body} · <a href={`/devolved/${h.legislature}/${h.key}#s${h.ord}`}>{fmtDate(h.date)}</a>
-                  {h.major ? ` · ${h.major}` : ""}
+                  {h.body}, <a href={`/devolved/${h.legislature}/${h.key}#s${h.ord}`}>{fmtDate(h.date)}</a>
+                  {h.major ? `, ${h.major}` : ""}
                 </p>
                 <p>
                   <strong>{h.speaker.name}</strong>
@@ -133,7 +133,7 @@ function Index() {
   useEffect(() => {
     if (bodies && window.location.hash) document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
   }, [bodies]);
-  if (!bodies) return <p className="muted" role="status">Loading…</p>;
+  if (!bodies) return <p className="muted" role="status">Fetching the devolved parliaments' recent sittings.</p>;
   const empty = bodies.every((b) => !b.speeches);
   return (
     <>
@@ -156,8 +156,8 @@ function Index() {
                     <a href={`/devolved/${b.id}/${d.key}`}>{fmtDate(d.date)}</a>
                     <span className="muted small">
                       {" "}
-                      · {d.headings.slice(0, 4).join("; ")}
-                      {d.headings.length > 4 ? "…" : ""}
+                      , {d.headings.slice(0, 4).join("; ")}
+                      {d.headings.length > 4 ? " and more" : ""}
                     </span>
                   </li>
                 ))}

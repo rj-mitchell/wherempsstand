@@ -41,7 +41,7 @@ function Page() {
       .then(setD)
       .catch(() => setD({ available: false }));
   }, [parliament, q]);
-  if (!d) return <p className="muted" role="status">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Fetching the list of groups.</p>;
   if (!d.available) return <p>The groups have not been loaded yet. They are added at the next weekly update.</p>;
   const groups = d.groups ?? [];
   const byCategory = new Map<string, Group[]>();
@@ -63,7 +63,7 @@ function Page() {
       >
         <label htmlFor="group-q">Subject, country or organisation</label>
         <div className="ask-row">
-          <input id="group-q" name="q" defaultValue={q} placeholder="For example: cancer, or Saudi Arabia" />
+          <input id="group-q" name="q" defaultValue={q} placeholder="for example cancer" />
           <button type="submit" className="primary">
             Search
           </button>
@@ -109,7 +109,7 @@ function Page() {
                 {g.benefits > 0 && (
                   <span className="muted small">
                     {" "}
-                    · {g.benefits} registered benefit{g.benefits === 1 ? "" : "s"}
+                    , {g.benefits} registered benefit{g.benefits === 1 ? "" : "s"}
                   </span>
                 )}
               </li>
@@ -128,12 +128,12 @@ function Funder({ name }: { name: string }) {
       .then((r) => (r.ok ? r.json() : { benefits: [] }))
       .then((d) => setRows(d.benefits))
       .catch(() => setRows([]));
-    document.title = `${name}: funding of all-party groups — Where MPs Stand`;
+    document.title = `${name}: funding of all-party groups | Where MPs Stand`;
   }, [name]);
-  if (!rows) return <p className="muted" role="status">Loading…</p>;
+  if (!rows) return <p className="muted" role="status">Fetching what this funder has given.</p>;
   return (
     <section aria-labelledby="h-funder">
-      <p className="eyebrow">
+      <p className="page-context">
         <a href="/groups">All groups</a>
       </p>
       <h2 id="h-funder">{name}</h2>

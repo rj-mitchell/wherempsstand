@@ -43,7 +43,7 @@ export interface Link {
   note?: string;
 }
 
-/** "Elsewhere: Hansard search (every mention) · …": one short line of outside links. */
+/** "Elsewhere: Hansard search (every mention), …": one short line of outside links. */
 export function Elsewhere({ label = "Elsewhere", links, children }: { label?: string; links: Link[]; children?: ReactNode }) {
   if (links.length === 0) return null;
   return (
@@ -51,7 +51,7 @@ export function Elsewhere({ label = "Elsewhere", links, children }: { label?: st
       <span className="muted">{label}: </span>
       {links.map((l, i) => (
         <span key={l.href}>
-          {i > 0 && " · "}
+          {i > 0 && ", "}
           <a href={l.href} rel="noreferrer">
             {l.text}
           </a>

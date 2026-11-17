@@ -9,7 +9,7 @@ export function SameQuestion({ question }: { question: string }) {
       <span className="muted">On a sister site: </span>
       {links.map((l, i) => (
         <span key={l.id}>
-          {i > 0 && " · "}
+          {i > 0 && ", "}
           <a href={l.href}>
             {/* the sister site's spine, from the family kit's shelf: a fixed drawing, not anything a reader sent */}
             <span className="same-question-spine" dangerouslySetInnerHTML={{ __html: l.spine }} />

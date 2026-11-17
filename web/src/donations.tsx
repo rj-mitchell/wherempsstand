@@ -48,13 +48,13 @@ function DonationTable({ items, showDonor }: { items: Donation[]; showDonor: boo
         <tbody>
           {items.map((d) => (
             <tr key={d.ec_ref}>
-              <td>{d.accepted ? fmtDate(d.accepted) : "—"}</td>
+              <td>{d.accepted ? fmtDate(d.accepted) : "Not given"}</td>
               {showDonor && <td>{donorLink(d.donor)}</td>}
               <td>
                 <Member d={d} />
                 {d.kind === "local_party" && <span className="muted small"> (to their local party: {d.unit})</span>}
               </td>
-              <td>{d.value != null ? MONEY.format(d.value) : "—"}</td>
+              <td>{d.value != null ? MONEY.format(d.value) : "Not given"}</td>
               <td className="small">{what(d)}</td>
               <td className="small">
                 <a href={d.url}>{d.ec_ref}</a>
@@ -89,15 +89,15 @@ function OneDonor({ name }: { name: string }) {
       .then((r) => (r.ok ? r.json() : { donations: [] }))
       .then((d: { donations: Donation[] }) => setRows(d.donations))
       .catch(() => setRows([]));
-    document.title = `${name}: donations to MPs — Where MPs Stand`;
+    document.title = `${name}: donations to MPs | Where MPs Stand`;
   }, [name]);
-  if (!rows) return <p className="muted" role="status">Loading…</p>;
+  if (!rows) return <p className="muted" role="status">Fetching this donor's donations.</p>;
   const total = rows.reduce((t, d) => t + (d.value ?? 0), 0);
   const personal = rows.filter((d) => d.kind !== "local_party");
   const local = rows.filter((d) => d.kind === "local_party");
   return (
     <section aria-labelledby="h-donor">
-      <p className="eyebrow">
+      <p className="page-context">
         <a href="/donations">All donations</a>
       </p>
       <h2 id="h-donor">{name}</h2>
@@ -146,7 +146,7 @@ function Search() {
       >
         <label htmlFor="donor-q">Company, union, organisation or person</label>
         <div className="ask-row">
-          <input id="donor-q" name="q" placeholder="For example: Unite" />
+          <input id="donor-q" name="q" placeholder="for example Unite" />
           <button type="submit" className="primary">
             Search
           </button>
@@ -175,7 +175,7 @@ function Page() {
       .catch(() => setD({ available: false }));
   }, [donor]);
   if (donor) return <OneDonor name={donor} />;
-  if (!d) return <p className="muted" role="status">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Fetching the register of donations.</p>;
   if (!d.available) return <p>The register of donations has not been loaded yet. It is added at the next weekly update.</p>;
   return (
     <>

@@ -1,4 +1,4 @@
-import { fmtDate, LONG } from "../render";
+import { fmtDate, LONG, sentenceCase } from "../render";
 
 export interface InterestItem {
   summary: string;
@@ -43,7 +43,7 @@ function Item({ item }: { item: InterestItem }) {
         <dl className="interest-details small">
           {item.details.map(([k, v]) => (
             <div key={k}>
-              <dt>{k}</dt>
+              <dt>{sentenceCase(k)}</dt>
               <dd>{show(k, v)}</dd>
             </div>
           ))}

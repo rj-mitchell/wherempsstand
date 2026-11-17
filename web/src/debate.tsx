@@ -72,14 +72,14 @@ function Debate({ path }: { path: string }) {
     fetch(`/api${path}`)
       .then(async (r) => {
         if (!r.ok)
-          throw new Error(r.status === 404 ? "There is no debate at this address." : "The debate could not be loaded.");
+          throw new Error(r.status === 404 ? "There is no debate at this address." : "The debate did not load. Reload the page to try again.");
         return r.json() as Promise<DebateData>;
       })
       .then((x) => {
         setD(x);
-        document.title = `${x.title}, ${fmtDate(x.date)} — Where MPs Stand`;
+        document.title = `${x.title}, ${fmtDate(x.date)} | Where MPs Stand`;
       })
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : "The debate could not be loaded."));
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "The debate did not load. Reload the page to try again."));
   }, [path]);
 
   // the address may point at one contribution: show it once the debate has loaded
@@ -98,26 +98,26 @@ function Debate({ path }: { path: string }) {
         {error} <a href="/">Ask a question</a>
       </p>
     );
-  if (!d) return <p className="muted" role="status">Loading…</p>;
+  if (!d) return <p className="muted" role="status">Fetching the debate.</p>;
   const headings = d.items.filter((i) => i.kind === "heading");
   const statement = d.kind === "statement";
   const question = statement
-    ? `What did the government say in its written statement on ${d.title} on ${fmtDate(d.date)}?`
+    ? `What did the Government say in its written statement on ${d.title} on ${fmtDate(d.date)}?`
     : `What was said in the ${d.chamber_name} debate on ${d.title} on ${fmtDate(d.date)}?`;
   return (
     <article className="debate">
-      <p className="eyebrow">
+      <p className="page-context">
         {statement ? `Written statement to the ${d.chamber_name}` : d.chamber_name}
-        {d.department && ` · ${d.department}`} · <time dateTime={d.date}>{fmtDate(d.date)}</time>
+        {d.department && `, ${d.department}`}, <time dateTime={d.date}>{fmtDate(d.date)}</time>
       </p>
       <h1>{d.title}</h1>
       {statement ? (
-        <p className="lede">
-          A written ministerial statement: how the government tells Parliament about a decision or development without
+        <p className="intro-text">
+          A written ministerial statement: how the Government tells Parliament about a decision or development without
           a debate. The minister is shown with their party, seat and role on the day.
         </p>
       ) : (
-        <p className="lede">
+        <p className="intro-text">
           {d.contributions > 0 ? (
             <>
               {d.contributions} contribution{d.contributions === 1 ? "" : "s"} from {d.speakers} member
@@ -202,14 +202,14 @@ function Debate({ path }: { path: string }) {
                 <p key={k}>{p}</p>
               ))}
               <p className="contrib-ref muted small">
-                {[i.time, i.colnum ? `col. ${i.colnum}` : null].filter(Boolean).join(" · ")}
-                {" · "}
+                {[i.time, i.colnum ? `col. ${i.colnum}` : null].filter(Boolean).join(", ")}
+                {", "}
                 <a href={`#${i.id}`} aria-label={`Link to this contribution by ${i.speaker?.name ?? "the speaker"}`}>
                   Link
                 </a>
                 {i.twfy_url && (
                   <>
-                    {" · "}
+                    {", "}
                     <a href={i.twfy_url} target="_blank" rel="noreferrer">
                       TheyWorkForYou
                     </a>
