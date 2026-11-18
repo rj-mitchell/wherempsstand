@@ -129,7 +129,7 @@ function CheckBadge({ answer, target }: { answer: Answer; target: string }) {
 
 /** At the top of a briefing: each group and its position, as the briefing's own section headings put it, with a
  * link to that section. Built from the headings (no extra AI), so it always matches the text below. */
-function WhereTheyStand({ stances, body }: { stances: Stance[]; body: React.RefObject<HTMLDivElement> }) {
+function WhereTheyStand({ stances, body }: { stances: Stance[]; body: React.RefObject<HTMLDivElement | null> }) {
   function go(heading: string) {
     const el = [...(body.current?.querySelectorAll<HTMLElement>("h2, h3, h4, p > strong:only-child") ?? [])].find(
       (e) => e.textContent?.trim() === heading,
