@@ -38,9 +38,12 @@ ADDED_MODELS = {"claude-opus-5-5": {"price_input_per_mtok": 4.0, "price_output_p
 
 # Settings changed on purpose since, each with its value then and now: one visitor's new briefings a day, lowered so
 # that a few visitors cannot use up the daily cap between them (docs/DECISIONS.md, 38); and what a briefing in
-# progress is reserved at, raised above what 16,000 tokens of output alone can cost ($0.16) plus its input
+# progress is reserved at, raised above what 16,000 tokens of output alone can cost ($0.16) plus its input; and the
+# effort the question reader gives each question, raised from low to medium after a run of the test set read 9 in 10
+# questions' filters right at low (a reading costs a fiftieth of a penny)
 CHANGED_SETTINGS: dict[str, dict[str, tuple[Any, Any]]] = {
-    "usage": {"per_visitor_daily_questions": (40, 10), "briefing_estimate_usd": (0.15, 0.30)}}
+    "usage": {"per_visitor_daily_questions": (40, 10), "briefing_estimate_usd": (0.15, 0.30)},
+    "answer": {"query_parse_effort": ("low", "medium")}}
 
 # The version of the instructions the goldens were recorded with. The question reader's instructions have changed
 # on purpose since (it now says when a message is plainly not a question about Parliament's record,
@@ -79,6 +82,19 @@ def without_research_rule(value: Any) -> Any:
     """What was sent, without the rule the question reader was given since."""
     rule = research_rule()
     return strings(value, lambda text: text.replace(rule, ""))
+
+
+def parse_effort_then(value: Any) -> Any:
+    """What was sent, with the question reader asked at the low effort it was then (CHANGED_SETTINGS: medium now).
+    Every reading of a question is checked to be at medium, and only those are changed back."""
+    calls = []
+    for call in value["calls"]:
+        if "parse" in call:
+            parse = dict(call["parse"])
+            assert parse["output_config"] == {"effort": "medium"}
+            call = {**call, "parse": {**parse, "output_config": {"effort": "low"}}}
+        calls.append(call)
+    return {**value, "calls": calls}
 
 
 KEY = re.compile(r"\b[0-9a-f]{64}\b")
@@ -383,7 +399,7 @@ def test_the_real_pipeline_sends_and_writes_what_it_did(name, indexed_settings, 
         lambda sdk, **usage: real_side(indexed_settings, tmp_path / f"real-{next(n)}", sdk, monkeypatch, **usage),
         only=name), tmp=tmp_path)[name]
     was = REAL[name]
-    now = without_research_rule(now)
+    now = parse_effort_then(without_research_rule(now))
     if name in FOLLOW_UPS:
         was = follow_ups_as_now(was, now, FOLLOW_UPS[name])
     assert now["calls"] == was["calls"]  # what the model was asked: every request, key for key

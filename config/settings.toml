@@ -93,7 +93,7 @@ side_sources = 10
 comprehensive_side_sources = 15
 summary_effort = "medium"
 comprehensive_effort = "high"
-query_parse_effort = "low"
+query_parse_effort = "medium"
 # The model that reads each question and chooses the filters (defaults to the model above). On the 62-question test
 # set (eval/), Haiku chose every filter right on 60 (Opus: 62), about twice as fast, at a thirtieth of the cost
 # (about 0.01p a question), so it also reads the question for "Sources only".
