@@ -51,8 +51,10 @@ The limits are in `[usage]` in `config/settings.toml`. To change one, edit it th
 ([OPERATIONS.md](OPERATIONS.md), "New code").
 
 - The site stops writing new briefings for the day at $10, and for the month at $150. Sources are still shown.
-- One visitor can have at most 40 new briefings a day, as a backstop against automated use, and make at most 20
-  requests a minute. Visitors are told apart by a salted hash of their IP address; the address is never stored.
+- One visitor can have at most 10 new briefings a day, as a backstop against automated use, and make at most 20
+  requests a minute. (It was 40 until November 2026, when three or four visitors could have used up the daily cap
+  between them.) A question that plainly is not about Parliament's record (a request for a poem, instructions to the
+  site) is read by the small model and then answered "No records found." without a briefing being written. Visitors are told apart by a salted hash of their IP address; the address is never stored.
 - After every 10 new briefings in a day, a visitor sees a short note on what the site costs, with a link to the
   charity's Donate page (wheretheystand.uk/donate). Closing it carries on as before, and a visitor who goes
   through to the Donate page is not reminded again that day.

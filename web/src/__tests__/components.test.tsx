@@ -347,6 +347,9 @@ describe("shared briefings", () => {
     render(<App />);
     expect(await screen.findByText("What has been said about jury trials?")).toBeInTheDocument();
     expect(screen.getByText(/A saved briefing, prepared 10 October 2026/)).toBeInTheDocument();
+    // the question is the reader's, and is labelled so; the page's title is the server's neutral one
+    expect(screen.getByText("Question asked by a reader")).toBeInTheDocument();
+    expect(document.title).not.toContain("jury trials");
     spy.mockRestore();
     window.history.pushState(null, "", "/");
   });

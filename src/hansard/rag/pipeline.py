@@ -650,9 +650,21 @@ class Pipeline:
             ev["parse_error"] = plan.parse_error  # for the operator's failure log; removed before reaching readers
         yield ev
 
-        result, divisions, sources = self.find(plan, req)
         from hansard.devolution import notes_for
         from hansard.rank.evidence import evidence_summary
+
+        if not plan.research_question:
+            # The model reading the question found it is plainly not about Parliament's record (a request for a poem,
+            # instructions to the site): nothing is searched, and the model that writes briefings is not called, so
+            # it costs no more than the reading. A reader who edits the plan has the search run as they asked.
+            yield {"type": "sources", "sources": [], "candidates": 0, "semantic": None,
+                   "evidence": {**evidence_summary([], []), "devolution": [], "edms": 0, "devolved": 0,
+                                "committee_evidence": 0}}
+            yield no_records_final("This does not read as a question about what has been said or done in "
+                                   "Parliament, so nothing was searched.")
+            return
+
+        result, divisions, sources = self.find(plan, req)
 
         yield {"type": "sources", "sources": [s.card() for s in sources], "candidates": result.candidates,
                "semantic": result.semantic_available,
@@ -662,10 +674,7 @@ class Pipeline:
                             "committee_evidence": sum(1 for s in sources if s.kind == "evidence")}}
 
         if not sources or (result.no_records and not divisions):
-            yield {"type": "final", "answer": {"segments": [{"text": NO_RECORDS + " The archive contains no "
-                   "records matching this question and these filters.", "sources": [], "cited": [],
-                   "status": "connective"}], "markdown": NO_RECORDS, "no_records": True, "citations_total": 0,
-                   "citations_invalid": 0, "grounded_ratio": 1.0, "unsupported_segments": 0}, "usage": None}
+            yield no_records_final("The archive contains no records matching this question and these filters.")
             return
         if not self.has_model():
             yield {"type": "final", "answer": None, "usage": None, "note": NO_MODEL}
@@ -712,6 +721,13 @@ class Pipeline:
         yield {"type": "final", "answer": answer, "usage": final.usage.as_stored(), "model": final.model,
                "stop_reason": final.stop_reason, "interests": (flags or ([], None))[0],
                "interests_usage": flags[1].as_stored() if flags and flags[1] is not None else None}
+
+
+def no_records_final(why: str) -> dict[str, Any]:
+    """The final event of a briefing that is not written: "No records found.", and why, with no model call."""
+    return {"type": "final", "answer": {"segments": [{"text": f"{NO_RECORDS} {why}", "sources": [], "cited": [],
+            "status": "connective"}], "markdown": NO_RECORDS, "no_records": True, "citations_total": 0,
+            "citations_invalid": 0, "grounded_ratio": 1.0, "unsupported_segments": 0}, "usage": None}
 
 
 def answer_once(pipeline: Pipeline, req: AskRequest) -> dict[str, Any]:

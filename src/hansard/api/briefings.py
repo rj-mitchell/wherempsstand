@@ -68,6 +68,13 @@ def feature(archive: SavedBriefings, state: StateDB, bid: str, title: str | None
     return True
 
 
+def featured_title(state: StateDB, bid: str) -> str | None:
+    """The title the owner gave a featured briefing, if any."""
+    with state.connect() as con:
+        row = con.execute("SELECT title FROM featured WHERE briefing_id = ?", (bid,)).fetchone()
+    return row["title"] if row and row["title"] else None
+
+
 def unfeature(state: StateDB, bid: str) -> bool:
     with state.connect() as con:
         return con.execute("DELETE FROM featured WHERE briefing_id = ?", (bid,)).rowcount > 0
@@ -181,6 +188,52 @@ def fmt_date(iso: str | None) -> str:
         return ""
     d = date.fromisoformat(iso[:10])
     return f"{d.day} {d.strftime('%B %Y')}"
+
+
+# A saved briefing's title, link preview and card never carry the reader's question, nor the model's reading of it
+# (either can repeat an allegation): they are the site's own words, worked out when the page is shown, so briefings
+# saved before this rule have them too (docs/DECISIONS.md). The question is on the page, labelled as a reader's.
+ASKED_BY_READER = "Question asked by a reader"
+
+
+def briefing_title(created_at: str | None) -> str:
+    """A saved briefing's neutral title: "Briefing from Hansard, 6 November 2026"."""
+    when = fmt_date(created_at)
+    return f"Briefing from Hansard, {when}" if when else "Briefing from Hansard"
+
+
+def briefing_description(created_at: str | None, records_up_to: str | None) -> str:
+    """A saved briefing's neutral link-preview text."""
+    text = "A briefing written by AI from the Hansard record, with every source it draws on"
+    if created_at:
+        text += f". Prepared {fmt_date(created_at)}"
+        if records_up_to:
+            text += f" from records up to {fmt_date(records_up_to)}"
+    return text + "."
+
+
+def trusted_history(archive: SavedBriefings, items: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """The earlier turns of a conversation, for a follow-up, from what the server itself holds.
+
+    The browser names each earlier briefing by its id; its question, what it searched for and the start of its
+    answer are read from the saved briefing, never taken from the request, so a request cannot put words in an
+    "earlier briefing". A turn without a saved briefing (sources only, say) gives its question and what it searched
+    for, and no answer."""
+    out = []
+    for h in items:
+        bid = h.get("briefing_id") or ""
+        b = archive.get(bid) if ID_PATTERN.match(bid) else None
+        if b is None:
+            out.append({"question": h.get("question", ""), "answer": "", "topic": h.get("topic", ""),
+                        "scope": h.get("scope", "")})
+            continue
+        ev = {e.get("type"): e for e in b.events}
+        plan = ev.get("plan", {}).get("plan") or {}
+        answer = (ev.get("final", {}).get("answer") or {}) if not b.withdrawn_at else {}
+        out.append({"question": b.question, "answer": (answer.get("markdown") or "")[:600],
+                    "topic": str(plan.get("search_text") or "")[:500],
+                    "scope": str(plan.get("interpretation") or "")[:1000]})
+    return out
 
 
 # Every page's link preview is the family kit's card for this site (web/public/family/card.png, copied in by the

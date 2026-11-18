@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { followUpsFor } from "../followups";
+import { followUpsFor, historyFor } from "../followups";
 import type { Answer, Plan, Turn } from "../types";
 
 const plan = (filters: Partial<Plan["filters"]>, extra: Partial<Plan> = {}): Plan =>
@@ -32,5 +32,22 @@ describe("suggested follow-ups", () => {
 
   it("offer nothing when there was no briefing", () => {
     expect(followUpsFor({ ...turn(plan({})), answer: null })).toEqual([]);
+  });
+});
+
+describe("what a follow-up sends", () => {
+  it("names earlier briefings by their ids and sends none of their text", () => {
+    const earlier: Turn = {
+      ...turn(plan({}, { interpretation: "All members." })),
+      briefingId: "abcdefghjk",
+      answer: { no_records: false, markdown: "Ministers said the scheme would close." } as Answer,
+    };
+    const sourcesOnly: Turn = { ...turn(plan({})), question: "rail fares", answer: null };
+    const sent = historyFor([earlier, sourcesOnly]);
+    expect(sent).toEqual([
+      { question: "q", topic: "bus services", scope: "All members.", briefing_id: "abcdefghjk" },
+      { question: "rail fares", topic: "bus services", scope: "", briefing_id: "" },
+    ]);
+    expect(JSON.stringify(sent)).not.toContain("scheme would close");
   });
 });

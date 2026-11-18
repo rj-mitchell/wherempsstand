@@ -75,7 +75,7 @@ export function AnswerView({
               ` Prepared ${fmtDate(preparedAt.slice(0, 10))}${recordsUpTo ? ` from records up to ${fmtDate(recordsUpTo)}` : ""}.`}
           </p>
           <div className="answer-actions">
-            {link && <ShareButton url={link} title={question} />}
+            {link && <ShareButton url={link} title={briefingTitle(preparedAt)} />}
             <details className="export-menu">
               <summary className="secondary">Export</summary>
               <div className="export-list">
@@ -94,7 +94,7 @@ export function AnswerView({
                 <button type="button" className="secondary" onClick={() => window.print()}>
                   Print or save as PDF
                 </button>
-                {link && <CopyButton label="Copy embed code" text={() => embedCode(link, question)} />}
+                {link && <CopyButton label="Copy embed code" text={() => embedCode(link)} />}
               </div>
             </details>
             <Feedback question={question} briefingKey={briefingKey} />
@@ -187,12 +187,20 @@ export function markInterests(html: string, flagged: Set<string>): string {
   );
 }
 
+/**
+ * A saved briefing's neutral title, as the server gives its page: "Briefing from Hansard, 6 November 2026". Shared
+ * links, embeds and the card never carry the reader's question, which can be worded as an allegation.
+ */
+export function briefingTitle(preparedAt?: string): string {
+  return preparedAt ? `Briefing from Hansard, ${fmtDate(preparedAt.slice(0, 10))}` : "Briefing from Hansard";
+}
+
 /** A snippet for a website or blog: the briefing's preview card, linking back to the briefing. */
-export function embedCode(link: string, question: string): string {
+export function embedCode(link: string): string {
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   return (
     `<a href="${esc(link)}" style="display:inline-block;max-width:600px">` +
-    `<img src="${esc(link)}/card.png" alt="${esc(`Where MPs Stand briefing: ${question}`)}" ` +
+    `<img src="${esc(link)}/card.png" alt="Where MPs Stand: a briefing written by AI from Hansard" ` +
     `width="600" style="width:100%;height:auto;border:1px solid #ccc"></a>\n` +
     `<p style="font-size:0.9em">From <a href="${esc(link)}">Where MPs Stand</a>, a briefing on the UK ` +
     `Parliament written by AI from the Hansard record (CC BY 4.0).</p>`

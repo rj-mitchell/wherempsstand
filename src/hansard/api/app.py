@@ -47,8 +47,11 @@ from hansard.api.auth import (
 from hansard.api.briefings import (
     ID_PATTERN,
     ShownOnly,
+    briefing_description,
+    briefing_title,
     feature,
     featured_list,
+    featured_title,
     fmt_date,
     get_briefing,
     is_featured,
@@ -57,9 +60,10 @@ from hansard.api.briefings import (
     public_view,
     recent_briefings,
     summary_text,
+    trusted_history,
     unfeature,
 )
-from hansard.api.cards import card_png
+from hansard.api.cards import card_paths, card_png
 from hansard.api.feeds import FEED_TYPE, rss
 from hansard.api.plaintext import (
     bill_text,
@@ -215,21 +219,25 @@ class HitBody(BaseModel):
 
 
 class HistoryItem(BaseModel):
-    """An earlier question in the conversation, as the browser sends it back. Each part is cut to a fixed length
-    (longer than the browser ever sends), so a request cannot inflate the prompt."""
+    """An earlier question in the conversation, as the browser sends it back: the saved briefing's id, if it has one,
+    or else the question and what it searched for. Each part is cut to a fixed length (longer than the browser ever
+    sends), so a request cannot inflate the prompt. No answer is taken from the browser: the start of an earlier
+    briefing is read from the saved briefing itself (``briefings.trusted_history``), so a request cannot invent
+    one. An ``answer`` sent by an older page is ignored."""
 
     question: str = ""
-    answer: str = ""
     topic: str = ""
     scope: str = ""
+    briefing_id: str = ""
 
-    @field_validator("question", "answer", "topic", "scope", mode="before")
+    @field_validator("question", "topic", "scope", "briefing_id", mode="before")
     @classmethod
     def _trimmed(cls, v: Any, info: ValidationInfo) -> str:
-        return str(v or "")[:HISTORY_LIMITS[info.field_name]]
+        v = str(v or "")[:HISTORY_LIMITS[info.field_name]]
+        return v if info.field_name != "briefing_id" or ID_PATTERN.match(v) else ""
 
 
-HISTORY_LIMITS = {"question": 2000, "answer": 1000, "topic": 500, "scope": 1000}
+HISTORY_LIMITS = {"question": 2000, "topic": 500, "scope": 1000, "briefing_id": 10}
 PLAN_MAX_CHARS = 20_000  # an edited plan is a few hundred characters; this is far more than any reader needs
 
 
@@ -258,6 +266,7 @@ class AskBody(BaseModel):
         return [{k[:20]: str(x)[:200] for k, x in list(side.items())[:5]} for side in v]
 
     def history_dicts(self) -> list[dict[str, str]]:
+        """The earlier turns as the browser named them (the saved briefings are read by ``trusted_history``)."""
         return [h.model_dump() for h in self.history]
 
 
@@ -623,7 +632,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         uid = user["user_id"] if user else None
         req = AskRequest(question=body.question, mode=body.mode, recency=body.recency,
                          role_weight=body.role_weight, scope=Scope(**body.scope.model_dump()), plan=body.plan,
-                         history=body.history_dicts(), compare=body.compare)
+                         history=trusted_history(parts.archive, body.history_dicts()), compare=body.compare)
         model_on = p.has_model()
         last = state.runs(1) if model_on and parts.cache_hours > 0 else []
         key = answer_key(settings, body, last[0]["run_id"] if last else None, model=model_on,
@@ -657,7 +666,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         if body.plan:
             plan = QueryPlan.from_dict({"question": body.question, **body.plan})
         elif read_with_model and p.has_model():
-            plan, usage = p.make_plan(AskRequest(question=body.question, history=body.history_dicts(),
+            plan, usage = p.make_plan(AskRequest(question=body.question,
+                                                 history=trusted_history(parts.archive, body.history_dicts()),
                                                  compare=body.compare))
             if plan.parse_error and parts.failures is not None:
                 parts.failures.note("question reading", body.question, plan.parse_error)
@@ -724,7 +734,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def briefing_card(bid: str):
         b = _briefing_or_error(bid)
         view = public_view(b)
-        path = card_png(settings.data_dir / "cards", bid, b["question"], fmt_date(b["created_at"]),
+        path = card_png(settings.data_dir / "cards", bid, briefing_title(b["created_at"]), fmt_date(b["created_at"]),
                         fmt_date(b["records_up_to"]), view["evidence"])
         return FileResponse(path, media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
 
@@ -748,17 +758,23 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                        url=f"{base}/b/{bid}", image=None)
             return Response(html_page, status_code=423, media_type="text/html")
         view = public_view(b)
-        description = summary_text(view["answer"]) or "A sourced briefing on the record of Parliament."
+        # never the reader's question, nor the model's words: either can repeat an allegation under the site's name.
+        # A featured briefing, which the owner has read, may have the owner's own title and its opening as preview.
+        featured = is_featured(state, bid)
+        title = (featured_title(state, bid) if featured else None) or briefing_title(b["created_at"])
+        description = ((summary_text(view["answer"]) if featured else "")
+                       or briefing_description(b["created_at"], b["records_up_to"]))
         html_page = page_with_meta(
-            page, title=f"{b['question']} | Where MPs Stand", description=description, url=f"{base}/b/{bid}",
-            noindex=not is_featured(state, bid))  # featured briefings are for search engines to find
+            page, title=f"{title} | Where MPs Stand", description=description, url=f"{base}/b/{bid}",
+            noindex=not featured)  # featured briefings are for search engines to find
         return Response(with_text(html_page, readable(lambda: briefing_text(view))), media_type="text/html")
 
     @app.post("/api/admin/briefings/{bid}/withdraw")
     def withdraw(bid: str, body: WithdrawBody, user=Depends(admin_user)):
         if not ID_PATTERN.match(bid) or not parts.archive.withdraw(bid, body.reason):
             raise HTTPException(404, "There is no briefing at this address.")
-        (settings.data_dir / "cards" / f"{bid}.png").unlink(missing_ok=True)
+        for card in card_paths(settings.data_dir / "cards", bid):
+            card.unlink(missing_ok=True)
         parts.cache.delete_briefing(bid)  # and it is not played again to the next reader with the same question
         record.mark(bid, corrected=True)  # what happened next, on that briefing's record
         return {"ok": True}

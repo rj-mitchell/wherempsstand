@@ -8,7 +8,7 @@ import re
 from html import escape as e
 from typing import Any
 
-from hansard.api.briefings import fmt_date
+from hansard.api.briefings import ASKED_BY_READER, briefing_title, fmt_date
 
 # the page's placeholder ("Fetching the debate."), with any attributes it carries (role="status" in web/*.html)
 _ROOT = re.compile(r'(<div id="[\w-]+-root">)\s*<p class="muted"[^>]*>[^<]*</p>\s*(</div>)')
@@ -60,9 +60,13 @@ def markdown_text(md: str) -> str:
 
 def briefing_text(view: dict[str, Any], heading: str | None = None) -> str:
     answer = view.get("answer") or {}
-    parts = [f"<h1>{e(heading or view['question'])}</h1>"]
+    """A briefing as plain HTML. A topic briefing is headed by the topic's title and its standing question; any other
+    is headed by its neutral title, with the question labelled as a reader's (never as the page's own heading)."""
     if heading:
-        parts.append(f"<p><em>{e(view['question'])}</em></p>")
+        parts = [f"<h1>{e(heading)}</h1>", f"<p><em>{e(view['question'])}</em></p>"]
+    else:
+        parts = [f"<h1>{e(briefing_title(view.get('created_at')))}</h1>",
+                 f"<p>{ASKED_BY_READER}: <em>{e(view['question'])}</em></p>"]
     parts.append(f"<p>A briefing written by AI (Claude) from the Hansard records cited below, prepared "
                  f"{e(fmt_date(view['created_at'][:10]))}"
                  + (f" from records up to {e(fmt_date(view['records_up_to']))}" if view.get("records_up_to") else "")

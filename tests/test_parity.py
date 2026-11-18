@@ -9,6 +9,7 @@ comes from; nothing is skipped.
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 import pytest
@@ -35,6 +36,81 @@ ADDED_MODELS = {"claude-opus-5-5": {"price_input_per_mtok": 4.0, "price_output_p
                                     "price_cache_read_per_mtok": 0.2}}
 
 
+# Settings changed on purpose since, each with its value then and now: one visitor's new briefings a day, lowered so
+# that a few visitors cannot use up the daily cap between them (docs/DECISIONS.md, 38)
+CHANGED_SETTINGS: dict[str, dict[str, tuple[Any, Any]]] = {"usage": {"per_visitor_daily_questions": (40, 10)}}
+
+# The version of the instructions the goldens were recorded with. The question reader's instructions have changed
+# on purpose since (it now says when a message is plainly not a question about Parliament's record,
+# docs/DECISIONS.md, 38), so the version is new, and every cached answer is written afresh, as the rule is. The
+# scenarios are played with the old version, so that every other part of each key is checked as before.
+INSTRUCTIONS_THEN = "4ccf1bce0bc2"
+
+
+def instructions_then(monkeypatch: pytest.MonkeyPatch) -> None:
+    from hansard.api import app as web
+
+    assert web.INSTRUCTIONS_VERSION != INSTRUCTIONS_THEN
+    monkeypatch.setattr(web, "INSTRUCTIONS_VERSION", INSTRUCTIONS_THEN)
+
+
+def research_rule() -> str:
+    """The rule the question reader was given since (docs/DECISIONS.md, 38): its whole text, as sent."""
+    from datetime import date
+
+    from hansard.rag.query_parse import system_prompt
+
+    text = system_prompt({}, [], date(2000, 1, 1))
+    return text[text.index("- research_question:"):text.index("- interpretation:")]
+
+
+def strings(value: Any, change: Any) -> Any:
+    """``value`` with ``change`` made to every string in it."""
+    if isinstance(value, dict):
+        return {k: strings(v, change) for k, v in value.items()}
+    if isinstance(value, list):
+        return [strings(v, change) for v in value]
+    return change(value) if isinstance(value, str) else value
+
+
+def without_research_rule(value: Any) -> Any:
+    """What was sent, without the rule the question reader was given since."""
+    rule = research_rule()
+    return strings(value, lambda text: text.replace(rule, ""))
+
+
+KEY = re.compile(r"\b[0-9a-f]{64}\b")
+
+
+def follow_ups_as_now(was: Any, now: Any, follow_ups: int) -> Any:
+    """The golden as a follow-up is asked now (docs/DECISIONS.md, 37): the answer the browser sent with the earlier
+    question is in neither request to the model, and the follow-up's cache key, which held it, is new. Each of
+    those keys, and only those, is the one now in its place."""
+    was = strings(was, lambda text: re.sub(r"\nA \(summary\): .*?(?=\n\n)", "", re.sub(
+        r"The start of the answer to the last of them:\n.*?\n\n", "", text, flags=re.S), flags=re.S))
+    then_text, now_text = json.dumps(was), json.dumps(now)
+    then_keys = [k for k in dict.fromkeys(KEY.findall(then_text)) if k not in now_text]
+    now_keys = [k for k in dict.fromkeys(KEY.findall(now_text)) if k not in then_text]
+    assert len(then_keys) == len(now_keys) == follow_ups
+    for then, key in zip(then_keys, now_keys, strict=True):
+        then_text = then_text.replace(then, key)
+    was = json.loads(then_text)
+    if was.get("rows", {}).get("cache"):  # the answer cache is listed in the order of its keys
+        was["rows"]["cache"] = sorted(was["rows"]["cache"], key=lambda row: row[0])
+    return was
+
+
+def changed_back(section: str, values: Any) -> Any:
+    """A section of the settings with each setting changed since put back to its value then."""
+    if not isinstance(values, dict):
+        return values
+    out = dict(values)
+    for key, (then, now) in CHANGED_SETTINGS.get(section, {}).items():
+        if out.get(key) == now:
+            out[key] = then
+    return out
+
+
 def without_added(section: str, values: Any) -> Any:
     """A section of the settings without what this move added to the settings file."""
     if not isinstance(values, dict):
@@ -58,11 +134,12 @@ def test_settings_resolve_as_before(tmp_path):
             real = load_settings()
             assert real.answer["cache_instructions"] == "short" and real.usage["models"]["claude-opus-5-5"] == \
                 ADDED_MODELS["claude-opus-5-5"]
-            gives["raw"] = {name: without_added(name, values) for name, values in gives["raw"].items()
-                            if name not in ADDED_SECTIONS}
+            assert real.usage["per_visitor_daily_questions"] == CHANGED_SETTINGS["usage"]["per_visitor_daily_questions"][1]
+            gives["raw"] = {name: changed_back(name, without_added(name, values))
+                            for name, values in gives["raw"].items() if name not in ADDED_SECTIONS}
             for name in ("answer", "usage", "embedding"):
                 if name in gives:
-                    gives[name] = without_added(name, gives[name])
+                    gives[name] = changed_back(name, without_added(name, gives[name]))
         assert gives == was["gives"], case["name"]
 
 
@@ -254,6 +331,8 @@ def test_on_the_providers_own_client_the_interests_check_puts_on_the_wire_what_t
 # the flow of a question, with a scripted pipeline
 
 SCRIPTED = shared.read("ask-scripted.json")
+# the scenarios with a follow-up, and how many follow-up keys each has (``follow_ups_as_now``)
+FOLLOW_UPS = {"a follow-up is cached too": 1, "a briefing, the same again, a follow-up, sources only": 1}
 
 
 @pytest.mark.parametrize("name", list(shared.SCRIPTED))
@@ -264,9 +343,11 @@ def test_the_flow_of_a_question_sends_and_writes_what_it_did(name, tmp_path, mon
     it, and what the status page says."""
     from .sides import scripted_side
 
+    instructions_then(monkeypatch)
     now = shared.plain(shared.scripted_asks(lambda **kw: scripted_side(tmp_path, monkeypatch, **kw), only=name),
                        tmp=tmp_path)[name]
-    assert now == SCRIPTED[name]
+    was = SCRIPTED[name]
+    assert now == (follow_ups_as_now(was, now, FOLLOW_UPS[name]) if name in FOLLOW_UPS else was)
 
 
 # the same through the site's real pipeline, over the tests' own index
@@ -294,11 +375,15 @@ def test_the_real_pipeline_sends_and_writes_what_it_did(name, indexed_settings, 
     saved and cached; a saved briefing with the stamp is shown as it was saved."""
     from .sides import real_side
 
+    instructions_then(monkeypatch)
     n = iter(range(100))
     now = shared.plain(shared.real_asks(
         lambda sdk, **usage: real_side(indexed_settings, tmp_path / f"real-{next(n)}", sdk, monkeypatch, **usage),
         only=name), tmp=tmp_path)[name]
     was = REAL[name]
+    now = without_research_rule(now)
+    if name in FOLLOW_UPS:
+        was = follow_ups_as_now(was, now, FOLLOW_UPS[name])
     assert now["calls"] == was["calls"]  # what the model was asked: every request, key for key
     written = [body for _, body in now["sent"] if '"no_records": false' in body]
     assert all(RULES in body for body in written)
@@ -340,21 +425,34 @@ def test_every_recorded_usage_costs_what_it_did():
 
 
 def test_the_answer_caches_keys_are_what_they_were(tmp_path, monkeypatch):
-    """The key is computed exactly as before, so the week's cached answers are still found after the move."""
+    """The key is computed exactly as before, so the week's cached answers are still found after the move. Two
+    differences, on purpose: the instructions' version is new (``INSTRUCTIONS_THEN``); and a follow-up's key no
+    longer holds the earlier answer the browser sent, which is not taken from it now, but the earlier briefing's
+    id (docs/DECISIONS.md, 37), so a follow-up's key is new and is the same for the same earlier briefing."""
     from hansard.api import app as web
 
     monkeypatch.setenv("HANSARD_DATA_DIR", str(tmp_path))
     golden = shared.read("cache-keys.json")
     assert len(golden) == len(shared.KEY_WORLDS) * len(shared.KEY_BODIES)
+    follow_ups = set()
     for was in golden:
         world = was["world"]
         settings = load_settings(**({"answer.model": world["model"]} if "model" in world else {}))
         with monkeypatch.context() as patch:
-            if "instructions" in world:
-                patch.setattr(web, "INSTRUCTIONS_VERSION", world["instructions"])
+            patch.setattr(web, "INSTRUCTIONS_VERSION", world.get("instructions", INSTRUCTIONS_THEN))
             key = web.answer_key(settings, web.AskBody(**was["body"]), world.get("data", 7), model=True,
                                  cache_hours=168)
+            if "history" in was["body"]:
+                assert key != was["key"], was
+                follow_ups.add(key)
+                again = web.answer_key(settings, web.AskBody(**{**was["body"], "history": [
+                    {k: v for k, v in h.items() if k != "answer"} for h in was["body"]["history"]]}),
+                    world.get("data", 7), model=True, cache_hours=168)
+                assert again == key, was  # the answer sent is ignored: the same key without it
+                continue
         assert key == was["key"], was
+    assert len(follow_ups) == len({json.dumps(w["world"], sort_keys=True) for w in golden}) * sum(
+        "history" in b for b in shared.KEY_BODIES)  # still a key of its own for each
     settings = load_settings()
     assert web.answer_key(settings, web.AskBody(question=shared.Q), 7, model=False, cache_hours=168) is None
     assert web.answer_key(settings, web.AskBody(question=shared.Q), 7, model=True, cache_hours=0) is None

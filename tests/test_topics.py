@@ -137,7 +137,9 @@ def test_featuring_a_briefing(site):
     assert client.post("/api/admin/featured", json={"briefing": "bbbbbbbbbb"}, headers=TOKEN).status_code == 404
     featured = client.get("/api/topics").json()["featured"]
     assert featured[0]["id"] == bid and featured[0]["title"] == "Juries" and featured[0]["blurb"]
-    assert 'name="robots"' not in client.get(f"/b/{bid}").text
+    page = client.get(f"/b/{bid}").text
+    assert 'name="robots"' not in page
+    assert "<title>Juries | Where MPs Stand</title>" in page  # the owner's own title for a featured briefing
     assert f"/b/{bid}" in client.get("/sitemap-briefings.xml").text
     assert client.delete(f"/api/admin/featured/{bid}", headers=TOKEN).status_code == 200
     assert client.get("/api/topics").json()["featured"] == []

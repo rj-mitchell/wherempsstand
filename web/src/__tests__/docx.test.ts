@@ -59,13 +59,18 @@ describe("Word download", () => {
 });
 
 describe("embed code", () => {
-  it("links the card back to the briefing and escapes the question", async () => {
+  it("links the card back to the briefing, in the site's words rather than the reader's question", async () => {
     const { embedCode } = await import("../components/AnswerView");
-    const code = embedCode("https://wherempsstand.com/b/abc", 'What did "MPs" say about <tax> & spending?');
-    expect(code).toContain('<a href="https://wherempsstand.com/b/abc"');
-    expect(code).toContain('src="https://wherempsstand.com/b/abc/card.png"');
-    expect(code).toContain("&quot;MPs&quot;");
-    expect(code).toContain("&lt;tax> &amp; spending");
+    const code = embedCode('https://wherempsstand.com/b/abc"<x>');
+    expect(code).toContain('<a href="https://wherempsstand.com/b/abc&quot;&lt;x>"');
+    expect(code).toContain('src="https://wherempsstand.com/b/abc&quot;&lt;x>/card.png"');
+    expect(code).toContain('alt="Where MPs Stand: a briefing written by AI from Hansard"');
     expect(code).toContain("CC BY 4.0");
+  });
+
+  it("gives a saved briefing a neutral title for sharing", async () => {
+    const { briefingTitle } = await import("../components/AnswerView");
+    expect(briefingTitle("2026-11-06T09:00:00+00:00")).toBe("Briefing from Hansard, 6 November 2026");
+    expect(briefingTitle()).toBe("Briefing from Hansard");
   });
 });
