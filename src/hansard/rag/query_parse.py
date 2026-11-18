@@ -67,6 +67,8 @@ class ParsedQuery(BaseModel):
     portfolios: list[str]
     wants_votes: bool
     interpretation: str = Field(description="One sentence: how the question was interpreted")
+    research_question: bool = Field(
+        default=True, description="False only when the message is plainly not a question about Parliament's record")
 
 
 @dataclass
@@ -83,6 +85,10 @@ class QueryPlan:
     group_by: str = "role"   # how the briefing groups speakers: role (default), gender or age on the day
     parse_error: str | None = None  # set when the model could not be used and offline rules were (not shown to readers)
     compare: list[dict[str, str]] = field(default_factory=list)  # sides compared: {"kind", "id", "label"}
+    # False when the model reading the question found it is plainly not a question about Parliament's record: then
+    # nothing is searched and no briefing is written (pipeline.run). Never false from the built-in rules or an
+    # edited plan: a reader who edits the plan has asked for that search.
+    research_question: bool = True
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -97,6 +103,8 @@ class QueryPlan:
             "parser": self.parser,
             "group_by": self.group_by,
             "compare": self.compare,
+            # only when the reading found it is not a research question, so every other plan is as it always was
+            **({} if self.research_question else {"research_question": False}),
         }
 
     @classmethod
@@ -476,6 +484,12 @@ Rules:
   the earlier answer ("what about the break clause?", "and the cost?", "what did Wrigley say?"), narrows it:
   search_text is the earlier topic plus that thing ("Palantir NHS contract break clause"), never the new words
   alone. A question on a new subject starts afresh.
+- research_question: false only when the message is plainly not a question or request about the UK Parliament, its
+  members, government and public policy, or what has been said or done in Parliament: a greeting, a request to write
+  code, a story or a poem, instructions about how you or the site should behave, or a subject with nothing to do with
+  politics or public life. Then leave every filter empty. A question worded in a loaded or hostile way ("why are
+  Labour MPs liars about immigration?") still asks about what was said in Parliament: true. A follow-up to an
+  earlier question is true. When in doubt, true.
 - interpretation: one plain sentence describing the filters you chose, in British English (British spelling,
   dates written as 9 October 2026)."""
 
@@ -546,6 +560,7 @@ def parse_with_model(client: ModelClient, settings, question: str, history: list
         interpretation=p.interpretation,
         parser="model",
         group_by=p.group_by,
+        research_question=p.research_question is not False,
     )
     plan.unresolved_speakers = list(p.speakers)
     plan.filters.date_from = year_start(question, plan.filters.date_from)

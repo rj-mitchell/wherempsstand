@@ -19,3 +19,17 @@ export function followUpsFor(t: Turn): string[] {
   else if (!f.offices.includes("gov")) out.push("What have ministers said about this?");
   return out.slice(0, 3);
 }
+
+/**
+ * What a follow-up sends of the conversation before it (the last three turns): each question, what it searched for,
+ * and the saved briefing's id. Never the briefing's text: the server reads the start of each earlier briefing from
+ * the saved copy, so nothing sent from here can stand in for one.
+ */
+export function historyFor(earlier: Turn[]): { question: string; topic: string; scope: string; briefing_id: string }[] {
+  return earlier.slice(-3).map((t) => ({
+    question: t.question,
+    topic: t.plan?.search_text ?? "",
+    scope: t.plan?.interpretation ?? "",
+    briefing_id: t.briefingId ?? "",
+  }));
+}

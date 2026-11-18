@@ -18,7 +18,7 @@ import { FamilyEndorsement } from "./components/Family";
 import { SameQuestion } from "./components/SameQuestion";
 import { SiteFooter } from "./components/SiteFooter";
 import { WhyChatbot } from "./components/WhyChatbot";
-import { followUpsFor } from "./followups";
+import { followUpsFor, historyFor } from "./followups";
 import { briefingGone } from "./gone";
 import { COMPARE_HANDOVER, MENUS, NAV } from "./nav";
 import type {
@@ -368,12 +368,7 @@ export default function App() {
     setTurns((ts) => (replaceId ? ts.map((t) => (t.id === id ? turn : t)) : [...ts, turn]));
     const earlier = turns.filter((t) => t.id !== id && t.status === "done");
     // what each earlier question searched for, so a follow-up ("what about the Lords?") keeps the topic and filters
-    const history = earlier.slice(-3).map((t) => ({
-      question: t.question,
-      answer: t.answer?.markdown?.slice(0, 600) ?? "",
-      topic: t.plan?.search_text ?? "",
-      scope: t.plan?.interpretation ?? "",
-    }));
+    const history = historyFor(earlier);
     const follows = earlier.at(-1)?.question;
     abortRef.current?.abort();
     const ctrl = new AbortController();
@@ -747,6 +742,7 @@ export default function App() {
             {t.follows && t.follows !== t.question && (
               <p className="page-context follows">Follow-up to &ldquo;{t.follows}&rdquo;</p>
             )}
+            {t.shared && <p className="page-context asked-by">Question asked by a reader</p>}
             <h2 className="question">{t.question}</h2>
             {t.shared && t.preparedAt && (
               <p className="shared-note">

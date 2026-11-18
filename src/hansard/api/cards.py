@@ -1,4 +1,7 @@
-"""Link-preview cards (1200 x 630 PNG) for shared briefings, in the site's own typefaces and colours."""
+"""Link-preview cards (1200 x 630 PNG) for shared briefings, in the site's own typefaces and colours.
+
+A card's headline is the briefing's neutral title (``briefings.briefing_title``), never the reader's question: a card
+carries the site's name, and a question can be worded as an allegation."""
 
 from __future__ import annotations
 
@@ -43,13 +46,13 @@ def _wrap(draw: ImageDraw.ImageDraw, text: str, font, width: int) -> list[str]:
     return lines
 
 
-def _fit_question(draw: ImageDraw.ImageDraw, question: str, width: int, max_lines: int) -> tuple[Any, list[str]]:
+def _fit_headline(draw: ImageDraw.ImageDraw, headline: str, width: int, max_lines: int) -> tuple[Any, list[str]]:
     for size in (64, 58, 52, 47, 43, 40):
         font = _font("SourceSerif4-Semibold.ttf", size)
-        lines = _wrap(draw, question, font, width)
+        lines = _wrap(draw, headline, font, width)
         if len(lines) <= max_lines:
             return font, lines
-    lines = _wrap(draw, question, font, width)[:max_lines]
+    lines = _wrap(draw, headline, font, width)[:max_lines]
     while lines and draw.textlength(lines[-1] + "…", font=font) > width:
         lines[-1] = lines[-1].rsplit(" ", 1)[0]
     lines[-1] += "…"
@@ -66,7 +69,7 @@ def evidence_line(evidence: dict[str, Any] | None) -> str:
     return "; ".join(parts)
 
 
-def render_card(question: str, prepared: str, records_up_to: str, evidence: dict[str, Any] | None) -> Image.Image:
+def render_card(headline: str, prepared: str, records_up_to: str, evidence: dict[str, Any] | None) -> Image.Image:
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
     d.rectangle((0, 0, W, BAND), fill=COMMONS)  # the site's cloth, as the header band on every page
@@ -77,7 +80,7 @@ def render_card(question: str, prepared: str, records_up_to: str, evidence: dict
     d.text((LEFT + 100, 92), "A Where They Stand project", font=_font("SourceSans3-Regular.ttf", 23), fill=ON_CLOTH)
 
     d.text((LEFT, 186), "Briefing written by AI from Hansard", font=_font("SourceSans3-Semibold.ttf", 23), fill=INK_SOFT)
-    font, lines = _fit_question(d, question, RIGHT - LEFT, 4)
+    font, lines = _fit_headline(d, headline, RIGHT - LEFT, 4)
     y = 228
     line_h = int(font.size * 1.18)
     for line in lines:
@@ -99,13 +102,22 @@ def render_card(question: str, prepared: str, records_up_to: str, evidence: dict
     return img
 
 
-def card_png(cache_dir: Path, bid: str, question: str, prepared: str, records_up_to: str,
+def card_paths(cache_dir: Path, bid: str) -> tuple[Path, Path]:
+    """Where a briefing's card is kept, and where a card from before neutral headlines was (it showed the question)."""
+    return cache_dir / f"{bid}.{CARD_VERSION}.png", cache_dir / f"{bid}.png"
+
+
+CARD_VERSION = "v2"  # change it when what a card shows changes, so cards already rendered are drawn again
+
+
+def card_png(cache_dir: Path, bid: str, headline: str, prepared: str, records_up_to: str,
              evidence: dict[str, Any] | None) -> Path:
-    """Render once, then serve the saved file."""
-    path = cache_dir / f"{bid}.png"
+    """Render once, then serve the saved file. A card saved before neutral headlines is deleted."""
+    path, old = card_paths(cache_dir, bid)
+    old.unlink(missing_ok=True)
     if not path.exists():
         cache_dir.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".tmp")
-        render_card(question, prepared, records_up_to, evidence).save(tmp, "PNG", optimize=True)
+        render_card(headline, prepared, records_up_to, evidence).save(tmp, "PNG", optimize=True)
         tmp.replace(path)
     return path

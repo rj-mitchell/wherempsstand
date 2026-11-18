@@ -69,7 +69,7 @@ export function askBody(
   question: string,
   settings: Settings,
   plan?: Plan,
-  history: { question: string; answer?: string; topic?: string; scope?: string }[] = [],
+  history: { question: string; topic?: string; scope?: string; briefing_id?: string }[] = [],
   sourcesOnly = false,
   compare: CompareSide[] = [],
   follows?: string,

@@ -147,7 +147,7 @@ NO_SUCH = "No such statement, or it can't be changed in that way now (see `hansa
 
 
 def test_what_the_forms_and_the_public_pages_answer(played):
-    """Reports and statements sent, what the public may read, and the owner's lists: 62 steps, two differences."""
+    """Reports and statements sent, what the public may read, and the owner's lists: 62 steps, three differences."""
     assert len(WAS["http"]) == 62
     assert differences(played, "http") == {
         # R: a report of nothing but spaces was thanked and kept, empty; it is refused, in the words for one too
@@ -164,10 +164,17 @@ def test_what_the_forms_and_the_public_pages_answer(played):
         "the owner's list of reports": {"json.reports[4].message": ("", FILLER)},
         "the owner's list of open reports": {"json.reports[4].message": ("", FILLER)},
         # page titles are "Page | Site name", as on every Where They Stand site (the charity's family/GLOSSARY.md,
-        # "Page titles")
-        "a saved briefing's page": {"title": (
-            "<title>What has been said about trial by jury since 2020? — Where MPs Stand</title>",
-            "<title>What has been said about trial by jury since 2020? | Where MPs Stand</title>")},
+        # "Page titles"); and a saved briefing's title and preview are the site's own neutral words, never the
+        # reader's question nor the model's words, which can repeat an allegation (docs/DECISIONS.md, 36)
+        "a saved briefing's page": {
+            "title": ("<title>What has been said about trial by jury since 2020? — Where MPs Stand</title>",
+                      "<title>Briefing from Hansard, 13 November 2026 | Where MPs Stand</title>"),
+            "description[0]": (
+                '<meta name="description" content="Hilary Benn said that trial by jury was &quot;a cornerstone&quot;. '
+                "In the debate that followed: Kenneth Clarke said jury trial would be kept for serious offences. This "
+                'was a turning point for every member in the Chamber." />',
+                '<meta name="description" content="A briefing written by AI from the Hansard record, with every source '
+                'it draws on. Prepared 13 November 2026 from records up to 12 November 2026." />')},
         "a withdrawn briefing's page": {"title": (
             "<title>Briefing withdrawn — Where MPs Stand</title>", "<title>Briefing withdrawn | Where MPs Stand</title>")},
         "the page of a briefing there is not": {"title": (
