@@ -43,7 +43,7 @@ the Northern Ireland Assembly.
 TheyWorkForYou Votes states no licence for its descriptions of divisions (from
 `theyworkforyou.com/pwdata/votes/divisions.parquet`), and the API terms that put mySociety's own data under CC BY-SA
 2.5 do not mention them. The site labels each description "(TheyWorkForYou Votes)" and credits mySociety on the
-methodology page and here. mySociety has been asked to confirm the terms (`outreach/2026-11/mysociety.txt`). If the
+methodology page and here. A letter asking mySociety to confirm the terms is drafted (`outreach/2026-11/mysociety.txt`) but not yet sent. If the
 descriptions may not be used, they will be removed; the site's own labels for kinds of vote are not affected.
 
 ## Registers of interests
