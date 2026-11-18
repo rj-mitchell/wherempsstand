@@ -142,7 +142,7 @@ requests_per_minute = 20           # questions and searches per visitor
 answer_cache_hours = 168           # identical questions are not re-run until new records arrive (or a week)
 # A briefing's cost is known only when it is finished, so each one being written is counted at this estimate
 # against the caps below meanwhile; and only so many are written at once, for one reader and in all.
-briefing_estimate_usd = 0.15
+briefing_estimate_usd = 0.30
 briefings_at_once = 8
 briefings_at_once_per_reader = 2
 daily_spend_cap_usd = 10.0

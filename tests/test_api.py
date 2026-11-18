@@ -704,11 +704,11 @@ def test_the_settings_file_has_every_figure_the_flow_of_a_briefing_needs(indexed
     from hansard.messages import MESSAGES
 
     u = indexed_settings.raw["usage"]
-    assert (u["briefings_at_once_per_reader"], u["briefings_at_once"], u["briefing_estimate_usd"]) == (2, 8, 0.15)
+    assert (u["briefings_at_once_per_reader"], u["briefings_at_once"], u["briefing_estimate_usd"]) == (2, 8, 0.30)
     assert u["answer_cache_hours"] == 168
     read = desk_settings(indexed_settings, MESSAGES, at_once_per_visitor="briefings_at_once_per_reader",
                          forget_over=50_000)
-    assert (read.at_once_per_visitor, read.at_once, read.estimate_usd, read.cache_hours) == (2, 8, 0.15, 168.0)
+    assert (read.at_once_per_visitor, read.at_once, read.estimate_usd, read.cache_hours) == (2, 8, 0.30, 168.0)
     without = dataclasses.replace(indexed_settings, raw={**indexed_settings.raw, "usage": {
         k: v for k, v in u.items() if k not in ("briefings_at_once_per_reader", "answer_cache_hours")}})
     with pytest.raises(SettingsError, match="briefings_at_once_per_reader") as stopped:
