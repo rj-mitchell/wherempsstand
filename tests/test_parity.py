@@ -37,8 +37,10 @@ ADDED_MODELS = {"claude-opus-5-5": {"price_input_per_mtok": 4.0, "price_output_p
 
 
 # Settings changed on purpose since, each with its value then and now: one visitor's new briefings a day, lowered so
-# that a few visitors cannot use up the daily cap between them (docs/DECISIONS.md, 38)
-CHANGED_SETTINGS: dict[str, dict[str, tuple[Any, Any]]] = {"usage": {"per_visitor_daily_questions": (40, 10)}}
+# that a few visitors cannot use up the daily cap between them (docs/DECISIONS.md, 38); and what a briefing in
+# progress is reserved at, raised above what 16,000 tokens of output alone can cost ($0.16) plus its input
+CHANGED_SETTINGS: dict[str, dict[str, tuple[Any, Any]]] = {
+    "usage": {"per_visitor_daily_questions": (40, 10), "briefing_estimate_usd": (0.15, 0.30)}}
 
 # The version of the instructions the goldens were recorded with. The question reader's instructions have changed
 # on purpose since (it now says when a message is plainly not a question about Parliament's record,
