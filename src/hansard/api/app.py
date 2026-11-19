@@ -2024,6 +2024,19 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                        for u, d in urls[:SITEMAP_LIMIT])
         return xml(f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{body}</urlset>')
 
+    # The sitemap index: one address for search engines to read, which lists the site's fixed pages (a static file,
+    # web/public/sitemap-pages.xml) and each sitemap the record makes. Submitting it once in Search Console covers
+    # them all.
+    SITEMAPS = ("pages", "people", "briefings", "bills", "committees", "edms", "groups", "devolved")
+
+    @app.get("/sitemap.xml", include_in_schema=False)
+    def sitemap_index(request: Request):
+        base = str(request.base_url).rstrip("/")
+        items = "".join(f"<sitemap><loc>{base}/sitemap-{name}.xml</loc></sitemap>" for name in SITEMAPS)
+        return Response('<?xml version="1.0" encoding="UTF-8"?><sitemapindex '
+                        f'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{items}</sitemapindex>',
+                        media_type="application/xml")
+
     @app.get("/sitemap-people.xml", include_in_schema=False)
     def sitemap_people(request: Request):
         """Every member since 1997 (each has a page), dated by the last day they spoke in the record."""
