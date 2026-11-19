@@ -1,38 +1,27 @@
 To: hello@mysociety.org
-Subject: TheyWorkForYou Votes descriptions on Where MPs Stand: may we show them, and how should we credit you?
+Subject: Using TheyWorkForYou Votes descriptions on Where MPs Stand
 
-Dear Alex,
+Hi Alex,
 
-I couldn't find an address for TheyWorkForYou Votes or for data licensing, so I've written to you as Head of Research and Policy. Please pass this on if it belongs with someone else.
+I hope you don't mind me writing to you directly. I couldn't find a contact for TheyWorkForYou Votes or for data licensing, so if this should go to someone else I'd be grateful if you could pass it on.
 
-I've read your post on vibe-coded websites, so I'll keep this short and answer its questions up front. I'm not asking for a call, promotion, money or for you to take anything on: just a licensing question, and an open invitation.
+I've read your recent post about vibe-coded websites, so I'll be upfront: I'm a data guy by trade, and I've built a small family of civic sites with Claude Code, starting with Where MPs Stand (https://wherempsstand.com). I'm not after a call, funding or promotion. There's one licensing question I'd like to get right, and something I think you might find more interesting than the MPs site.
 
-The question. Where MPs Stand (https://wherempsstand.com) shows your plain-English sentence on what voting aye (and sometimes no) meant, and how a party whipped the vote where you report it, next to about 1,600 divisions, from divisions.parquet. Each is labelled "(TheyWorkForYou Votes)" and credited on the methodology page (https://wherempsstand.com/methodology). I couldn't find a licence for them, so:
+The licensing question first. Where MPs Stand shows your plain-English explanations of what voting aye (and sometimes no) meant, and your whipping notes where you have them, next to about 1,600 divisions. They come from the divisions.parquet download, each one is labelled "(TheyWorkForYou Votes)", and you're thanked on the methodology page. I couldn't find a licence for them anywhere, though, so I wanted to check you're happy for us to show them, and if so how you'd like them credited. If you'd rather we didn't use them, that's absolutely fine - we'll take them out and go back to our own neutral labels.
 
-1. Is it all right for us to show them?
-2. If so, under what licence, and how would you like to be credited?
+While I was looking into it I read your API terms, which put your own data (the lists of MPs, Lords, constituencies and so on) under CC BY-SA 2.5. I've assumed that also covers the parlparse members data we download, so every page now carries "Data service provided by TheyWorkForYou" in its footer. Our briefings are CC BY 4.0, and I've read the share-alike as applying to your member data itself rather than to a briefing that mentions who spoke. Please do correct me if I've got either of those wrong.
 
-If you'd rather we didn't, say so and we'll take them out; the site falls back to its own neutral labels.
+Honestly, the site wouldn't exist without your work. It's built on ParlParse's Hansard XML and members data, and your APPG and constituency datasets. Where you already do something well, we point people to you rather than copying it - TheyWorkForYou for alerts and MPs' pages, TheyWorkForYou Votes for voting records, and WriteToThem for contacting an MP. If anything we do turns out to be useful to your users, such as the briefings that bring together what was said on a subject across all four UK parliaments, grouped by who said it, you'd be very welcome to link the other way.
 
-A smaller one, from your API terms: they put your own data (lists of MPs, Lords, constituencies and so on) under CC BY-SA 2.5, with the credit "Data service provided by TheyWorkForYou". We've taken that to cover the parlparse members/ data we download in bulk, and added the credit, linked, to every page's footer. Our briefings are CC BY 4.0, and we've taken the share-alike to apply to your member data itself, not to a briefing that says who spoke. Please tell us if either is wrong.
+The thing I suspect you'll find more interesting is Where Councils Stand (https://wherecouncilsstand.com). It reads the minutes of full council and cabinet meetings from hundreds of UK councils, going back to 2018, and pulls out who attended, how each councillor voted in named votes (with their party at the time) and declarations of interest. As far as I can tell nobody else is doing this: councils publish their recorded votes one by one on their own sites, and nothing brings them together. It uses MapIt, so thank you for that as well. It's very much an alpha - about 1 named vote in 100 still has a councillor on the wrong side, which we say openly while we build up a properly checked test set.
 
-The invitation. The site is built on your work: ParlParse's Hansard XML and members data, and your APPG and 2025-constituencies datasets. Where you do something we don't, we send people to you: TheyWorkForYou for alerts and MPs' pages, TheyWorkForYou Votes for voting records, and WriteToThem. If anything we do is useful to your users (for example, short briefings on what was said about a subject, grouped by who said it, across all four UK parliaments, every point linked to Hansard), you're welcome to link the other way. No obligation.
+On the other questions in your post: everything is free and non-commercial, and Where They Stand is applying to register as a charity. The data refreshes twice a day from your feeds, so changes of MP come through automatically, and the code is public on GitHub (https://github.com/rj-mitchell/wherempsstand). There's a corrections page and a right of reply for MPs, and anything we get wrong is corrected or withdrawn in public. The briefings are written by Claude, but only from records the site has found, and every citation and quote is checked against its source, with anything unsupported flagged to the reader. As for users, I haven't done any promotion yet. Some of the domains are still less than 30 days old, and a lot of workplace filters block new domains, so I'm waiting for that to clear first.
 
-You may find our sister site more interesting. Where Councils Stand (https://wherecouncilsstand.com) reads the minutes of full council and cabinet meetings from hundreds of UK councils since May 2018, and pulls out attendance, named votes with each councillor's party on the date, and declarations of interest. As far as I can find, nobody else does this: councils publish recorded votes one by one on their own sites, and nothing gathers them. It uses MapIt, with thanks. It's an open alpha: about 1 named vote in 100 still has a councillor on the wrong side, a figure we publish. If it's useful to you or anyone you work with on local democracy, I'd be glad to hear.
+I've also had a chat with Tom Steinberg about it.
 
-Your post's other questions, briefly:
+Thanks for TheyWorkForYou and everything around it - it's made all of this possible.
 
-- Money: free and non-commercial. Where They Stand is applying to register as a charity in England and Wales, and is funded by donations.
-- Keeping it going: the record updates twice a day from your data, so changes of MP come through parlparse. The code is public (https://github.com/rj-mitchell/wherempsstand).
-- Votes and complaints: we show your explanations of votes rather than writing our own. There's a corrections route (https://wherempsstand.com/corrections) and a right of reply for MPs (https://wherempsstand.com/named), and anything wrong is corrected or withdrawn in public.
-- AI: briefings are written by Claude from the records found for each question. Every citation and quotation is checked against its source, unsupported sentences are flagged to the reader, and every briefing says it was written by AI. I build the sites with AI coding tools.
-- Users: we haven't promoted the sites yet. Some of the domains are less than 30 days old, and workplace web filters block new domains, so we're waiting for that to clear.
-
-In passing, I've spoken to Tom Steinberg about the site.
-
-Thank you for TheyWorkForYou and everything around it.
-
-Kind regards,
+Best wishes,
 
 Rob Mitchell
 Founder, Where They Stand
