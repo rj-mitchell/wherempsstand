@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import { fmtDate } from "./render";
 
 interface Speaker {
@@ -52,11 +53,11 @@ function Sitting({ path }: { path: string }) {
   }, [d]);
   if (error)
     return (
-      <p role="alert">
+      <Failed text={TEXT}>
         {error} <a href="/devolved">Devolved parliaments</a>
-      </p>
+      </Failed>
     );
-  if (!d) return <p className="muted" role="status">Fetching the day's official report.</p>;
+  if (!d) return <Pending text={TEXT}><p className="muted" role="status">Fetching the day's official report.</p></Pending>;
   const headings = d.items.filter((i) => i.kind === "heading");
   let minor: string | null = null;
   return (
@@ -136,6 +137,8 @@ function Sitting({ path }: { path: string }) {
 }
 
 const path = window.location.pathname.match(/^\/devolved\/[a-z-]+\/[A-Za-z0-9_-]+\/?$/)?.[0];
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("devolvedday-root"));
 createRoot(document.getElementById("devolvedday-root")!).render(
   <StrictMode>{path ? <Sitting path={path.replace(/\/$/, "")} /> : <p role="alert">No sitting was given.</p>}</StrictMode>,
 );

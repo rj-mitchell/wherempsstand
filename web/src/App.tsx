@@ -19,6 +19,7 @@ import { SameQuestion } from "./components/SameQuestion";
 import { SiteFooter } from "./components/SiteFooter";
 import { WhyChatbot } from "./components/WhyChatbot";
 import { followUpsFor, historyFor } from "./followups";
+import { Failed, NOT_UPDATED, serverText } from "./serverText";
 import { briefingGone } from "./gone";
 import { COMPARE_HANDOVER, MENUS, NAV } from "./nav";
 import type {
@@ -36,6 +37,21 @@ import type {
 import { withInterests } from "./types";
 
 const SHARED = /^\/b\/([a-km-z2-9]{10})\/?$/;
+// a topic's or a saved briefing's readable copy, which the server puts in the page (plaintext.py): kept in view if the
+// briefing itself cannot be fetched, rather than a "not found" that is not true
+const TEXT = serverText(document.querySelector("#root > main.thread"));
+/** The briefing could not be fetched, though the page has it (a network failure, or a renderer refused the data). */
+const unreachable = (e: unknown) => TEXT !== null && !(e instanceof ApiError && e.status < 500);
+const plainCopy = (id: string, settings: Settings): Turn => ({
+  id,
+  question: "",
+  settings,
+  sources: [],
+  streamText: "",
+  status: "error",
+  error: NOT_UPDATED,
+  fallbackHtml: TEXT ?? "",
+});
 const TOPIC = /^\/topics\/([a-z0-9-]+)\/?$/;
 
 /**
@@ -229,17 +245,19 @@ export default function App() {
               },
         ]);
       })
-      .catch(() =>
+      .catch((e: unknown) =>
         setTurns([
-          {
-            id: slug,
-            question: "Topic not found",
-            settings,
-            sources: [],
-            streamText: "",
-            status: "error",
-            error: "There is no topic at this address. The list of topics is at /topics.",
-          },
+          unreachable(e)
+            ? plainCopy(slug, settings)
+            : {
+                id: slug,
+                question: "Topic not found",
+                settings,
+                sources: [],
+                streamText: "",
+                status: "error",
+                error: "There is no topic at this address. The list of topics is at /topics.",
+              },
         ]),
       );
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
@@ -276,15 +294,17 @@ export default function App() {
       )
       .catch((e: unknown) =>
         setTurns([
-          {
-            id,
-            question: briefingGone(e).question,
-            settings,
-            sources: [],
-            streamText: "",
-            status: "error",
-            error: briefingGone(e).error,
-          },
+          unreachable(e)
+            ? plainCopy(id, settings)
+            : {
+                id,
+                question: briefingGone(e).question,
+                settings,
+                sources: [],
+                streamText: "",
+                status: "error",
+                error: briefingGone(e).error,
+              },
         ]),
       );
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
@@ -730,7 +750,12 @@ export default function App() {
             </div>
           </section>
         )}
-        {turns.map((t) => (
+        {turns.map((t) =>
+          t.fallbackHtml ? (
+            <article key={t.id} id={`turn-${t.id}`} className="turn">
+              <Failed text={t.fallbackHtml}>{t.error}</Failed>
+            </article>
+          ) : (
           <article key={t.id} id={`turn-${t.id}`} className="turn">
             {t.topic && <TopicHeader topic={t.topic} preparedAt={t.preparedAt} recordsUpTo={t.recordsUpTo} />}
             {t.comparing !== undefined && (
@@ -817,7 +842,8 @@ export default function App() {
               <p className="muted small">Meaning-based search is still being built; these results used keyword search.</p>
             )}
           </article>
-        ))}
+          ),
+        )}
       </main>
 
       {turns.length > 0 && composer("composer")}

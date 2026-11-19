@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import { getJSON } from "./committeeApi";
 import { fmtDate } from "./render";
 
@@ -40,11 +41,11 @@ function Page({ id }: { id: string }) {
   }, [t]);
   if (error)
     return (
-      <p role="alert">
+      <Failed text={TEXT}>
         {error} <a href="/committees">Committees</a>
-      </p>
+      </Failed>
     );
-  if (!t) return <p className="muted" role="status">Fetching the evidence transcript.</p>;
+  if (!t) return <Pending text={TEXT}><p className="muted" role="status">Fetching the evidence transcript.</p></Pending>;
   const witnessNames = new Set((t.witnesses ?? []).map((w) => w.name));
   return (
     <article className="debate">
@@ -121,6 +122,8 @@ function Page({ id }: { id: string }) {
 }
 
 const id = window.location.pathname.match(/^\/evidence\/(\d+)\/?$/)?.[1];
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("evidence-root"));
 createRoot(document.getElementById("evidence-root")!).render(
   <StrictMode>{id ? <Page id={id} /> : <p role="alert">No session was given.</p>}</StrictMode>,
 );

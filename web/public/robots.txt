@@ -1,6 +1,48 @@
+# Every page is open to search engines. Each page of the record (a member, bill, debate, committee, week, topic)
+# fetches its content from the site's free, read-only addresses under /api/, and a search engine that draws the page
+# obeys this file for those fetches too, so they are allowed. Everything else under /api/ stays closed: briefings,
+# which cost money, searches, anything that writes, a reader's own details, and the owner's pages. An address added
+# under /api/ later is closed until it is listed here.
 User-agent: *
 Allow: /
+Allow: /api/people
+Allow: /api/bills
+Allow: /api/debates/
+Allow: /api/week
+Allow: /api/committees
+Allow: /api/inquiries/
+Allow: /api/evidence
+Allow: /api/witnesses
+Allow: /api/edms
+Allow: /api/groups
+Allow: /api/devolved
+Allow: /api/donations
+Allow: /api/directorships
+Allow: /api/lighter-side
+Allow: /api/topics
+Allow: /api/briefings/
+Allow: /api/statements
+Allow: /api/corrections
+Allow: /api/status
+Allow: /api/site
+Allow: /api/meta
 Disallow: /api/
+Disallow: /api/ask
+Disallow: /api/search
+Disallow: /api/v1/
+Disallow: /api/trends
+Disallow: /api/timeline
+Disallow: /api/postcode/
+Disallow: /api/feedback
+Disallow: /api/report
+Disallow: /api/support-clicked
+Disallow: /api/hit
+Disallow: /api/me$
+Disallow: /api/auth/
+Disallow: /api/admin/
+Disallow: /api/check
+Disallow: /api/docs
+Disallow: /api/openapi.json
 Disallow: /admin
 
 Sitemap: https://wherempsstand.com/sitemap.xml

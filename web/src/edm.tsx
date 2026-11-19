@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import type { EdmMember } from "./components/EdmList";
 import { fmtDate } from "./render";
 
@@ -56,11 +57,11 @@ function Edm({ id }: { id: string }) {
 
   if (error)
     return (
-      <p role="alert">
+      <Failed text={TEXT}>
         {error} <a href="/edms">All early day motions</a>
-      </p>
+      </Failed>
     );
-  if (!e) return <p className="muted" role="status">Fetching the motion and its signatures.</p>;
+  if (!e) return <Pending text={TEXT}><p className="muted" role="status">Fetching the motion and its signatures.</p></Pending>;
   const supporters = e.sponsors.filter((s) => !s.withdrawn);
   const withdrawn = e.sponsors.filter((s) => s.withdrawn);
   const question = `What have MPs said in Parliament about ${e.title.replace(/\.$/, "")}?`;
@@ -170,6 +171,8 @@ function Edm({ id }: { id: string }) {
 }
 
 const id = window.location.pathname.match(/^\/edms\/(\d+)\/?$/)?.[1];
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("edm-root"));
 createRoot(document.getElementById("edm-root")!).render(
   <StrictMode>{id ? <Edm id={id} /> : <p role="alert">No motion was given.</p>}</StrictMode>,
 );

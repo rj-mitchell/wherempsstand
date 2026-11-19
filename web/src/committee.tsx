@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import { HOUSE_NAME, getJSON } from "./committeeApi";
 import { fmtDate } from "./render";
 
@@ -34,11 +35,11 @@ function Page({ id }: { id: string }) {
   }, [id]);
   if (error)
     return (
-      <p role="alert">
+      <Failed text={TEXT}>
         {error} <a href="/committees">All committees</a>
-      </p>
+      </Failed>
     );
-  if (!c) return <p className="muted" role="status">Fetching the committee's inquiries and reports.</p>;
+  if (!c) return <Pending text={TEXT}><p className="muted" role="status">Fetching the committee's inquiries and reports.</p></Pending>;
   const current = c.inquiries.filter((i) => !i.close);
   const past = c.inquiries.filter((i) => i.close);
   const list = (items: Committee["inquiries"]) => (
@@ -126,6 +127,8 @@ function Page({ id }: { id: string }) {
 }
 
 const id = window.location.pathname.match(/^\/committees\/(\d+)\/?$/)?.[1];
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("committee-root"));
 createRoot(document.getElementById("committee-root")!).render(
   <StrictMode>{id ? <Page id={id} /> : <p role="alert">No committee was given.</p>}</StrictMode>,
 );

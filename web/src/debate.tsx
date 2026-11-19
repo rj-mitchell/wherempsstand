@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import { VoteKind } from "./components/VoteKind";
 import { fmtDate } from "./render";
 import type { VoteType } from "./types";
@@ -94,11 +95,11 @@ function Debate({ path }: { path: string }) {
 
   if (error)
     return (
-      <p role="alert">
+      <Failed text={TEXT}>
         {error} <a href="/">Ask a question</a>
-      </p>
+      </Failed>
     );
-  if (!d) return <p className="muted" role="status">Fetching the debate.</p>;
+  if (!d) return <Pending text={TEXT}><p className="muted" role="status">Fetching the debate.</p></Pending>;
   const headings = d.items.filter((i) => i.kind === "heading");
   const statement = d.kind === "statement";
   const question = statement
@@ -241,6 +242,8 @@ function Debate({ path }: { path: string }) {
 }
 
 const path = window.location.pathname.match(/^\/debates\/\d{4}-\d{2}-\d{2}\/[a-z0-9-]+\/[a-z0-9-]+\/?$/)?.[0];
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("debate-root"));
 createRoot(document.getElementById("debate-root")!).render(
   <StrictMode>{path ? <Debate path={path.replace(/\/$/, "")} /> : <p role="alert">No debate was given.</p>}</StrictMode>,
 );
