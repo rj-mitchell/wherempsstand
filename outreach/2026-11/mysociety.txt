@@ -3,29 +3,30 @@ Subject: TheyWorkForYou Votes descriptions on Where MPs Stand: may we show them,
 
 Dear Alex,
 
-I've addressed this to you as Head of Research and Policy, as I couldn't find an address for TheyWorkForYou Votes or for data licensing. If it belongs with someone else, please could you pass it on?
+I couldn't find an address for TheyWorkForYou Votes or for data licensing, so I've written to you as Head of Research and Policy. Please pass this on if it belongs with someone else.
 
-I've read your post on vibe-coded websites, so I'll keep this short and answer its questions up front. I'm not asking for a call, for promotion, for money or for you to take anything on. I have a licensing question, and one open invitation.
+I've read your post on vibe-coded websites, so I'll keep this short and answer its questions up front. I'm not asking for a call, promotion, money or for you to take anything on: just a licensing question, and an open invitation.
 
 The question. Where MPs Stand (https://wherempsstand.com) shows your plain-English sentence on what voting aye (and sometimes no) meant, and how a party whipped the vote where you report it, next to about 1,600 divisions, from divisions.parquet. Each is labelled "(TheyWorkForYou Votes)" and credited on the methodology page (https://wherempsstand.com/methodology). I couldn't find a licence for them, so:
 
 1. Is it all right for us to show them?
 2. If so, under what licence, and how would you like to be credited?
 
-If you'd rather we didn't, just say and we'll take them out; the site falls back to its own neutral labels (a second reading, an amendment and so on).
+If you'd rather we didn't, say so and we'll take them out; the site falls back to its own neutral labels.
 
-A smaller one, where I've tried to work it out from your API terms. They put your own data (lists of MPs, Lords, constituencies and so on) under CC BY-SA 2.5, with the credit "Data service provided by TheyWorkForYou". We take it the same covers the parlparse members/ data we download in bulk (the Hansard text itself being under the Open Parliament Licence), and we'll add that credit, linked, to the pages that use it. Our briefings are CC BY 4.0, and we take it the share-alike applies to your member data itself rather than to a briefing that says who spoke. Please tell us if either is wrong.
+A smaller one, from your API terms: they put your own data (lists of MPs, Lords, constituencies and so on) under CC BY-SA 2.5, with the credit "Data service provided by TheyWorkForYou". We've taken that to cover the parlparse members/ data we download in bulk, and added the credit, linked, to every page's footer. Our briefings are CC BY 4.0, and we've taken the share-alike to apply to your member data itself, not to a briefing that says who spoke. Please tell us if either is wrong.
 
-The invitation. The site is built on your work: ParlParse's Hansard XML and members data, and your APPG and 2025-constituencies datasets. Where you do something we don't, we send people to you rather than copy it: TheyWorkForYou for alerts and MPs' pages, TheyWorkForYou Votes for voting records, and WriteToThem for contacting representatives. If anything we do that you don't is useful to your users, you're welcome to link the other way: for example, short briefings on what was said about a subject, grouped by who said it, across the Commons, the Lords and the devolved parliaments, with every point linked to Hansard. No obligation at all.
+The invitation. The site is built on your work: ParlParse's Hansard XML and members data, and your APPG and 2025-constituencies datasets. Where you do something we don't, we send people to you: TheyWorkForYou for alerts and MPs' pages, TheyWorkForYou Votes for voting records, and WriteToThem. If anything we do is useful to your users (for example, short briefings on what was said about a subject, grouped by who said it, across all four UK parliaments, every point linked to Hansard), you're welcome to link the other way. No obligation.
 
-You may find our sister site more interesting, as I don't know of anyone else doing it. Where Councils Stand (https://wherecouncilsstand.com) reads the minutes councils publish for full council and cabinet meetings, across the UK's principal councils and England's strategic authorities from May 2018. From them it pulls who attended, named votes with each councillor's party on the date, and declarations of interest. It uses MapIt for the list of councils, with thanks. It's an open alpha and says so on every page: about 1 named vote in 100 still has a councillor on the wrong side, a figure we publish, and building a checked test set is the main work before beta. If it's of use to you, or to anyone you work with on local democracy, I'd be glad to hear, and the same open invitation to link applies.
+You may find our sister site more interesting. Where Councils Stand (https://wherecouncilsstand.com) reads the minutes of full council and cabinet meetings across the UK's principal councils from May 2018, and pulls out attendance, named votes with each councillor's party on the date, and declarations of interest. As far as I can find, nobody else does this: councils publish recorded votes one by one on their own sites, and nothing gathers them. It uses MapIt, with thanks. It's an open alpha: about 1 named vote in 100 still has a councillor on the wrong side, a figure we publish. If it's useful to you or anyone you work with on local democracy, I'd be glad to hear.
 
 Your post's other questions, briefly:
 
-- Money: the site is free and non-commercial. Where They Stand is applying to register as a charity in England and Wales, and is funded by donations.
-- Keeping it going: the record updates twice a day from your published data, so changes of MP at and between elections come through parlparse. The code is public (https://github.com/rj-mitchell/wherempsstand).
-- Getting votes right, and complaints: we don't write our own explanations of votes. We show yours, credited, beside neutral labels. Every page has a corrections route (https://wherempsstand.com/corrections), MPs have a right of reply (https://wherempsstand.com/named), and anything wrong is corrected or withdrawn in public.
-- AI: the briefings are written by AI (Anthropic's Claude) from the records found for each question, and for a vote your description is part of what the model is given. Every citation and quotation is checked against its source, any sentence no source supports is flagged to the reader, and every briefing says it was written by AI. I build the site with AI coding tools.
+- Money: free and non-commercial. Where They Stand is applying to register as a charity in England and Wales, and is funded by donations.
+- Keeping it going: the record updates twice a day from your data, so changes of MP come through parlparse. The code is public (https://github.com/rj-mitchell/wherempsstand).
+- Votes and complaints: we show your explanations of votes rather than writing our own. There's a corrections route (https://wherempsstand.com/corrections) and a right of reply for MPs (https://wherempsstand.com/named), and anything wrong is corrected or withdrawn in public.
+- AI: briefings are written by Claude from the records found for each question. Every citation and quotation is checked against its source, unsupported sentences are flagged to the reader, and every briefing says it was written by AI. I build the sites with AI coding tools.
+- Users: we haven't promoted the sites yet. Some of the domains are less than 30 days old, and workplace web filters block new domains, so we're waiting for that to clear.
 
 In passing, I've spoken to Tom Steinberg about the site.
 
