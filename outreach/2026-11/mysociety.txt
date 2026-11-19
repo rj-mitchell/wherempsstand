@@ -1,24 +1,29 @@
 To: hello@mysociety.org
-Subject: Showing TheyWorkForYou Votes descriptions on Where MPs Stand: permission and credit
+Subject: TheyWorkForYou Votes descriptions on Where MPs Stand: may we show them, and how should we credit you?
 
 Dear Alex,
 
-I've addressed this to you as Head of Research and Policy, as I couldn't find an address for TheyWorkForYou Votes or for data licensing. If it belongs with someone else, please could you pass it on? Thank you.
+I've addressed this to you as Head of Research and Policy, as I couldn't find an address for TheyWorkForYou Votes or for data licensing. If it belongs with someone else, please could you pass it on?
 
-I'm Rob Mitchell, and I run Where MPs Stand (https://wherempsstand.com), a free, non-commercial site that helps people find what was said and decided in Parliament. It is a project of Where They Stand, which is applying to register as a charity in England and Wales. The site leans heavily on mySociety's work, and we try to send people your way: it links to TheyWorkForYou for alerts and members' pages, to TheyWorkForYou Votes for each member's voting record, and to WriteToThem.
+I've read your post on vibe-coded websites, so I'll keep this short and answer its questions up front. I'm not asking for a call, for promotion, for money or for you to take anything on. I have one licensing question, and one open invitation.
 
-My question is about TheyWorkForYou Votes. Next to about 1,600 votes, the site shows your plain-English sentence on what voting aye (and sometimes no) meant and, where you report it, how a party whipped the vote, both taken from the divisions.parquet download. Each sentence is labelled "(TheyWorkForYou Votes)", and the methodology page credits you with thanks (https://wherempsstand.com/methodology). I couldn't find a licence for that data, so I'd like to check:
+The question. Where MPs Stand (https://wherempsstand.com) shows your plain-English sentence on what voting aye (and sometimes no) meant, and how a party whipped the vote where you report it, next to about 1,600 divisions, from divisions.parquet. Each is labelled "(TheyWorkForYou Votes)" and credited on the methodology page (https://wherempsstand.com/methodology). I couldn't find a licence for them, so:
 
 1. Is it all right for us to show them?
 2. If so, under what licence, and how would you like to be credited?
 
-I want to be open about how the site uses AI, because it affects how your descriptions are used. The site answers questions with short briefings written by AI (Anthropic's Claude) from the parliamentary record, and for a vote your description is part of what the model is given. The model sees only the records found for the question; every citation is checked automatically against its source; quotations are checked word for word; any sentence that isn't backed by a source is flagged to the reader; and every briefing says it was written by AI and links to its sources. The site's code is public (https://github.com/rj-mitchell/wherempsstand), and I build it with the help of AI coding tools.
+If you'd rather we didn't, just say and we'll take them out; the site falls back to its own neutral labels (a second reading, an amendment and so on). A smaller one: are there any terms for the parlparse members/ data beyond the Open Parliament Licence?
 
-If you'd rather we didn't use the descriptions, or would like them presented differently, just say and we'll change it. Without them the site keeps its own neutral labels for each vote (an amendment, a second reading and so on).
+The invitation. The site is built on your work: TheyWorkForYou's Hansard XML, the parlparse members data, and your APPG and 2025-constituencies datasets. Where you do something we don't, we send people to you rather than copy it: TheyWorkForYou for alerts and MPs' pages, TheyWorkForYou Votes for voting records, and WriteToThem for contacting representatives. If anything we do that you don't is useful to your users, you're welcome to link the other way: for example, short briefings on what was said about a subject, grouped by who said it, across the Commons, the Lords and the devolved parliaments, with every point linked to Hansard. No obligation at all.
 
-One smaller question: we also use the members data in your parlparse repository (people, seats, parties and posts), credited to mySociety. Are there any terms for that beyond the Open Parliament Licence on Parliament's own data?
+Your post's other questions, briefly:
 
-Thank you for TheyWorkForYou and everything around it. I'd be glad to talk if any of this is of interest, and to hear if anything on the site could be done better.
+- Money: the site is free and non-commercial. Where They Stand is applying to register as a charity in England and Wales, and is funded by donations.
+- Keeping it going: the record updates twice a day from your published data, so changes of MP at and between elections come through parlparse. The code is public (https://github.com/rj-mitchell/wherempsstand).
+- Getting votes right, and complaints: we don't write our own explanations of votes. We show yours, credited, beside neutral labels. Every page has a corrections route (https://wherempsstand.com/corrections), MPs have a right of reply (https://wherempsstand.com/named), and anything wrong is corrected or withdrawn in public.
+- AI: the briefings are written by AI (Anthropic's Claude) from the records found for each question, and for a vote your description is part of what the model is given. Every citation and quotation is checked against its source, any sentence no source supports is flagged to the reader, and every briefing says it was written by AI. I build the site with AI coding tools.
+
+Thank you for TheyWorkForYou and everything around it.
 
 Kind regards,
 
