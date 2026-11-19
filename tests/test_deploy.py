@@ -802,3 +802,22 @@ def test_a_row_the_old_code_added_is_decided_by_the_shared_packages_guard_alone_
     assert found is not None and found.old == {"reports": 1}
     with pytest.raises(WrittenSinceTheMove, match=r"\(1 in reports\)"):
         open_core(old, FixedClock("2026-11-13T16:00:00+00:00"))
+
+
+def test_the_front_door_compresses_answers_that_tell_cloudflare_not_to_change_them():
+    """Caddy's encode leaves alone an answer that already carries Cache-Control: no-transform. The headers are added
+    as the answer is sent (``defer``, or a removal such as -Server, which defers too), after encode has compressed
+    it; added first, as they were for this site until 19 November 2026, nothing of it was compressed."""
+    import re
+    from pathlib import Path
+
+    caddyfile = (Path(__file__).resolve().parents[1] / "deploy" / "Caddyfile").read_text()
+    blocks = re.findall(r"\n\theader \{\n(.*?)\n\t\}", caddyfile, flags=re.S)
+    with_no_transform = [b for b in blocks if '+Cache-Control "no-transform"' in b]
+    assert len(with_no_transform) == 2  # this site's, and the other sites'
+    for block in with_no_transform:
+        assert re.search(r"^\t\t(defer|-\w)", block, flags=re.M), block
+    assert caddyfile.count("encode zstd gzip") == 2
+    # the family kit's files carry no fingerprint: kept a while, never for ever
+    assert 'header @familyfonts Cache-Control "public, max-age=2592000"' in caddyfile
+    assert "immutable" not in caddyfile.split("@familyfonts", 1)[1].split("reverse_proxy", 1)[0]
