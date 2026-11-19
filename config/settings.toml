@@ -146,7 +146,7 @@ briefing_estimate_usd = 0.30
 briefings_at_once = 8
 briefings_at_once_per_reader = 2
 daily_spend_cap_usd = 50.0
-monthly_spend_cap_usd = 150.0
+monthly_spend_cap_usd = 250.0
 # USD per million tokens, used for spend tracking only.
 price_input_per_mtok = 4.0
 price_output_per_mtok = 20.0

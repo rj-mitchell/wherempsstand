@@ -41,10 +41,10 @@ ADDED_MODELS = {"claude-opus-5-5": {"price_input_per_mtok": 4.0, "price_output_p
 # progress is reserved at, raised above what 16,000 tokens of output alone can cost ($0.16) plus its input; and the
 # effort the question reader gives each question, raised from low to medium after a run of the test set read 9 in 10
 # questions' filters right at low (a reading costs a fiftieth of a penny); and the daily spending cap, raised by the owner
-# from $10 to $50 on 19 November 2026
+# from $10 to $50, and the monthly cap from $150 to $250, on 19 November 2026
 CHANGED_SETTINGS: dict[str, dict[str, tuple[Any, Any]]] = {
     "usage": {"per_visitor_daily_questions": (40, 10), "briefing_estimate_usd": (0.15, 0.30),
-              "daily_spend_cap_usd": (10.0, 50.0)},
+              "daily_spend_cap_usd": (10.0, 50.0), "monthly_spend_cap_usd": (150.0, 250.0)},
     "answer": {"query_parse_effort": ("low", "medium")}}
 
 # The version of the instructions the goldens were recorded with. The question reader's instructions have changed
