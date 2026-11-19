@@ -139,3 +139,40 @@ def test_the_motions_store_gives_its_archive_by_month_and_sitemaps_by_year(tmp_p
     # dated by the newest of tabling, change of status and signature
     assert store.sitemap("2024") == [(1, "2024-02-01"), (2, "2024-05-20")]
     assert store.sitemap("undated") == [(4, None)]
+
+
+def _data(page: str) -> list[dict]:
+    import json
+
+    return [json.loads(m) for m in re.findall(r'<script type="application/ld\+json">(.*?)</script>', page, re.S)]
+
+
+def test_structured_data_names_the_site_on_its_home_page_and_the_trail_above_each_page(indexed_settings, tmp_path):
+    client = _client(indexed_settings, tmp_path)
+    (site,) = _data(client.get("/").text)
+    assert site["@type"] == "WebSite" and site["name"] == "Where MPs Stand" and site["url"] == "http://testserver/"
+    assert site["publisher"] == {"@type": "Organization", "@id": "https://wheretheystand.uk/#org",
+                                 "name": "Where They Stand", "url": "https://wheretheystand.uk/"}
+    assert "SearchAction" not in str(site)
+    topics = client.get("/topics/cost-of-living")  # the same frame as the home page: not the site's description
+    assert all(d.get("@type") != "WebSite" for d in _data(topics.text))
+
+    m = client.get("/api/people").json()["people"][0]
+    (graph,) = _data(client.get(f"/people/{m['number']}/{m['slug']}").text)
+    person, trail = graph["@graph"]
+    url = f"http://testserver/people/{m['number']}/{m['slug']}"
+    assert person["@type"] == "Person" and person["@id"] == f"{url}#person" and person["jobTitle"]
+    assert person["sameAs"][0].startswith("https://members.parliament.uk/member/")
+    assert [i["name"] for i in trail["itemListElement"]] == ["Where MPs Stand", "MPs and peers", m["name"]]
+    assert trail["itemListElement"][-1]["item"] == url
+
+    b = client.get("/api/bills").json()["bills"][0]
+    (graph,) = _data(client.get(f"/bills/{b['slug']}").text)
+    assert [i["item"] for i in graph["@graph"][0]["itemListElement"]] == [
+        "http://testserver/", "http://testserver/bills", f"http://testserver/bills/{b['slug']}"]
+
+    debate = _urls(client.get("/sitemap-debates-2026.xml").text)[0][0].removeprefix("http://testserver")
+    (graph,) = _data(client.get(debate).text)
+    names = [i["name"] for i in graph["@graph"][0]["itemListElement"]]
+    assert names[1].startswith("Week of ") and graph["@graph"][0]["itemListElement"][1]["item"].startswith(
+        "http://testserver/weeks/")
