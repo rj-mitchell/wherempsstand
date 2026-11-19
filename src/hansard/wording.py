@@ -50,5 +50,8 @@ def shorten(text: str, limit: int) -> str:
     text = " ".join(text.split())
     if len(text) <= limit:
         return text
-    cut = text[:limit - 1].rsplit(" ", 1)[0].rstrip(" ,;:—–-")
+    cut = text[:limit - 1]
+    if text[limit - 1].isalnum():  # the cut is inside a word: back to the word before it
+        cut = cut.rsplit(" ", 1)[0]
+    cut = cut.rstrip(" ,;:—–-")
     return cut + "…"

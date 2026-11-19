@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseChunk } from "../api";
-import { demoteHeadings, highlightParts, renderAnswer, segmentsToMarkdown, typographic } from "../render";
+import { demoteHeadings, highlightParts, renderAnswer, segmentsToMarkdown, shorten, typographic } from "../render";
 import type { Segment } from "../types";
 
 const seg = (text: string, status: Segment["status"], sources: number[] = []): Segment => ({
@@ -180,5 +180,15 @@ describe("register field names", () => {
     expect(sentenceCase("Donor Other Details")).toBe("Donor other details");
     expect(sentenceCase("Value")).toBe("Value");
     expect(sentenceCase("Received Date In UK")).toBe("Received date in UK");
+  });
+});
+
+describe("shorten", () => {
+  it("cuts a long title at a word, as the server does", () => {
+    expect(shorten("Short title", 60)).toBe("Short title");
+    const long = "All-Party Parliamentary Group on Something Very Long Indeed, And Even Longer Than Sixty";
+    const cut = shorten(long, 60);
+    expect(cut.length).toBeLessThanOrEqual(60);
+    expect(cut).toBe("All-Party Parliamentary Group on Something Very Long Indeed…");
   });
 });

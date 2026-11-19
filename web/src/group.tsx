@@ -3,7 +3,7 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
 import { Failed, Pending, serverText } from "./serverText";
-import { fmtDate } from "./render";
+import { fmtDate, shorten } from "./render";
 
 interface Member {
   person_id: string | null;
@@ -79,7 +79,7 @@ function Page({ parliament, slug }: { parliament: string; slug: string }) {
       })
       .then((d) => {
         setG(d);
-        document.title = `${d.title} | Where MPs Stand`;
+        document.title = `${shorten(d.title, 60)} | Where MPs Stand`;
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "The group's page did not load. Reload the page to try again."));
   }, [parliament, slug]);
