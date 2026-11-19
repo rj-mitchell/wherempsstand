@@ -163,7 +163,8 @@ def person_text(core: dict[str, Any], activity: dict[str, Any] | None,
 
 def bill_text(b: dict[str, Any]) -> str:
     parts = [f"<h1>{e(b['name'])}</h1>",
-             f"<p>{b.get('contributions', 0):,} contributions in Parliament, {e(fmt_date(b['first']))} to "
+             f"<p>The {e(b['name'])} of {e(b.get('years') or _years(b['first'], b['last']))}: "
+             f"{b.get('contributions', 0):,} contributions in Parliament, {e(fmt_date(b['first']))} to "
              f"{e(fmt_date(b['last']))}.</p><h2>Sittings</h2><ul>"]
     for s in (b.get("sittings") or [])[:MAX_ITEMS]:
         stages = ", ".join(s.get("stages") or [])
@@ -349,8 +350,8 @@ def bills_list_text(bills: list[dict[str, Any]], years: list[str], total: int | 
              f"{'is' if len(bills) == 1 else 'are'} listed.</p>" if total else "",
              '<ul class="topic-list">']
     for b in bills:
-        parts.append(f"<li>{_link(f'/bills/{b['slug']}', b.get('label') or b['name'])} "
-                     f"({e(_years(b['first'], b['last']))})</li>")
+        parts.append(f"<li>{_link(f'/bills/{b['slug']}', b['name'])} "
+                     f"({e(b.get('years') or _years(b['first'], b['last']))})</li>")
     parts.append("</ul>")
     return "".join(parts) + year_links("/bills/year/", years, "Bills by the year they were debated")
 

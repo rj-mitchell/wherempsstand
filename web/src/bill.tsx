@@ -31,6 +31,8 @@ interface Division {
 interface BillData {
   slug: string;
   name: string;
+  /** the years it was debated ("2025–26"), which tell bills of the same name apart */
+  years?: string;
   first: string;
   last: string;
   houses: string[];
@@ -52,7 +54,7 @@ function Bill({ slug }: { slug: string }) {
       })
       .then((d) => {
         setB(d);
-        document.title = `${d.name} | Where MPs Stand`;
+        document.title = `${d.name}${d.years ? ` (${d.years})` : ""} | Where MPs Stand`;
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "The bill's page did not load. Reload the page to try again."));
   }, [slug]);
