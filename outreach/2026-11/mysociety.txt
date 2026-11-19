@@ -18,6 +18,8 @@ A smaller one, where I've tried to work it out from your API terms. They put you
 
 The invitation. The site is built on your work: ParlParse's Hansard XML and members data, and your APPG and 2025-constituencies datasets. Where you do something we don't, we send people to you rather than copy it: TheyWorkForYou for alerts and MPs' pages, TheyWorkForYou Votes for voting records, and WriteToThem for contacting representatives. If anything we do that you don't is useful to your users, you're welcome to link the other way: for example, short briefings on what was said about a subject, grouped by who said it, across the Commons, the Lords and the devolved parliaments, with every point linked to Hansard. No obligation at all.
 
+You may find our sister site more interesting, as I don't know of anyone else doing it. Where Councils Stand (https://wherecouncilsstand.com) reads the minutes councils publish for full council and cabinet meetings, across the UK's principal councils and England's strategic authorities from May 2018. From them it pulls who attended, named votes with each councillor's party on the date, and declarations of interest. It uses MapIt for the list of councils, with thanks. It's an open alpha and says so on every page: about 1 named vote in 100 still has a councillor on the wrong side, a figure we publish, and building a checked test set is the main work before beta. If it's of use to you, or to anyone you work with on local democracy, I'd be glad to hear, and the same open invitation to link applies.
+
 Your post's other questions, briefly:
 
 - Money: the site is free and non-commercial. Where They Stand is applying to register as a charity in England and Wales, and is funded by donations.
