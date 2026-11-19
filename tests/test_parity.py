@@ -139,6 +139,92 @@ def without_added(section: str, values: Any) -> Any:
     return out
 
 
+# Version 2 of the checks on briefings (wts-core 0.3.2, ``checks.RULES_VERSION``): a short uncited line that is a
+# sentence of its own is a claim, to be checked, where version 1 took it for a join. Each passage of the recordings
+# that this changes, every one a claim the recordings were wrong to pass; it is "unsupported" now, and was
+# "connective" when they were recorded.
+CLAIMS_NOW = (
+    # after a citation, in the scenario of the checks "a cited claim, a lead-in and an uncited claim" (the lead-in,
+    # "Hilary Benn said that ", is a join as before)
+    " This was a turning point for the House.",
+    # the faked model's sentence after its quotation, in every briefing of the real pipeline (wts-core's changelog
+    # names it: the one passage of the sites' saved briefings that version 2 changed)
+    '" The minister admitted that the organisation was at fault.',
+)
+
+
+def judged_then(answer: dict[str, Any], moved: list[str] | None = None) -> dict[str, Any]:
+    """A checked answer as version 1 of the rules judged it: each passage of ``CLAIMS_NOW`` that is a point to
+    check now put back as a join, and the counts of the answer worked out again as the package does when it judges
+    a saved briefing again (``Verifier.recheck``). Each passage put back is added to ``moved``."""
+    segments = answer["segments"]
+    back = [s.get("status") == "unsupported" and s.get("text") in CLAIMS_NOW for s in segments]
+    if not any(back):
+        return answer
+    if moved is not None:
+        moved += [s["text"] for s, b in zip(segments, back, strict=True) if b]
+    segments = [{**s, "status": "connective"} if b else s for s, b in zip(segments, back, strict=True)]
+    cited = sum(len(s["text"]) for s in segments if s.get("status") == "cited")
+    unsupported = sum(len(s["text"]) for s in segments if s.get("status") in ("unsupported", "invalid"))
+    return {**answer, "segments": segments,
+            "unsupported_segments": sum(1 for s in segments if s.get("status") == "unsupported"),
+            "grounded_ratio": round(1.0 if not cited + unsupported else cited / (cited + unsupported), 3)}
+
+
+def claims_then(value: Any, moved: list[str]) -> Any:
+    """What was sent, saved or cached, with each checked answer in it as version 1 of the rules judged it
+    (``judged_then``): in the views of saved briefings, and in the JSON of each event sent and each row written."""
+    if isinstance(value, dict):
+        if isinstance(value.get("segments"), list) and "unsupported_segments" in value:
+            return judged_then(value, moved)
+        return {k: claims_then(v, moved) for k, v in value.items()}
+    if isinstance(value, list):
+        return [claims_then(v, moved) for v in value]
+    if isinstance(value, str) and value.startswith(("[", "{")):
+        try:
+            data = json.loads(value)
+        except ValueError:
+            return value
+        then = claims_then(data, moved)
+        return value if then == data else json.dumps(then)
+    if isinstance(value, str) and "\ndata: {" in value:  # an event stream: each event's data, one at a time
+        events = []
+        for event in value.split("\n\n"):
+            head, data = event.split("data: ", 1) if "data: {" in event else (event, None)
+            if data is not None and (then := claims_then(json.loads(data), moved)) != json.loads(data):
+                event = f"{head}data: {json.dumps(then)}"
+            events.append(event)
+        return "\n\n".join(events)
+    return value
+
+
+# Briefings that end without an answer are charged since wts-core 0.3.2, in a spending row of kind "unfinished"
+# that counts towards the daily limits: what the model's adapter saw used, or, where it saw nothing, what a
+# briefing in progress is reserved at (CHANGED_SETTINGS: $0.30). Before, they cost nothing. Each scenario that ends
+# one so, with the rows it now writes (all but the time and the reader, which are those of the briefing's other
+# rows); the recordings hold none.
+ESTIMATE = CHANGED_SETTINGS["usage"]["briefing_estimate_usd"][1]
+AS_ANSWERED = [1300, 200, 400, 300, 0.00483]  # what the faked SDK's briefing reports using, as an answer is charged
+UNFINISHED: dict[str, list[list[Any]]] = {
+    # the site's scripted pipeline reports no model calls: its model had begun writing, so the estimate
+    "the pipeline raising mid-stream": [["unfinished", "claude-sonnet-5-5", 0, 0, 0, 0, ESTIMATE]],
+    "the reader leaving while the briefing is written": [["unfinished", "claude-sonnet-5-5", 0, 0, 0, 0, ESTIMATE]],
+    # the site's error event when the model declines carries no counts: what the adapter saw, for each of the two
+    "the model declines": [["unfinished", "claude-sonnet-5-5", *AS_ANSWERED]] * 2,
+}
+
+
+def without_unfinished(now: Any, name: str) -> Any:
+    """What was written, without the rows of briefings that ended without an answer: each is checked to be one
+    ``UNFINISHED`` names, charged to the same reader as the briefing's other rows."""
+    spending = now["rows"]["spending"]
+    unfinished = [row for row in spending if row[1] == "unfinished"]
+    kept = [row for row in spending if row[1] != "unfinished"]
+    assert [[row[1], row[2], *row[5:]] for row in unfinished] == UNFINISHED.get(name, []), name
+    assert all(row[3:5] == kept[0][3:5] for row in unfinished), name
+    return {**now, "rows": {**now["rows"], "spending": kept}}
+
+
 # settings
 
 
@@ -169,9 +255,10 @@ def test_the_local_settings_file_is_written_byte_for_byte_as_before(tmp_path):
 
 
 def test_the_checks_report_each_briefing_as_before():
-    """Twelve briefings as the model might write them, through every check. One difference, on purpose: each
+    """Twelve briefings as the model might write them, through every check. Two differences, on purpose: each
     answer now carries ``rules``, the version of the checking rules that wrote it (wts-core's
-    to_dict() writes today's keys and then rules)."""
+    to_dict() writes today's keys and then rules); and under version 2 of the rules the uncited claim of one
+    (``CLAIMS_NOW``) is a point to check, where version 1 took it for a join."""
     from wts_core.checks import RULES_VERSION
 
     from hansard.rag.checks import checked
@@ -182,8 +269,11 @@ def test_the_checks_report_each_briefing_as_before():
     assert [c["name"] for c in golden] == [c["name"] for c in shared.CHECK_CASES]
     for was, case in zip(golden, shared.CHECK_CASES, strict=True):
         answer = dict(checked(case["blocks"], sources))
-        assert list(answer)[-1] == "rules" and answer.pop("rules") == RULES_VERSION == 1, case["name"]
-        assert answer == was["answer"], case["name"]
+        assert list(answer)[-1] == "rules" and answer.pop("rules") == RULES_VERSION == 2, case["name"]
+        moved: list[str] = []
+        assert judged_then(answer, moved) == was["answer"], case["name"]
+        assert moved == (list(CLAIMS_NOW[:1]) if case["name"] == "a cited claim, a lead-in and an uncited claim"
+                         else []), case["name"]
 
 
 def test_the_wide_rule_for_notes_about_the_evidence_is_kept():
@@ -222,16 +312,21 @@ def test_a_saved_briefing_is_shown_as_before_with_its_flags_judged_again():
 
 def test_a_briefing_written_under_todays_rules_is_shown_as_it_was_saved():
     """A briefing stamped with today's rules is left alone when it is shown again:
-    judging it again could only repeat, less well informed, what the verifier did when it was written."""
+    judging it again could only repeat, less well informed, what the verifier did when it was written. Today's
+    rules are version 2 (wts-core 0.3.2); one stamped with version 1 is judged again, as one with no stamp is."""
+    from wts_core.checks import RULES_VERSION
+
     from hansard.rag.checks import shown_again
 
-    stamped = shown_again({**shared.an_answer(), "rules": 1})
+    assert RULES_VERSION == 2
+    stamped = shown_again({**shared.an_answer(), "rules": RULES_VERSION})
     assert [s["status"] for s in stamped["segments"]] == ["cited", "unsupported", "cited", "unsupported"]
     assert stamped["unsupported_segments"] == 2 and stamped["grounded_ratio"] == 0.5
     assert stamped["loaded_words"] == 0  # a judgemental-word mark is judged by today's list every time it is shown
     unstamped = shown_again(shared.an_answer())
     assert [s["status"] for s in unstamped["segments"]] == ["cited", "connective", "cited", "unsupported"]
     assert unstamped["loaded_words"] == 0
+    assert shown_again({**shared.an_answer(), "rules": 1}) == {**unstamped, "rules": 1}
 
 
 # the interests check
@@ -358,12 +453,14 @@ def test_the_flow_of_a_question_sends_and_writes_what_it_did(name, tmp_path, mon
     """Every byte sent and every row written, case for case, with the shared briefing desk in place of the
     route's own flow: what is sent, the spending record, the answer cache, the saved briefings, the notes of
     failures, the site's own counts, what the pipeline was asked to do, each saved briefing as its address serves
-    it, and what the status page says."""
+    it, and what the status page says. One difference, on purpose: a briefing that ends without an answer is
+    charged (``UNFINISHED``)."""
     from .sides import scripted_side
 
     instructions_then(monkeypatch)
     now = shared.plain(shared.scripted_asks(lambda **kw: scripted_side(tmp_path, monkeypatch, **kw), only=name),
                        tmp=tmp_path)[name]
+    now = without_unfinished(now, name)
     was = SCRIPTED[name]
     assert now == (follow_ups_as_now(was, now, FOLLOW_UPS[name]) if name in FOLLOW_UPS else was)
 
@@ -371,7 +468,7 @@ def test_the_flow_of_a_question_sends_and_writes_what_it_did(name, tmp_path, mon
 # the same through the site's real pipeline, over the tests' own index
 
 REAL = shared.read("ask-real.json")
-RULES = '"rules": 1'
+RULES = '"rules": 2'
 
 
 def without_rules(value: Any) -> Any:
@@ -381,16 +478,18 @@ def without_rules(value: Any) -> Any:
     if isinstance(value, list):
         return [without_rules(v) for v in value]
     if isinstance(value, str) and RULES in value:
-        return value.replace(', "rules": 1', "")
+        return value.replace(", " + RULES, "")
     return value
 
 
 @pytest.mark.parametrize("name", list(shared.REAL))
 def test_the_real_pipeline_sends_and_writes_what_it_did(name, indexed_settings, tmp_path, monkeypatch):
     """The whole of each answer through the site's real search, ranking, instructions and checks, with a faked
-    Anthropic SDK; and the requests the model was sent, whole. One difference, on purpose: each answer the checks
-    wrote carries ``rules``, the version of the checking rules, in what is sent,
-    saved and cached; a saved briefing with the stamp is shown as it was saved."""
+    Anthropic SDK; and the requests the model was sent, whole. Three differences, on purpose: each answer the
+    checks wrote carries ``rules``, the version of the checking rules, in what is sent,
+    saved and cached, and a saved briefing with the stamp is shown as it was saved; under version 2 of the rules
+    the faked model's uncited sentence is a point to check (``CLAIMS_NOW``), wherever the answer is; and a
+    briefing that ends without an answer is charged (``UNFINISHED``)."""
     from .sides import real_side
 
     instructions_then(monkeypatch)
@@ -399,12 +498,15 @@ def test_the_real_pipeline_sends_and_writes_what_it_did(name, indexed_settings, 
         lambda sdk, **usage: real_side(indexed_settings, tmp_path / f"real-{next(n)}", sdk, monkeypatch, **usage),
         only=name), tmp=tmp_path)[name]
     was = REAL[name]
-    now = parse_effort_then(without_research_rule(now))
+    now = without_unfinished(parse_effort_then(without_research_rule(now)), name)
+    moved: list[str] = []
+    now = claims_then(now, moved)
     if name in FOLLOW_UPS:
         was = follow_ups_as_now(was, now, FOLLOW_UPS[name])
     assert now["calls"] == was["calls"]  # what the model was asked: every request, key for key
     written = [body for _, body in now["sent"] if '"no_records": false' in body]
     assert all(RULES in body for body in written)
+    assert set(moved) == ({CLAIMS_NOW[1]} if written else set())
     assert without_rules(now) == was
     if written:
         assert all(RULES in row[4] for row in now["rows"]["briefings"])  # each saved briefing's events

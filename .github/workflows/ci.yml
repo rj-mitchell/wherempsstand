@@ -18,20 +18,20 @@ permissions:
 jobs:
   # uv sync --frozen, ruff, pytest, with the family's Python and uv
   python:
-    uses: rj-mitchell/wts-core/.github/workflows/python.yml@v0.3.1
+    uses: rj-mitchell/wts-core/.github/workflows/python.yml@v0.3.2
     with:
       lint-paths: "src tests scripts"
 
   # npm ci, the type check, the tests and the build, with the family's Node
   web:
-    uses: rj-mitchell/wts-core/.github/workflows/web.yml@v0.3.1
+    uses: rj-mitchell/wts-core/.github/workflows/web.yml@v0.3.2
     with:
       working-directory: web
 
   # The Where They Stand family kit version last synced into web/public/family/. Raise it in the same change as a
   # new sync.
   kit:
-    uses: rj-mitchell/wts-core/.github/workflows/kit.yml@v0.3.1
+    uses: rj-mitchell/wts-core/.github/workflows/kit.yml@v0.3.2
     with:
       version: "2.0.1"
       site: mps
@@ -77,7 +77,7 @@ jobs:
           docker exec wts hansard tidy
           docker exec wts hansard eval replay eval/fixtures
       - name: Accessibility check (axe, WCAG 2.2 AA, light and dark, desktop and phone)
-        uses: rj-mitchell/wts-core/.github/actions/a11y@v0.3.1
+        uses: rj-mitchell/wts-core/.github/actions/a11y@v0.3.2
         with:
           url: http://localhost:8000
       - name: Show the container log if anything failed
