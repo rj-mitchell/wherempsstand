@@ -27,6 +27,8 @@ Your post's other questions, briefly:
 - Getting votes right, and complaints: we don't write our own explanations of votes. We show yours, credited, beside neutral labels. Every page has a corrections route (https://wherempsstand.com/corrections), MPs have a right of reply (https://wherempsstand.com/named), and anything wrong is corrected or withdrawn in public.
 - AI: the briefings are written by AI (Anthropic's Claude) from the records found for each question, and for a vote your description is part of what the model is given. Every citation and quotation is checked against its source, any sentence no source supports is flagged to the reader, and every briefing says it was written by AI. I build the site with AI coding tools.
 
+In passing, I've spoken to Tom Steinberg about the site.
+
 Thank you for TheyWorkForYou and everything around it.
 
 Kind regards,
