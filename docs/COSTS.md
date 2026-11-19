@@ -50,7 +50,7 @@ These run on the server, which is paid for whatever the use, so extra use costs 
 The limits are in `[usage]` in `config/settings.toml`. To change one, edit it there and deploy the change
 ([OPERATIONS.md](OPERATIONS.md), "New code").
 
-- The site stops writing new briefings for the day at $50 (raised from $10 on 19 November 2026), and for the month at $150. Sources are still shown.
+- The site stops writing new briefings for the day at $50 (raised from $10 on 19 November 2026), and for the month at $250 (raised from $150 the same day). Sources are still shown.
 - One visitor can have at most 10 new briefings a day, as a backstop against automated use, and make at most 20
   requests a minute. (It was 40 until November 2026, when three or four visitors could have used up the daily cap
   between them.) A question that plainly is not about Parliament's record (a request for a poem, instructions to the
