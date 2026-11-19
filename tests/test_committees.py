@@ -146,7 +146,7 @@ def test_sitemaps(indexed_settings, tmp_path):
     from .test_api import make_app
 
     path = committees_path(indexed_settings)
-    app, _, _ = make_app(indexed_settings, tmp_path, auth=False)
+    app, _, _ = make_app(indexed_settings, tmp_path, auth=False, pages=True)
     client = TestClient(app)
     try:
         build(path, fake_api(), no_wait)

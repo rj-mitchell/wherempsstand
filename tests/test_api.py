@@ -6,6 +6,7 @@ import asyncio
 import dataclasses
 import html
 import json
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -21,11 +22,23 @@ from hansard.store.state import StateDB
 from .conftest import model_of
 from .test_rag import TODAY, FakeClient
 
+WEB_SOURCES = Path(__file__).resolve().parents[1] / "web"  # the pages' sources, which the build copies
 
-def make_app(indexed_settings, tmp_path, *, auth: bool, **usage):
-    # each test gets its own state DB (users, usage, cache) on top of the shared index
+
+def make_app(indexed_settings, tmp_path, *, auth: bool, pages: bool = False, **usage):
+    # each test gets its own state DB (users, usage, cache) on top of the shared index; with ``pages``, the server
+    # fills in the site's own page sources (web/*.html) as it does the built pages, so a test can read a page's
+    # server-written text without a build of the app (CI's Python job has none)
+    paths = dict(indexed_settings.raw.get("paths", {}))
+    if pages:
+        dist = tmp_path / "dist"
+        (dist / "assets").mkdir(parents=True, exist_ok=True)
+        for page in WEB_SOURCES.glob("*.html"):
+            (dist / page.name).write_text(page.read_text(encoding="utf-8"), encoding="utf-8")
+        paths["web_dist"] = str(dist)
     s = dataclasses.replace(indexed_settings, raw={
         **indexed_settings.raw,
+        "paths": paths,
         "auth": {"required": auth},
         "usage": {**indexed_settings.raw["usage"], "per_user_daily_questions": 2, "per_visitor_daily_questions": 2,
                   **usage}})
