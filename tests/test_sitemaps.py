@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 WEB_PUBLIC = Path(__file__).resolve().parents[1] / "web" / "public"
-CHILDREN = ("pages", "people", "briefings", "bills", "committees", "edms", "groups", "devolved")
+CHILDREN = ("pages", "people", "briefings", "bills", "weeks", "committees", "groups", "devolved")
 
 
 def test_the_index_lists_every_sitemap_and_each_one_made_by_the_site_answers(indexed_settings, tmp_path):
@@ -19,9 +19,14 @@ def test_the_index_lists_every_sitemap_and_each_one_made_by_the_site_answers(ind
     assert r.status_code == 200 and r.headers["content-type"].startswith("application/xml")
     assert "<sitemapindex " in r.text and "<urlset" not in r.text
     listed = re.findall(r"<loc>([^<]+)</loc>", r.text)
-    assert [loc.rsplit("/", 1)[1] for loc in listed] == [f"sitemap-{name}.xml" for name in CHILDREN]
-    for name in CHILDREN[1:]:  # the fixed pages are a static file, served with the built site
-        assert client.get(f"/sitemap-{name}.xml").status_code == 200, name
+    names = [loc.rsplit("/", 1)[1] for loc in listed]
+    # the fixed ones, then the debates a year each (the fixtures have days in 2026 and 2012; no motions here)
+    assert names == [f"sitemap-{name}.xml" for name in CHILDREN] + ["sitemap-debates-2026.xml",
+                                                                    "sitemap-debates-2012.xml"]
+    for name in names[1:]:  # the fixed pages are a static file, served with the built site
+        assert client.get(f"/{name}").status_code == 200, name
+    assert client.get("/sitemap-debates-1990.xml").status_code == 404
+    assert client.get("/sitemap-edms-1990.xml").status_code == 404 and client.get("/sitemap-edms-x.xml").status_code == 404
 
 
 def test_the_fixed_pages_are_a_sitemap_of_their_own_and_robots_names_only_the_index():

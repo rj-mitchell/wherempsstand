@@ -541,13 +541,31 @@ class Committees:
                 GROUP BY s.id ORDER BY s.date DESC LIMIT ?""", (mnis, limit)).fetchall()
         return [dict(r) | {"url": links("session", r["id"])} for r in rows]
 
-    def sitemap_ids(self) -> tuple[list[int], list[int]]:
-        """(committees, inquiries) with something to show: current committees, inquiries with sessions or reports."""
+    def sitemap_ids(self) -> tuple[list[tuple[int, str | None]], list[tuple[int, str | None]]]:
+        """(committees, inquiries) with something to show, each with the last date known for it (its newest
+        publication or evidence session, or for an inquiry with neither its closing or opening date): current
+        committees, and inquiries with sessions or reports."""
         with self.connect() as con:
-            cs = [r[0] for r in con.execute("SELECT id FROM committees WHERE end IS NULL")]
-            iq = [r[0] for r in con.execute("""SELECT DISTINCT inquiry_id FROM session_inquiries
-                                               UNION SELECT DISTINCT inquiry_id FROM publication_inquiries""")]
-        return cs, iq
+            cs = con.execute("""
+                SELECT c.id, max(d) FROM committees c LEFT JOIN (
+                    SELECT committee_id, date AS d FROM publications
+                    UNION ALL SELECT sc.committee_id, s.date FROM session_committees sc JOIN sessions s ON s.id = sc.session_id
+                ) x ON x.committee_id = c.id
+                WHERE c.end IS NULL GROUP BY c.id ORDER BY c.id""").fetchall()
+            iq = con.execute("""
+                SELECT inquiry_id, max(d) FROM (
+                    SELECT si.inquiry_id, s.date AS d FROM session_inquiries si LEFT JOIN sessions s ON s.id = si.session_id
+                    UNION ALL SELECT pi.inquiry_id, p.date FROM publication_inquiries pi
+                    LEFT JOIN publications p ON p.id = pi.publication_id
+                ) x GROUP BY inquiry_id ORDER BY inquiry_id""").fetchall()
+            dates = dict(con.execute("SELECT id, coalesce(close, open) FROM inquiries").fetchall())
+        return ([(i, _day(d)) for i, d in cs],
+                [(i, _day(d) or _day(dates.get(i))) for i, d in iq])
+
+    def session_dates(self, ids: set[int]) -> dict[int, str | None]:
+        """The date of each of these evidence sessions."""
+        with self.connect() as con:
+            return {i: _day(d) for i, d in con.execute("SELECT id, date FROM sessions").fetchall() if i in ids}
 
     def recent_publications(self, limit: int = 40) -> list[dict[str, Any]]:
         """The newest reports, special reports and government responses, with their committee and inquiry."""

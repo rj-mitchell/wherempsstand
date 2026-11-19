@@ -65,3 +65,27 @@ def test_home_fallback_gives_way_to_a_pages_own_text():
     assert "home-fallback" not in out and "note" not in out
     assert out == '<body><div id="root"><main class="thread prose"><h1>A briefing</h1></main></div></body>'
     assert with_text(page, None) == page  # no text of its own: the home page's stays
+
+
+def test_index_lists_go_where_the_app_draws_its_list_and_pages_link_to_members():
+    from hansard.api.plaintext import debate_text, week_text, with_heading, with_list
+
+    page = ('<h1>Bills</h1><p class="intro-text">Every bill.</p>'
+            '<div id="bills-live" aria-live="polite"><p class="muted">Fetching the list of bills.</p></div>')
+    out = with_list(page, '<ul><li><a href="/bills/x">X</a></li></ul>')
+    assert '<div id="bills-live" aria-live="polite"><div class="server-list"><ul>' in out and "Fetching" not in out
+    assert with_list(page, None) == page
+    archive = with_heading(page, "Bills debated in 2024", "The 3 bills debated in 2024.")
+    assert "<h1>Bills debated in 2024</h1>" in archive and "The 3 bills debated in 2024." in archive
+    d = debate_text({"title": "Rail", "chamber_name": "House of Commons", "date": "2026-11-18",
+                     "items": [{"kind": "said", "speaker": {"name": "Ann <MP>", "number": 1, "slug": "ann-mp"},
+                                "paragraphs": ["Hello."]}]})
+    assert '<h3><a href="/people/1/ann-mp">Ann &lt;MP&gt;</a></h3>' in d
+    m = edm_text({"title": "T", "uin": "1", "date_tabled": "2026-01-01", "sponsors_count": 2,
+                  "sponsor": {"name": "Ann", "number": 1, "slug": "ann"},
+                  "sponsors": [{"name": "Bob", "number": 2, "slug": "bob", "party": "Labour"},
+                               {"name": "Cy", "withdrawn": "2026-01-02"}]})
+    assert 'by <a href="/people/1/ann">Ann</a>' in m and '<li><a href="/people/2/bob">Bob</a> (Labour)</li>' in m
+    assert "Cy" not in m  # a withdrawn signature is not listed
+    w = week_text({"start": "2026-11-16", "days": [], "previous": "2026-11-09", "next": None})
+    assert '<a href="/weeks/2026-11-09">The week before</a>' in w and '<a href="/weeks">Every week</a>' in w

@@ -103,6 +103,8 @@ def test_refresh_and_pages(indexed_settings, tmp_path):
         assert client.get("/api/groups").json()["groups"][0]["slug"] == "rail"
         assert client.get("/api/groups", params={"parliament": "nowhere"}).status_code == 404
         assert "/groups/uk/rail</loc>" in client.get("/sitemap-groups.xml").text
+        assert 'href="/groups/uk/rail"' in client.get("/groups").text
+        assert f'href="/people/{BENN.rsplit("/", 1)[1]}/hilary-benn"' in client.get("/groups/uk/rail").text
         assert client.get("/groups/uk/rail").status_code == 200 and client.get("/groups/uk/none").status_code == 404
         page = client.get(f"/api/people/{BENN.rsplit('/', 1)[1]}").json()
         assert page["groups"][0]["role"] == "Chair & Registered Contact"

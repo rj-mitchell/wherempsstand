@@ -4,10 +4,27 @@
  * on the page, so it is never left with only an error where its heading and content were. */
 import type { ReactNode } from "react";
 
-/** The server's copy in a page's root, taken before the app draws over it; null when the root holds only the
- * placeholder ("Fetching the bill's stages and votes."), as it does on a page the server did not fill. */
+/** The server's copy in a page's root, taken before the app draws over it: a page of the record (with its heading)
+ * or an index page's list of links (.server-list). Null when the root holds only the placeholder ("Fetching the
+ * bill's stages and votes."), as it does on a page the server did not fill. */
 export function serverText(root: Element | null): string | null {
-  return root?.querySelector("h1") ? root.innerHTML : null;
+  return root?.querySelector("h1, .server-list") ? root.innerHTML : null;
+}
+
+/** For the index pages written without React: when their list cannot be fetched, the server's list stays, under the
+ * same notice; with no list from the server, ``message`` takes the placeholder's place. */
+export function listFailed(live: HTMLElement, message: string): void {
+  const note = document.createElement("p");
+  note.setAttribute("role", "alert");
+  if (live.querySelector(".server-list")) {
+    note.className = "shared-note";
+    note.textContent = NOT_UPDATED;
+    live.prepend(note);
+  } else {
+    note.className = "form-error";
+    note.textContent = message;
+    live.replaceChildren(note);
+  }
 }
 
 /** What shows while the page's data is on its way: the server's copy if there is one, otherwise ``children`` (the

@@ -1,5 +1,6 @@
 /** The topic briefings page: every topic, grouped by area, with its latest summary; then featured briefings. */
 import "./pages";
+import { listFailed } from "./serverText";
 import { fmtDate } from "./render";
 
 interface TopicRow {
@@ -64,7 +65,7 @@ async function load() {
       document.getElementById("featured")!.hidden = false;
     }
   } catch {
-    live.replaceChildren(el("p", "form-error", "The list of topic briefings did not load. Reload the page to try again."));
+    listFailed(live, "The list of topic briefings did not load. Reload the page to try again.");
   }
 }
 

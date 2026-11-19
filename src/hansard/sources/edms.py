@@ -219,6 +219,41 @@ class EdmStore:
                                    LIMIT ? OFFSET ?""", [*params, limit, offset]).fetchall()
         return total, [dict(r) for r in rows]
 
+    def months(self) -> list[tuple[str, int]]:
+        """Each month motions were tabled in ("2026-11"), newest first, with how many: the motions' archive."""
+        with self.connect() as con:
+            return [(r[0], r[1]) for r in con.execute(
+                "SELECT substr(date_tabled, 1, 7) AS m, count(*) FROM edms WHERE date_tabled IS NOT NULL "
+                "GROUP BY m ORDER BY m DESC")]
+
+    def in_month(self, month: str) -> list[dict[str, Any]]:
+        """The motions tabled in one month ("2026-11"), in the order they were tabled."""
+        with self.connect() as con:
+            rows = con.execute("""SELECT e.id, e.uin, e.title, e.date_tabled, e.status, e.sponsors_count,
+                                         e.primary_mnis, e.primary_name, e.primary_party, e.prayer
+                                  FROM edms e WHERE substr(e.date_tabled, 1, 7) = ? ORDER BY e.date_tabled, e.id""",
+                               (month,)).fetchall()
+        return [dict(r) for r in rows]
+
+    def years(self) -> list[str]:
+        """The years motions were tabled in, newest first, and "undated" if any motion has no date."""
+        with self.connect() as con:
+            rows = [r[0] for r in con.execute(
+                "SELECT DISTINCT coalesce(substr(date_tabled, 1, 4), 'undated') AS y FROM edms ORDER BY y DESC")]
+        return [y for y in rows if y != "undated"] + (["undated"] if "undated" in rows else [])
+
+    def sitemap(self, year: str) -> list[tuple[int, str | None]]:
+        """(id, date last changed) of each motion tabled in ``year`` ("undated": those without a date). The date is
+        the latest of when it was tabled, its last change of status and its newest signature."""
+        where = "e.date_tabled IS NULL" if year == "undated" else "substr(e.date_tabled, 1, 4) = ?"
+        with self.connect() as con:
+            rows = con.execute(f"""
+                SELECT e.id, max(coalesce(e.date_tabled, ''), coalesce(e.status_date, ''),
+                                 coalesce((SELECT max(s.signed) FROM edm_sponsors s WHERE s.edm_id = e.id), ''))
+                FROM edms e WHERE {where} ORDER BY e.date_tabled, e.id""",
+                               () if year == "undated" else (year,)).fetchall()
+        return [(r[0], r[1][:10] or None) for r in rows]
+
     def relevant(self, keywords: list[str], *, date_from: str | None = None, date_to: str | None = None,
                  limit: int = 3) -> list[dict[str, Any]]:
         """Motions matching all the keywords (the best few by relevance, then support), with their signatures."""

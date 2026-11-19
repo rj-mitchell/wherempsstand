@@ -3,6 +3,7 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
 import { fmtDate } from "./render";
+import { Failed, Pending, serverText } from "./serverText";
 
 interface Day {
   key: string;
@@ -19,6 +20,7 @@ interface Body {
   from?: string;
   to?: string;
   days: Day[];
+  years?: string[];
 }
 interface Hit {
   id: number;
@@ -123,17 +125,27 @@ function Search({ bodies }: { bodies: Body[] }) {
 
 function Index() {
   const [bodies, setBodies] = useState<Body[] | null>(null);
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
     fetch("/api/devolved")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      })
       .then((d: { legislatures: Body[] }) => setBodies(d.legislatures))
-      .catch(() => setBodies([]));
+      .catch(() => (TEXT ? setFailed(true) : setBodies([])));
   }, []);
   // a link to one parliament (/devolved#h-senedd) arrives before its section exists: go there once it is drawn
   useEffect(() => {
     if (bodies && window.location.hash) document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
   }, [bodies]);
-  if (!bodies) return <p className="muted" role="status">Fetching the devolved parliaments' recent sittings.</p>;
+  if (failed) return <Failed text={TEXT}>{null}</Failed>;
+  if (!bodies)
+    return (
+      <Pending text={TEXT}>
+        <p className="muted" role="status">Fetching the devolved parliaments' recent sittings.</p>
+      </Pending>
+    );
   const empty = bodies.every((b) => !b.speeches);
   return (
     <>
@@ -162,6 +174,19 @@ function Index() {
                   </li>
                 ))}
               </ul>
+              {b.years && b.years.length > 0 && (
+                <nav aria-label={`${b.name} by year`}>
+                  <p className="small">
+                    Every sitting, by year:{" "}
+                    {b.years.map((y, i) => (
+                      <span key={y}>
+                        {i > 0 && " · "}
+                        <a href={`/devolved/${b.id}/year/${y}`}>{y}</a>
+                      </span>
+                    ))}
+                  </p>
+                </nav>
+              )}
             </>
           )}
         </section>
@@ -170,8 +195,12 @@ function Index() {
   );
 }
 
-createRoot(document.getElementById("devolved-root")!).render(
-  <StrictMode>
-    <Index />
-  </StrictMode>,
-);
+// the server's list of sittings, kept until the app has the data to draw it (serverText.tsx); a parliament's
+// sittings in one year (/devolved/senedd/year/2024) are the server's page alone
+const TEXT = serverText(document.getElementById("devolved-root"));
+if (!/^\/devolved\/[a-z-]+\/year\/\d{4}\/?$/.test(window.location.pathname))
+  createRoot(document.getElementById("devolved-root")!).render(
+    <StrictMode>
+      <Index />
+    </StrictMode>,
+  );

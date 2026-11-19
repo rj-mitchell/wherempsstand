@@ -97,6 +97,12 @@ def test_pages(indexed_settings, tmp_path):
         assert client.get("/devolved/scottish-parliament/2026-09-17_20233").status_code == 200
         assert client.get("/devolved/scottish-parliament/1999-01-01_1").status_code == 404
         assert client.get("/api/devolved/nowhere").status_code == 404
+        # every sitting can be reached: a parliament's days by year, and dated in the sitemap
+        assert index["scottish-parliament"]["years"] == ["2026"]
+        assert client.get("/devolved/scottish-parliament/year/2026").status_code == 200
+        assert client.get("/devolved/scottish-parliament/year/2001").status_code == 404
+        body = client.get("/sitemap-devolved.xml").text
+        assert "/devolved/scottish-parliament/2026-09-17_20233</loc><lastmod>2026-09-17</lastmod>" in body
     finally:
         for suffix in ("", "-wal", "-shm"):
             path.with_name(path.name + suffix).unlink(missing_ok=True)
