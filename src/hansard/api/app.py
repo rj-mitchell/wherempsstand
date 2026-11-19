@@ -1958,6 +1958,10 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                            description="There is no member at this address.",
                                            url=f"{base}/people/{number}", image=None), status_code=404,
                             media_type="text/html")
+        if name != info["slug"] or number != info["number"]:
+            # one address for each member: a missing or old name, or a number since merged into theirs, is sent on
+            query = f"?{request.url.query}" if request.url.query else ""
+            return RedirectResponse(f"/people/{info['number']}/{info['slug']}{query}", status_code=301)
         desc = f"{info['status']}. What {info['name']} has said in Parliament, with roles, majorities and votes."
         # contributions only when already at hand, so the page is never held up by them; otherwise the debates they
         # last spoke in, which are quick to find (their headings only)

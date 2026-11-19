@@ -104,6 +104,14 @@ def test_people_api_and_page(indexed_settings, tmp_path):
     assert page.status_code == 200 and "<title>Hilary Benn | Where MPs Stand</title>" in page.text
     assert 'content="noindex"' not in page.text  # member pages are for search engines
     assert "/people/10669/hilary-benn" in client.get("/sitemap-people.xml").text
+    # one address for each member: without the name, or with another, a permanent redirect to it
+    for wrong in ("/people/10669", "/people/10669/benn", "/people/10669/hilary-benn-mp"):
+        r = client.get(wrong, follow_redirects=False)
+        assert r.status_code == 301 and r.headers["location"] == "/people/10669/hilary-benn", wrong
+    assert client.get("/people/10669?x=1", follow_redirects=False).headers["location"] == \
+        "/people/10669/hilary-benn?x=1"
+    assert client.get("/people/10669/hilary-benn", follow_redirects=False).status_code == 200
+    assert client.get("/people/99999999/nobody", follow_redirects=False).status_code == 404
 
 
 def test_search_matches_every_word_and_former_members(people):
