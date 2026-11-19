@@ -294,6 +294,23 @@ def _public_run(run: dict[str, Any]) -> dict[str, Any]:
     return {"finished_at": run.get("finished_at"), "status": run.get("status")}
 
 
+def breadcrumbs(base: str, trail: list[tuple[str, str]]) -> dict[str, Any]:
+    """schema.org's trail of pages above this one, from the home page: (name, path) each, this page last."""
+    return {"@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": n, "name": name, "item": base + path}
+        for n, (name, path) in enumerate([("Where MPs Stand", "/"), *trail], start=1)]}
+
+
+def structured(*items: dict[str, Any]) -> dict[str, Any]:
+    """Structured data for a page's head: schema.org items, together."""
+    return {"@context": "https://schema.org", "@graph": list(items)}
+
+
+# the charity, as the family's footer names it (web/public/family/shelf.html)
+PUBLISHER = {"@type": "Organization", "@id": "https://wheretheystand.uk/#org", "name": "Where They Stand",
+             "url": "https://wheretheystand.uk/"}
+
+
 def server_timing(timings: dict[str, float]) -> str:
     """'keyword;dur=812.4, meaning;dur=40.1': how long each stage took, readable in the browser's network panel."""
     return ", ".join(f"{k};dur={v * 1000:.1f}" for k, v in timings.items())
@@ -931,8 +948,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         # the years they were debated
         description = (f"The {b['name']} ({b['years']}) in Parliament: every debate and vote in {houses}, "
                        f"{fmt_date(b['first'])} to {fmt_date(b['last'])}, from the official record.")
+        trail = breadcrumbs(base, [("Bills", "/bills"), (f"{b['name']} ({b['years']})", f"/bills/{slug}")])
         return Response(with_text(page_with_meta(page, title=f"{b['name']} ({b['years']}) | Where MPs Stand",
-                                                 description=description,
+                                                 description=description, data=structured(trail),
                                                  url=f"{base}/bills/{slug}", image=None, noindex=False),
                                   readable(lambda: bill_text(b))), media_type="text/html")
 
@@ -979,8 +997,15 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         else:
             description = (f"{d['title']}: the debate in the {d['chamber_name']} on {fmt_date(d['date'])}, as "
                            f"recorded in Hansard, with {d['contributions']} contributions from {d['speakers']} members.")
+        from hansard.week import monday
+
+        week = monday(date.fromisoformat(d["date"])).isoformat()
+        trail = breadcrumbs(str(request.base_url).rstrip("/"), [
+            (f"Week of {fmt_date(week)}", f"/weeks/{week}"),
+            (f"{d['title']}, {fmt_date(d['date'])}", f"/debates/{day}/{chamber}/{slug}")])
         return Response(with_text(page_with_meta(page, title=f"{d['title']}, {fmt_date(d['date'])} | Where MPs Stand",
-                                                 description=description, url=url, image=None, noindex=False),
+                                                 description=description, url=url, image=None, noindex=False,
+                                                 data=structured(trail)),
                                   readable(lambda: debate_text(d))), media_type="text/html")
 
     # the week in Parliament
@@ -1261,10 +1286,23 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                            description="There is no transcript for that session here yet.", url=url,
                                            image=None), status_code=404, media_type="text/html")
         title = t["title"] or "Oral evidence"
+        try:
+            session = get_committees().sessions_meta({sid}).get(sid, {})
+        except HTTPException:
+            session = {}
+        trail = [("Committees", "/committees")]
+        if session.get("committee_id"):
+            trail.append(((session.get("committees") or "Committee").split("; ")[0],
+                          f"/committees/{session['committee_id']}"))
+        if session.get("inquiry_id"):
+            trail.append((session.get("inquiry") or "Inquiry", f"/inquiries/{session['inquiry_id']}"))
+        trail.append((title, f"/evidence/{sid}"))
         return Response(with_text(page_with_meta(page, title=f"{title} | Where MPs Stand",
                                                  description=f"{title}: the transcript of a committee evidence session, "
-                                                             "with who said what.", url=url, image=None, noindex=False),
-                                  readable(lambda: evidence_text({**t, **get_committees().sessions_meta({sid}).get(sid, {})}))),
+                                                             "with who said what.", url=url, image=None, noindex=False,
+                                                 data=structured(breadcrumbs(str(request.base_url).rstrip("/"),
+                                                                             trail))),
+                                  readable(lambda: evidence_text({**t, **session}))),
                         media_type="text/html")
 
     @app.get("/api/witnesses")
@@ -1296,8 +1334,12 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             have = get_evidence().available()
             d = {**d, "sessions": [{**x, "transcript": x["id"] in have} for x in d["sessions"]]}
         text = committee_text if kind == "committee" else inquiry_text
+        above = [] if kind == "committee" else [(c["name"], f"/committees/{c['id']}") for c in d["committees"][:1]
+                                                if c.get("id")]
+        trail = breadcrumbs(base, [("Committees", "/committees"), *above, (title, path)])
         return Response(with_text(page_with_meta(page, title=f"{title} | Where MPs Stand", description=desc[:300],
-                                                 url=base + path, image=None, noindex=False), readable(lambda: text(d))),
+                                                 url=base + path, image=None, noindex=False, data=structured(trail)),
+                                  readable(lambda: text(d))),
                         media_type="text/html")
 
     @app.get("/committees/{cid}", include_in_schema=False)
@@ -1924,15 +1966,27 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             remembered(f"person:{number}:core", lambda: person_core(number)), activity,
             None if activity else remembered(f"person:{number}:debates", lambda: pp.recent_debates(pid))))
         page_url = f"{base}/people/{info['number']}/{info['slug']}"
-        person = {"@context": "https://schema.org", "@type": "Person", "name": info["name"], "url": page_url,
+        current = info.get("current") or {}
+        office = next((o["title"] for o in info.get("offices") or [] if not o.get("end")), None)
+        job = office or ((f"Member of Parliament for {current['constituency']}" if current.get("constituency")
+                          else "Member of Parliament") if current.get("house") == "commons"
+                         else "Member of the House of Lords" if current else None)
+        person = {"@type": "Person", "@id": f"{page_url}#person", "name": info["name"], "url": page_url,
                   "description": info["status"],
+                  **({"jobTitle": job} if job else {}),
+                  # Parliament's own page for the member, where their number there is known
+                  **({"sameAs": [f"https://members.parliament.uk/member/{info['parliament_id']}"]}
+                     if info.get("parliament_id") else {}),
                   **({"alternateName": info["other_names"]} if info.get("other_names") else {}),
                   **({"memberOf": {"@type": "Organization", "name": "House of Commons" if info["current"]["house"]
                                    == "commons" else "House of Lords"}} if info.get("current") else {}),
                   **({"affiliation": {"@type": "Organization", "name": info["current"]["party"]}}
                      if (info.get("current") or {}).get("party") else {})}
+        listed = ("MPs and peers", "/people") if info.get("current") else ("Former MPs and peers", "/people/former")
+        trail = breadcrumbs(base, [listed, (info["name"], f"/people/{info['number']}/{info['slug']}")])
         return Response(with_text(page_with_meta(html_doc, title=f"{info['name']} | Where MPs Stand", description=desc,
-                                                 url=page_url, noindex=False, data=person), text), media_type="text/html")
+                                                 url=page_url, noindex=False, data=structured(person, trail)), text),
+                        media_type="text/html")
 
     # The sitemap index: one address for search engines to read, which lists the site's fixed pages (a static file,
     # web/public/sitemap-pages.xml) and each sitemap the record makes. Submitting it once in Search Console covers
@@ -2361,6 +2415,17 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
     if dist.exists():
         app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
+
+        @app.get("/", include_in_schema=False)
+        def home(request: Request):
+            """The home page, with what search engines are told about the site as a whole: its name and who
+            publishes it (schema.org WebSite, on this page only; the same file is the frame of topic and briefing
+            pages, which carry their own)."""
+            base = str(request.base_url).rstrip("/")
+            site = {"@context": "https://schema.org", "@type": "WebSite", "@id": f"{base}/#website",
+                    "name": "Where MPs Stand", "url": f"{base}/", "inLanguage": "en-GB", "publisher": PUBLISHER}
+            tag = '<script type="application/ld+json">' + json.dumps(site).replace("</", "<\\/") + "</script>"
+            return html((dist / "index.html").read_text().replace("</head>", f"  {tag}\n  </head>", 1))
 
         @app.get("/{path:path}", include_in_schema=False)
         def spa(path: str):

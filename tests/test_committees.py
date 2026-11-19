@@ -155,6 +155,10 @@ def test_sitemaps(indexed_settings, tmp_path):
         # each dated by its newest publication or evidence session, where it has one
         assert re.search(r"/inquiries/900</loc><lastmod>\d{4}-\d{2}-\d{2}</lastmod>", body)
         assert 'href="/committees/10"' in client.get("/committees").text  # the index's HTML links each one
+        # the trail above an inquiry, for search engines: Committees, then its committee
+        page = client.get("/inquiries/900").text
+        assert '"@type": "BreadcrumbList"' in page and '"name": "Committees"' in page
+        assert '"item": "http://testserver/committees/10"' in page
         for p in ("/sitemap-edms.xml", "/sitemap-devolved.xml"):
             assert client.get(p).status_code == 200
     finally:
