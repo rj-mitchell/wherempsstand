@@ -97,7 +97,7 @@ def test_refresh_and_pages(indexed_settings, tmp_path):
     try:
         assert refresh(path, con, client=httpx.Client(transport=httpx.MockTransport(handler)))["updated"]
         assert not refresh(path, con, client=httpx.Client(transport=httpx.MockTransport(handler)))["updated"]
-        client = TestClient(make_app(indexed_settings, tmp_path, auth=False)[0])
+        client = TestClient(make_app(indexed_settings, tmp_path, auth=False, pages=True)[0])
         g = client.get("/api/groups/uk/rail").json()
         assert g["members"][0]["member"]["name"] == "Hilary Benn"
         assert client.get("/api/groups").json()["groups"][0]["slug"] == "rail"
