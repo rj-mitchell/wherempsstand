@@ -224,7 +224,7 @@ def test_each_visitor_has_a_daily_limit_but_cached_answers_still_load(public):
 
 def test_site_wide_daily_budget(public):
     client, state, _ = public
-    spend(client.app, "answer", "claude-opus-5-5", {"input_tokens": 3_000_000})
+    spend(client.app, "answer", "claude-opus-5-5", {"input_tokens": 15_000_000})  # $60, over the $50 daily cap
     evs = events(client.post("/api/ask", json={"question": "trial by jury"}))
     assert sources_but_no_briefing(evs, "budget")
 
@@ -299,7 +299,7 @@ def test_public_status(public):
     client, state, _ = public
     st = client.get("/api/status").json()
     assert st["briefings"] == "available" and st["archive_start"]
-    spend(client.app, "answer", "claude-opus-5-5", {"input_tokens": 3_000_000})
+    spend(client.app, "answer", "claude-opus-5-5", {"input_tokens": 15_000_000})  # $60, over the $50 daily cap
     st = client.get("/api/status").json()
     assert st["briefings"] == "paused" and "budget" in st["briefings_note"]
 
