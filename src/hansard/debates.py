@@ -30,6 +30,12 @@ CHAMBER_NAMES = {"commons": "House of Commons", "lords": "House of Lords", "west
                  "public-bill-committee": "Public Bill Committee",
                  "commons-written-statements": "House of Commons", "lords-written-statements": "House of Lords"}
 _IN_THE_CHAIR = re.compile(r"\s*[—-]\s*\[[^\]]*in the chair\]\s*$", re.I)
+LISTED = 3  # a debate is listed (in a sitemap, in the week) once members spoke in it this many times
+_LISTING_SQL = """
+SELECT date, source, major_heading, minor_heading, bill, count(*) FILTER (WHERE xml_person_id IS NOT NULL) AS said
+FROM records WHERE year = ? AND source IN ('debates', 'lordspages', 'westminhall', 'standing', 'wms', 'lordswms')
+GROUP BY ALL
+"""
 
 
 def slug(text: str) -> str:
@@ -66,6 +72,11 @@ def debate_path(source: str, on: date | str, major: str | None, minor: str | Non
     return f"/debates/{day}/{SOURCES[source]}/{s}" + (f"#{anchor(record_id)}" if record_id else "")
 
 
+def _source_of(path: str) -> str:
+    """The chamber part of a debate's address (/debates/<day>/<chamber>/<slug>)."""
+    return path.split("/")[3]
+
+
 def anchor(record_id: str) -> str:
     col, n = _order(record_id)
     return f"c{col}-{n}"
@@ -90,6 +101,7 @@ class Debates:
         self.resolver = ProfileResolver(settings.reference_dir)
         self._lock = threading.Lock()
         self._cache: OrderedDict[tuple, dict[str, Any] | None] = OrderedDict()
+        self._listings: dict[tuple[str, int], list[tuple[str, str]]] = {}
 
     def _day(self, source: str, day: date) -> list[dict[str, Any]]:
         d = partition_dir(self.settings.parquet_dir, "records", source, day.year)
@@ -105,6 +117,36 @@ class Debates:
             r = dict(zip(cols, row, strict=True))
             seen.setdefault(r["record_id"], r)  # an ID can repeat within a file: keep one
         return list(seen.values())
+
+    def years(self) -> list[int]:
+        """The years the record has debates for, newest first."""
+        root = self.settings.parquet_dir / "records"
+        found = {int(d.name.removeprefix("year=")) for source in SOURCES for d in root.glob(f"source={source}/year=*")
+                 if d.name.removeprefix("year=").isdigit() and any(d.glob("*.parquet"))}
+        return sorted(found, reverse=True)
+
+    def listing(self, year: int, version: Any = None) -> list[tuple[str, str]]:
+        """(address, date) of each debate of ``year`` worth a search engine's while, in date order: those in which
+        members spoke at least ``LISTED`` times, and every written statement. Kept until the record changes."""
+        key = (str(version), year)
+        with self._lock:
+            if key in self._listings:
+                return self._listings[key]
+        if "records" not in self.stores:
+            return []
+        with self._lock:
+            rows = self.con.execute(_LISTING_SQL, [year]).fetchall()
+        said: dict[tuple, int] = {}
+        for day, source, major, minor, bill, n in rows:
+            path = debate_path(source, day, major, minor, bill)
+            if path:
+                said[(day, path)] = said.get((day, path), 0) + n
+        out = [(path, day.isoformat()) for (day, path), n in sorted(said.items())
+               if n >= LISTED or (n and CHAMBERS[_source_of(path)] in STATEMENTS)]
+        with self._lock:
+            self._listings = {k: v for k, v in self._listings.items() if k[0] == key[0]}  # an older record's go
+            self._listings[key] = out
+        return out
 
     def get(self, day: str, chamber: str, debate_slug: str, version: Any = None) -> dict[str, Any] | None:
         key = (str(version), day, chamber, debate_slug)

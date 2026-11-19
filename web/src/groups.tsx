@@ -5,6 +5,7 @@ import "./pages";
 import { groupPath } from "./components/Groups";
 import { MONEY } from "./components/Donations";
 import { fmtDate } from "./render";
+import { Pending, serverText } from "./serverText";
 
 interface Group {
   slug: string;
@@ -41,8 +42,10 @@ function Page() {
       .then(setD)
       .catch(() => setD({ available: false }));
   }, [parliament, q]);
-  if (!d) return <p className="muted" role="status">Fetching the list of groups.</p>;
-  if (!d.available) return <p>The groups have not been loaded yet. They are added at the next weekly update.</p>;
+  if (!d) return <Pending text={TEXT}><p className="muted" role="status">Fetching the list of groups.</p></Pending>;
+  // a failed fetch also reads as not available: the server's list stays then, if it sent one
+  if (!d.available)
+    return TEXT ? <Pending text={TEXT}>{null}</Pending> : <p>The groups have not been loaded yet. They are added at the next weekly update.</p>;
   const groups = d.groups ?? [];
   const byCategory = new Map<string, Group[]>();
   for (const g of groups) {
@@ -99,6 +102,17 @@ function Page() {
           </ol>
         </section>
       )}
+      <nav aria-label="Other parliaments' groups">
+        <p className="small">
+          Groups in the{" "}
+          {PARLIAMENTS.filter(([k]) => k !== parliament).map(([k, label], i) => (
+            <span key={k}>
+              {i > 0 && " · "}
+              <a href={k === "uk" ? "/groups" : `/groups?parliament=${k}`}>{label.replace(/ \(.*\)$/, "")}</a>
+            </span>
+          ))}
+        </p>
+      </nav>
       {[...byCategory.entries()].map(([cat, items]) => (
         <section key={cat} aria-label={cat}>
           <h2>{cat}</h2>
@@ -153,6 +167,8 @@ function Funder({ name }: { name: string }) {
 }
 
 const root = document.getElementById("groups-root");
+// the server's list of groups, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(root);
 if (root) {
   const funder = new URLSearchParams(window.location.search).get("funder");
   createRoot(root).render(<StrictMode>{funder ? <Funder name={funder} /> : <Page />}</StrictMode>);

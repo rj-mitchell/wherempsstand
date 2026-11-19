@@ -43,12 +43,32 @@ class Weeks:
         self.stores = set(attach_store(self.con, settings.parquet_dir))
         self._lock = threading.Lock()
         self._cache: OrderedDict[tuple, dict[str, Any] | None] = OrderedDict()
+        self._all: tuple[str, list[dict[str, str]]] | None = None
 
     def latest(self) -> date | None:
         if "records" not in self.stores:
             return None
         row = self.con.execute("SELECT max(date) FROM records WHERE source IN ('debates', 'lordspages')").fetchone()
         return monday(row[0]) if row and row[0] else None
+
+    def all(self, version: Any = None) -> list[dict[str, str]]:
+        """Every week either House sat, newest first: its Monday (``start``, the week's address) and its last sitting
+        day (``last``). Kept until the record changes."""
+        if "records" not in self.stores:
+            return []
+        with self._lock:
+            if self._all is not None and self._all[0] == str(version):
+                return self._all[1]
+            rows = self.con.execute("SELECT DISTINCT date FROM records WHERE source IN ('debates', 'lordspages')"
+                                    ).fetchall()
+        last: dict[date, date] = {}
+        for (day,) in rows:
+            m = monday(day)
+            last[m] = max(last.get(m, day), day)
+        out = [{"start": m.isoformat(), "last": d.isoformat()} for m, d in sorted(last.items(), reverse=True)]
+        with self._lock:
+            self._all = (str(version), out)
+        return out
 
     def pause(self, today: date) -> dict[str, Any] | None:
         """When neither House has sat for over a week: the last sitting days, and whether the record is still being

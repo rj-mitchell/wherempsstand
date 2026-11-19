@@ -3,6 +3,45 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
 import { EdmList, type EdmRow } from "./components/EdmList";
+import { Pending, serverText } from "./serverText";
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+  "November", "December"];
+
+/** Every month motions were tabled in, by year, each a link to that month's list (/edms/month/2026-11): the
+ * archive, so that every motion can be reached from here. */
+function ByMonth() {
+  const [months, setMonths] = useState<{ month: string; count: number }[] | null>(null);
+  useEffect(() => {
+    fetch("/api/edms/months")
+      .then((r) => (r.ok ? r.json() : { months: [] }))
+      .then((d: { months: { month: string; count: number }[] }) => setMonths(d.months))
+      .catch(() => setMonths([]));
+  }, []);
+  if (!months?.length) return null;
+  const years = [...new Set(months.map((m) => m.month.slice(0, 4)))];
+  return (
+    <nav aria-labelledby="h-by-month">
+      <h2 id="h-by-month">Motions by month</h2>
+      <ul>
+        {years.map((y) => (
+          <li key={y}>
+            {y}:{" "}
+            {months
+              .filter((m) => m.month.startsWith(y))
+              .reverse()
+              .map((m, i) => (
+                <span key={m.month}>
+                  {i > 0 && ", "}
+                  <a href={`/edms/month/${m.month}`}>{MONTHS[Number(m.month.slice(5, 7)) - 1]}</a>
+                </span>
+              ))}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 interface Listing {
   total: number;
@@ -61,6 +100,8 @@ function Edms() {
         </p>
       )}
       {error && <p role="alert">{error}</p>}
+      {/* the server's list of motions until the app has its own, and if it cannot be fetched */}
+      {!data && <Pending text={TEXT}>{null}</Pending>}
       {data && !data.available && (
         <p className="muted">
           The motions are being collected from Parliament and will appear here after the next update.
@@ -96,12 +137,16 @@ function Edms() {
           )}
         </>
       )}
+      {data && !person && !q && <ByMonth />}
     </>
   );
 }
 
 const root = document.getElementById("edms-root");
-if (root)
+// the server's list of motions, kept until the app has the data to draw it (serverText.tsx); one month's motions
+// (/edms/month/2026-11) are the server's page alone
+const TEXT = serverText(root);
+if (root && !/^\/edms\/month\//.test(window.location.pathname))
   createRoot(root).render(
     <StrictMode>
       <Edms />

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 import httpx
 
 from hansard.sources.committees import Committees, build, refresh
@@ -150,6 +152,9 @@ def test_sitemaps(indexed_settings, tmp_path):
         build(path, fake_api(), no_wait)
         body = client.get("/sitemap-committees.xml").text
         assert "/committees/10</loc>" in body and "/inquiries/900</loc>" in body and "/committees/11<" not in body
+        # each dated by its newest publication or evidence session, where it has one
+        assert re.search(r"/inquiries/900</loc><lastmod>\d{4}-\d{2}-\d{2}</lastmod>", body)
+        assert 'href="/committees/10"' in client.get("/committees").text  # the index's HTML links each one
         for p in ("/sitemap-edms.xml", "/sitemap-devolved.xml"):
             assert client.get(p).status_code == 200
     finally:

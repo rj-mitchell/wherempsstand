@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import "./pages";
 import { HOUSE_NAME, getJSON } from "./committeeApi";
 import { fmtDate } from "./render";
+import { Failed, Pending, serverText } from "./serverText";
 
 interface Row {
   id: number;
@@ -25,8 +26,8 @@ function Index() {
       .then((d) => setRows(d.committees))
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not load."));
   }, []);
-  if (error) return <p role="alert">{error}</p>;
-  if (!rows) return <p className="muted" role="status">Fetching the list of committees.</p>;
+  if (error) return <Failed text={TEXT}>{error}</Failed>;
+  if (!rows) return <Pending text={TEXT}><p className="muted" role="status">Fetching the list of committees.</p></Pending>;
   const houses = ["Commons", "Lords", "Joint"].filter((h) => rows.some((r) => r.house === h));
   return (
     <>
@@ -62,6 +63,8 @@ function Index() {
   );
 }
 
+// the server's list of committees, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("committees-root"));
 createRoot(document.getElementById("committees-root")!).render(
   <StrictMode>
     <Index />

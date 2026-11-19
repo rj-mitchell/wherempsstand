@@ -13,9 +13,13 @@ from hansard.api.briefings import ASKED_BY_READER, briefing_title, fmt_date
 # the page's placeholder ("Fetching the debate."), with any attributes it carries (role="status" in web/*.html)
 _ROOT = re.compile(r'(<div id="[\w-]+-root">)\s*<p class="muted"[^>]*>[^<]*</p>\s*(</div>)')
 _EMPTY_ROOT = '<div id="root"></div>'
+# an index page's list, as it is before the app fills it: its live region or app root, with the "Fetching …" line
+_LIST = re.compile(r'(<div id="[\w-]+-(?:live|root)"[^>]*>)\s*<p class="muted"[^>]*>[^<]*</p>\s*(</div>)')
 # the home page's text for readers with scripts off (web/index.html); other pages built on it bring their own
 _HOME_FALLBACK = re.compile(r'(?:<!--[^>]*-->\s*)?<noscript class="home-fallback">.*?</noscript>\s*', re.S)
 MAX_ITEMS = 60
+MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+          "November", "December"]
 
 
 def with_text(page: str, fragment: str | None) -> str:
@@ -28,8 +32,31 @@ def with_text(page: str, fragment: str | None) -> str:
     return _ROOT.sub(lambda m: m.group(1) + fragment + m.group(2), page, count=1)
 
 
+def with_list(page: str, fragment: str | None) -> str:
+    """An index page (/bills, /people …) with ``fragment``, its list of links, in place of the "Fetching …" line
+    (replaced by the app when it starts, which keeps it if its own data cannot be fetched: serverText.tsx)."""
+    if not fragment:
+        return page
+    return _LIST.sub(lambda m: m.group(1) + f'<div class="server-list">{fragment}</div>' + m.group(2), page, count=1)
+
+
+def with_heading(page: str, heading: str, intro: str | None = None) -> str:
+    """The page with its first heading, and the paragraph introducing it, in other words (an archive page made from
+    an index page's template)."""
+    page = re.sub(r"<h1>[^<]*</h1>", lambda _: f"<h1>{e(heading)}</h1>", page, count=1)
+    if intro is not None:
+        page = re.sub(r'<p class="intro-text">.*?</p>', lambda _: f'<p class="intro-text">{e(intro)}</p>', page,
+                      count=1, flags=re.S)
+    return page
+
+
 def _link(href: str | None, text: str) -> str:
     return f'<a href="{e(href)}">{e(text)}</a>' if href else e(text)
+
+
+def person_path(m: dict[str, Any] | None) -> str | None:
+    """A member's page, from anything that carries their number and name's slug."""
+    return f"/people/{m['number']}/{m['slug']}" if m and m.get("number") and m.get("slug") else None
 
 
 def _inline(md: str) -> str:
@@ -83,7 +110,10 @@ def briefing_text(view: dict[str, Any], heading: str | None = None) -> str:
     return "".join(parts)
 
 
-def person_text(core: dict[str, Any], activity: dict[str, Any] | None) -> str:
+def person_text(core: dict[str, Any], activity: dict[str, Any] | None,
+                recent: list[dict[str, Any]] | None = None) -> str:
+    """A member's page. Their latest contributions when they are at hand; otherwise the debates they last spoke in
+    (``recent``), which are quick to find."""
     parts = [f"<h1>{e(core['name'])}</h1>", f"<p>{e(core.get('status') or '')}.</p>"]
     if core.get("memberships"):
         parts.append("<h2>Membership</h2><ul>")
@@ -118,6 +148,12 @@ def person_text(core: dict[str, Any], activity: dict[str, Any] | None) -> str:
                          + (f", {e(c['heading'])}" if c.get("heading") else "") + "</p>"
                          f"<p>{e(c['excerpt'])}</p><p>{_link(c.get('debate_path') or c.get('twfy_url'), 'Read in full')}</p></li>")
         parts.append("</ol>")
+    if not contributions and recent:
+        parts.append("<h2>Recent debates</h2><ul>")
+        for d in recent:
+            parts.append(f"<li>{e(fmt_date(d['date']))}, {e(d.get('chamber') or '')}: "
+                         f"{_link(d['path'], d.get('title') or 'the debate')}</li>")
+        parts.append("</ul>")
     voting = (activity or {}).get("voting")
     if voting and voting.get("votes"):
         parts.append(f"<h2>Voting record</h2><p>{voting['votes']:,} votes recorded, of which {voting['rebellions']:,} "
@@ -151,7 +187,7 @@ def debate_text(d: dict[str, Any]) -> str:
         who = sp.get("name") or it.get("speaker_name_raw") or "A member"
         detail = ", ".join(x for x in (sp.get("party"), sp.get("constituency")) if x)
         body = "".join(f"<p>{e(p)}</p>" for p in it.get("paragraphs") or [])
-        parts.append(f"<h3>{e(who)}{' (' + e(detail) + ')' if detail else ''}</h3>{body}")
+        parts.append(f"<h3>{_link(person_path(sp), who)}{' (' + e(detail) + ')' if detail else ''}</h3>{body}")
         shown += 1
         if shown >= 200:
             parts.append(f"<p>{_link(d.get('official_url'), 'The rest of the debate is in Hansard')}.</p>")
@@ -169,6 +205,9 @@ def week_text(w: dict[str, Any]) -> str:
                 kind = f" ({deb['kind']})" if deb.get("kind") else ""
                 parts.append(f"<li>{_link(deb.get('path'), deb['title'])}{e(kind)}</li>")
             parts.append("</ul>")
+    nav = [_link(f"/weeks/{w['previous']}", "The week before") if w.get("previous") else "",
+           _link(f"/weeks/{w['next']}", "The week after") if w.get("next") else "", _link("/weeks", "Every week")]
+    parts.append(f"<p>{' · '.join(x for x in nav if x)}</p>")
     return "".join(parts)
 
 
@@ -176,13 +215,18 @@ def edm_text(m: dict[str, Any]) -> str:
     sponsor = m.get("sponsor") or {}
     parts = [f"<h1>{e(m['title'])}</h1>",
              f"<p>Early day motion {e(m.get('uin') or '')}, tabled {e(fmt_date(m['date_tabled']))}"
-             + (f" by {e(sponsor['name'])}" + (f" ({e(sponsor['party'])})" if sponsor.get("party") else "")
-                if sponsor.get("name") else "")
+             + (f" by {_link(person_path(sponsor), sponsor['name'])}"
+                + (f" ({e(sponsor['party'])})" if sponsor.get("party") else "") if sponsor.get("name") else "")
              + (f". Signed by {m['sponsors_count']} member{'' if m['sponsors_count'] == 1 else 's'}" if m.get("sponsors_count") else "") + ".</p>"]
     if m.get("text"):
         parts.append(f"<blockquote><p>{e(m['text'])}</p></blockquote>")
     if m.get("party_counts"):
         parts.append("<p>Signatures by party: " + e(", ".join(f"{p} {n}" for p, n in m["party_counts"])) + ".</p>")
+    signed = [s for s in m.get("sponsors") or [] if not s.get("withdrawn") and s.get("name")]
+    if signed:
+        parts.append("<h2>Signed by</h2><ul>" + "".join(
+            f"<li>{_link(person_path(s), s['name'])}{' (' + e(s['party']) + ')' if s.get('party') else ''}</li>"
+            for s in signed) + "</ul>")
     return "".join(parts)
 
 
@@ -196,7 +240,7 @@ def committee_text(d: dict[str, Any]) -> str:
         parts.append(f"<p>{e(d['purpose'])}</p>")
     if d.get("inquiries"):
         parts.append("<h2>Inquiries</h2><ul>")
-        for q in d["inquiries"][:MAX_ITEMS]:
+        for q in d["inquiries"][:500]:  # every inquiry, so each can be reached from here
             when = " to ".join(fmt_date(x) for x in (q.get("open"), q.get("close")) if x)
             parts.append(f"<li>{_link(f'/inquiries/{q['id']}', q['title'])}{' (' + e(when) + ')' if when else ''}</li>")
         parts.append("</ul>")
@@ -223,7 +267,9 @@ def inquiry_text(d: dict[str, Any]) -> str:
         for s in d["sessions"][:MAX_ITEMS]:
             who = "; ".join(", ".join(x for x in (w.get("name"), w.get("organisation")) if x)
                             for w in s.get("witnesses") or [])
-            parts.append(f"<li>{e(fmt_date(s['date'])) if s.get('date') else ''}: {e(who) or 'witnesses not listed'}</li>")
+            transcript = f" ({_link(f'/evidence/{s['id']}', 'transcript')})" if s.get("transcript") and s.get("id") else ""
+            parts.append(f"<li>{e(fmt_date(s['date'])) if s.get('date') else ''}: {e(who) or 'witnesses not listed'}"
+                         f"{transcript}</li>")
         parts.append("</ul>")
     return "".join(parts)
 
@@ -239,7 +285,8 @@ def group_text(g: dict[str, Any]) -> str:
         parts.append(f"<p>Secretariat: {e(g['secretariat'])}</p>")
     if g.get("members"):
         parts.append("<h2>Members</h2><ul>" + "".join(
-            f"<li>{e(m.get('name') or '')}{' (' + e(m['role']) + ')' if m.get('role') else ''}</li>"
+            f"<li>{_link(person_path(m.get('member')), m.get('name') or '')}"
+            f"{' (' + e(m['role']) + ')' if m.get('role') else ''}</li>"
             for m in g["members"][:100]) + "</ul>")
     if g.get("benefits"):
         parts.append("<h2>Funding and benefits registered</h2><ul>" + "".join(
@@ -263,7 +310,8 @@ def devolved_day_text(d: dict[str, Any]) -> str:
         elif it.get("kind") == "said":
             sp = it.get("speaker") or {}
             detail = ", ".join(x for x in (sp.get("party"), sp.get("seat")) if x)
-            parts.append(f"<h3>{e(sp.get('name') or 'A member')}{' (' + e(detail) + ')' if detail else ''}</h3>"
+            parts.append(f"<h3>{_link(person_path(sp), sp.get('name') or 'A member')}"
+                         f"{' (' + e(detail) + ')' if detail else ''}</h3>"
                          + "".join(f"<p>{e(p)}</p>" for p in it.get("paragraphs") or []))
             shown += 1
             if shown >= 200:
@@ -277,4 +325,144 @@ def evidence_text(t: dict[str, Any]) -> str:
         parts.append(f"<p>Oral evidence, {e(fmt_date(t['date']))}.</p>")
     for turn in (t.get("turns") or [])[:300]:
         parts.append(f"<h3>{e(turn.get('speaker') or '')}</h3><p>{e(turn.get('text') or '')}</p>")
+    return "".join(parts)
+
+
+# Index and archive pages: plain lists of links, so that every page of the record can be reached from the index
+# pages in a few steps by anything that does not run the pages' scripts. The apps draw their own lists over them.
+
+def _years(first: str, last: str) -> str:
+    return first[:4] if first[:4] == last[:4] else f"{first[:4]}–{last[:4]}"
+
+
+def year_links(prefix: str, years: list[str], label: str) -> str:
+    """'Bills by year: 2026 · 2025 …', each year a link to its archive page (``prefix`` + year)."""
+    return f'<nav aria-label="{e(label)}"><p>{e(label)}: ' + " · ".join(
+        _link(f"{prefix}{y}", y) for y in years) + "</p></nav>"
+
+
+def bills_list_text(bills: list[dict[str, Any]], years: list[str], total: int | None = None) -> str:
+    """A list of bills, newest first, with the years they were debated, and the archive of bills by year."""
+    if not bills:
+        return ""
+    parts = [f"<p>{total:,} bill{'' if total == 1 else 's'}. The {len(bills):,} most recently debated "
+             f"{'is' if len(bills) == 1 else 'are'} listed.</p>" if total else "",
+             '<ul class="topic-list">']
+    for b in bills:
+        parts.append(f"<li>{_link(f'/bills/{b['slug']}', b.get('label') or b['name'])} "
+                     f"({e(_years(b['first'], b['last']))})</li>")
+    parts.append("</ul>")
+    return "".join(parts) + year_links("/bills/year/", years, "Bills by the year they were debated")
+
+
+def people_list_text(people: list[dict[str, Any]], *, former: bool = False) -> str:
+    """Members by House, each linked to their page: the sitting members, or (``former``) those who have left since
+    1997, with a link between the two lists."""
+    parts = []
+    for house, heading in (("commons", "MPs"), ("lords", "Members of the House of Lords")):
+        members = [m for m in people if m.get("house") == house]
+        if not members:
+            continue
+        if former:
+            heading = "Former MPs" if house == "commons" else "Former members of the House of Lords"
+        parts.append(f"<h2>{e(heading)} ({len(members):,})</h2><ul class=\"people-list\">")
+        for m in members:
+            detail = ", ".join(x for x in (m.get("constituency"), m.get("party"),
+                                           f"until {m['until'][:4]}" if former and m.get("until") else None) if x)
+            note = f' <span class="muted small">{e(detail)}</span>' if detail else ""
+            parts.append(f"<li>{_link(person_path(m), m['name'])}{note}</li>")
+        parts.append("</ul>")
+    other = _link("/people", "Sitting MPs and peers") if former else \
+        _link("/people/former", "Former MPs and peers since 1997")
+    parts.append(f"<p>{other}</p>")
+    return "".join(parts)
+
+
+def edms_list_text(rows: list[dict[str, Any]], months: list[tuple[str, int]], *, heading: str | None = None) -> str:
+    """Motions, each linked, and the archive of motions by the month they were tabled."""
+    if not rows and not months:
+        return ""
+    parts = [f"<h2>{e(heading)}</h2>" if heading else "", '<ul class="edm-list">']
+    for r in rows:
+        sponsor = r.get("sponsor") or {}
+        who = f", {_link(person_path(sponsor), sponsor['name'])}" if sponsor.get("name") else ""
+        parts.append(f"<li>{_link(f'/edms/{r['id']}', r['title'])} ({e(fmt_date(r.get('date_tabled')))}{who})</li>")
+    parts.append("</ul>")
+    return "".join(parts) + edm_months_text(months)
+
+
+def edm_months_text(months: list[tuple[str, int]]) -> str:
+    """Every month motions were tabled in, by year: 'Motions by month. 2026: January, February …'."""
+    by_year: dict[str, list[str]] = {}
+    for month, _ in months:
+        by_year.setdefault(month[:4], []).append(month)
+    if not by_year:
+        return ""
+    lines = [f"<li>{e(y)}: " + ", ".join(_link(f"/edms/month/{m}", MONTHS[int(m[5:7]) - 1])
+                                        for m in sorted(ms)) + "</li>" for y, ms in by_year.items()]
+    return '<nav aria-label="Motions by month"><h2>Motions by month</h2><ul>' + "".join(lines) + "</ul></nav>"
+
+
+def committees_list_text(rows: list[dict[str, Any]], house_names: dict[str, str]) -> str:
+    parts = []
+    for house in ("Commons", "Lords", "Joint"):
+        mine = [r for r in rows if r.get("house") == house]
+        if mine:
+            parts.append(f"<h2>{e(house_names.get(house, house))}</h2><ul class=\"edm-list committee-list\">"
+                         + "".join(f"<li>{_link(f'/committees/{r['id']}', r['name'])}</li>" for r in mine) + "</ul>")
+    return "".join(parts)
+
+
+def groups_list_text(groups: list[dict[str, Any]], parliament: str, parliaments: dict[str, str]) -> str:
+    """One parliament's groups, each linked, and links to the other parliaments' lists."""
+    if not groups:
+        return ""
+    parts = [f"<h2>{e(parliaments.get(parliament, parliament))}</h2><ul class=\"edm-list\">"]
+    parts += [f"<li>{_link(f'/groups/{parliament}/{g['slug']}', g['title'])}</li>" for g in groups]
+    parts.append("</ul>")
+    others = [_link("/groups" if k == "uk" else f"/groups?parliament={k}", name)
+              for k, name in parliaments.items() if k != parliament]
+    parts.append(f"<p>Groups in the {' · '.join(others)}</p>" if others else "")
+    return "".join(parts)
+
+
+def devolved_list_text(legislatures: list[dict[str, Any]]) -> str:
+    """Each devolved parliament's latest sitting days and the archive of its days by year."""
+    parts = []
+    for leg in legislatures:
+        if not leg.get("days"):
+            continue
+        parts.append(f"<h2>{e(leg['name'])}</h2><ul>" + "".join(
+            f"<li>{_link(f'/devolved/{leg['id']}/{d['key']}', fmt_date(d['date']))}</li>" for d in leg["days"])
+                     + "</ul>")
+        if leg.get("years"):
+            parts.append(year_links(f"/devolved/{leg['id']}/year/", leg["years"], f"{leg['name']} by year"))
+    return "".join(parts)
+
+
+def devolved_year_text(name: str, leg: str, days: list[tuple[str, str]]) -> str:
+    return "<ul>" + "".join(f"<li>{_link(f'/devolved/{leg}/{key}', fmt_date(day))}</li>" for key, day in days) + \
+        f"</ul><p>{_link('/devolved', 'All the devolved parliaments')}</p>"
+
+
+def topics_list_text(topics: list[dict[str, Any]], featured: list[dict[str, Any]]) -> str:
+    parts = ['<ul class="topic-list">'] + [
+        f"<li>{_link(f'/topics/{t['slug']}', t['title'])}</li>" for t in topics] + ["</ul>"]
+    if featured:
+        parts.append("<h2>Featured briefings</h2><ul class=\"topic-list\">" + "".join(
+            f"<li>{_link(f'/b/{f['id']}', f.get('title') or 'Briefing')}</li>" for f in featured) + "</ul>")
+    return "".join(parts)
+
+
+def weeks_list_text(weeks: list[dict[str, str]]) -> str:
+    """Every week Parliament sat, by year, each linked to its page."""
+    by_year: dict[str, list[dict[str, str]]] = {}
+    for w in weeks:
+        by_year.setdefault(w["start"][:4], []).append(w)
+    parts = ["<h1>Every week in Parliament</h1>",
+             f"<p>The {len(weeks):,} weeks either House sat since the record begins, newest first. "
+             f"{_link('/this-week', 'The latest week')}.</p>"]
+    for y, ws in by_year.items():
+        parts.append(f"<h2>{e(y)}</h2><ul>" + "".join(
+            f"<li>{_link(f'/weeks/{w['start']}', 'Week of ' + fmt_date(w['start']))}</li>" for w in ws) + "</ul>")
     return "".join(parts)

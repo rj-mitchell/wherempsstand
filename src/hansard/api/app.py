@@ -67,16 +67,27 @@ from hansard.api.cards import card_paths, card_png
 from hansard.api.feeds import FEED_TYPE, rss
 from hansard.api.plaintext import (
     bill_text,
+    bills_list_text,
     briefing_text,
     committee_text,
+    committees_list_text,
     debate_text,
     devolved_day_text,
+    devolved_list_text,
+    devolved_year_text,
     edm_text,
+    edms_list_text,
     evidence_text,
     group_text,
+    groups_list_text,
     inquiry_text,
+    people_list_text,
     person_text,
+    topics_list_text,
     week_text,
+    weeks_list_text,
+    with_heading,
+    with_list,
     with_text,
 )
 from hansard.api.usage import (
@@ -288,6 +299,9 @@ def server_timing(timings: dict[str, float]) -> str:
 
 
 STREAM_HEADERS = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
+SITEMAP_LIMIT = 50_000  # the most addresses one sitemap may hold (sitemaps.org)
+COMMITTEE_HOUSES = {"Commons": "House of Commons", "Lords": "House of Lords", "Joint": "Joint committees"}
+EMPTY_PAGE = "<!doctype html><html><head></head><body></body></html>"
 CLOSED = ("resolved", "dismissed")  # how a report may be closed
 WITHDRAWN_BY_AUTHOR = "Withdrawn by the author."  # the note of a withdrawal, when the owner gives none
 WITHDRAWN = "This briefing has been withdrawn."  # what a withdrawn briefing's address says
@@ -465,6 +479,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         except Exception:  # noqa: BLE001 - the readable copy is a courtesy; never fail the page for it
             log.exception("readable page text not built")
             return None
+
+    def template(name: str) -> str:
+        """A page of the built app (web/dist/<name>.html), for the server to fill in; a bare page without a build."""
+        f = dist / f"{name}.html"
+        return f.read_text() if f.is_file() else EMPTY_PAGE
 
     def remembered_if_ready(key: str, ttl: float = 600.0) -> Any:
         with remembered_lock:
@@ -835,7 +854,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         from hansard.topics import topic_listing
 
         base = str(request.base_url).rstrip("/")
-        urls = [f"<url><loc>{base}/topics</loc><changefreq>weekly</changefreq></url>"]
+        urls = [f"<url><loc>{base}/topics</loc></url>"]
         for t in topic_listing(settings, state, shown()):
             if t["current"]:
                 urls.append(f"<url><loc>{base}/topics/{t['slug']}</loc>"
@@ -910,15 +929,6 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                                  url=f"{base}/bills/{slug}", image=None, noindex=False),
                                   readable(lambda: bill_text(b))), media_type="text/html")
 
-    @app.get("/sitemap-bills.xml", include_in_schema=False)
-    def sitemap_bills(request: Request):
-        base = str(request.base_url).rstrip("/")
-        urls = "".join(f"<url><loc>{base}/bills/{b['slug']}</loc><lastmod>{b['last']}</lastmod></url>"
-                       for b in get_bills().all(state.latest_record_date()))
-        return Response('<?xml version="1.0" encoding="UTF-8"?><urlset '
-                        f'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',
-                        media_type="application/xml")
-
     # debates
     def get_debates():
         from hansard.debates import Debates
@@ -929,6 +939,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         return holder["debates"]
 
     _DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+    _MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
+    _YEAR = re.compile(r"^(19|20)\d{2}$")
     _SLUG = re.compile(r"^[a-z0-9-]{1,200}$")
 
     def find_debate(day: str, chamber: str, slug: str):
@@ -1095,7 +1107,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         store, _ = get_devolved()
         counts = store.counts()
         return {"legislatures": [{"id": k, "name": v["name"], "member": v["member"], "nation": v["nation"],
-                                  **(counts.get(k) or {"speeches": 0}), "days": store.days(k, 12)}
+                                  **(counts.get(k) or {"speeches": 0}), "days": store.days(k, 12),
+                                  "years": devolved_years(k)}
                                  for k, v in LEGISLATURES.items()]}
 
     @app.get("/api/devolved/search")
@@ -1272,6 +1285,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             title = d["title"]
             desc = (f"{d['title']}: an inquiry by the " + " and ".join(x["name"] for x in d["committees"]) +
                     ", with its reports, the Government's responses and who gave evidence.")
+        if kind == "inquiry":  # which sessions have a transcript here, to link to
+            have = get_evidence().available()
+            d = {**d, "sessions": [{**x, "transcript": x["id"] in have} for x in d["sessions"]]}
         text = committee_text if kind == "committee" else inquiry_text
         return Response(with_text(page_with_meta(page, title=f"{title} | Where MPs Stand", description=desc[:300],
                                                  url=base + path, image=None, noindex=False), readable(lambda: text(d))),
@@ -1404,7 +1420,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         desc = (g["purpose"] or g["title"])[:280]
         return Response(with_text(page_with_meta(page, title=f"{g['title']} | Where MPs Stand", description=desc,
                                                  url=f"{base}/groups/{parliament}/{slug}", image=None, noindex=False),
-                                  readable(lambda: group_text(g))),
+                                  readable(lambda: group_text(group_detail(parliament, slug)))),
                         media_type="text/html")
 
     @app.get("/api/donations")
@@ -1476,6 +1492,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             mnis = [int(info["parliament_id"])]
         total, rows = store.search(q[:200], mnis=mnis, limit=25, offset=(page - 1) * 25)
         return {"total": total, "page": page, "per_page": 25, "items": edm_rows(rows), "available": store.count() > 0}
+
+    @app.get("/api/edms/months")
+    def edms_by_month():
+        """Each month motions were tabled in, newest first, with how many: the archive of motions by month."""
+        return {"months": [{"month": m, "count": n} for m, n in edm_months()]}
 
     @app.get("/api/edms/{edm_id}")
     def edm_detail(edm_id: int):
@@ -1605,7 +1626,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     # MPs and peers
     @app.get("/api/people")
     def people_list(q: str = "", everyone: bool = False):
-        return {"people": get_people().search(q.strip()[:80], current_only=not everyone)}
+        # everyone since 1997 is a few thousand: all of them, for the list of former members
+        return {"people": get_people().search(q.strip()[:80], current_only=not everyone,
+                                              limit=20_000 if everyone else 2000)}
 
     @app.get("/api/people/{number}")
     def person(number: int, part: Literal["all", "core", "activity", "interests"] = "all"):
@@ -1708,6 +1731,163 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             raise HTTPException(404, "No constituency was found for that postcode.")
         return found
 
+    # Index and archive pages. The index pages' own files (web/*.html) are filled in with plain lists of links
+    # (plaintext.py), and their archives (bills by year, motions by month, former members, devolved sittings by year,
+    # every sitting week) are made from the same files, so that anything that does not run the pages' scripts can
+    # still reach every page of the record in a few steps.
+    def html(page: str, status_code: int = 200) -> Response:
+        return Response(page, status_code=status_code, media_type="text/html")
+
+    def not_found(name: str, url: str) -> Response:
+        return html(page_with_meta(template(name), title="Not found | Where MPs Stand", description="Nothing here.",
+                                   url=url, image=None), 404)
+
+    def archive_page(name: str, request: Request, path: str, title: str, description: str, heading: str,
+                     intro: str | None, fragment: Callable[[], str]) -> Response:
+        page = page_with_meta(template(name), title=f"{title} | Where MPs Stand", description=description,
+                              url=str(request.base_url).rstrip("/") + path, image=None, noindex=False)
+        return html(with_list(with_heading(page, heading, intro), readable(fragment)))
+
+    def bill_years(bills: list[dict[str, Any]]) -> list[str]:
+        """The years bills were debated in, newest first: a bill counts in each year from its first sitting to its
+        last (as the page's app counts them, web/src/billsIndex.ts)."""
+        return sorted({str(y) for b in bills for y in range(int(b["first"][:4]), int(b["last"][:4]) + 1)},
+                      reverse=True)
+
+    @app.get("/bills", include_in_schema=False)
+    def bills_page():
+        bills = get_bills().all(state.latest_record_date())
+        return html(with_list(template("bills"), readable(lambda: bills_list_text(bills[:100], bill_years(bills),
+                                                                                     len(bills)))))
+
+    @app.get("/bills/year/{year}", include_in_schema=False)
+    def bills_year_page(year: str, request: Request):
+        bills = get_bills().all(state.latest_record_date())
+        these = [b for b in bills if b["first"][:4] <= year <= b["last"][:4]] if _YEAR.match(year) else []
+        if not these:
+            return not_found("bills", f"{str(request.base_url).rstrip('/')}/bills/year/{year}")
+        return archive_page("bills", request, f"/bills/year/{year}", f"Bills debated in {year}",
+                            f"The {len(these):,} bills debated in Parliament in {year}, each with its stages in the "
+                            "Commons and the Lords and every vote, from the official record.",
+                            f"Bills debated in {year}", f"The {len(these):,} bills debated in Parliament in {year}.",
+                            lambda: bills_list_text(these, bill_years(bills)))
+
+    def people_listing(former: bool) -> list[dict[str, Any]]:
+        def build() -> list[dict[str, Any]]:
+            people = get_people().search(current_only=not former, limit=20_000)
+            return [m for m in people if not m["current"]] if former else people
+        return remembered(f"people-listing:{former}", build)
+
+    @app.get("/people", include_in_schema=False)
+    def people_page():
+        return html(with_list(template("people"), readable(lambda: people_list_text(people_listing(False)))))
+
+    @app.get("/people/former", include_in_schema=False)
+    def former_people_page(request: Request):
+        former = people_listing(True)
+        return archive_page("people", request, "/people/former", "Former MPs and peers since 1997",
+                            f"The {len(former):,} MPs and peers who have left Parliament since 1997: what each said "
+                            "there, with their roles, majorities and votes.", "Former MPs and peers",
+                            "Members of either House since 1997 who no longer sit, each with what they said in "
+                            "Parliament, their roles, majorities and votes.",
+                            lambda: people_list_text(former, former=True))
+
+    @app.get("/committees", include_in_schema=False)
+    def committees_page():
+        def text() -> str:
+            try:
+                return committees_list_text(get_committees().index(), COMMITTEE_HOUSES)
+            except HTTPException:  # not collected yet on this server: the app says so
+                return ""
+        return html(with_list(template("committees"), readable(text)))
+
+    def edm_months() -> list[tuple[str, int]]:
+        return remembered("edm-months", lambda: get_edms().months())
+
+    @app.get("/edms", include_in_schema=False)
+    def edms_page():
+        def text() -> str:
+            _, rows = get_edms().search(limit=50)
+            return edms_list_text(edm_rows(rows), edm_months(), heading="The latest motions")
+        return html(with_list(template("edms"), readable(text)))
+
+    @app.get("/edms/month/{month}", include_in_schema=False)
+    def edms_month_page(month: str, request: Request):
+        from hansard.api.plaintext import MONTHS
+
+        rows = get_edms().in_month(month) if _MONTH.match(month) else []
+        if not rows:
+            return not_found("edms", f"{str(request.base_url).rstrip('/')}/edms/month/{month}")
+        when = f"{MONTHS[int(month[5:]) - 1]} {month[:4]}"
+        return archive_page("edms", request, f"/edms/month/{month}", f"Early day motions tabled in {when}",
+                            f"The {len(rows):,} early day motions tabled in the House of Commons in {when}: each "
+                            "motion's text and who signed it.", f"Early day motions tabled in {when}",
+                            f"The {len(rows):,} motions tabled in {when}, in the order they were tabled.",
+                            lambda: edms_list_text(edm_rows(rows), edm_months()))
+
+    @app.get("/groups", include_in_schema=False)
+    def groups_page(request: Request, parliament: str = "uk"):
+        from hansard.sources.appgs import PARLIAMENTS
+
+        if parliament not in PARLIAMENTS:
+            return not_found("groups", f"{str(request.base_url).rstrip('/')}/groups")
+
+        def text() -> str:
+            found = groups_index_data("", parliament)
+            return groups_list_text(found.get("groups") or [], parliament, PARLIAMENTS)
+        if parliament == "uk":
+            return html(with_list(template("groups"), readable(text)))
+        name = PARLIAMENTS[parliament]
+        return archive_page("groups", request, f"/groups?parliament={parliament}", f"Cross-party groups: {name}",
+                            f"The groups of members in the {name}, with their officers, members and registered "
+                            "benefits.", f"Groups in the {name}", None, text)
+
+    def devolved_years(leg: str) -> list[str]:
+        return sorted({d[:4] for _, _, d in devolved_calendar(leg)}, reverse=True)
+
+    def devolved_calendar(leg: str) -> list[tuple[str, str, str]]:
+        return remembered(f"devolved-calendar:{leg}", lambda: get_devolved()[0].calendar(leg))
+
+    @app.get("/devolved", include_in_schema=False)
+    def devolved_page():
+        def text() -> str:
+            return devolved_list_text(devolved_index()["legislatures"])
+        return html(with_list(template("devolved"), readable(text)))
+
+    @app.get("/devolved/{leg}/year/{year}", include_in_schema=False)
+    def devolved_year_page(leg: str, year: str, request: Request):
+        from hansard.devolved import LEGISLATURES
+
+        days = [(k, d) for _, k, d in devolved_calendar(leg) if d[:4] == year] if leg in LEGISLATURES else []
+        if not days:
+            return not_found("devolved", f"{str(request.base_url).rstrip('/')}/devolved/{leg}/year/{year}")
+        name = LEGISLATURES[leg]["name"]
+        return archive_page("devolved", request, f"/devolved/{leg}/year/{year}", f"{name}, {year}",
+                            f"Every sitting of the {name} in {year} with something said, each with its official "
+                            "report.", f"{name}: sittings in {year}",
+                            f"The {len(days):,} sitting days of the {name} in {year}, newest first.",
+                            lambda: devolved_year_text(name, leg, days))
+
+    @app.get("/topics", include_in_schema=False)
+    def topics_page():
+        from hansard.topics import topic_listing
+
+        def text() -> str:
+            # a featured briefing is named by the owner's title or the site's own words, never a reader's question
+            featured = [{"id": f["id"], "title": featured_title(state, f["id"]) or briefing_title(f["prepared_at"])}
+                        for f in featured_list(shown(), state)]
+            return topics_list_text(topic_listing(settings, state, shown()), featured)
+        return html(with_list(template("topics"), readable(text)))
+
+    @app.get("/weeks", include_in_schema=False)
+    def weeks_page(request: Request):
+        weeks = get_weeks().all(state.latest_record_date())
+        page = page_with_meta(template("week"), title="Every week in Parliament | Where MPs Stand",
+                              description="Every week the Commons or the Lords sat since 1997, each with its debates, "
+                                          "votes, bills and statements, from the official record.",
+                              url=f"{str(request.base_url).rstrip('/')}/weeks", image=None, noindex=False)
+        return html(with_text(page, readable(lambda: weeks_list_text(weeks))))
+
     @app.get("/people/{number}", include_in_schema=False)
     @app.get("/people/{number}/{name}", include_in_schema=False)
     def person_page(number: int, request: Request, name: str = ""):
@@ -1724,9 +1904,12 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                            url=f"{base}/people/{number}", image=None), status_code=404,
                             media_type="text/html")
         desc = f"{info['status']}. What {info['name']} has said in Parliament, with roles, majorities and votes."
-        # contributions only when already at hand, so the page is never held up by them
-        text = readable(lambda: person_text(remembered(f"person:{number}:core", lambda: person_core(number)),
-                                            remembered_if_ready(f"person:{number}:activity")))
+        # contributions only when already at hand, so the page is never held up by them; otherwise the debates they
+        # last spoke in, which are quick to find (their headings only)
+        activity = remembered_if_ready(f"person:{number}:activity")
+        text = readable(lambda: person_text(
+            remembered(f"person:{number}:core", lambda: person_core(number)), activity,
+            None if activity else remembered(f"person:{number}:debates", lambda: pp.recent_debates(pid))))
         page_url = f"{base}/people/{info['number']}/{info['slug']}"
         person = {"@context": "https://schema.org", "@type": "Person", "name": info["name"], "url": page_url,
                   "description": info["status"],
@@ -1740,30 +1923,69 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
     # The sitemap index: one address for search engines to read, which lists the site's fixed pages (a static file,
     # web/public/sitemap-pages.xml) and each sitemap the record makes. Submitting it once in Search Console covers
-    # them all.
-    SITEMAPS = ("pages", "people", "briefings", "bills", "committees", "edms", "groups", "devolved")
+    # them all. Debates and early day motions have a sitemap a year, which keeps each well under the 50,000
+    # addresses a sitemap may hold. A date is given only where the record has a true one (when a debate was held,
+    # when a motion was last signed), never the time the sitemap was made.
+    SITEMAPS = ("pages", "people", "briefings", "bills", "weeks", "committees", "groups", "devolved")
+
+    def xml(body: str) -> Response:
+        return Response('<?xml version="1.0" encoding="UTF-8"?>' + body, media_type="application/xml")
+
+    def sitemap_names() -> list[str]:
+        try:
+            edm_years = remembered("edm-years", lambda: get_edms().years())
+        except Exception:  # noqa: BLE001 - the motions not set up on this server: none listed
+            log.warning("no early day motions for the sitemap", exc_info=True)
+            edm_years = []
+        return [*SITEMAPS, *(f"debates-{y}" for y in get_debates().years()), *(f"edms-{y}" for y in edm_years)]
 
     @app.get("/sitemap.xml", include_in_schema=False)
     def sitemap_index(request: Request):
         base = str(request.base_url).rstrip("/")
-        items = "".join(f"<sitemap><loc>{base}/sitemap-{name}.xml</loc></sitemap>" for name in SITEMAPS)
-        return Response('<?xml version="1.0" encoding="UTF-8"?><sitemapindex '
-                        f'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{items}</sitemapindex>',
-                        media_type="application/xml")
+        items = "".join(f"<sitemap><loc>{base}/sitemap-{name}.xml</loc></sitemap>" for name in sitemap_names())
+        return xml(f'<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{items}</sitemapindex>')
+
+    def sitemap(urls: list[tuple[str, str | None]], name: str) -> Response:
+        """A sitemap of (address, date last changed or None)."""
+        if len(urls) > SITEMAP_LIMIT:  # never expected (each is a year or less): said, not hidden
+            log.error("sitemap-%s.xml has %d addresses; only the first %d are listed", name, len(urls), SITEMAP_LIMIT)
+        body = "".join(f"<url><loc>{u}</loc>" + (f"<lastmod>{d[:10]}</lastmod>" if d else "") + "</url>"
+                       for u, d in urls[:SITEMAP_LIMIT])
+        return xml(f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{body}</urlset>')
 
     @app.get("/sitemap-people.xml", include_in_schema=False)
     def sitemap_people(request: Request):
+        """Every member since 1997 (each has a page), dated by the last day they spoke in the record."""
         base = str(request.base_url).rstrip("/")
-        urls = "".join(f"<url><loc>{base}/people/{p['number']}/{p['slug']}</loc><changefreq>weekly</changefreq></url>"
-                       for p in get_people().search(current_only=True))
-        return Response('<?xml version="1.0" encoding="UTF-8"?><urlset '
-                        f'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',
-                        media_type="application/xml")
+        spoke = remembered(f"last-spoke:{state.latest_record_date()}", lambda: get_people().last_spoke(),
+                           ttl=12 * 3600)
+        people = get_people().search(current_only=False, limit=20_000)
+        return sitemap([(f"{base}/people", None), (f"{base}/people/former", None)]
+                       + [(f"{base}/people/{p['number']}/{p['slug']}", spoke.get(p["number"])) for p in people],
+                       "people")
 
-    def sitemap(urls: list[str]) -> Response:
-        body = "".join(f"<url><loc>{u}</loc></url>" for u in urls[:50000])
-        return Response('<?xml version="1.0" encoding="UTF-8"?><urlset '
-                        f'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{body}</urlset>', media_type="application/xml")
+    @app.get("/sitemap-bills.xml", include_in_schema=False)
+    def sitemap_bills(request: Request):
+        base = str(request.base_url).rstrip("/")
+        bills = get_bills().all(state.latest_record_date())
+        return sitemap([(f"{base}/bills/year/{y}", None) for y in bill_years(bills)]
+                       + [(f"{base}/bills/{b['slug']}", b["last"]) for b in bills], "bills")
+
+    @app.get("/sitemap-weeks.xml", include_in_schema=False)
+    def sitemap_weeks(request: Request):
+        """Every sitting week, dated by its last sitting day."""
+        base = str(request.base_url).rstrip("/")
+        return sitemap([(f"{base}/weeks", None)] + [(f"{base}/weeks/{w['start']}", w["last"])
+                                                    for w in get_weeks().all(state.latest_record_date())], "weeks")
+
+    @app.get("/sitemap-debates-{year}.xml", include_in_schema=False)
+    def sitemap_debates(year: str, request: Request):
+        """The year's debates and written statements, each dated by the day it was held."""
+        base = str(request.base_url).rstrip("/")
+        if not _YEAR.match(year) or int(year) not in get_debates().years():
+            raise HTTPException(404, "There is no sitemap at this address.")
+        found = get_debates().listing(int(year), state.latest_record_date())
+        return sitemap([(base + path, day) for path, day in found], f"debates-{year}")
 
     @app.get("/sitemap-committees.xml", include_in_schema=False)
     def sitemap_committees(request: Request):
@@ -1772,36 +1994,52 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             cs, iq = get_committees().sitemap_ids()
         except HTTPException:
             cs, iq = [], []
-        try:  # transcripts collected so far
+        try:  # transcripts collected so far, dated by their session
             ev = sorted(get_evidence().available(), reverse=True)
-        except Exception:
-            ev = []
-        return sitemap([f"{base}/committees/{c}" for c in cs] + [f"{base}/inquiries/{i}" for i in iq]
-                       + [f"{base}/evidence/{e}" for e in ev])
+            days = get_committees().session_dates(set(ev)) if ev else {}
+        except Exception:  # noqa: BLE001 - evidence not collected on this server: none listed
+            ev, days = [], {}
+        return sitemap([(f"{base}/committees/{c}", d) for c, d in cs] + [(f"{base}/inquiries/{i}", d) for i, d in iq]
+                       + [(f"{base}/evidence/{e}", days.get(e)) for e in ev], "committees")
 
     @app.get("/sitemap-groups.xml", include_in_schema=False)
     def sitemap_groups(request: Request):
+        from hansard.sources.appgs import PARLIAMENTS
+
         base = str(request.base_url).rstrip("/")
-        with get_groups().connect() as con:
-            rows = con.execute("SELECT parliament, slug FROM groups").fetchall() if con is not None else []
-        return sitemap([f"{base}/groups/{p}/{s}" for p, s in rows])
+        lists = [(f"{base}/groups" + ("" if k == "uk" else f"?parliament={k}"), None) for k in PARLIAMENTS]
+        return sitemap(lists + [(f"{base}/groups/{p}/{s}", d) for p, s, d in get_groups().sitemap()], "groups")
 
     @app.get("/sitemap-edms.xml", include_in_schema=False)
-    def sitemap_edms(request: Request):
+    def sitemap_edms_index(request: Request):
+        """The motions' sitemaps, a year each (this address once listed every motion in one, which outgrew it)."""
         base = str(request.base_url).rstrip("/")
-        with get_edms().connect() as con:
-            ids = [r[0] for r in con.execute("SELECT id FROM edms ORDER BY date_tabled DESC LIMIT 50000")]
-        return sitemap([f"{base}/edms/{i}" for i in ids])
+        items = "".join(f"<sitemap><loc>{base}/sitemap-{name}.xml</loc></sitemap>"
+                        for name in sitemap_names() if name.startswith("edms-"))
+        return xml(f'<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{items}</sitemapindex>')
+
+    @app.get("/sitemap-edms-{year}.xml", include_in_schema=False)
+    def sitemap_edms(year: str, request: Request):
+        """The motions tabled in the year, each dated by its newest signature or change of status, and the year's
+        monthly lists."""
+        base = str(request.base_url).rstrip("/")
+        if not (_YEAR.match(year) or year == "undated"):
+            raise HTTPException(404, "There is no sitemap at this address.")
+        found = get_edms().sitemap(year)
+        if not found:
+            raise HTTPException(404, "There is no sitemap at this address.")
+        months = [(f"{base}/edms/month/{m}", None) for m, _ in edm_months() if m[:4] == year]
+        return sitemap(months + [(f"{base}/edms/{i}", d) for i, d in found], f"edms-{year}")
 
     @app.get("/sitemap-devolved.xml", include_in_schema=False)
     def sitemap_devolved(request: Request):
         from hansard.devolved import LEGISLATURES
 
         base = str(request.base_url).rstrip("/")
-        store, _ = get_devolved()
-        with store.connect() as con:
-            keys = con.execute("SELECT legislature, key FROM files ORDER BY date DESC").fetchall()
-        return sitemap([f"{base}/devolved/{leg}/{key}" for leg, key in keys if leg in LEGISLATURES])
+        days = [(leg, key, day) for leg, key, day in get_devolved()[0].calendar() if leg in LEGISLATURES]
+        years = sorted({(leg, day[:4]) for leg, _, day in days}, reverse=True)
+        return sitemap([(f"{base}/devolved/{leg}/year/{y}", None) for leg, y in years]
+                       + [(f"{base}/devolved/{leg}/{key}", day) for leg, key, day in days], "devolved")
 
     # RSS feeds
     def feed(request: Request, path: str, title: str, link: str, description: str, items: list) -> Response:

@@ -17,7 +17,7 @@ import httpx
 from wts_core.adapters.duckdb import shared
 
 from hansard.config import Settings
-from hansard.debates import debate_path
+from hansard.debates import debate_path, title_of
 from hansard.reference.build import office_display
 from hansard.reference.profiles import ProfileResolver, attach_reference
 from hansard.sources.demographics import USER_AGENT, age_on, assumed_birth
@@ -341,6 +341,46 @@ class People:
                  "constituency": cons, "party": party, "current": last_end == OPEN_END,
                  "until": None if last_end == OPEN_END else last_end.isoformat()}
                 for pid, house, cons, party, name, last_end in rows if person_number(pid)]
+
+    def last_spoke(self) -> dict[int, str]:
+        """The last day each member spoke in the record, by their number: the date their page last gained something
+        from it, for the sitemap."""
+        if "records" not in self.stores:
+            return {}
+        with self._lock:
+            rows = self.con.execute("""
+                SELECT i.person_id, max(r.date) FROM records r JOIN ref_person_ids i ON i.xml_id = r.xml_person_id
+                WHERE r.xml_person_id IS NOT NULL GROUP BY 1""").fetchall()
+        return {n: d.isoformat() for pid, d in rows if d and (n := person_number(pid))}
+
+    def recent_debates(self, person_id: str, limit: int = 10) -> list[dict[str, Any]]:
+        """The debates a member last spoke in, newest first (date, chamber, title and address): a list of links
+        for the page's readable copy. Reads only the headings of the last two years they sat, never the text."""
+        if "records" not in self.stores:
+            return []
+        xml = self._xml_ids(person_id)
+        first, last = self.con.execute(
+            'SELECT min(start), max("end") FROM ref_memberships WHERE person_id = ?', [person_id]).fetchone()
+        if first is None:
+            return []
+        end_year = min(last, self.today or date.today()).year
+        since = max(end_year - 1, first.year, self.settings.archive_start.year)
+        with self._lock:
+            rows = self.con.execute(f"""
+                SELECT date, source, chamber, major_heading, minor_heading, bill FROM records
+                WHERE year BETWEEN {int(since)} AND {int(end_year)} AND list_contains(?, xml_person_id)
+                  AND source IN ('debates', 'lordspages', 'westminhall', 'standing', 'wms', 'lordswms')
+                GROUP BY ALL ORDER BY date DESC""", [xml]).fetchall()
+        out, seen = [], set()
+        for day, source, chamber, major, minor, bill in rows:
+            path = debate_path(source, day, major, minor, bill)
+            if path and path not in seen:
+                seen.add(path)
+                out.append({"date": day.isoformat(), "chamber": chamber, "path": path,
+                            "title": title_of(source, major, minor, bill)})
+            if len(out) >= limit:
+                break
+        return out
 
     def by_postcode(self, postcode: str, client: httpx.Client | None = None) -> dict[str, Any] | None:
         """The current MP for a postcode, via the UK Parliament Members API."""

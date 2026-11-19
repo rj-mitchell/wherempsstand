@@ -98,6 +98,15 @@ def test_pages_and_api(indexed_settings, tmp_path):
         assert client.get("/edms/1").status_code == 200 and client.get("/edms/2").status_code == 404
         assert client.get("/api/edms/2").status_code == 404
         assert client.get("/api/edms", params={"person": 999999999}).status_code == 404
+        # found by search engines: a sitemap a year, dated, and the archive of motions by month, linked in HTML
+        assert "/sitemap-edms-2024.xml" in client.get("/sitemap.xml").text
+        # dated by its newest signature, the day after it was tabled
+        assert "/edms/1</loc><lastmod>2024-01-11</lastmod>" in client.get("/sitemap-edms-2024.xml").text
+        assert "/sitemap-edms-2024.xml" in client.get("/sitemap-edms.xml").text
+        assert client.get("/api/edms/months").json() == {"months": [{"month": "2024-01", "count": 1}]}
+        month = client.get("/edms/month/2024-01")
+        assert month.status_code == 200 and "Early day motions tabled in January 2024" in month.text
+        assert client.get("/edms/month/2024-02").status_code == 404
     finally:
         for suffix in ("", "-wal", "-shm"):
             path.with_name(path.name + suffix).unlink(missing_ok=True)

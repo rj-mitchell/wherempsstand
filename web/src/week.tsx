@@ -137,6 +137,7 @@ function Week({ start }: { start: string | null }) {
       </p>
       <nav className="week-nav" aria-label="Other weeks">
         {w.previous ? <a href={`/weeks/${w.previous}`}>Previous week, starting {fmtDate(w.previous)}</a> : <span />}
+        <a href="/weeks">Every week</a>
         {w.next && <a href={`/weeks/${w.next}`}>Next week, starting {fmtDate(w.next)}</a>}
       </nav>
 
@@ -224,11 +225,13 @@ function Week({ start }: { start: string | null }) {
 const m = window.location.pathname.match(/^\/weeks\/(\d{4}-\d{2}-\d{2})\/?$/);
 // the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
 const TEXT = serverText(document.getElementById("week-root"));
-createRoot(document.getElementById("week-root")!).render(
-  <StrictMode>
-    <Week start={m ? m[1] : null} />
-  </StrictMode>,
-);
+// /weeks, the list of every week, is the server's page alone: nothing to draw over it
+if (!/^\/weeks\/?$/.test(window.location.pathname))
+  createRoot(document.getElementById("week-root")!).render(
+    <StrictMode>
+      <Week start={m ? m[1] : null} />
+    </StrictMode>,
+  );
 
 /** The week's votes, saying so when they have not been loaded yet rather than counting none. */
 function votesText(w: { divisions: number; votes_loaded_to?: string | null; start: string; days: { date: string }[] }) {

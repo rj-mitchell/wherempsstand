@@ -267,6 +267,20 @@ class Groups:
         return {"available": True, "parliament": parliament, "groups": [dict(r) for r in rows],
                 "funders": [dict(r) for r in funders] if not words else [], **self.meta()}
 
+    def sitemap(self) -> list[tuple[str, str, str | None]]:
+        """(parliament, slug, date last changed) of every group: the newest date on its list of members or among
+        its registered benefits, where either has one."""
+        with self.connect() as con:
+            if con is None:
+                return []
+            rows = con.execute("""
+                SELECT g.parliament, g.slug, max(d) FROM groups g LEFT JOIN (
+                    SELECT parliament, slug, updated AS d FROM members
+                    UNION ALL SELECT parliament, slug, registered FROM benefits
+                ) x ON x.parliament = g.parliament AND x.slug = g.slug
+                GROUP BY g.parliament, g.slug ORDER BY g.parliament, g.slug""").fetchall()
+        return [(r[0], r[1], r[2]) for r in rows]
+
     def group(self, slug: str, parliament: str = "uk") -> dict[str, Any] | None:
         with self.connect() as con:
             if con is None:

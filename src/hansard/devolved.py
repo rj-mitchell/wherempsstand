@@ -150,6 +150,15 @@ class DevolvedStore:
                 out.append(dict(r) | {"headings": heads[:10]})
         return out
 
+    def calendar(self, leg: str | None = None) -> list[tuple[str, str, str]]:
+        """(parliament, key, date) of every sitting day with something said, newest first: one parliament's, or
+        all of them."""
+        with self.connect() as con:
+            rows = con.execute(f"""
+                SELECT legislature, key, min(date) AS d FROM speeches {"WHERE legislature = ?" if leg else ""}
+                GROUP BY legislature, key ORDER BY d DESC, key DESC""", (leg,) if leg else ()).fetchall()
+        return [(r[0], r[1], r[2]) for r in rows]
+
     def day(self, leg: str, key: str) -> list[dict[str, Any]]:
         with self.connect() as con:
             rows = con.execute("SELECT * FROM speeches WHERE legislature = ? AND key = ? ORDER BY ord",
