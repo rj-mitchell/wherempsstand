@@ -197,7 +197,8 @@ def debate_text(d: dict[str, Any]) -> str:
 
 
 def week_text(w: dict[str, Any]) -> str:
-    parts = [f"<h1>In Parliament, week of {e(fmt_date(w['start']))}</h1>"]
+    # as the app heads it (web/src/week.tsx): "In Parliament" above, the week as the heading
+    parts = ['<p class="page-context">In Parliament</p>', f"<h1>Week of {e(fmt_date(w['start']))}</h1>"]
     for day in w.get("days") or []:
         parts.append(f"<h2>{e(fmt_date(day['date']))}</h2>")
         for ch in day.get("chambers") or []:

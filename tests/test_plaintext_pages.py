@@ -89,3 +89,4 @@ def test_index_lists_go_where_the_app_draws_its_list_and_pages_link_to_members()
     assert "Cy" not in m  # a withdrawn signature is not listed
     w = week_text({"start": "2026-11-16", "days": [], "previous": "2026-11-09", "next": None})
     assert '<a href="/weeks/2026-11-09">The week before</a>' in w and '<a href="/weeks">Every week</a>' in w
+    assert "<h1>Week of 16 November 2026</h1>" in w  # the heading the app gives the page
