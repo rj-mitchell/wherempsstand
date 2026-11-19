@@ -16,6 +16,12 @@
 	# built files have a fingerprint in their name, so a browser can keep them for a year without asking again
 	@fingerprinted path /assets/*
 	header @fingerprinted Cache-Control "public, max-age=31536000, immutable"
+	# the family kit's files have no fingerprint, so none is kept for ever: the fonts never change between versions
+	# of the kit, and are kept for 30 days; its style sheets change when the kit is synced, and are kept for an hour
+	@familyfonts path /family/fonts/*
+	header @familyfonts Cache-Control "public, max-age=2592000"
+	@familycss path /family/*.css
+	header @familycss Cache-Control "public, max-age=3600"
 	# flush_interval -1 streams answers to the browser as they are written (server-sent events)
 	reverse_proxy app:8000 {
 		flush_interval -1
@@ -24,6 +30,11 @@
 		header_up X-Forwarded-For {client_ip}
 	}
 	header {
+		# Set as the answer is sent, after encode has compressed it. encode leaves alone any answer that already says
+		# no-transform, so with these set first (Caddy's default when nothing is removed) no page, style sheet or
+		# API answer of this site was compressed (found 19 November 2026). The other sites' block below removes
+		# Server, which makes Caddy wait in the same way, and theirs were compressed.
+		defer
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		X-Frame-Options "DENY"
