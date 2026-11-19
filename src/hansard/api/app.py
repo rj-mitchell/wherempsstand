@@ -302,6 +302,9 @@ STREAM_HEADERS = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
 SITEMAP_LIMIT = 50_000  # the most addresses one sitemap may hold (sitemaps.org)
 COMMITTEE_HOUSES = {"Commons": "House of Commons", "Lords": "House of Lords", "Joint": "Joint committees"}
 EMPTY_PAGE = "<!doctype html><html><head></head><body></body></html>"
+# the built pages that are only frames for one item, filled in from their address (/people/<number>/<name> uses
+# person.html): at their own address (/person, /bill.html) they are empty, so they answer 404, not an empty page
+TEMPLATES = {"person", "bill", "debate", "committee", "inquiry", "evidence", "edm", "group", "devolvedday", "week"}
 CLOSED = ("resolved", "dismissed")  # how a report may be closed
 WITHDRAWN_BY_AUTHOR = "Withdrawn by the author."  # the note of a withdrawal, when the owner gives none
 WITHDRAWN = "This briefing has been withdrawn."  # what a withdrawn briefing's address says
@@ -2356,6 +2359,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         def spa(path: str):
             if path.startswith("api/"):
                 return JSONResponse({"detail": "Not found"}, status_code=404)
+            if path.strip("/").removesuffix(".html") in TEMPLATES:  # a page's frame, empty without its address
+                missing = dist / "404.html"
+                return FileResponse(missing if missing.is_file() else dist / "index.html", status_code=404)
             f = (dist / path).resolve()
             if path and f.is_file() and f.is_relative_to(dist.resolve()):  # never serve outside the build
                 return FileResponse(f)
