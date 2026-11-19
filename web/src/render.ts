@@ -151,3 +151,14 @@ export function sentenceCase(label: string): string {
     .map((w, i) => (i > 0 && /^[A-Z][a-z]/.test(w) ? w.toLowerCase() : w))
     .join(" ");
 }
+
+/** ``text`` cut at a word to at most ``limit`` characters, with an ellipsis if anything was cut (as the server cuts a
+ * page's title: hansard/wording.py, shorten). */
+export function shorten(text: string, limit: number): string {
+  const t = text.split(/\s+/).filter(Boolean).join(" ");
+  if (t.length <= limit) return t;
+  let cut = t.slice(0, limit - 1);
+  // the cut is inside a word: back to the word before it
+  if (/[\p{L}\p{N}]/u.test(t[limit - 1]) && cut.includes(" ")) cut = cut.slice(0, cut.lastIndexOf(" "));
+  return `${cut.replace(/[\s,;:—–-]+$/, "")}…`;
+}

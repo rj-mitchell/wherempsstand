@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import "./pages";
 import { Failed, Pending, serverText } from "./serverText";
 import type { EdmMember } from "./components/EdmList";
-import { fmtDate } from "./render";
+import { fmtDate, shorten } from "./render";
 
 interface Sponsor extends EdmMember {
   sponsoring_order: number | null;
@@ -50,7 +50,7 @@ function Edm({ id }: { id: string }) {
       })
       .then((x) => {
         setE(x);
-        document.title = `${x.title} (early day motion) | Where MPs Stand`;
+        document.title = `${shorten(x.title, 60)} (early day motion) | Where MPs Stand`;
       })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not load."));
   }, [id]);

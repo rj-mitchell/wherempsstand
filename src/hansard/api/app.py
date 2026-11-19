@@ -125,6 +125,7 @@ from hansard.replies import (
 )
 from hansard.store.state import StateDB
 from hansard.store.wts import BACKUP_ALERTS, BACKUPS, check_before_opening, open_core
+from hansard.wording import shorten, title_case
 
 log = logging.getLogger(__name__)
 
@@ -1423,8 +1424,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                            description="There is no group at this address.",
                                            url=f"{base}/groups/{parliament}/{slug}", image=None),
                             status_code=404, media_type="text/html")
-        desc = (g["purpose"] or g["title"])[:280]
-        return Response(with_text(page_with_meta(page, title=f"{g['title']} | Where MPs Stand", description=desc,
+        # a group's title runs to 107 characters and its purpose to 280: cut at a word for the page title and the
+        # search result's description (the page itself has them in full)
+        desc = shorten(g["purpose"] or g["title"], 155)
+        return Response(with_text(page_with_meta(page, title=f"{shorten(g['title'], 60)} | Where MPs Stand",
+                                                 description=desc,
                                                  url=f"{base}/groups/{parliament}/{slug}", image=None, noindex=False),
                                   readable(lambda: group_text(group_detail(parliament, slug)))),
                         media_type="text/html")
@@ -1479,7 +1483,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def edm_rows(rows: list[dict]) -> list[dict]:
         found = get_people().by_parliament_id([(r["primary_mnis"], r["date_tabled"]) for r in rows
                                                if r["primary_mnis"]])
-        return [{**{k: r[k] for k in ("id", "uin", "title", "date_tabled", "status", "sponsors_count", "prayer")},
+        # older motions' titles are in capitals ("WINNIE EWING"): shown as titles, acronyms kept
+        return [{**{k: r[k] for k in ("id", "uin", "date_tabled", "status", "sponsors_count", "prayer")},
+                 "title": title_case(r["title"]),
                  "sponsor": edm_member(found, r["primary_mnis"], r["date_tabled"], r["primary_name"],
                                        r["primary_party"])} for r in rows]
 
@@ -1519,8 +1525,9 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         for s in sponsors:
             if not s["withdrawn"]:
                 parties[s["party"] or "Unknown"] = parties.get(s["party"] or "Unknown", 0) + 1
-        return {**{k: e[k] for k in ("id", "uin", "title", "text", "date_tabled", "status", "status_date",
+        return {**{k: e[k] for k in ("id", "uin", "text", "date_tabled", "status", "status_date",
                                      "sponsors_count", "amendment_to", "prayer")},
+                "title": title_case(e["title"]),
                 "sponsor": edm_member(found, e["primary_mnis"], e["date_tabled"], e["primary_name"],
                                       e["primary_party"]),
                 "sponsors": sponsors, "signatures_known": bool(e["sponsors_fetched"]),
@@ -1540,7 +1547,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                            image=None), status_code=404, media_type="text/html")
         when = fmt_date(e["date_tabled"]) if e["date_tabled"] else "an unknown date"
         return Response(with_text(page_with_meta(
-            page, title=f"{e['title']} (early day motion) | Where MPs Stand",
+            page, title=f"{shorten(title_case(e['title']), 60)} (early day motion) | Where MPs Stand",
             description=f"Early day motion tabled on {when} by {e['primary_name']}, with "
                         f"{e['sponsors_count'] or 0} signatures: the text and who signed.",
             url=url, image=None, noindex=False), readable(lambda: edm_text(edm_detail(edm_id)))), media_type="text/html")
@@ -2139,7 +2146,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def feed_edms(request: Request):
         base = str(request.base_url).rstrip("/")
         _, rows = get_edms().search(limit=40)
-        items = [{"title": r["title"], "date": r["date_tabled"] or "2000-01-01", "guid": f"edm-{r['id']}",
+        items = [{"title": title_case(r["title"]), "date": r["date_tabled"] or "2000-01-01", "guid": f"edm-{r['id']}",
                   "link": f"{base}/edms/{r['id']}",
                   "description": f"Early day motion {r['uin'] or ''} tabled by {r['primary_name'] or 'an MP'}"
                                  f"{' (' + r['primary_party'] + ')' if r['primary_party'] else ''}."}

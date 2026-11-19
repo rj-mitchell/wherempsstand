@@ -89,7 +89,8 @@ def test_pages_and_api(indexed_settings, tmp_path):
         assert client.get("/api/edms").json()["available"] is False, "before the first sync"
         store = EdmStore(path)
         sync_edms(store, today=date(2024, 2, 1), months_per_run=3, sleep=NO_WAIT,
-                  client=fake_api([motion(1, "Hospice funding", "2024-01-10")]))
+                  client=fake_api([motion(1, "Hospice funding", "2024-01-10"),
+                                   motion(3, "WINNIE EWING AND THE SNP", "2024-01-12")]))
         listing = client.get("/api/edms", params={"q": "hospice"}).json()
         assert listing["total"] == 1 and listing["items"][0]["sponsor"]["name"] == "Ann Example"
         one = client.get("/api/edms/1").json()
@@ -103,7 +104,11 @@ def test_pages_and_api(indexed_settings, tmp_path):
         # dated by its newest signature, the day after it was tabled
         assert "/edms/1</loc><lastmod>2024-01-11</lastmod>" in client.get("/sitemap-edms-2024.xml").text
         assert "/sitemap-edms-2024.xml" in client.get("/sitemap-edms.xml").text
-        assert client.get("/api/edms/months").json() == {"months": [{"month": "2024-01", "count": 1}]}
+        assert client.get("/api/edms/months").json() == {"months": [{"month": "2024-01", "count": 2}]}
+        # an older motion's title in capitals is shown as a title, acronyms kept, in the page and the app
+        assert client.get("/api/edms/3").json()["title"] == "Winnie Ewing and the SNP"
+        assert "<title>Winnie Ewing and the SNP (early day motion) | Where MPs Stand</title>" in \
+            client.get("/edms/3").text
         month = client.get("/edms/month/2024-01")
         assert month.status_code == 200 and "Early day motions tabled in January 2024" in month.text
         assert client.get("/edms/month/2024-02").status_code == 404
