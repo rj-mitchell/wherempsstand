@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import { fmtDate } from "./render";
 
 interface Member {
@@ -82,8 +83,8 @@ function Page({ parliament, slug }: { parliament: string; slug: string }) {
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "The group's page did not load. Reload the page to try again."));
   }, [parliament, slug]);
-  if (error) return <p role="alert">{error} <a href="/groups">All groups</a></p>;
-  if (!g) return <p className="muted" role="status">Fetching the group's officers, members and benefits.</p>;
+  if (error) return <Failed text={TEXT}>{error} <a href="/groups">All groups</a></Failed>;
+  if (!g) return <Pending text={TEXT}><p className="muted" role="status">Fetching the group's officers, members and benefits.</p></Pending>;
   const officers = g.members.filter((m) => m.is_officer);
   const members = g.members.filter((m) => !m.is_officer);
   const linked = members.filter((m) => m.member);
@@ -200,6 +201,8 @@ function Page({ parliament, slug }: { parliament: string; slug: string }) {
   );
 }
 
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("group-root"));
 const root = document.getElementById("group-root");
 if (root) {
   const [, , parliament, slug] = window.location.pathname.split("/");

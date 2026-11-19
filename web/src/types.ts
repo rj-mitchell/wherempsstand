@@ -303,6 +303,8 @@ export interface Turn {
   passages?: number;
   /** when each stage began, by the reader's clock */
   stages?: import("./components/Progress").Stages;
+  /** the server's readable copy of the page, shown when the briefing itself could not be fetched (serverText.tsx) */
+  fallbackHtml?: string;
 }
 
 export interface TopicInfo {

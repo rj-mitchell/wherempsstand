@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import { VoteKind, VoteKindKey } from "./components/VoteKind";
 import { ELSEWHERE, Elsewhere } from "./elsewhere";
 import { fmtDate } from "./render";
@@ -56,8 +57,8 @@ function Bill({ slug }: { slug: string }) {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "The bill's page did not load. Reload the page to try again."));
   }, [slug]);
 
-  if (error) return <p role="alert">{error} <a href="/bills">All bills</a></p>;
-  if (!b) return <p className="muted" role="status">Fetching the bill's stages and votes.</p>;
+  if (error) return <Failed text={TEXT}>{error} <a href="/bills">All bills</a></Failed>;
+  if (!b) return <Pending text={TEXT}><p className="muted" role="status">Fetching the bill's stages and votes.</p></Pending>;
   const range = `between ${fmtDate(b.first)} and ${fmtDate(b.last)}`;
   const question = `What arguments were made for and against the ${b.name} ${range}?`;
   return (
@@ -175,6 +176,8 @@ function Bill({ slug }: { slug: string }) {
 }
 
 const slug = window.location.pathname.match(/^\/bills\/([a-z0-9-]+)\/?$/)?.[1];
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("bill-root"));
 createRoot(document.getElementById("bill-root")!).render(
   <StrictMode>{slug ? <Bill slug={slug} /> : <p role="alert">No bill was given.</p>}</StrictMode>,
 );

@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import { VoteKind } from "./components/VoteKind";
 import { ELSEWHERE, Elsewhere } from "./elsewhere";
 import { fmtDate } from "./render";
@@ -104,11 +105,11 @@ function Week({ start }: { start: string | null }) {
 
   if (error)
     return (
-      <p role="alert">
+      <Failed text={TEXT}>
         {error} <a href="/this-week">The latest week</a>
-      </p>
+      </Failed>
     );
-  if (!w) return <p className="muted" role="status">Fetching the week's business.</p>;
+  if (!w) return <Pending text={TEXT}><p className="muted" role="status">Fetching the week's business.</p></Pending>;
   const debates = w.days.reduce((n, d) => n + d.chambers.reduce((m, c) => m + c.debates.length, 0), 0);
   return (
     <article className="week">
@@ -221,6 +222,8 @@ function Week({ start }: { start: string | null }) {
 }
 
 const m = window.location.pathname.match(/^\/weeks\/(\d{4}-\d{2}-\d{2})\/?$/);
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("week-root"));
 createRoot(document.getElementById("week-root")!).render(
   <StrictMode>
     <Week start={m ? m[1] : null} />

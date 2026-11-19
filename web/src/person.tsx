@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import { Timeline } from "./components/Timeline";
 import { EdmList, type EdmRow } from "./components/EdmList";
 import { DirectorshipsSection, type MemberDirectorships } from "./components/Directorships";
@@ -132,8 +133,8 @@ function Person({ number }: { number: string }) {
     part("interests").then(setExtras, () => setExtras("error"));
   }, [number]);
 
-  if (error) return <p role="alert">{error}</p>;
-  if (!core) return <p className="muted" role="status">Fetching this member's record.</p>;
+  if (error) return <Failed text={TEXT}>{error}</Failed>;
+  if (!core) return <Pending text={TEXT}><p className="muted" role="status">Fetching this member's record.</p></Pending>;
   const p: PersonData = {
     ...core,
     ...(activity && activity !== "error" ? activity : {}),
@@ -627,6 +628,8 @@ function elsewhereFor(p: PersonData): Link[] {
 }
 
 const number = window.location.pathname.match(/^\/people\/(\d+)/)?.[1];
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("person-root"));
 createRoot(document.getElementById("person-root")!).render(
   <StrictMode>{number ? <Person number={number} /> : <p role="alert">No member was given.</p>}</StrictMode>,
 );

@@ -2,6 +2,7 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./pages";
+import { Failed, Pending, serverText } from "./serverText";
 import { getJSON } from "./committeeApi";
 import { fmtDate } from "./render";
 
@@ -35,11 +36,11 @@ function Page({ id }: { id: string }) {
   }, [id]);
   if (error)
     return (
-      <p role="alert">
+      <Failed text={TEXT}>
         {error} <a href="/committees">All committees</a>
-      </p>
+      </Failed>
     );
-  if (!d) return <p className="muted" role="status">Fetching the inquiry's reports and witnesses.</p>;
+  if (!d) return <Pending text={TEXT}><p className="muted" role="status">Fetching the inquiry's reports and witnesses.</p></Pending>;
   const question = `What have MPs and peers said about ${d.title.replace(/\.$/, "")}?`;
   return (
     <article>
@@ -139,6 +140,8 @@ function Page({ id }: { id: string }) {
 }
 
 const id = window.location.pathname.match(/^\/inquiries\/(\d+)\/?$/)?.[1];
+// the server's readable copy of the page, kept until the app has the data to draw it (serverText.tsx)
+const TEXT = serverText(document.getElementById("inquiry-root"));
 createRoot(document.getElementById("inquiry-root")!).render(
   <StrictMode>{id ? <Page id={id} /> : <p role="alert">No inquiry was given.</p>}</StrictMode>,
 );
