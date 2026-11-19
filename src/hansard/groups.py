@@ -7,7 +7,8 @@ A member counts as in a group when there is published evidence of it, or when th
 * ``signatories``: they signed a letter or statement the group published with its signatories' names;
 * ``ipsa``: IPSA's published business costs show their office paying for the group's pooled research service. That is
   a subscription, not membership (IPSA says so), and is shown only as what it is, only when ``[groups] show_ipsa`` is
-  on (off until the charity has legal advice on the basis for showing it);
+  on (on since 12 November 2026; the owner decided on 19 November 2026 to keep it without further legal review,
+  docs/DECISIONS.md, 39);
 * ``declared``: they said in the Commons or the Lords that they are a member, the chair, a founder... (first person
   only, found by :func:`find_declarations`).
 

@@ -145,7 +145,7 @@ answer_cache_hours = 168           # identical questions are not re-run until ne
 briefing_estimate_usd = 0.30
 briefings_at_once = 8
 briefings_at_once_per_reader = 2
-daily_spend_cap_usd = 10.0
+daily_spend_cap_usd = 50.0
 monthly_spend_cap_usd = 150.0
 # USD per million tokens, used for spend tracking only.
 price_input_per_mtok = 4.0
