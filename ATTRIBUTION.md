@@ -26,6 +26,12 @@ committee memberships come from the `members/` data in
 the UK Parliament Members' Names Information Service (Open Parliament Licence
 v3.0). With thanks to mySociety for maintaining these datasets.
 
+TheyWorkForYou's [API terms](https://www.theyworkforyou.com/api/terms) put mySociety's own data (lists of MPs, Lords,
+constituencies and so on) under Creative Commons Attribution-ShareAlike 2.5 and ask for the credit "Data service
+provided by TheyWorkForYou", linked, where it is used. The site takes these terms to cover the bulk files it uses
+too (the letter in `outreach/2026-11/mysociety.txt` asks mySociety to confirm), and every page's footer carries that
+credit, as does the attribution in the API's responses.
+
 ## Early day motions, committees and the devolved parliaments
 
 Early day motions and their signatures come from the UK Parliament
