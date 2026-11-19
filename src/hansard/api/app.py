@@ -900,7 +900,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         out = []
         for b in get_bills().all(state.latest_record_date()):
             last = b["sittings"][-1]
-            out.append({k: b[k] for k in ("slug", "name", "first", "last", "houses", "contributions")}
+            out.append({k: b[k] for k in ("slug", "name", "years", "first", "last", "houses", "contributions")}
                        | {"sittings": len(b["sittings"]), "divisions": len(b["divisions"]),
                           "latest": f"{', '.join(last['stages'])} ({'Lords' if last['house'] == 'lords' else 'Commons'})"})
         return {"bills": out}
@@ -923,9 +923,12 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                                            description="There is no bill at this address.", url=f"{base}/bills/{slug}",
                                            image=None), status_code=404, media_type="text/html")
         houses = " and ".join("the Lords" if h == "lords" else "the Commons" for h in b["houses"])
-        description = (f"The {b['name']} in Parliament: every debate and vote in {houses}, "
+        # bills of the same name (a Finance Bill every year, a bill brought back in a new session) are told apart by
+        # the years they were debated
+        description = (f"The {b['name']} ({b['years']}) in Parliament: every debate and vote in {houses}, "
                        f"{fmt_date(b['first'])} to {fmt_date(b['last'])}, from the official record.")
-        return Response(with_text(page_with_meta(page, title=f"{b['name']} | Where MPs Stand", description=description,
+        return Response(with_text(page_with_meta(page, title=f"{b['name']} ({b['years']}) | Where MPs Stand",
+                                                 description=description,
                                                  url=f"{base}/bills/{slug}", image=None, noindex=False),
                                   readable(lambda: bill_text(b))), media_type="text/html")
 

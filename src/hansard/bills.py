@@ -26,10 +26,12 @@ from hansard.config import Settings
 from hansard.debates import debate_path
 from hansard.store.parquet import attach_store
 from hansard.vote_types import vote_types
+from hansard.wording import title_case
 
 log = logging.getLogger(__name__)
 
-FORMAT = 4  # raise when the shape of a bill changes, so a cached index is rebuilt (2: kinds of vote, 3: debates)
+FORMAT = 5  # raise when the shape of a bill changes, so a cached index is rebuilt (2: kinds of vote, 3: debates,
+# 5: "Proceedings in Public Bill Committees" is not a bill)
 GAP = timedelta(days=200)  # sittings further apart than this belong to different bills of the same name
 _HEADING = re.compile(r"^(?P<name>.*?\bBill\b(?:\s*\[(?:HL|Lords)\])?)\s*(?P<tail>.*)$", re.I)
 _MOTIONS = [("programme", "Programme motion"), ("money", "Money resolution"),
@@ -77,14 +79,46 @@ def parse_heading(raw: str) -> tuple[str, str] | None:
     name, tail = m.group("name").strip(), m.group("tail").strip(" -–—:")
     if len(bill_key(name).split()) < 2:  # "Bill" alone, "Bill of Rights" etc. are not bill names here
         return None
+    if bill_key(name).endswith("public bill") and tail.lower().startswith("committee"):
+        return None  # a motion about Public Bill Committees ("Proceedings in Public Bill Committees etc.")
     return name, tail
 
 
+# what older Commons headings put before a bill's name: "Orders of the Day — Finance Bill", "Business without
+# Debate — …", "Remaining Private Members' Bills — …"
+_BEFORE_NAME = re.compile(r"^[^—–]*?\s[—–]\s+(?=.*\bbill\b)", re.I)
+
+
+def display_name(name: str) -> str:
+    """A bill's name as its page gives it: without what the heading put before it, without [HL] or [Lords], and
+    not in capitals ("Orders of the Day — CONSOLIDATED FUND BILL" -> "Consolidated Fund Bill"). Its address is
+    unchanged."""
+    while (shorter := _BEFORE_NAME.sub("", name, count=1)) != name:
+        name = shorter
+    name = " ".join(re.sub(r"\s*\[(?:HL|Lords)\]", "", name, flags=re.I).split())
+    return re.sub(r"\bbill\b", "Bill", title_case(name), flags=re.I)
+
+
+def years_of(b: dict[str, Any]) -> str:
+    """The years a bill was debated: "2025", or "2025–26" across two (as a parliamentary session is written)."""
+    first, last = b["first"][:4], b["last"][:4]
+    if first == last:
+        return first
+    return f"{first}–{last[2:]}" if first[:2] == last[:2] else f"{first}–{last}"
+
+
+def shown(bills: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The bills as the pages show them: each name as ``display_name`` gives it, and the years it was debated."""
+    return [{**b, "name": display_name(b["name"]), "years": years_of(b)} for b in bills]
+
+
 def _display(names: Counter) -> str:
-    """The most common spelling, preferring one not in capitals (older Commons headings are upper case)."""
+    """The most common spelling, preferring one not in capitals (older Commons headings are upper case). A name in
+    capitals is kept so: ``display_name`` writes it as a title for the page (its address, made from this, is the
+    same either way)."""
     proper = Counter({n: c for n, c in names.items() if not n.isupper()})
     best = (proper or names).most_common(1)[0][0]
-    return re.sub(r"\s*\[(?:HL|Lords)\]", "", best).strip() if not best.isupper() else best.title()
+    return re.sub(r"\s*\[(?:HL|Lords)\]", "", best).strip() if not best.isupper() else best
 
 
 _PROPER = re.compile(r"\b(commons|lords|house|bill|royal assent|hl)\b")
@@ -239,11 +273,11 @@ class Bills:
                 try:
                     cached = json.loads(self.path.read_text())
                     if cached.get("version") == stamp:
-                        self._bills, self._version = cached["bills"], version
+                        self._bills, self._version = shown(cached["bills"]), version
                         return self._bills
                 except (OSError, ValueError):
                     pass
-            self._bills = rebuild(self.settings, stamp)
+            self._bills = shown(rebuild(self.settings, stamp))
             self._version = version
             return self._bills
 
