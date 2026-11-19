@@ -5,16 +5,18 @@ Dear Alex,
 
 I've addressed this to you as Head of Research and Policy, as I couldn't find an address for TheyWorkForYou Votes or for data licensing. If it belongs with someone else, please could you pass it on?
 
-I've read your post on vibe-coded websites, so I'll keep this short and answer its questions up front. I'm not asking for a call, for promotion, for money or for you to take anything on. I have one licensing question, and one open invitation.
+I've read your post on vibe-coded websites, so I'll keep this short and answer its questions up front. I'm not asking for a call, for promotion, for money or for you to take anything on. I have a licensing question, and one open invitation.
 
 The question. Where MPs Stand (https://wherempsstand.com) shows your plain-English sentence on what voting aye (and sometimes no) meant, and how a party whipped the vote where you report it, next to about 1,600 divisions, from divisions.parquet. Each is labelled "(TheyWorkForYou Votes)" and credited on the methodology page (https://wherempsstand.com/methodology). I couldn't find a licence for them, so:
 
 1. Is it all right for us to show them?
 2. If so, under what licence, and how would you like to be credited?
 
-If you'd rather we didn't, just say and we'll take them out; the site falls back to its own neutral labels (a second reading, an amendment and so on). A smaller one: are there any terms for the parlparse members/ data beyond the Open Parliament Licence?
+If you'd rather we didn't, just say and we'll take them out; the site falls back to its own neutral labels (a second reading, an amendment and so on).
 
-The invitation. The site is built on your work: TheyWorkForYou's Hansard XML, the parlparse members data, and your APPG and 2025-constituencies datasets. Where you do something we don't, we send people to you rather than copy it: TheyWorkForYou for alerts and MPs' pages, TheyWorkForYou Votes for voting records, and WriteToThem for contacting representatives. If anything we do that you don't is useful to your users, you're welcome to link the other way: for example, short briefings on what was said about a subject, grouped by who said it, across the Commons, the Lords and the devolved parliaments, with every point linked to Hansard. No obligation at all.
+A smaller one, where I've tried to work it out from your API terms. They put your own data (lists of MPs, Lords, constituencies and so on) under CC BY-SA 2.5, with the credit "Data service provided by TheyWorkForYou". We take it the same covers the parlparse members/ data we download in bulk (the Hansard text itself being under the Open Parliament Licence), and we'll add that credit, linked, to the pages that use it. Our briefings are CC BY 4.0, and we take it the share-alike applies to your member data itself rather than to a briefing that says who spoke. Please tell us if either is wrong.
+
+The invitation. The site is built on your work: ParlParse's Hansard XML and members data, and your APPG and 2025-constituencies datasets. Where you do something we don't, we send people to you rather than copy it: TheyWorkForYou for alerts and MPs' pages, TheyWorkForYou Votes for voting records, and WriteToThem for contacting representatives. If anything we do that you don't is useful to your users, you're welcome to link the other way: for example, short briefings on what was said about a subject, grouped by who said it, across the Commons, the Lords and the devolved parliaments, with every point linked to Hansard. No obligation at all.
 
 Your post's other questions, briefly:
 
