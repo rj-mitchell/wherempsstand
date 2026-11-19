@@ -324,6 +324,16 @@ def test_static_pages_are_served_at_clean_addresses(indexed_settings, tmp_path):
     assert client.get("/api/nope").status_code == 404
     head = client.head("/methodology")  # link checkers and search engines ask with HEAD
     assert head.status_code == 200 and head.text == ""
+    # a page that is only a frame for one item (person.html for /people/<number>/<name>) is not a page at its own
+    # address (it answered 200 with an empty shell: audit, 19 November 2026)
+    for name in ("person", "bill", "debate", "committee", "inquiry", "evidence", "edm", "group", "devolvedday",
+                 "week"):
+        (dist / f"{name}.html").write_text(f'<div id="{name}-root"><p class="muted">Fetching.</p></div>')
+    for path in ("/person", "/bill", "/debate", "/committee", "/inquiry", "/evidence", "/edm", "/group",
+                 "/devolvedday", "/week", "/person.html", "/week/"):
+        assert client.get(path).status_code == 404, path
+    assert client.get("/this-week").status_code == 200 and client.get("/bills/no-such-bill").status_code == 404
+    assert client.get("/methodology").status_code == 200
 
 
 def test_a_head_request_is_still_one_when_its_answer_is_sent(indexed_settings, tmp_path):
