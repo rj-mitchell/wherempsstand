@@ -1009,8 +1009,8 @@ def topics_refresh(only: list[str] = typer.Option(None, help="just these topics 
 # the run has its own limit, says so as it starts, and reports what it spent. Its cost counts each of a
 # briefing's three model calls, the check of registered interests among them (``HansardEval.usages``). (wts-core
 # 0.3.0 could record a run in the site's spending, where the caps would count it: ``eval_commands(spending=…)``.
-# On this site a run on the archive costs a few dollars against a daily cap of ten, so readers could be paused for
-# the rest of the day; it is not given, and that is for the owner to decide.)
+# On this site a full run on the archive costs about $6 (docs/EVALUATION.md), against a daily cap of $50, so on a
+# busy day readers could be paused for the rest of it; it is not given, and that is for the owner to decide.)
 
 NOT_IN_USAGE = ("What this run spends is not in the admin page's spending and counts towards neither the daily nor "
                 "the monthly cap: it stops at its own limit ([eval] max_cost_usd, or --max-cost), and says below "
