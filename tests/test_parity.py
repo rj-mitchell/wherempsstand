@@ -41,11 +41,14 @@ ADDED_MODELS = {"claude-opus-5-5": {"price_input_per_mtok": 4.0, "price_output_p
 # progress is reserved at, raised above what 16,000 tokens of output alone can cost ($0.16) plus its input; and the
 # effort the question reader gives each question, raised from low to medium after a run of the test set read 9 in 10
 # questions' filters right at low (a reading costs a fiftieth of a penny); and the daily spending cap, raised by the owner
-# from $10 to $50, and the monthly cap from $150 to $250, on 19 November 2026
+# from $10 to $50, and the monthly cap from $150 to $250, on 19 November 2026; and the most a run of the test set may
+# spend, in a section the move added (so the recordings hold none of it), raised by the owner from $3 to $7 on
+# 19 November 2026 after a full run on the real archive cost $5.76 (docs/EVALUATION.md)
 CHANGED_SETTINGS: dict[str, dict[str, tuple[Any, Any]]] = {
     "usage": {"per_visitor_daily_questions": (40, 10), "briefing_estimate_usd": (0.15, 0.30),
               "daily_spend_cap_usd": (10.0, 50.0), "monthly_spend_cap_usd": (150.0, 250.0)},
-    "answer": {"query_parse_effort": ("low", "medium")}}
+    "answer": {"query_parse_effort": ("low", "medium")},
+    "eval": {"max_cost_usd": (3.0, 7.0)}}
 
 # The version of the instructions the goldens were recorded with. The question reader's instructions have changed
 # on purpose since (it now says when a message is plainly not a question about Parliament's record,
@@ -241,6 +244,7 @@ def test_settings_resolve_as_before(tmp_path):
             assert real.answer["cache_instructions"] == "short" and real.usage["models"]["claude-opus-5-5"] == \
                 ADDED_MODELS["claude-opus-5-5"]
             assert real.usage["per_visitor_daily_questions"] == CHANGED_SETTINGS["usage"]["per_visitor_daily_questions"][1]
+            assert real.section("eval")["max_cost_usd"] == CHANGED_SETTINGS["eval"]["max_cost_usd"][1]
             gives["raw"] = {name: changed_back(name, without_added(name, values))
                             for name, values in gives["raw"].items() if name not in ADDED_SECTIONS}
             for name in ("answer", "usage", "embedding"):

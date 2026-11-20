@@ -35,8 +35,9 @@ These run on the server, which is paid for whatever the use, so extra use costs 
   the sources found have changed. At most 4 are rewritten per update, and none once a daily or monthly cap is
   reached.
 - Featured briefings are free, since they are briefings already written.
-- A full run of the test set with every briefing written (`hansard eval run`) costs about $2 to $3, and stops at
-  `[eval] max_cost_usd`.
+- A full run of the test set with every briefing written (`hansard eval run`) costs about $6 (the first baseline,
+  19 November 2026: $5.76, [EVALUATION.md](EVALUATION.md#the-first-baseline-on-the-real-archive-19-november-2026)).
+  It stops cleanly at `[eval] max_cost_usd` ($7), and says what it spent.
 
 ## Fixed costs
 

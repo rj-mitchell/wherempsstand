@@ -30,12 +30,15 @@ The commands (`hansard eval --help` lists their options):
 | `hansard eval sources` | Compares ranking variants on the relevance and balance of the sources | a few pence, for new grades only |
 | `hansard eval retrieval` | Runs the searches alone, from saved question readings ([Retrieval only](#retrieval-only)) | free |
 | `hansard eval briefings` | Writes briefings with each model and compares them | about 6 to 15 US cents a briefing |
-| `hansard eval run` | Asks the whole test set through the whole pipeline and holds it to `[eval.thresholds]` in `config/settings.toml` | about $2 to $3, capped by `[eval] max_cost_usd` |
+| `hansard eval run` | Asks the whole test set through the whole pipeline and holds it to `[eval.thresholds]` in `config/settings.toml` | about $6 ([the first baseline](#the-first-baseline-on-the-real-archive-19-november-2026)), capped by `[eval] max_cost_usd` ($7) |
 | `hansard eval compare A B` | Sets two runs side by side | free |
 | `hansard eval replay eval/fixtures` | Runs the checks again over recorded briefings; the tests and CI do this on every change | free |
 
 On the server, `hansard eval run` saves its runs in `/data/eval/runs/` on the data volume. What it spends is not on
-the admin page and counts towards neither cap; the run says what it spent.
+the admin page and counts towards neither cap. A run never starts without a limit: `[eval] max_cost_usd`, or
+`--max-cost`. Once its spending reaches the limit it stops cleanly between questions: the rest are marked as not
+asked, the run is saved, and it does not pass. It says what it spent as it ends, and the run file keeps it
+(`cost_usd`).
 
 ## Reading the question
 
@@ -201,6 +204,63 @@ a time limit, `[answer] side_lookup_seconds` (6). A lookup still running then is
 warning in the log ("side lookup 'devolved' took longer than 6 s: the briefing goes on without it"); its thread
 finishes on its own. While one kind is still running past its limit, that kind is left out of new briefings, so a
 slow kind holds at most one of the pool's eight threads.
+
+## The first baseline on the real archive (19 November 2026)
+
+The owner ran the whole test set on the server on 19 November 2026, with every briefing written:
+
+```bash
+hansard eval run --max-cost 6.5
+```
+
+The run is `/data/eval/runs/20261119-223324-eval-eb8c1dc139b3.json` on the server's data volume, for the
+configuration `eb8c1dc139b3`.
+
+| Figure | Result |
+|---|---|
+| Questions asked | 66 of 66 |
+| Briefings written | 66 |
+| Answers of "no records" | 0 |
+| Errors | 0 |
+| Grounded ratio (mean) | 0.918 |
+| Citations | 1,104, none not found in their source |
+| Unsupported sentences | 81; 69.7% of briefings have at least one |
+| Quotations | 997; 5 not found word for word |
+| Loaded words | 3 |
+| Sources for a briefing (mean) | 32.02, from 8.05 groups; 28.6% from the largest group |
+| Time to the first word | median 6,356 ms; 95th percentile 17,099 ms |
+| Time to the end | median 17,850 ms; 95th percentile 29,450 ms |
+| Cost | $5.759, or $0.0873 a question |
+| Tokens | 2,767,870 in and 298,737 out; 728,390 read from the cache and 11,206 written to it |
+| Met every expectation | 92.4% of questions |
+
+Every question was answered and none ended in an error. Every citation was found in its source.
+
+The run does not pass. Five of the 997 quotations were not found word for word, one each in `zoning`, `water`,
+`labour-tuition`, `libdem-electoral` and `london-housing`. The threshold for those (`max_unverified_quotations`)
+is 0 on purpose, so a run does not pass whenever even one quotation is not word for word. The checks flag each
+such quotation to the reader, so none is shown as exact.
+
+Three loaded words were flagged, in `labour-tuition`, `lords-rwanda` and `marginal`. A run of those three again
+found one: "attacked", in `lords-rwanda` ("Opposition spokespeople attacked the scheme's scale and cost"). The model
+writes each briefing afresh, so a loaded word can come and go between runs.
+
+Five questions missed an expectation, each in how the question was read: the parties for `tory-labour-ppe`, the
+portfolios for `last-parliament`, `combo-3` and `follow-party`, and the Houses for `benn-ni`.
+
+A full run costs about $6, or 9 cents a question, so the limit for a run is now $7 (`[eval] max_cost_usd`). The
+first run on the real archive, on 16 November, stopped at the old limit of $3 after 34 questions. It also showed
+questions naming a period taking up to 276 s to the first word. The cause was the devolved parliaments' lookup,
+fixed in pull request 58 ([above](#the-devolved-parliaments-lookup)): on the server, the lookup for four words over
+the coalition years went from 80.7 s to 0.2 s. This baseline is after that fix: the 95th percentile of the time to
+the first word fell from 229 s to 17 s.
+
+This run is what later runs are compared against, and so is the weekly routine of improving the site (wts-core's
+[docs/IMPROVING.md](https://github.com/rj-mitchell/wts-core/blob/main/docs/IMPROVING.md)). On the server:
+
+```bash
+hansard eval compare /data/eval/runs/20261119-223324-eval-eb8c1dc139b3.json /data/eval/runs/<the new run>.json
+```
 
 ## Measured performance
 
