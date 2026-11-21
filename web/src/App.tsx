@@ -829,7 +829,7 @@ export default function App() {
               open={t.status === "answering" || (!t.answer && t.status === "done")}
               writing={t.status === "answering"}
             />
-            {t.status === "done" && <SameQuestion question={t.question} />}
+            {t.status === "done" && <SameQuestion question={t.question} plan={t.plan} />}
             {t.status === "done" && t.plan && (
               <ElsewhereForSearch
                 words={t.plan.search_text}

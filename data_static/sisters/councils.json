@@ -1,0 +1,1996 @@
+{
+ "source": "https://wherecouncilsstand.com/api/councils",
+ "fetched": "2026-11-21",
+ "councils": [
+  {
+   "gss": "E06000001",
+   "name": "Hartlepool Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000002",
+   "name": "Middlesbrough Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000003",
+   "name": "Redcar and Cleveland Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000004",
+   "name": "Stockton-on-Tees Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000005",
+   "name": "Darlington Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000006",
+   "name": "Halton Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000007",
+   "name": "Warrington Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000008",
+   "name": "Blackburn with Darwen Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000009",
+   "name": "Blackpool Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000010",
+   "name": "Hull City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000011",
+   "name": "East Riding of Yorkshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000012",
+   "name": "North East Lincolnshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000013",
+   "name": "North Lincolnshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000014",
+   "name": "City of York Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000015",
+   "name": "Derby City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000016",
+   "name": "Leicester City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000017",
+   "name": "Rutland County Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000018",
+   "name": "Nottingham City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000019",
+   "name": "Herefordshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000020",
+   "name": "Telford & Wrekin Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000021",
+   "name": "Stoke-on-Trent City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000022",
+   "name": "Bath and North East Somerset Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000023",
+   "name": "Bristol City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000024",
+   "name": "North Somerset Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000025",
+   "name": "South Gloucestershire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000026",
+   "name": "Plymouth City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000027",
+   "name": "Torbay Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000030",
+   "name": "Swindon Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000031",
+   "name": "Peterborough City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000032",
+   "name": "Luton Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000033",
+   "name": "Southend-on-Sea Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000034",
+   "name": "Thurrock Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000035",
+   "name": "Medway Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000036",
+   "name": "Bracknell Forest Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000037",
+   "name": "West Berkshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000038",
+   "name": "Reading Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000039",
+   "name": "Slough Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000040",
+   "name": "Royal Borough of Windsor and Maidenhead",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000041",
+   "name": "Wokingham Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000042",
+   "name": "Milton Keynes City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000043",
+   "name": "Brighton and Hove City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000044",
+   "name": "Portsmouth City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000045",
+   "name": "Southampton City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000046",
+   "name": "Isle of Wight Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000047",
+   "name": "Durham County Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000049",
+   "name": "Cheshire East Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000050",
+   "name": "Cheshire West and Chester Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000051",
+   "name": "Shropshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000052",
+   "name": "Cornwall Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000053",
+   "name": "Council of the Isles of Scilly",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000054",
+   "name": "Wiltshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000055",
+   "name": "Bedford Borough Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000056",
+   "name": "Central Bedfordshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000057",
+   "name": "Northumberland County Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000058",
+   "name": "Bournemouth, Christchurch and Poole Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000059",
+   "name": "Dorset Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000060",
+   "name": "Buckinghamshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000061",
+   "name": "North Northamptonshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000062",
+   "name": "West Northamptonshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000063",
+   "name": "Cumberland Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000064",
+   "name": "Westmorland and Furness Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000065",
+   "name": "North Yorkshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E06000066",
+   "name": "Somerset Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "E07000008",
+   "name": "Cambridge City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000009",
+   "name": "East Cambridgeshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000010",
+   "name": "Fenland District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000011",
+   "name": "Huntingdonshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000012",
+   "name": "South Cambridgeshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000032",
+   "name": "Amber Valley Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000033",
+   "name": "Bolsover District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000034",
+   "name": "Chesterfield Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000035",
+   "name": "Derbyshire Dales District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000036",
+   "name": "Erewash Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000037",
+   "name": "High Peak Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000038",
+   "name": "North East Derbyshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000039",
+   "name": "South Derbyshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000040",
+   "name": "East Devon District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000041",
+   "name": "Exeter City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000042",
+   "name": "Mid Devon District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000043",
+   "name": "North Devon District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000044",
+   "name": "South Hams District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000045",
+   "name": "Teignbridge District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000046",
+   "name": "Torridge District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000047",
+   "name": "West Devon Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000061",
+   "name": "Eastbourne Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000062",
+   "name": "Hastings Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000063",
+   "name": "Lewes District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000064",
+   "name": "Rother District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000065",
+   "name": "Wealden District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000066",
+   "name": "Basildon Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000067",
+   "name": "Braintree District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000068",
+   "name": "Brentwood Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000069",
+   "name": "Castle Point Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000070",
+   "name": "Chelmsford City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000071",
+   "name": "Colchester City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000072",
+   "name": "Epping Forest District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000073",
+   "name": "Harlow District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000074",
+   "name": "Maldon District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000075",
+   "name": "Rochford District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000076",
+   "name": "Tendring District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000077",
+   "name": "Uttlesford District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000078",
+   "name": "Cheltenham Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000079",
+   "name": "Cotswold District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000080",
+   "name": "Forest of Dean District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000081",
+   "name": "Gloucester City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000082",
+   "name": "Stroud District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000083",
+   "name": "Tewkesbury Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000084",
+   "name": "Basingstoke and Deane Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000085",
+   "name": "East Hampshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000086",
+   "name": "Eastleigh Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000087",
+   "name": "Fareham Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000088",
+   "name": "Gosport Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000089",
+   "name": "Hart District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000090",
+   "name": "Havant Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000091",
+   "name": "New Forest District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000092",
+   "name": "Rushmoor Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000093",
+   "name": "Test Valley Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000094",
+   "name": "Winchester City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000095",
+   "name": "Broxbourne Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000096",
+   "name": "Dacorum Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000098",
+   "name": "Hertsmere Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000099",
+   "name": "North Hertfordshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000102",
+   "name": "Three Rivers District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000103",
+   "name": "Watford Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000105",
+   "name": "Ashford Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000106",
+   "name": "Canterbury City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000107",
+   "name": "Dartford Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000108",
+   "name": "Dover District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000109",
+   "name": "Gravesham Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000110",
+   "name": "Maidstone Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000111",
+   "name": "Sevenoaks District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000112",
+   "name": "Folkestone and Hythe Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000113",
+   "name": "Swale Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000114",
+   "name": "Thanet District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000115",
+   "name": "Tonbridge and Malling Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000116",
+   "name": "Tunbridge Wells Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000117",
+   "name": "Burnley Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000118",
+   "name": "Chorley Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000119",
+   "name": "Fylde Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000120",
+   "name": "Hyndburn Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000121",
+   "name": "Lancaster City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000122",
+   "name": "Pendle Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000123",
+   "name": "Preston City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000124",
+   "name": "Ribble Valley Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000125",
+   "name": "Rossendale Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000126",
+   "name": "South Ribble Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000127",
+   "name": "West Lancashire Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000128",
+   "name": "Wyre Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000129",
+   "name": "Blaby District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000130",
+   "name": "Charnwood Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000131",
+   "name": "Harborough District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000132",
+   "name": "Hinckley and Bosworth Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000133",
+   "name": "Melton Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000134",
+   "name": "North West Leicestershire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000135",
+   "name": "Oadby and Wigston Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000136",
+   "name": "Boston Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000137",
+   "name": "East Lindsey District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000138",
+   "name": "City of Lincoln Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000139",
+   "name": "North Kesteven District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000140",
+   "name": "South Holland District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000141",
+   "name": "South Kesteven District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000142",
+   "name": "West Lindsey District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000143",
+   "name": "Breckland District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000144",
+   "name": "Broadland District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000145",
+   "name": "Great Yarmouth Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000146",
+   "name": "Borough Council of King's Lynn and West Norfolk",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000147",
+   "name": "North Norfolk District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000148",
+   "name": "Norwich City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000149",
+   "name": "South Norfolk District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000170",
+   "name": "Ashfield District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000171",
+   "name": "Bassetlaw District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000172",
+   "name": "Broxtowe Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000173",
+   "name": "Gedling Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000174",
+   "name": "Mansfield District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000175",
+   "name": "Newark and Sherwood District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000176",
+   "name": "Rushcliffe Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000177",
+   "name": "Cherwell District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000178",
+   "name": "Oxford City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000179",
+   "name": "South Oxfordshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000180",
+   "name": "Vale of White Horse District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000181",
+   "name": "West Oxfordshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000192",
+   "name": "Cannock Chase District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000193",
+   "name": "East Staffordshire Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000194",
+   "name": "Lichfield District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000195",
+   "name": "Newcastle-under-Lyme Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000196",
+   "name": "South Staffordshire Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000197",
+   "name": "Stafford Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000198",
+   "name": "Staffordshire Moorlands District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000199",
+   "name": "Tamworth Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000200",
+   "name": "Babergh District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000202",
+   "name": "Ipswich Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000203",
+   "name": "Mid Suffolk District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000207",
+   "name": "Elmbridge Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000208",
+   "name": "Epsom and Ewell Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000209",
+   "name": "Guildford Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000210",
+   "name": "Mole Valley District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000211",
+   "name": "Reigate and Banstead Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000212",
+   "name": "Runnymede Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000213",
+   "name": "Spelthorne Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000214",
+   "name": "Surrey Heath Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000215",
+   "name": "Tandridge District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000216",
+   "name": "Waverley Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000217",
+   "name": "Woking Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000218",
+   "name": "North Warwickshire Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000219",
+   "name": "Nuneaton and Bedworth Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000220",
+   "name": "Rugby Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000221",
+   "name": "Stratford-on-Avon District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000222",
+   "name": "Warwick District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000223",
+   "name": "Adur District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000224",
+   "name": "Arun District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000225",
+   "name": "Chichester District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000226",
+   "name": "Crawley Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000227",
+   "name": "Horsham District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000228",
+   "name": "Mid Sussex District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000229",
+   "name": "Worthing Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000234",
+   "name": "Bromsgrove District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000235",
+   "name": "Malvern Hills District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000236",
+   "name": "Redditch Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000237",
+   "name": "Worcester City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000238",
+   "name": "Wychavon District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000239",
+   "name": "Wyre Forest District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000240",
+   "name": "St Albans City and District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000241",
+   "name": "Welwyn Hatfield Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000242",
+   "name": "East Hertfordshire District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000243",
+   "name": "Stevenage Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000244",
+   "name": "East Suffolk Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E07000245",
+   "name": "West Suffolk Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "E08000001",
+   "name": "Bolton Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000002",
+   "name": "Bury Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000003",
+   "name": "Manchester City Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000004",
+   "name": "Oldham Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000005",
+   "name": "Rochdale Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000006",
+   "name": "Salford City Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000007",
+   "name": "Stockport Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000008",
+   "name": "Tameside Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000009",
+   "name": "Trafford Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000010",
+   "name": "Wigan Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000011",
+   "name": "Knowsley Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000012",
+   "name": "Liverpool City Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000013",
+   "name": "St Helens Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000014",
+   "name": "Sefton Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000015",
+   "name": "Wirral Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000017",
+   "name": "Doncaster Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000018",
+   "name": "Rotherham Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000021",
+   "name": "Newcastle City Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000022",
+   "name": "North Tyneside Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000023",
+   "name": "South Tyneside Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000024",
+   "name": "Sunderland City Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000025",
+   "name": "Birmingham City Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000026",
+   "name": "Coventry City Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000027",
+   "name": "Dudley Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000028",
+   "name": "Sandwell Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000029",
+   "name": "Solihull Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000030",
+   "name": "Walsall Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000031",
+   "name": "City of Wolverhampton Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000032",
+   "name": "City of Bradford Metropolitan District Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000033",
+   "name": "Calderdale Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000034",
+   "name": "Kirklees Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000035",
+   "name": "Leeds City Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000036",
+   "name": "Wakefield Metropolitan District Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000037",
+   "name": "Gateshead Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000038",
+   "name": "Barnsley Metropolitan Borough Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E08000039",
+   "name": "Sheffield City Council",
+   "type_name": "Metropolitan borough council"
+  },
+  {
+   "gss": "E09000001",
+   "name": "City of London Corporation",
+   "type_name": "City of London Corporation"
+  },
+  {
+   "gss": "E09000002",
+   "name": "London Borough of Barking and Dagenham",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000003",
+   "name": "London Borough of Barnet",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000004",
+   "name": "London Borough of Bexley",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000005",
+   "name": "London Borough of Brent",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000006",
+   "name": "London Borough of Bromley",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000007",
+   "name": "London Borough of Camden",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000008",
+   "name": "London Borough of Croydon",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000009",
+   "name": "London Borough of Ealing",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000010",
+   "name": "London Borough of Enfield",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000011",
+   "name": "Royal Borough of Greenwich",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000012",
+   "name": "London Borough of Hackney",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000013",
+   "name": "London Borough of Hammersmith & Fulham",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000014",
+   "name": "London Borough of Haringey",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000015",
+   "name": "London Borough of Harrow",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000016",
+   "name": "London Borough of Havering",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000017",
+   "name": "London Borough of Hillingdon",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000018",
+   "name": "London Borough of Hounslow",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000019",
+   "name": "London Borough of Islington",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000020",
+   "name": "Royal Borough of Kensington and Chelsea",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000021",
+   "name": "Royal Borough of Kingston upon Thames",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000022",
+   "name": "London Borough of Lambeth",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000023",
+   "name": "London Borough of Lewisham",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000024",
+   "name": "London Borough of Merton",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000025",
+   "name": "London Borough of Newham",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000026",
+   "name": "London Borough of Redbridge",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000027",
+   "name": "London Borough of Richmond upon Thames",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000028",
+   "name": "London Borough of Southwark",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000029",
+   "name": "London Borough of Sutton",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000030",
+   "name": "London Borough of Tower Hamlets",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000031",
+   "name": "London Borough of Waltham Forest",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000032",
+   "name": "London Borough of Wandsworth",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E09000033",
+   "name": "City of Westminster",
+   "type_name": "London borough council"
+  },
+  {
+   "gss": "E10000003",
+   "name": "Cambridgeshire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000007",
+   "name": "Derbyshire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000008",
+   "name": "Devon County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000011",
+   "name": "East Sussex County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000012",
+   "name": "Essex County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000013",
+   "name": "Gloucestershire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000014",
+   "name": "Hampshire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000015",
+   "name": "Hertfordshire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000016",
+   "name": "Kent County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000017",
+   "name": "Lancashire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000018",
+   "name": "Leicestershire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000019",
+   "name": "Lincolnshire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000020",
+   "name": "Norfolk County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000024",
+   "name": "Nottinghamshire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000025",
+   "name": "Oxfordshire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000028",
+   "name": "Staffordshire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000029",
+   "name": "Suffolk County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000030",
+   "name": "Surrey County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000031",
+   "name": "Warwickshire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000032",
+   "name": "West Sussex County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E10000034",
+   "name": "Worcestershire County Council",
+   "type_name": "County council"
+  },
+  {
+   "gss": "E12000007",
+   "name": "Greater London Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000001",
+   "name": "Greater Manchester Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000002",
+   "name": "South Yorkshire Mayoral Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000003",
+   "name": "West Yorkshire Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000004",
+   "name": "Liverpool City Region Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000006",
+   "name": "Tees Valley Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000007",
+   "name": "West Midlands Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000008",
+   "name": "Cambridgeshire and Peterborough Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000009",
+   "name": "West of England Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000012",
+   "name": "York and North Yorkshire Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000013",
+   "name": "East Midlands Combined County Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000014",
+   "name": "North East Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000015",
+   "name": "Devon and Torbay Combined County Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000016",
+   "name": "Hull and East Yorkshire Combined Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000017",
+   "name": "Greater Lincolnshire Combined County Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "E47000018",
+   "name": "Lancashire Combined County Authority",
+   "type_name": "Strategic authority"
+  },
+  {
+   "gss": "N09000001",
+   "name": "Antrim and Newtownabbey Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000002",
+   "name": "Armagh City, Banbridge and Craigavon Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000003",
+   "name": "Belfast City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000004",
+   "name": "Causeway Coast and Glens Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000005",
+   "name": "Derry City and Strabane District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000006",
+   "name": "Fermanagh and Omagh District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000007",
+   "name": "Lisburn and Castlereagh City Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000008",
+   "name": "Mid and East Antrim Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000009",
+   "name": "Mid Ulster District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000010",
+   "name": "Newry, Mourne and Down District Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "N09000011",
+   "name": "Ards and North Down Borough Council",
+   "type_name": "District council"
+  },
+  {
+   "gss": "S12000005",
+   "name": "Clackmannanshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000006",
+   "name": "Dumfries and Galloway Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000008",
+   "name": "East Ayrshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000010",
+   "name": "East Lothian Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000011",
+   "name": "East Renfrewshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000013",
+   "name": "Comhairle nan Eilean Siar",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000014",
+   "name": "Falkirk Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000017",
+   "name": "The Highland Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000018",
+   "name": "Inverclyde Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000019",
+   "name": "Midlothian Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000020",
+   "name": "The Moray Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000021",
+   "name": "North Ayrshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000023",
+   "name": "Orkney Islands Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000026",
+   "name": "Scottish Borders Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000027",
+   "name": "Shetland Islands Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000028",
+   "name": "South Ayrshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000029",
+   "name": "South Lanarkshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000030",
+   "name": "Stirling Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000033",
+   "name": "Aberdeen City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000034",
+   "name": "Aberdeenshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000035",
+   "name": "Argyll and Bute Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000036",
+   "name": "City of Edinburgh Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000038",
+   "name": "Renfrewshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000039",
+   "name": "West Dunbartonshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000040",
+   "name": "West Lothian Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000041",
+   "name": "Angus Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000042",
+   "name": "Dundee City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000045",
+   "name": "East Dunbartonshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000047",
+   "name": "Fife Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000048",
+   "name": "Perth and Kinross Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000049",
+   "name": "Glasgow City Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "S12000050",
+   "name": "North Lanarkshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000001",
+   "name": "Isle of Anglesey Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000002",
+   "name": "Gwynedd Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000003",
+   "name": "Conwy Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000004",
+   "name": "Denbighshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000005",
+   "name": "Flintshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000006",
+   "name": "Wrexham Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000008",
+   "name": "Ceredigion Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000009",
+   "name": "Pembrokeshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000010",
+   "name": "Carmarthenshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000011",
+   "name": "Swansea Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000012",
+   "name": "Neath Port Talbot Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000013",
+   "name": "Bridgend Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000014",
+   "name": "Vale of Glamorgan Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000015",
+   "name": "Cardiff Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000016",
+   "name": "Rhondda Cynon Taf Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000018",
+   "name": "Caerphilly Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000019",
+   "name": "Blaenau Gwent Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000020",
+   "name": "Torfaen Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000021",
+   "name": "Monmouthshire Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000022",
+   "name": "Newport Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000023",
+   "name": "Powys Council",
+   "type_name": "Unitary council"
+  },
+  {
+   "gss": "W06000024",
+   "name": "Merthyr Tydfil Council",
+   "type_name": "Unitary council"
+  }
+ ]
+}

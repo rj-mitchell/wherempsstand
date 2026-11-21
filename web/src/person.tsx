@@ -13,6 +13,8 @@ import { ELSEWHERE, Elsewhere, type Link } from "./elsewhere";
 import { type Interests, InterestsSection } from "./components/Interests";
 import { StatementBox, useStatements } from "./components/Statements";
 import { hasVoteKind, VoteKind } from "./components/VoteKind";
+import { type SeatCouncil, SeatCouncils } from "./components/SeatCouncils";
+import { type Quoted, QuotedIn } from "./components/QuotedIn";
 import { fmtDate } from "./render";
 import type { PartyGroup, VoteType } from "./types";
 
@@ -53,6 +55,8 @@ interface PersonData {
   offices: { kind: string; title: string; start: string; end: string | null }[];
   seats: { constituency: string; start: string; end: string | null; results: Result[] }[];
   party_groups?: PartyGroup[]; // party groups and caucuses, with the evidence for each, by Parliament
+  councils?: SeatCouncil[]; // a sitting MP's councils, on Where Councils Stand
+  quoted_in?: Quoted[]; // the topic briefings that quote them, newest first
   contributions?: Contribution[];
   contributions_more?: boolean;
   voting?: {
@@ -208,6 +212,8 @@ function Person({ number }: { number: string }) {
         )}
       </section>
 
+      {(p.quoted_in ?? []).length > 0 && <QuotedIn name={p.name} quoted={p.quoted_in ?? []} />}
+
       {p.voting && p.voting.votes > 0 && (
         <section aria-labelledby="h-votes">
           <h2 id="h-votes">Voting record</h2>
@@ -284,6 +290,10 @@ function Person({ number }: { number: string }) {
             </div>
           ))}
         </section>
+      )}
+
+      {(p.councils ?? []).length > 0 && p.current?.constituency && (
+        <SeatCouncils seat={p.current.constituency} councils={p.councils ?? []} />
       )}
 
       {(p.party_groups ?? []).length > 0 && (

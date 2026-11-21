@@ -3455,6 +3455,10 @@ main:focus {
   margin-block: var(--space-s) 0;
 }
 
+.same-question p {
+  margin-block: 0 var(--space-2xs);
+}
+
 .same-question a {
   white-space: normal;
 }
@@ -3468,6 +3472,41 @@ main:focus {
 .same-question-spine > .wts-spine {
   block-size: 1.15em;
   inline-size: auto;
+}
+
+/* links to a sister site: under its name and spine, as on the sister sites (an MP's councils) */
+.sister {
+  display: flex;
+  gap: var(--space-s);
+  align-items: start;
+  margin-block: var(--space-s) var(--space-m);
+}
+
+.sister-spine {
+  display: block;
+  flex: none;
+  margin-block-start: 0.15em;
+}
+
+.sister-name {
+  margin: 0 0 var(--space-2xs);
+  font-family: var(--serif);
+  font-weight: 600;
+}
+
+.sister ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+/* the links sit close together, so each is at least 24px tall (WCAG 2.5.8) */
+.sister li a {
+  display: inline-block;
+  min-block-size: 24px;
+  padding-block: 0.1em;
 }
 
 /* the MPs and peers page: each House's full list folds away until opened */

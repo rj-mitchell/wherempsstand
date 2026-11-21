@@ -254,3 +254,29 @@ def topic_listing(settings: Settings, state: StateDB, archive: SavedBriefings) -
                     "current": {**cur, "summary": summary} if cur else None,
                     "versions": len(versions(state, archive, t.slug)), "last_check": last_check(state, t.slug)})
     return out
+
+
+def quoted_index(settings: Settings, state: StateDB, archive: SavedBriefings) -> dict[str, list[dict[str, Any]]]:
+    """For each member, the topic briefings that quote them, newest first: a topic counts when its current version
+    cites, in a citation that passed the check, something the member said. Made from the saved briefings' sources,
+    with no AI. Each is the topic's title and page, and the day its current version was prepared."""
+    from hansard.api.briefings import get_briefing
+
+    out: dict[str, list[dict[str, Any]]] = {}
+    for t in load_topics(topics_file(settings)):
+        cur = current(state, archive, t.slug)
+        b = get_briefing(archive, cur["briefing_id"]) if cur else None
+        if b is None:
+            continue
+        ev = {e.get("type"): e for e in b.get("events", [])}
+        answer = (ev.get("final") or {}).get("answer") or {}
+        cited = {n for seg in answer.get("segments") or [] if seg.get("status") == "cited"
+                 for n in seg.get("sources") or []}
+        people = {(s.get("speaker") or {}).get("person_id")
+                  for s in (ev.get("sources") or {}).get("sources") or [] if s.get("n") in cited}
+        for pid in people - {None}:
+            out.setdefault(pid, []).append({"slug": t.slug, "title": t.title, "path": f"/topics/{t.slug}",
+                                            "prepared_at": cur["prepared_at"]})
+    for rows in out.values():
+        rows.sort(key=lambda r: r["prepared_at"], reverse=True)
+    return out

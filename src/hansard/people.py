@@ -125,9 +125,10 @@ class People:
         names = [r[0] for r in self.con.execute(
             "SELECT name FROM ref_names WHERE person_id = ? GROUP BY name ORDER BY min(start)", [person_id]).fetchall()]
         memberships = [
-            {"house": h, "constituency": c, "region": reg, "party": party, "start": _iso(s), "end": _iso(e)}
-            for h, c, reg, party, s, e in self.con.execute(
-                """SELECT house, constituency, region, party_name, start, "end" FROM ref_memberships
+            {"house": h, "constituency": c, "gss_code": gss, "region": reg, "party": party, "start": _iso(s),
+             "end": _iso(e)}
+            for h, c, gss, reg, party, s, e in self.con.execute(
+                """SELECT house, constituency, gss_code, region, party_name, start, "end" FROM ref_memberships
                    WHERE person_id = ? ORDER BY start""", [person_id]).fetchall()]
         offices = []
         for kind, role, cid, cname, s, e in self.con.execute(

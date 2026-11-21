@@ -138,6 +138,17 @@ Contains National Statistics data © Crown copyright and database right.
 Contains NRS data © Crown copyright and database right.
 Contains NISRA data © Crown copyright.
 
+## Councils overlapping each seat
+
+The councils whose areas overlap each constituency (`data_static/geo/constituency_councils.csv`, shown on a sitting
+MP's page) come from the ONS
+[Ward to Westminster Parliamentary Constituency to Local Authority District to Upper Tier Local Authority (July 2024)
+Lookup in the UK](https://geoportal.statistics.gov.uk/), built by `scripts/build_council_overlaps.py`. Source: Office
+for National Statistics licensed under the Open Government Licence v.3.0. The ONS's geography licences page (checked
+on 21 November 2026) asks only for this statement for lookups, with no Ordnance Survey notice, and the dataset itself
+names no other. Which councils have a page on [Where Councils Stand](https://wherecouncilsstand.com), a sister site,
+comes from that site's own public list of councils.
+
 ## Typefaces
 
 The web app bundles [Source Serif 4](https://github.com/adobe-fonts/source-serif) by Adobe, via Fontsource. Link
