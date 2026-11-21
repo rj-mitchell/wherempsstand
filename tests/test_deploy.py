@@ -33,7 +33,7 @@ from .test_import import dump, old_database, rows
 
 DEPLOY = REPO_ROOT / "deploy"
 JOBS = ("hansard-sync", "hansard-backup", "hansard-backup-check", "hansard-weekly-report")
-FAMILY = ("wheretheystand-watchdog", "wheretheystand-disk", "wheretheystand-disk-report")
+FAMILY = ("wheretheystand-watchdog", "wheretheystand-disk", "wheretheystand-disk-report", "wheretheystand-waiting")
 
 
 STAND_IN = r"""#!/usr/bin/env bash

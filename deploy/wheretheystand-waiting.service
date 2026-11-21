@@ -1,0 +1,11 @@
+# Email the alerts address when a reader's report or a statement arrives on any site on this server
+# (deploy/waiting-alert.sh): counts only. Installed by deploy/update.sh.
+[Unit]
+Description=Look for new reports and statements waiting on the sites
+OnFailure=alert@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/hansardgpt/deploy/waiting-alert.sh
+TimeoutStartSec=5min
+Nice=10
