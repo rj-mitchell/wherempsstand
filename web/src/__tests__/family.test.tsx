@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { BRAND } from "../brand";
 import { SiteFooter } from "../components/SiteFooter";
 import { FAMILY, PROJECTS, sister } from "../family";
+import { FOOTER } from "../nav";
 
 const web = resolve(__dirname, "../..");
 const read = (path: string) => readFileSync(join(web, path), "utf8");
@@ -44,6 +45,19 @@ describe("the Where They Stand family binding", () => {
       expect(html, page).not.toMatch(/rel="(icon|apple-touch-icon)"|name="theme-color"/);
     }
     expect(read("partials/head.html")).not.toMatch(/rel="(icon|apple-touch-icon)"|name="theme-color"|og:image/);
+  });
+
+  it("every page's footer reaches the same pages, in the family's order, and If you're named is a step away", () => {
+    for (const page of pages) expect(read(page), page).toContain("<!--#include footer-->");
+    const partial = document.createElement("div");
+    partial.innerHTML = read("partials/footer.html");
+    const links = [...partial.querySelectorAll(".footer-nav a")].map((a) => [a.textContent, a.getAttribute("href")]);
+    expect(links).toEqual(FOOTER.map((l) => [l.label, l.href]));
+    // at most six, in this order (family/GLOSSARY.md, "Footer links"); "If you're named" is not one of them
+    expect(links.map(([label]) => label)).toEqual(["About", "Methodology", "Corrections", "Accessibility", "Privacy", "Source code"]);
+    for (const page of ["corrections.html", "about.html"]) {
+      expect(read(page), page).toContain('<a href="/named">If you\'re named on this site</a>');
+    }
   });
 
   it("the home page's footer is the static pages' footer", () => {
