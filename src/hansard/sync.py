@@ -487,6 +487,14 @@ def _run_sync(settings: Settings, *, fetch: bool = True, embed_minutes: float | 
                 except Exception as exc:  # never let an outside service stop the sync
                     log.warning("directorships not updated: %s", exc)
                     stats["directorships"] = {"error": str(exc)[:200]}
+        if fetch:
+            try:  # the councils Where Councils Stand has pages for, linked from MPs' pages (keeps the last good copy)
+                from hansard.sisters import refresh_councils
+
+                stats["sister_councils"] = refresh_councils(settings)
+            except Exception as exc:  # never let another site stop the sync
+                log.warning("Where Councils Stand's list of councils not updated: %s", exc)
+                stats["sister_councils"] = {"error": str(exc)[:200]}
         try:  # what each vote was on (amendment, second reading and so on), used across the site
             from hansard.vote_types import vote_types
 

@@ -88,10 +88,23 @@ Then raise the version in the `kit` job of `.github/workflows/ci.yml` in the sam
 
 ## Links to sister sites
 
-Under a briefing, a short line offers the same question on a sister site, by name and with its spine from the
-family shelf: "Ask Where Councils Stand" for local services, "Ask Where Countries Stand" for foreign affairs. A short
-rule for each (`web/src/sisters.ts`) decides when it shows, so it appears only where the other site's record deals
-with the subject. Both sites take the question in `?q=` on their home page.
+A link to a sister site always names it and shows its spine, drawn by the family kit (the same SVG as on the footer
+shelf, read from `web/public/family/shelf.html`, never drawn here), so readers know they are moving to another site.
+
+- Under a briefing, live or saved, a short line offers the same question on a sister site: "Ask the same question
+  on Where Councils Stand" when the question as read touches local services, "Ask the same question on Where
+  Countries Stand" when it touches foreign affairs. The rule (`web/src/sisters.ts`, decision 43) works from the
+  policy areas in the plan the site made when it read the question, with no further AI. Both sites take the
+  question in `?q=` on their home page.
+- On a sitting MP's page, "Councils" lists the councils whose areas overlap the seat, in a quiet block headed "On
+  Where Councils Stand" with that site's spine, as Where Councils Stand shows its own links to sister sites. Each
+  council links to its page there. The county council comes first, then the others by how much of the seat they
+  cover (decision 41).
+- On a member's page, "Quoted in" lists the topic briefings whose checked citations quote them, newest first, each
+  with the day it was prepared (decision 42). These are this site's own pages.
+
+The server writes the councils and "Quoted in" into the member's page for readers and search engines that do not run
+scripts (`src/hansard/api/plaintext.py`); the briefing's line is drawn by the app.
 
 ## Accessibility
 

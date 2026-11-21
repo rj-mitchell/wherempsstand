@@ -69,7 +69,7 @@ Run `hansard --help`, or `hansard <command> --help`, for every option.
 
 | Command | What it does |
 |---|---|
-| `hansard sync` | The twice-daily update (the timer runs it): member data, new and corrected Hansard, the index, embeddings, compaction and the sync log |
+| `hansard sync` | The twice-daily update (the timer runs it): member data, new and corrected Hansard, the index, embeddings, Where Councils Stand's list of councils, compaction and the sync log |
 | `hansard status` | Files ingested, indexed and embedded; the parlparse commit; recent runs |
 | `hansard search "…" --from 2018-01-01 --region "North East"` | Ranked sources in the terminal, with no model call |
 | `hansard user add`, `list`, `disable` | Accounts, used only in invite-only mode (`[auth] required = true`) |
@@ -120,6 +120,8 @@ On the server, from `/opt/hansardgpt/deploy`:
 | Set the Companies House API key (free, from developer.company-information.service.gov.uk) | `read -rsp "Companies House API key: " K && echo && sed -i -e '/^HANSARD_COMPANIES_HOUSE_KEY=/d' -e '$a\' .env && printf 'HANSARD_COMPANIES_HOUSE_KEY=%s\n' "$K" >> .env && unset K && docker compose up -d` |
 | Point "Support this site" somewhere other than the charity's Donate page | Add `HANSARD_DONATE_URL=https://…` to `.env`, then `docker compose up -d` |
 | Change a spending cap or limit | Edit `[usage]` in `config/settings.toml` and deploy ([COSTS.md](COSTS.md)) |
+| See whether the councils on MPs' pages are up to date | `docker compose exec app cat /data/sisters/councils.json \| head -3` (the day Where Councils Stand's list was last fetched; until the first update fetches it, the copy kept with the code is used). The update's log says "list of councils not updated" when that site could not be reached, and the last good copy is kept |
+| Rebuild the councils overlapping each seat, after a new ONS lookup (a boundary or local government change) | On a checkout: `uv run python scripts/build_council_overlaps.py`, then commit `data_static/geo/constituency_councils.csv` and `data_static/sisters/councils.json` and deploy |
 
 For a private, invite-only site, set `[auth] required = true` and create accounts with `hansard user add`.
 

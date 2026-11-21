@@ -123,6 +123,7 @@ from hansard.replies import (
     open_replies,
     published,
 )
+from hansard.sisters import councils_for_seat
 from hansard.store.state import StateDB
 from hansard.store.wts import BACKUP_ALERTS, BACKUPS, check_before_opening, open_core
 from hansard.wording import shorten, title_case
@@ -139,7 +140,7 @@ ATTRIBUTION = [
     {"text": "Contains Parliamentary information licensed under the Open Parliament Licence v3.0.",
      "url": "https://www.parliament.uk/site-information/copyright-parliament/open-parliament-licence/"},
     {"text": "Contains public sector information licensed under the Open Government Licence v3.0 "
-             "(ONS, NRS and NISRA boundaries, urban areas and census populations).",
+             "(ONS, NRS and NISRA boundaries, council areas, urban areas and census populations).",
      "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"},
     {"text": "Data service provided by TheyWorkForYou: Hansard data and member records via TheyWorkForYou / "
              "ParlParse, with thanks to mySociety.",
@@ -1725,7 +1726,17 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             pass
         # party groups and caucuses, with the evidence for each, by Parliament
         page = {**page, "party_groups": get_pipeline().engine.groups().all_for(pid)}
+        # a sitting MP's councils, on Where Councils Stand, and the topic briefings that quote them (decisions 41, 42)
+        seat = page.get("current") or {}
+        page["councils"] = councils_for_seat(settings, seat.get("gss_code")) if seat.get("house") == "commons" else []
+        page["quoted_in"] = [{k: q[k] for k in ("title", "path", "prepared_at")} for q in quoted_index().get(pid, [])]
         return page
+
+    def quoted_index() -> dict[str, list[dict[str, Any]]]:
+        """Who each topic briefing quotes, worked out again when the topics may have changed (ten minutes)."""
+        from hansard.topics import quoted_index as index
+
+        return remembered("topics:quoted", lambda: index(settings, state, shown()))
 
     def person_activity(number: int) -> dict[str, Any]:
         pp = get_people()

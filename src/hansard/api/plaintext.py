@@ -9,6 +9,7 @@ from html import escape as e
 from typing import Any
 
 from hansard.api.briefings import ASKED_BY_READER, briefing_title, fmt_date
+from hansard.sisters import COUNCILS_NAME, spine
 
 # the page's placeholder ("Fetching the debate."), with any attributes it carries (role="status" in web/*.html)
 _ROOT = re.compile(r'(<div id="[\w-]+-root">)\s*<p class="muted"[^>]*>[^<]*</p>\s*(</div>)')
@@ -134,6 +135,8 @@ def person_text(core: dict[str, Any], activity: dict[str, Any] | None,
                             for r in s.get("results") or [] if r.get("majority") is not None)
         if results:
             parts.append(f"<p>{e(s['constituency'])}: {e(results)}.</p>")
+    parts.append(councils_text(core))
+    parts.append(quoted_in_text(core))
     if core.get("party_groups"):
         parts.append("<h2>Party groups and caucuses</h2><ul>")
         for g in core["party_groups"]:
@@ -159,6 +162,32 @@ def person_text(core: dict[str, Any], activity: dict[str, Any] | None,
         parts.append(f"<h2>Voting record</h2><p>{voting['votes']:,} votes recorded, of which {voting['rebellions']:,} "
                      "were against the majority of their own party.</p>")
     return "".join(parts)
+
+
+def councils_text(core: dict[str, Any]) -> str:
+    """A sitting MP's councils, each linked to its page on Where Councils Stand, under that site's name and spine
+    (as web/src/components/SeatCouncils.tsx draws them)."""
+    councils = core.get("councils") or []
+    if not councils:
+        return ""
+    seat = (core.get("current") or {}).get("constituency") or "the seat"
+    linked = "".join(f"<li>{_link(c['url'], c['name'])}</li>" for c in councils if c.get("url"))
+    others = [c["name"] for c in councils if not c.get("url")]
+    return (f"<h2>Councils</h2><p>The councils whose areas overlap {e(seat)}, from the ONS lookup of wards, "
+            "constituencies and councils (July 2024).</p>"
+            + (f'<aside class="sister" aria-label="On {COUNCILS_NAME}"><span class="sister-spine">{spine("councils")}</span><div>'
+               f'<p class="sister-name">On {COUNCILS_NAME}</p><ul>{linked}</ul></div></aside>' if linked else "")
+            + (f"<p>Also overlapping, with no page on {COUNCILS_NAME}: {e(', '.join(others))}.</p>" if others else ""))
+
+
+def quoted_in_text(core: dict[str, Any]) -> str:
+    """The topic briefings that quote the member, newest first (as the member's page shows them)."""
+    quoted = core.get("quoted_in") or []
+    if not quoted:
+        return ""
+    items = "".join(f"<li>{_link(q['path'], q['title'])}, {e(fmt_date(q['prepared_at'][:10]))}</li>" for q in quoted)
+    return (f"<h2>Quoted in</h2><p>Topic briefings, written by AI from the record, whose checked citations quote "
+            f"{e(core['name'])}.</p><ul>{items}</ul>")
 
 
 def bill_text(b: dict[str, Any]) -> str:
