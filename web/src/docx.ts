@@ -1,5 +1,6 @@
 /** A briefing as a Word document (.docx), built in the browser: no server work and no extra libraries. */
 import { BRAND } from "./brand";
+import { checkCounts, countsInWords } from "./checked";
 import { sourceLine } from "./export";
 import { fmtDate } from "./render";
 import type { Answer, SourceCard } from "./types";
@@ -106,6 +107,8 @@ function para(content: string, style?: string): string {
 
 export function documentXml(question: string, answer: Answer, sources: SourceCard[], link: string, today: Date): string {
   const body: string[] = [para(run(question), "Title")];
+  // the check summary first, as the check strip is at the top of the briefing on the site
+  if (!answer.no_records) body.push(para(run(`Checked against Hansard: ${countsInWords(checkCounts(answer))}.`, { bold: true })));
   body.push(
     para(
       run(

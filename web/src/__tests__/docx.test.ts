@@ -43,6 +43,10 @@ describe("Word download", () => {
     expect(xml).toContain('w:val="superscript"');
     expect(xml).toContain("A point &amp; another &lt;one&gt;");
     expect(xml).toContain("HC Deb 16 January 2024, col 851");
+    // the check summary comes first, after the title
+    const summary = "Checked against Hansard: 1 of 1 citations matched to the record, 0 of 0 quotations found word for word, 0 sentences without a source.";
+    expect(xml.indexOf(summary)).toBeGreaterThan(0);
+    expect(xml.indexOf(summary)).toBeLessThan(xml.indexOf("Written by AI"));
   });
 
   it("packages a zip that starts with a local file header", () => {

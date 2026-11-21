@@ -49,6 +49,8 @@ def test_a_quotation_found_word_for_word_is_never_shown_as_having_no_source():
     assert "".join(s["text"] for s in shown["segments"]) == "".join(s["text"] for s in saved["segments"])
     assert {k: v for k, v in shown.items() if k != "segments"} == {k: v for k, v in saved.items() if k != "segments"}
     assert not any(ITALY in s["text"] and s["status"] in ("unsupported", "invalid") for s in shown["segments"])
+    # the web app's tests render this answer as shown (web/src/__tests__/checked.test.tsx)
+    assert shown == answer_of("kGfKBI3cRLw-shown-2026-11-21.json")
     # and a saved briefing's address shows it the same way, after its flags are judged again
     assert next(s for s in shown_again(saved)["segments"] if ITALY in s["text"])["status"] == "cited"
 

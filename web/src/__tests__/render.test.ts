@@ -11,28 +11,38 @@ const seg = (text: string, status: Segment["status"], sources: number[] = []): S
 });
 
 describe("answer rendering", () => {
-  it("turns citations into clickable source badges", () => {
-    const html = renderAnswer(segmentsToMarkdown([seg("Ministers cited costs", "cited", [1, 3]), seg(".", "connective")]));
-    expect(html).toContain('data-source="1"');
-    expect(html).toContain('aria-label="Open source 3">3</button>');
+  it("turns citations into chips that name their sources, numbered for printing", () => {
+    const html = renderAnswer(segmentsToMarkdown([seg("Ministers cited costs", "cited", [1, 3]), seg(".", "connective")]), {
+      chip: (n) => (n === 3 ? "Emma Reynolds, Commons, 3 November 2026" : null),
+    });
+    expect(html).toContain('<button type="button" class="wts-chip" data-source="1" data-seg="0">');
+    expect(html).toContain('<span class="wts-chip__n"><span class="wts-vh">Source</span> 3</span> <span>Emma Reynolds, Commons, 3 November 2026</span>');
+    expect(html).not.toContain("aria-label");
     expect(html).not.toContain("⟦");
   });
 
-  it("highlights unsupported text", () => {
-    const html = renderAnswer(segmentsToMarkdown([seg("An uncited claim about 2023.", "unsupported")]));
-    expect(html).toContain('class="unsupported"');
+  it("marks text with no source, always, the first with the tag", () => {
+    const html = renderAnswer(segmentsToMarkdown([seg("An uncited claim about 2023.", "unsupported"), seg(" Another one.", "unsupported")]));
+    expect(html).toContain('<span class="wts-nosource" id="nosource-0">An uncited claim about 2023.<span class="wts-nosource__tag">No source</span><span class="wts-vh"> (no source)</span></span>');
+    expect(html).toContain('<span class="wts-nosource" id="nosource-1">Another one.<span class="wts-vh"> (no source)</span></span>');
   });
 
-  it("marks a sentence whose citations all failed the check as it marks an unsupported one", () => {
+  it("marks a sentence whose citations all failed the check as it marks an unsupported one, saying why", () => {
     const html = renderAnswer(segmentsToMarkdown([seg("A claim its source did not bear out.", "invalid")]));
-    expect(html).toContain('<span class="unsupported" title="Not directly supported by a cited source">');
-    expect(html).toContain("A claim its source did not bear out.</span>");
-    expect(html).not.toContain('class="cite"');
+    expect(html).toContain('<span class="wts-nosource" id="nosource-0">A claim its source did not bear out.');
+    expect(html).toContain("(its citation did not match the source and was removed)");
+    expect(html).not.toContain("wts-chip");
   });
 
-  it("marks quotations not found in their sources, and loaded words, in the same segment", () => {
-    const text = 'He said "we will never do that" and called it a disgrace.';
-    const seg: Segment = {
+  it("keeps a list's marker outside the mark of a passage with no source", () => {
+    const html = renderAnswer(segmentsToMarkdown([seg("- A first point with no source\n- A second", "unsupported")]));
+    expect(html.match(/<li>/g)).toHaveLength(2);
+    expect(html.match(/class="wts-nosource"/g)).toHaveLength(2);
+  });
+
+  it("marks quotations not found in their sources, the record's own words, and loaded words, in the same segment", () => {
+    const text = 'He said "we will never do that" and called it a disgrace, "a matter for the whole House".';
+    const s: Segment = {
       text,
       sources: [1],
       cited: [],
@@ -40,9 +50,11 @@ describe("answer rendering", () => {
       misquotes: [{ start: 8, end: 31, text: "we will never do that" }],
       loaded: [{ start: 49, end: 57, word: "disgrace" }],
     };
-    const html = renderAnswer(segmentsToMarkdown([seg]));
-    expect(html).toContain('<span class="misquote"');
-    expect(html).toContain("\u201cwe will never do that\u201d</span>"); // shown with printers' quotation marks
+    const html = renderAnswer(segmentsToMarkdown([s]));
+    expect(html).toContain('<span class="wts-quote wts-quote--missing" id="misquote-0" data-seg="0">\u201cwe will never do that\u201d');
+    expect(html).toContain("Not found word for word</span><span class=\"wts-vh\"> (quotation not found word for word in source 1)</span>");
+    expect(html).toContain('<span class="wts-quote wts-quote--checked" data-seg="0" data-source="1">\u201ca matter for the whole House\u201d');
+    expect(html).toContain("(quotation, found word for word in source 1)");
     expect(html).toContain('<span class="loaded"');
   });
 
@@ -155,8 +167,8 @@ describe("typographic quotes", () => {
     expect(typographic('<p>She said "it\'s too high" and the Lords\' view.</p>')).toBe(
       "<p>She said “it’s too high” and the Lords’ view.</p>",
     );
-    expect(typographic('<p>&quot;Quoted&quot;<button class="cite" data-source="2" aria-label="Open source 2">2</button>.</p>')).toBe(
-      '<p>“Quoted”<button class="cite" data-source="2" aria-label="Open source 2">2</button>.</p>',
+    expect(typographic('<p>&quot;Quoted&quot;<button class="wts-chip" data-source="2">2</button>.</p>')).toBe(
+      '<p>“Quoted”<button class="wts-chip" data-source="2">2</button>.</p>',
     );
     expect(typographic('<p>"One"</p><p>"Two"</p>')).toBe("<p>“One”</p><p>“Two”</p>");
   });

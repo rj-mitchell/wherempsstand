@@ -1,6 +1,8 @@
+import proof from "../../partials/proof.html?raw";
+
 /**
- * Under the question box on the home page: the line saying briefings are written by AI, and a plain fold-out of how
- * they are checked, in the family's words (the charity's family/GLOSSARY.md, "AI briefings"). The About and
+ * Just under the question box on the home page: the line saying briefings are written by AI, and a plain fold-out of
+ * how they are checked, in the family's words (the charity's family/GLOSSARY.md, "AI briefings"). The About and
  * methodology pages say the same at more length (#ai-briefings on each).
  */
 export function WhyChatbot() {
@@ -29,4 +31,11 @@ export function WhyChatbot() {
       </details>
     </div>
   );
+}
+
+/** The checking, shown: the kit's proof block, from the same file the page's HTML includes for readers without
+ * scripts (web/partials/proof.html), so the two cannot differ. */
+export function Proof() {
+  // the site's own markup, written by hand: no reader's or model's words
+  return <div className="proof-holder" dangerouslySetInnerHTML={{ __html: proof.replace(/<!--[\s\S]*?-->/g, "") }} />;
 }

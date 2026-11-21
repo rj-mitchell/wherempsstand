@@ -4,7 +4,7 @@ import { AnswerView } from "../components/AnswerView";
 import { Controls, recencyLabel } from "../components/Controls";
 import { chipsFor, PlanChips } from "../components/PlanChips";
 import { SourceDrawer } from "../components/Sources";
-import type { Answer, Meta, Plan, SourceCard } from "../types";
+import type { Answer, Meta, Plan, SourceCard, Turn } from "../types";
 
 const plan: Plan = {
   question: "q",
@@ -103,59 +103,33 @@ const answer: Answer = {
   unsupported_segments: 0,
 };
 
+const turnOf = (a: Answer, extra: Partial<Turn> = {}): Turn => ({
+  id: "t1", question: "q", settings: {} as Turn["settings"], sources: [], streamText: "", answer: a, status: "done", ...extra,
+});
+
 describe("answer view", () => {
-  it("opens the cited source with its quotes", () => {
+  it("opens a source's full details from its passage, with the quoted words", () => {
     const onCite = vi.fn();
-    render(<AnswerView question="q" answer={answer} streamText="" sources={[]} onCite={onCite} />);
-    fireEvent.click(screen.getByRole("button", { name: "Open source 1" }));
-    expect(onCite).toHaveBeenCalledWith({ source: 1, quotes: ["inflation in costs"] });
-    expect(screen.getByText(/1 citation, each checked against the source text/)).toBeInTheDocument();
+    const quoted: Answer = {
+      ...answer,
+      segments: [{ text: 'The minister said "we face inflation in costs"', sources: [1], cited: [{ source: 1, cited_text: "x" }], status: "cited" }],
+      quotes_total: 1,
+      quotes_unverified: 0,
+    };
+    render(<AnswerView turn={turnOf(quoted, { sources: [source] })} onCite={onCite} />);
+    fireEvent.click(screen.getByRole("button", { name: "Source 1 Hilary Benn, Commons, 7 March 2018" }));
+    fireEvent.click(screen.getByRole("button", { name: "All the details of this source" }));
+    expect(onCite).toHaveBeenCalledWith({ source: 1, quotes: ["we face inflation in costs"] });
     expect(screen.getByText(/Written by AI \(Claude\) from the cited Hansard records only/)).toBeInTheDocument();
   });
 
-  it("notes uncited statements after the answer and marks them only on request", () => {
-    const uncited: Answer = {
-      ...answer,
-      segments: [...answer.segments, { text: " Everyone agreed.", sources: [], cited: [], status: "unsupported" }],
-      unsupported_segments: 1,
-    };
-    const { container } = render(<AnswerView question="q" answer={uncited} streamText="" sources={[]} onCite={vi.fn()} />);
-    expect(screen.getByText(/One statement in this briefing is/)).toBeInTheDocument();
-    expect(container.querySelector(".answer-body.show-uncited")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Show it" }));
-    expect(container.querySelector(".answer-body.show-uncited .unsupported")).not.toBeNull();
-  });
-
-  it("counts and marks a statement whose citations all failed the check, as it does one with no citation", () => {
-    const failed: Answer = {
-      ...answer,
-      segments: [...answer.segments, { text: " Everyone agreed.", sources: [], cited: [], status: "invalid" }],
-      citations_total: 2,
-      citations_invalid: 1,
-      unsupported_segments: 0, // the server counts only "unsupported" here
-    };
-    const { container } = render(<AnswerView question="q" answer={failed} streamText="" sources={[]} onCite={vi.fn()} />);
-    expect(screen.getByRole("link", { name: "1 point to check" })).toBeInTheDocument();
-    expect(screen.getByText(/One statement in this briefing is/)).toBeInTheDocument();
-    expect(screen.getByText(/1 citation\(s\) could not be verified and were removed/)).toBeInTheDocument();
-    expect(screen.queryByText(/each checked against the source text/)).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Show it" }));
-    expect(container.querySelector(".answer-body.show-uncited .unsupported")?.textContent).toBe("Everyone agreed.");
-  });
-
-  it("counts statements with no citation and with failed citations together", () => {
-    const both: Answer = {
-      ...answer,
-      segments: [
-        ...answer.segments,
-        { text: " Everyone agreed.", sources: [], cited: [], status: "unsupported" },
-        { text: " Nobody objected.", sources: [], cited: [], status: "invalid" },
-      ],
-      unsupported_segments: 1,
-    };
-    render(<AnswerView question="q" answer={both} streamText="" sources={[]} onCite={vi.fn()} />);
-    expect(screen.getByText(/2 statements in this briefing are/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Show them" })).toBeInTheDocument();
+  it("asks whether the briefing was useful and sends the answer once", () => {
+    const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 200 }));
+    render(<AnswerView turn={turnOf(answer, { briefingKey: "k1" })} onCite={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "No" }));
+    expect(screen.getByText("Thank you for the feedback.")).toBeInTheDocument();
+    expect(JSON.parse(spy.mock.calls[0][1]!.body as string)).toEqual({ question: "q", useful: false, briefing_key: "k1" });
+    spy.mockRestore();
   });
 
   it("flags judgemental words in the briefing's own voice", () => {
@@ -164,18 +138,9 @@ describe("answer view", () => {
       segments: [{ ...answer.segments[0], text: "The minister admitted inflation", loaded: [{ start: 13, end: 21, word: "admitted" }] }],
       loaded_words: 1,
     };
-    const { container } = render(<AnswerView question="q" answer={flagged} streamText="" sources={[]} onCite={vi.fn()} />);
+    const { container } = render(<AnswerView turn={turnOf(flagged)} onCite={vi.fn()} />);
     expect(container.querySelector(".loaded")?.textContent).toBe("admitted");
     expect(screen.getByText(/1 judgemental word in the briefing's own voice/)).toBeInTheDocument();
-  });
-
-  it("asks whether the briefing was useful and sends the answer once", () => {
-    const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 200 }));
-    render(<AnswerView question="q" answer={answer} streamText="" sources={[]} briefingKey="k1" onCite={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "No" }));
-    expect(screen.getByText("Thank you for the feedback.")).toBeInTheDocument();
-    expect(JSON.parse(spy.mock.calls[0][1]!.body as string)).toEqual({ question: "q", useful: false, briefing_key: "k1" });
-    spy.mockRestore();
   });
 });
 
@@ -316,13 +281,7 @@ describe("shared briefings", () => {
   it("shows when the briefing was prepared and offers its link", () => {
     render(
       <AnswerView
-        question="q"
-        answer={answer}
-        streamText=""
-        sources={[]}
-        briefingId="abcdefghjk"
-        preparedAt="2026-10-10T09:00:00+00:00"
-        recordsUpTo="2026-10-08"
+        turn={turnOf(answer, { briefingId: "abcdefghjk", preparedAt: "2026-10-10T09:00:00+00:00", recordsUpTo: "2026-10-08" })}
         onCite={vi.fn()}
       />,
     );

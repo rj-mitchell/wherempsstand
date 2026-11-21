@@ -214,6 +214,8 @@ export interface Segment {
   loaded?: { start: number; end: number; word: string }[];
   /** quotations not found word for word in the sources cited for them */
   misquotes?: { start: number; end: number; text: string }[];
+  /** a quotation shown as the passage of the source cited straight after it (wts-core's display rule) */
+  beside?: boolean;
 }
 
 export interface Answer {
@@ -301,8 +303,12 @@ export interface Turn {
   follows?: string;
   /** passages in the archive, sent as soon as the question arrives (for the progress list) */
   passages?: number;
-  /** when each stage began, by the reader's clock */
-  stages?: import("./components/Progress").Stages;
+  /** the sources cited so far while the briefing is written, in the order the model cited them (citation events) */
+  cited?: number[];
+  /** asked in this visit and written or replayed while the reader waited: its checks' results run up when it ends */
+  live?: boolean;
+  /** "Sources only (no AI)": the records found, with no briefing written */
+  sourcesOnly?: boolean;
   /** the server's readable copy of the page, shown when the briefing itself could not be fetched (serverText.tsx) */
   fallbackHtml?: string;
 }
