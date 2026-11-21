@@ -1,123 +1,85 @@
-"""Link-preview cards (1200 x 630 PNG) for shared briefings, in the site's own typefaces and colours.
+"""Share cards (1200 x 630 PNG) for saved briefings and topic briefings: the link preview that shows the checking.
 
-A card's headline is the briefing's neutral title (``briefings.briefing_title``), never the reader's question: a card
-carries the site's name, and a question can be worded as an allegation."""
+Each card is drawn once by the Where They Stand family's shared drawing (wts-core's ``adapters.cards.briefing_card``,
+with Pillow and no AI) in the site's cloth and typefaces, and kept on disk: the site's band, "Briefing written by AI,
+checked against Hansard", a title, the check strip's three counts in words and the day it was prepared.
+
+A card's title is never the reader's question (docs/DECISIONS.md, 36): a saved briefing's card carries its neutral
+title (``briefings.briefing_title``, "Briefing from Hansard, 17 November 2026"), since a question can be worded as an
+allegation and the card carries the site's name. A topic's card carries the topic's own title, which the owner
+chose. The counts are the strip's (``wts_core.checks.check_counts``) on the answer as it is shown, after the display
+rule for quotations (``rag/checks.py``)."""
 
 from __future__ import annotations
 
-from functools import lru_cache
+import re
 from pathlib import Path
 from typing import Any
 
-from PIL import Image, ImageDraw, ImageFont
+from wts_core.adapters.cards import CardStyle, briefing_card, card_count_lines
+from wts_core.checks import CheckCounts, check_counts
 
 from hansard.config import STATIC_DIR
 
-W, H = 1200, 630
-PAPER = (255, 255, 255)
-PANEL = (242, 244, 244)
-INK = (28, 36, 39)
-INK_SOFT = (79, 90, 94)
-COMMONS = (29, 69, 53)
-ON_CLOTH = (255, 255, 255)
 FONTS = STATIC_DIR / "fonts"
-LEFT, RIGHT = 96, 1120
-BAND = 150
+STYLE = CardStyle(
+    site_name="Where MPs Stand", domain="wherempsstand.com", cloth=(29, 69, 53), record="Hansard",
+    serif=FONTS / "SourceSerif4-Semibold.ttf", sans=FONTS / "SourceSans3-Regular.ttf",
+    sans_bold=FONTS / "SourceSans3-Semibold.ttf", icon=STATIC_DIR / "brand" / "icon-192.png")
+
+# change it when what a card shows changes, so cards already drawn are drawn again (v3: the family's card, with the
+# check strip's counts, 21 November 2026)
+CARD_VERSION = "v3"
 
 
-@lru_cache(maxsize=32)
-def _font(name: str, size: int) -> ImageFont.FreeTypeFont:
-    return ImageFont.truetype(str(FONTS / name), size)
+def card_paths(cache_dir: Path, bid: str) -> tuple[Path, ...]:
+    """Where a briefing's card is kept, then every earlier version's file: a card from before neutral headlines
+    (it showed the question) and the cards drawn before this version."""
+    return (cache_dir / f"{bid}.{CARD_VERSION}.png", cache_dir / f"{bid}.png", cache_dir / f"{bid}.v2.png")
 
 
-def _wrap(draw: ImageDraw.ImageDraw, text: str, font, width: int) -> list[str]:
-    lines: list[str] = []
-    line = ""
-    for word in text.split():
-        trial = f"{line} {word}".strip()
-        if draw.textlength(trial, font=font) <= width:
-            line = trial
-        else:
-            if line:
-                lines.append(line)
-            line = word
-    if line:
-        lines.append(line)
-    return lines
+def topic_card_path(cache_dir: Path, slug: str, bid: str) -> Path:
+    """Where a topic's card is kept: one for each version of its briefing, so a new week's briefing has its own."""
+    return cache_dir / f"topic-{slug}-{bid}.{CARD_VERSION}.png"
 
 
-def _fit_headline(draw: ImageDraw.ImageDraw, headline: str, width: int, max_lines: int) -> tuple[Any, list[str]]:
-    for size in (64, 58, 52, 47, 43, 40):
-        font = _font("SourceSerif4-Semibold.ttf", size)
-        lines = _wrap(draw, headline, font, width)
-        if len(lines) <= max_lines:
-            return font, lines
-    lines = _wrap(draw, headline, font, width)[:max_lines]
-    while lines and draw.textlength(lines[-1] + "…", font=font) > width:
-        lines[-1] = lines[-1].rsplit(" ", 1)[0]
-    lines[-1] += "…"
-    return font, lines
+def counts_of(answer: dict[str, Any] | None) -> CheckCounts:
+    """The strip's counts for an answer as it is shown (an answer with none gives zeros)."""
+    return check_counts(answer or {})  # type: ignore[arg-type]  # an answer is a dict of the same keys
 
 
-def evidence_line(evidence: dict[str, Any] | None) -> str:
-    if not evidence or not evidence.get("records"):
-        return ""
-    parts = [f"{evidence['records']} contributions from {evidence['speakers']} speakers"]
-    parties = sorted((evidence.get("parties") or {}).items(), key=lambda kv: -kv[1])
-    if parties:
-        parts.append("parties: " + ", ".join(f"{p} {n}" for p, n in parties[:4]))
-    return "; ".join(parts)
+def card_alt(title: str, counts: CheckCounts) -> str:
+    """What a card shows, in words, for its ``og:image:alt``."""
+    said = ", ".join(f"{number} {words}" for number, words, _ in card_count_lines(counts))
+    return f"Where MPs Stand: {title}. Briefing written by AI, checked against Hansard: {said}."
 
 
-def render_card(headline: str, prepared: str, records_up_to: str, evidence: dict[str, Any] | None) -> Image.Image:
-    img = Image.new("RGB", (W, H), PAPER)
-    d = ImageDraw.Draw(img)
-    d.rectangle((0, 0, W, BAND), fill=COMMONS)  # the site's cloth, as the header band on every page
-
-    icon = Image.open(STATIC_DIR / "brand" / "icon-192.png").convert("RGBA").resize((76, 76), Image.LANCZOS)
-    img.paste(icon, (LEFT, 37), icon)
-    d.text((LEFT + 100, 44), "Where MPs Stand", font=_font("SourceSerif4-Semibold.ttf", 38), fill=ON_CLOTH)
-    d.text((LEFT + 100, 92), "A Where They Stand project", font=_font("SourceSans3-Regular.ttf", 23), fill=ON_CLOTH)
-
-    d.text((LEFT, 186), "Briefing written by AI from Hansard", font=_font("SourceSans3-Semibold.ttf", 23), fill=INK_SOFT)
-    font, lines = _fit_headline(d, headline, RIGHT - LEFT, 4)
-    y = 228
-    line_h = int(font.size * 1.18)
-    for line in lines:
-        d.text((LEFT, y), line, font=font, fill=INK)
-        y += line_h
-
-    ev = evidence_line(evidence)
-    small = _font("SourceSans3-Regular.ttf", 23)
-    if ev:
-        while d.textlength(ev, font=small) > RIGHT - LEFT and " " in ev:
-            ev = ev.rsplit(" ", 1)[0].rstrip(",;") + "…"
-        d.text((LEFT, 500), ev, font=small, fill=INK_SOFT)
-    d.rectangle((0, 548, W, H), fill=PANEL)
-    stamp = f"Prepared {prepared}" + (f" from records up to {records_up_to}" if records_up_to else "")
-    d.text((LEFT, 574), stamp, font=small, fill=INK_SOFT)
-    url_font = _font("SourceSans3-Semibold.ttf", 23)
-    d.text((RIGHT - d.textlength("wherempsstand.com", font=url_font), 574), "wherempsstand.com", font=url_font,
-           fill=COMMONS)
-    return img
-
-
-def card_paths(cache_dir: Path, bid: str) -> tuple[Path, Path]:
-    """Where a briefing's card is kept, and where a card from before neutral headlines was (it showed the question)."""
-    return cache_dir / f"{bid}.{CARD_VERSION}.png", cache_dir / f"{bid}.png"
-
-
-CARD_VERSION = "v2"  # change it when what a card shows changes, so cards already rendered are drawn again
-
-
-def card_png(cache_dir: Path, bid: str, headline: str, prepared: str, records_up_to: str,
-             evidence: dict[str, Any] | None) -> Path:
-    """Render once, then serve the saved file. A card saved before neutral headlines is deleted."""
-    path, old = card_paths(cache_dir, bid)
-    old.unlink(missing_ok=True)
+def _drawn(path: Path, title: str, counts: CheckCounts, prepared: str) -> Path:
     if not path.exists():
-        cache_dir.mkdir(parents=True, exist_ok=True)
+        path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".tmp")
-        render_card(headline, prepared, records_up_to, evidence).save(tmp, "PNG", optimize=True)
+        tmp.write_bytes(briefing_card(STYLE, title=title, counts=counts, prepared=prepared))
         tmp.replace(path)
     return path
+
+
+def card_png(cache_dir: Path, bid: str, title: str, prepared: str, answer: dict[str, Any] | None) -> Path:
+    """A saved briefing's card: drawn once, then the saved file is served. Cards of earlier versions are
+    deleted."""
+    path, *old = card_paths(cache_dir, bid)
+    for p in old:
+        p.unlink(missing_ok=True)
+    return _drawn(path, title, counts_of(answer), prepared)
+
+
+def topic_card_png(cache_dir: Path, slug: str, bid: str, title: str, prepared: str,
+                   answer: dict[str, Any] | None) -> Path:
+    """A topic's card, for its current briefing: drawn once, and the cards of the topic's earlier briefings are
+    deleted."""
+    path = topic_card_path(cache_dir, slug, bid)
+    earlier = re.compile(rf"topic-{re.escape(slug)}-[a-z0-9]{{10}}\.[\w.]+\.png")
+    if cache_dir.is_dir():
+        for p in cache_dir.glob(f"topic-{slug}-*.png"):
+            if p != path and earlier.fullmatch(p.name):
+                p.unlink(missing_ok=True)
+    return _drawn(path, title, counts_of(answer), prepared)

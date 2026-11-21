@@ -11,6 +11,11 @@ voice are highlighted (never hidden, and never inside a quotation). What is this
   two forms, as it always has: a sentence saying something "was supplied" or "were retrieved" counts as one (so
   "Gas was supplied to two million homes" is not marked). Narrowing it is a change of its own, to be made with an
   evaluation run before and after; tests/test_rag.py holds it where it is.
+
+Every answer a reader is shown, new, cached or saved, then passes through the family's display rule for quotations
+(``as_shown``, wts-core's ``quotes_beside``): a quotation found word for word in the source cited straight after it
+is shown as that source's quotation, never as text with no source. That changes only what is shown: the saved
+briefing keeps the verifier's own segments and counts.
 """
 
 from __future__ import annotations
@@ -25,6 +30,7 @@ from wts_core.checks import (
     LoadedWords,
     Verifier,
     check_briefing,
+    quotes_beside,
 )
 from wts_core.events import Answer
 
@@ -42,8 +48,15 @@ def checked(blocks: list[dict[str, Any]], sources: list[Any]) -> Answer:
     return check_briefing(blocks, sources, VERIFIER, LOADED_WORDS)
 
 
+def as_shown(answer: dict[str, Any] | None) -> dict[str, Any] | None:
+    """An answer as a reader is shown it: the display rule for quotations beside their citation (wts-core's
+    ``quotes_beside``; the family's BRIEFINGS.md). Its counts are the verifier's, unchanged."""
+    return quotes_beside(answer)  # type: ignore[arg-type,return-value]  # an answer is a dict of the same keys
+
+
 def shown_again(answer: dict[str, Any] | None) -> dict[str, Any] | None:
     """A saved briefing's answer as its address shows it today: its points to check and its judgemental-word marks
-    judged again by the current rules, so a mark since found to be wrong is not shown. Nothing is ever newly
-    flagged, and a briefing written under today's rules is left as it is."""
-    return LOADED_WORDS.still_loaded(VERIFIER.recheck(answer))
+    judged again by the current rules, so a mark since found to be wrong is not shown, then the display rule for
+    quotations (``as_shown``). Nothing is ever newly flagged, and a briefing written under today's rules is judged
+    as it was."""
+    return as_shown(LOADED_WORDS.still_loaded(VERIFIER.recheck(answer)))

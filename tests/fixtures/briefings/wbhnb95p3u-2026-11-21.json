@@ -1,0 +1,3377 @@
+{
+ "id": "wbhnb95p3u",
+ "question": "What positions have MPs and peers taken on the funding of local councils over the past twelve months?",
+ "created_at": "2026-11-18T19:33:27+00:00",
+ "records_up_to": "2026-11-17",
+ "settings": {
+  "mode": "summary",
+  "topic": "local-government-funding"
+ },
+ "plan": {
+  "question": "What positions have MPs and peers taken on the funding of local councils over the past twelve months?",
+  "search_text": "local government funding, council finance, local authority funding, council grants, business rates, council tax",
+  "filters": {
+   "date_from": "2025-11-18",
+   "date_to": null,
+   "houses": [
+    "commons",
+    "lords"
+   ],
+   "regions": [],
+   "parties": [],
+   "person_ids": [],
+   "offices": [],
+   "record_types": [],
+   "genders": [],
+   "age_bands": [],
+   "tenure": [],
+   "majority_bands": [],
+   "runner_up_parties": [],
+   "groups": [],
+   "seat_types": []
+  },
+  "portfolios": [
+   "housing_communities"
+  ],
+  "wants_votes": false,
+  "speakers": [],
+  "unresolved_speakers": [],
+  "interpretation": "Searches Commons and Lords debates on local government and council funding from 18 November 2025 to 18 November 2026, with no restriction on speakers' party, role or seat.",
+  "parser": "model",
+  "group_by": "role",
+  "compare": []
+ },
+ "sources": [
+  {
+   "n": 1,
+   "kind": "record",
+   "title": "Jim McMahon (Labour/Co-operative; MP for Oldham West, Chadderton and Royton, city seat (Greater Manchester urban area, 2.5m people), North West; role on this date: Parliamentary Under-Secretary (Housing, Communities and Local Government)) — Written answer, Commons written answers — 15 October 2026 — UIN 32118 — Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/32118",
+   "record_id": "uk.org.publicwhip/wrans/2026-10-09.32118.r0",
+   "debate_path": null,
+   "date": "2026-10-15",
+   "chamber": "Commons written answers",
+   "record_type": "answer",
+   "heading": "Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "colnum": null,
+   "uin": "32118",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/32118",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-10-09.32118.r0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25475",
+    "date": "2026-10-15",
+    "name": "Jim McMahon",
+    "house": "commons",
+    "constituency": "Oldham West, Chadderton and Royton",
+    "gss_code": "E14001416",
+    "region": "North West",
+    "nation": "England",
+    "party": "Labour/Co-operative",
+    "party_id": "labourco-operative",
+    "settlement": "city",
+    "urban_area": "Greater Manchester",
+    "urban_area_pop": 2461366,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+      "title": "Parliamentary Under-Secretary (Housing, Communities and Local Government)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 46,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2015-12-04",
+    "first_term": false,
+    "majority_then": {
+     "majority": 4976,
+     "pct": 12.9,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "independent",
+    "runner_up_then": {
+     "party": "Independent",
+     "party_id": "independent",
+     "votes": 8256,
+     "majority": 4976,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 4976,
+     "pct": 12.9,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Oldham West, Chadderton and Royton"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Jim McMahon",
+   "group": "Government ministers",
+   "text": "The amount of grant a council receives is unaffected by the level of tax it charges. Instead, the government's approach via the resources adjustment better takes into account of the council tax raising ability of each authority, not the level of council tax set by each council, through the use of a measure of the council tax base. To account for differing council tax raising ability, we multiply each council’s tax base (the number and band of properties) by a notional level of council tax. The technical annex on the resources adjustment published at the final Local Government Finance Settlement 2026-27 sets out how the band D equivalent council tax base is calculated which can be found, here.\n\nMore detail on Fair Funding Allocations can be found here.\n\nA council’s actual Band D level in 2025-2026 was the basis for calculating their Core Spending Power for 2026-27 to 2028-29, with the response to UIN 20159 setting out the methodology for the each of the six councils. The actual level of council tax remains a local decision for individual councils, taking into consideration a range of local factors including the impact on taxpayers.",
+   "context": "To ask the Secretary of State for Housing, Communities and Local Government, pursuant to the answer of 8 September 2026, to Question 20159, on Council tax: City of Westminster and Wandsworth, and of 9 September 2026, to Question 20138, on council tax, what is the mathematical formula for the resource adjustment, in relation to the change in council funding as a consequence of a local authority’s Band D rate, excluding police, mayoral and parish precepts, being set below the national notional council tax.",
+   "replies": null,
+   "ranking": {
+    "score": 1.2308,
+    "relevance": 0.8378,
+    "keyword": 46.0799,
+    "semantic": 0.7459,
+    "recency": 0.9794,
+    "authority": 1.5,
+    "authority_reason": "government minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 2,
+   "kind": "record",
+   "title": "Jim McMahon (Labour/Co-operative; MP for Oldham West, Chadderton and Royton, city seat (Greater Manchester urban area, 2.5m people), North West; role on this date: Parliamentary Under-Secretary (Housing, Communities and Local Government)) — Westminster Hall — 2 September 2026 — col. 138 — Rural Upper-tier Local Authorities — [Paula Barker in the Chair]",
+   "url": "https://hansard.parliament.uk/Commons/2026-09-02",
+   "record_id": "uk.org.publicwhip/westminhall/2026-09-02c.138.2",
+   "debate_path": "/debates/2026-09-02/westminster-hall/rural-upper-tier-local-authorities#c138-2",
+   "date": "2026-09-02",
+   "chamber": "Westminster Hall",
+   "record_type": "speech",
+   "heading": "Rural Upper-tier Local Authorities — [Paula Barker in the Chair]",
+   "colnum": "138",
+   "uin": null,
+   "time": "15:36",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-09-02",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/whall/?id=2026-09-02c.138.2",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25475",
+    "date": "2026-09-02",
+    "name": "Jim McMahon",
+    "house": "commons",
+    "constituency": "Oldham West, Chadderton and Royton",
+    "gss_code": "E14001416",
+    "region": "North West",
+    "nation": "England",
+    "party": "Labour/Co-operative",
+    "party_id": "labourco-operative",
+    "settlement": "city",
+    "urban_area": "Greater Manchester",
+    "urban_area_pop": 2461366,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+      "title": "Parliamentary Under-Secretary (Housing, Communities and Local Government)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 46,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2015-12-04",
+    "first_term": false,
+    "majority_then": {
+     "majority": 4976,
+     "pct": 12.9,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "independent",
+    "runner_up_then": {
+     "party": "Independent",
+     "party_id": "independent",
+     "votes": 8256,
+     "majority": 4976,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 4976,
+     "pct": 12.9,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Oldham West, Chadderton and Royton"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Jim McMahon",
+   "group": "Government ministers",
+   "text": "In a sense, I recognise that there will be differences of opinion, depending on which local authority and what part of the country Members represent, about whether the fair funding review fully picks up all the particular circumstances. There might be more agreement on the sufficiency of local government finance. Whatever the allocation across the board, the fair funding review is intended to distribute it in the fairest possible way and in a transparent way, so that Members and councillors can see where the money is going to.\n\nSince coming to power, the Labour Government have delivered long-overdue reforms to council funding through the first multi-year local government settlement in a decade. In doing so, we have delivered transformational changes to how councils are funded, which the public, our local government partners and Parliament have long called for. We have delivered on our commitment to give councils greater certainty and flexibility over their funding, ensuring that resources are fairly aligned to local need and simplifying the funding landscape by ending wasteful competitive bidding, which we all recognise pits one area against another.\n\nThe Government also have a very important role to play as an equaliser for local government income. During the course of the debate, I heard references to the amount of grant that individual councils get, and one grant total being compared with another. I want to be clear that the fair funding review is not intended to give every council the same central Government grant. That grant is intended to act as an equaliser for the system, so that in the end all councils have the resources to deliver the public service need in their local areas, while recognising that there are wide differences in England in the local tax bases of council tax and business rates.\n\nAs a result of our reforms, nine in 10 councils will receive funding that broadly matches their assessed relative need by the end of the multi-year settlement, up by about a third before the reforms. We recognise the different drivers in demand for services, the cost of providing them in different places and the different abilities of areas to raise council tax. We are therefore making funding available in such a way as to enable all local authorities to provide the same level of services to their residents.\n\nFor rural communities, the 2026-27 settlement was a key step in delivering a fairer system to address the issues that matter to local communities across England. It included recognising local circumstances, including differences in the cost of delivering services between rural and urban areas, and using the best available and most up-to-date data, including the latest indices of multiple deprivation to ensure that deprivation in rural areas is captured accurately. I will explain a bit more on that.\n\nI heard references to the fair funding review not taking account of the differential cost of delivering services in rural areas. To be clear, we account for rural costs through the area cost adjustment, which is applied to all formulas. That adjustment captures the variation in wages, property rates, journey times, and a range of other factors that pick up the local variation that takes place. On top of that, we have a remoteness adjustment in social care. I hear representations that say, “Hang on. If it costs more to deliver adult social care in these areas, then surely children’s services and other services such as waste collection and other things ought to be included, too.” The area cost adjustment picks up that general difference of delivering a service in those areas. There is a balance here. We want a simplified system that can be scrutinised and understood. The more we adapt and change and really drill down on that, the more complicated it becomes, the more it has to be updated and the more that changes. There is always a balance to be had between simplicity, being understood and giving certainty over the multi-year settlement, while recognising the differences at a local level.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 1.1861,
+    "relevance": 0.8287,
+    "keyword": 47.3584,
+    "semantic": 0.7301,
+    "recency": 0.9542,
+    "authority": 1.5,
+    "authority_reason": "government minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 3,
+   "kind": "record",
+   "title": "David Simmonds (Conservative; MP for Ruislip, Northwood and Pinner, city seat (Greater London urban area, 8.1m people), London; role on this date: Shadow Minister (Levelling Up, Housing and Communities)) — has raised this subject repeatedly (on several separate days) — Written question, Commons written answers — 15 October 2026 — UIN 32118 — Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/32118",
+   "record_id": "uk.org.publicwhip/wrans/2026-10-09.32118.q0",
+   "debate_path": null,
+   "date": "2026-10-15",
+   "chamber": "Commons written answers",
+   "record_type": "question",
+   "heading": "Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "colnum": null,
+   "uin": "32118",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/32118",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-10-09.32118.q0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25892",
+    "date": "2026-10-15",
+    "name": "David Simmonds",
+    "house": "commons",
+    "constituency": "Ruislip, Northwood and Pinner",
+    "gss_code": "E14001454",
+    "region": "London",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "city",
+    "urban_area": "Greater London",
+    "urban_area_pop": 8135667,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Minister (Levelling Up, Housing and Communities)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Minister (Levelling Up, Housing and Communities)",
+      "title": "Shadow Minister (Levelling Up, Housing and Communities)"
+     },
+     {
+      "kind": "whip",
+      "role": "Opposition Whip (Commons)",
+      "portfolios": [],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Opposition Whip (Commons)",
+      "title": "Opposition Whip (Commons)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 50,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2019-12-13",
+    "first_term": false,
+    "majority_then": {
+     "majority": 7581,
+     "pct": 16.1,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 13785,
+     "majority": 7581,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 7581,
+     "pct": 16.1,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Ruislip, Northwood and Pinner"
+    },
+    "party_groups": [
+     {
+      "id": "conservative-environment-network",
+      "name": "Conservative Environment Network",
+      "evidence": [
+       {
+        "kind": "members",
+        "date": "2026-11-12",
+        "parliament": "2024–",
+        "label": "Listed by the Conservative Environment Network (its website, accessed 12 November 2026)",
+        "url": "https://www.cen.uk.com/our-caucus",
+        "archive_url": null,
+        "publisher": "Conservative Environment Network (its own website)",
+        "role": null,
+        "document": null,
+        "note": "The page is undated: what it said on the day it was accessed. To be checked again from time to time."
+       }
+      ]
+     }
+    ]
+   },
+   "speaker_name_raw": "David Simmonds",
+   "group": "Opposition frontbench",
+   "text": "To ask the Secretary of State for Housing, Communities and Local Government, pursuant to the answer of 8 September 2026, to Question 20159, on Council tax: City of Westminster and Wandsworth, and of 9 September 2026, to Question 20138, on council tax, what is the mathematical formula for the resource adjustment, in relation to the change in council funding as a consequence of a local authority’s Band D rate, excluding police, mayoral and parish precepts, being set below the national notional council tax.",
+   "context": null,
+   "replies": [
+    {
+     "record_id": "uk.org.publicwhip/wrans/2026-10-09.32118.r0",
+     "date": "2026-10-15",
+     "text": "The amount of grant a council receives is unaffected by the level of tax it charges. Instead, the government's approach via the resources adjustment better takes into account of the council tax raising ability of each authority, not the level of council tax set by each council, through the use of a measure of the council tax base. To account for differing council tax raising ability, we multiply each council’s tax base (the number and band of properties) by a notional level of council tax. The technical annex on the resources adjustment published at the final Local Government Finance Settlement 2026-27 sets out how the band D equivalent council tax base is calculated which can be found, here.\n\nMore detail on Fair Funding Allocations can be found here.\n\nA council’s actual Band D level in 2025-2026 was the basis for calculating their Core Spending Power for 2026-27 to 2028-29, with the response to UIN 20159 setting out the methodology for the each of the six councils. The actual level of council tax remains a local decision for individual councils, taking into consideration a range of local factors including the impact on taxpayers.",
+     "speaker_name_raw": "Jim McMahon",
+     "speaker": {
+      "person_id": "uk.org.publicwhip/person/25475",
+      "date": "2026-10-15",
+      "name": "Jim McMahon",
+      "house": "commons",
+      "constituency": "Oldham West, Chadderton and Royton",
+      "gss_code": "E14001416",
+      "region": "North West",
+      "nation": "England",
+      "party": "Labour/Co-operative",
+      "party_id": "labourco-operative",
+      "settlement": "city",
+      "urban_area": "Greater Manchester",
+      "urban_area_pop": 2461366,
+      "offices": [
+       {
+        "kind": "gov",
+        "role": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+        "portfolios": [
+         "housing_communities"
+        ],
+        "committee_id": null,
+        "committee_name": null,
+        "display_name": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+        "title": "Parliamentary Under-Secretary (Housing, Communities and Local Government)"
+       }
+      ],
+      "other_names": [],
+      "gender": "M",
+      "age": 46,
+      "age_approximate": false,
+      "age_band": "40-54",
+      "first_elected": "2015-12-04",
+      "first_term": false,
+      "majority_then": {
+       "majority": 4976,
+       "pct": 12.9,
+       "band": "middle",
+       "election": "2024 general election",
+       "date": "2024-07-04"
+      },
+      "majority_band": "middle",
+      "runner_up": "independent",
+      "runner_up_then": {
+       "party": "Independent",
+       "party_id": "independent",
+       "votes": 8256,
+       "majority": 4976,
+       "election": "2024 general election",
+       "date": "2024-07-04"
+      },
+      "majority_now": {
+       "majority": 4976,
+       "pct": 12.9,
+       "band": "middle",
+       "election": "2024 general election",
+       "date": "2024-07-04",
+       "constituency": "Oldham West, Chadderton and Royton"
+      },
+      "party_groups": []
+     }
+    }
+   ],
+   "ranking": {
+    "score": 1.1798,
+    "relevance": 0.8031,
+    "keyword": 45.1447,
+    "semantic": 0.7285,
+    "recency": 0.9794,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": 23,
+   "declared": null
+  },
+  {
+   "n": 4,
+   "kind": "record",
+   "title": "David Simmonds (Conservative; MP for Ruislip, Northwood and Pinner, city seat (Greater London urban area, 8.1m people), London; role on this date: Shadow Minister (Levelling Up, Housing and Communities)) — has raised this subject repeatedly (on several separate days) — Written question, Commons written answers — 19 October 2026 — UIN 33346 — Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/33346",
+   "record_id": "uk.org.publicwhip/wrans/2026-10-09.33346.q0",
+   "debate_path": null,
+   "date": "2026-10-19",
+   "chamber": "Commons written answers",
+   "record_type": "question",
+   "heading": "Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "colnum": null,
+   "uin": "33346",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/33346",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-10-09.33346.q0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25892",
+    "date": "2026-10-19",
+    "name": "David Simmonds",
+    "house": "commons",
+    "constituency": "Ruislip, Northwood and Pinner",
+    "gss_code": "E14001454",
+    "region": "London",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "city",
+    "urban_area": "Greater London",
+    "urban_area_pop": 8135667,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Minister (Levelling Up, Housing and Communities)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Minister (Levelling Up, Housing and Communities)",
+      "title": "Shadow Minister (Levelling Up, Housing and Communities)"
+     },
+     {
+      "kind": "whip",
+      "role": "Opposition Whip (Commons)",
+      "portfolios": [],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Opposition Whip (Commons)",
+      "title": "Opposition Whip (Commons)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 50,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2019-12-13",
+    "first_term": false,
+    "majority_then": {
+     "majority": 7581,
+     "pct": 16.1,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 13785,
+     "majority": 7581,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 7581,
+     "pct": 16.1,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Ruislip, Northwood and Pinner"
+    },
+    "party_groups": [
+     {
+      "id": "conservative-environment-network",
+      "name": "Conservative Environment Network",
+      "evidence": [
+       {
+        "kind": "members",
+        "date": "2026-11-12",
+        "parliament": "2024–",
+        "label": "Listed by the Conservative Environment Network (its website, accessed 12 November 2026)",
+        "url": "https://www.cen.uk.com/our-caucus",
+        "archive_url": null,
+        "publisher": "Conservative Environment Network (its own website)",
+        "role": null,
+        "document": null,
+        "note": "The page is undated: what it said on the day it was accessed. To be checked again from time to time."
+       }
+      ]
+     }
+    ]
+   },
+   "speaker_name_raw": "David Simmonds",
+   "group": "Opposition frontbench",
+   "text": "To ask the Secretary of State for Housing, Communities and Local Government, pursuant to the answer of 8 September 2026, to Question 20159, on Council Tax, whether her department has made an estimate of the effective financial loss in funding for each of the six councils that have below-average levels of current council tax, specifically as a consequence of the national notional council tax level being applied in the Local Government Finance Settlement.",
+   "context": null,
+   "replies": [
+    {
+     "record_id": "uk.org.publicwhip/wrans/2026-10-09.33346.r0",
+     "date": "2026-10-19",
+     "text": "No such estimate has been made. The national notional council tax level is used to calculate resource adjustment, a measure which accounts for the different council tax raising ability between local authorities based on the number and band of properties. To fully account for ability to raise council tax, following consultation, the government set the notional level at the average level of council tax in England.\n\nThe council tax level assumed for each of the six councils in calculating their Core Spending Power for 2026-27 to 2028-29 is based on the actual Band D level for each council in 2025-26. The actual level of council tax remains a local decision for individual councils, taking into consideration a range of local factors including the impact on taxpayers.",
+     "speaker_name_raw": "Jim McMahon",
+     "speaker": {
+      "person_id": "uk.org.publicwhip/person/25475",
+      "date": "2026-10-19",
+      "name": "Jim McMahon",
+      "house": "commons",
+      "constituency": "Oldham West, Chadderton and Royton",
+      "gss_code": "E14001416",
+      "region": "North West",
+      "nation": "England",
+      "party": "Labour/Co-operative",
+      "party_id": "labourco-operative",
+      "settlement": "city",
+      "urban_area": "Greater Manchester",
+      "urban_area_pop": 2461366,
+      "offices": [
+       {
+        "kind": "gov",
+        "role": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+        "portfolios": [
+         "housing_communities"
+        ],
+        "committee_id": null,
+        "committee_name": null,
+        "display_name": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+        "title": "Parliamentary Under-Secretary (Housing, Communities and Local Government)"
+       }
+      ],
+      "other_names": [],
+      "gender": "M",
+      "age": 46,
+      "age_approximate": false,
+      "age_band": "40-54",
+      "first_elected": "2015-12-04",
+      "first_term": false,
+      "majority_then": {
+       "majority": 4976,
+       "pct": 12.9,
+       "band": "middle",
+       "election": "2024 general election",
+       "date": "2024-07-04"
+      },
+      "majority_band": "middle",
+      "runner_up": "independent",
+      "runner_up_then": {
+       "party": "Independent",
+       "party_id": "independent",
+       "votes": 8256,
+       "majority": 4976,
+       "election": "2024 general election",
+       "date": "2024-07-04"
+      },
+      "majority_now": {
+       "majority": 4976,
+       "pct": 12.9,
+       "band": "middle",
+       "election": "2024 general election",
+       "date": "2024-07-04",
+       "constituency": "Oldham West, Chadderton and Royton"
+      },
+      "party_groups": []
+     }
+    }
+   ],
+   "ranking": {
+    "score": 1.1293,
+    "relevance": 0.7669,
+    "keyword": 41.1477,
+    "semantic": 0.7327,
+    "recency": 0.9818,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": 23,
+   "declared": null
+  },
+  {
+   "n": 5,
+   "kind": "record",
+   "title": "Alison McGovern (Labour; MP for Birkenhead, city seat (Birkenhead urban area, 261,000 people), North West; role on this date: Minister of State (Housing, Communities and Local Government)) — Written answer, Commons written answers — 15 July 2026 — UIN 17443 — Ministry of Housing, Communities and Local Government — Business Rates and Council Tax: Arrears",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-07-09/17443",
+   "record_id": "uk.org.publicwhip/wrans/2026-07-09.17443.r0",
+   "debate_path": null,
+   "date": "2026-07-15",
+   "chamber": "Commons written answers",
+   "record_type": "answer",
+   "heading": "Ministry of Housing, Communities and Local Government — Business Rates and Council Tax: Arrears",
+   "colnum": null,
+   "uin": "17443",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-07-09/17443",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-07-09.17443.r0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/24897",
+    "date": "2026-07-15",
+    "name": "Alison McGovern",
+    "house": "commons",
+    "constituency": "Birkenhead",
+    "gss_code": "E14001091",
+    "region": "North West",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "city",
+    "urban_area": "Birkenhead",
+    "urban_area_pop": 260588,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "Minister of State (Housing, Communities and Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Minister of State (Housing, Communities and Local Government)",
+      "title": "Minister of State (Housing, Communities and Local Government)"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 45,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2010-05-06",
+    "first_term": false,
+    "majority_then": {
+     "majority": 13798,
+     "pct": 32.0,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "green",
+    "runner_up_then": {
+     "party": "Green Party",
+     "party_id": "green",
+     "votes": 8670,
+     "majority": 13798,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 13798,
+     "pct": 32.0,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Birkenhead"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Alison McGovern",
+   "group": "Government ministers",
+   "text": "Collection rates for both council tax and business rates remain high. Collection rates in England were at 95.6% for council tax and 96.8% for business rates in the 2025-2026 financial year. Small fluctuations in collection rates for council tax and business rates are not uncommon and could be affected by many different reasons.\n\nThese taxes are important in helping fund local services and local authorities have a range of tools available to recover unpaid taxes. It is ultimately the responsibility of individual local authorities to manage the collection of both business rates and council tax.",
+   "context": "To ask the Secretary of State for Housing, Communities and Local Government, further to Collection rates for Council Tax and non-domestic rates in England, 2025 to 2026, published on 24 June 2026, what analysis he has undertaken into the reasons for the (a) fall in council tax collection rates, (b) fall in business rate collection rates, (c) rise in council tax arrears and (d) rise in business rate arrears.",
+   "replies": null,
+   "ranking": {
+    "score": 1.1044,
+    "relevance": 0.7945,
+    "keyword": 47.1139,
+    "semantic": 0.7079,
+    "recency": 0.9268,
+    "authority": 1.5,
+    "authority_reason": "government minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 6,
+   "kind": "record",
+   "title": "James Cleverly (Conservative; MP for Braintree, town seat (urban area of 53,000), East of England; role on this date: Shadow Secretary of State for Housing, Communities and Local Government) — has raised this subject repeatedly (on several separate days) — Written question, Commons written answers — 16 June 2026 — UIN 8563 — Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-06-10/8563",
+   "record_id": "uk.org.publicwhip/wrans/2026-06-10.8563.q0",
+   "debate_path": null,
+   "date": "2026-06-16",
+   "chamber": "Commons written answers",
+   "record_type": "question",
+   "heading": "Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "colnum": null,
+   "uin": "8563",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-06-10/8563",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-06-10.8563.q0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25376",
+    "date": "2026-06-16",
+    "name": "James Cleverly",
+    "house": "commons",
+    "constituency": "Braintree",
+    "gss_code": "E14001121",
+    "region": "East of England",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "town",
+    "urban_area": "Braintree",
+    "urban_area_pop": 53477,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Secretary of State for Housing, Communities and Local Government",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Secretary of State for Housing, Communities and Local Government",
+      "title": "Shadow Secretary of State for Housing, Communities and Local Government"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 56,
+    "age_approximate": false,
+    "age_band": "55-69",
+    "first_elected": "2015-05-08",
+    "first_term": false,
+    "majority_then": {
+     "majority": 3670,
+     "pct": 7.5,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 13744,
+     "majority": 3670,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 3670,
+     "pct": 7.5,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Braintree"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Sir James Cleverly",
+   "group": "Opposition frontbench",
+   "text": "To ask the Secretary of State for Housing, Communities and Local Government, with reference to the publication, High Value Council Tax Surcharge, published 19 May 2026, through what mechanism will the revenue raised be used to support funding for local government services, and whether it will be ringfenced in the Local Government Finance Settlement or via a separate grant.",
+   "context": null,
+   "replies": [
+    {
+     "record_id": "uk.org.publicwhip/wrans/2026-06-10.8563.r0",
+     "date": "2026-06-16",
+     "text": "Revenue raised through the HVCTS will be used to support funding for local government services, with further detail to be set out at the next Spending Review.",
+     "speaker_name_raw": "Alison McGovern",
+     "speaker": {
+      "person_id": "uk.org.publicwhip/person/24897",
+      "date": "2026-06-16",
+      "name": "Alison McGovern",
+      "house": "commons",
+      "constituency": "Birkenhead",
+      "gss_code": "E14001091",
+      "region": "North West",
+      "nation": "England",
+      "party": "Labour",
+      "party_id": "labour",
+      "settlement": "city",
+      "urban_area": "Birkenhead",
+      "urban_area_pop": 260588,
+      "offices": [
+       {
+        "kind": "gov",
+        "role": "Minister of State (Housing, Communities and Local Government)",
+        "portfolios": [
+         "housing_communities"
+        ],
+        "committee_id": null,
+        "committee_name": null,
+        "display_name": "Minister of State (Housing, Communities and Local Government)",
+        "title": "Minister of State (Housing, Communities and Local Government)"
+       }
+      ],
+      "other_names": [],
+      "gender": "F",
+      "age": 45,
+      "age_approximate": false,
+      "age_band": "40-54",
+      "first_elected": "2010-05-06",
+      "first_term": false,
+      "majority_then": {
+       "majority": 13798,
+       "pct": 32.0,
+       "band": "safe",
+       "election": "2024 general election",
+       "date": "2024-07-04"
+      },
+      "majority_band": "safe",
+      "runner_up": "green",
+      "runner_up_then": {
+       "party": "Green Party",
+       "party_id": "green",
+       "votes": 8670,
+       "majority": 13798,
+       "election": "2024 general election",
+       "date": "2024-07-04"
+      },
+      "majority_now": {
+       "majority": 13798,
+       "pct": 32.0,
+       "band": "safe",
+       "election": "2024 general election",
+       "date": "2024-07-04",
+       "constituency": "Birkenhead"
+      },
+      "party_groups": []
+     }
+    }
+   ],
+   "ranking": {
+    "score": 1.0373,
+    "relevance": 0.759,
+    "keyword": 39.5181,
+    "semantic": 0.7393,
+    "recency": 0.9111,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": 26,
+   "declared": null
+  },
+  {
+   "n": 7,
+   "kind": "record",
+   "title": "Lord Jamieson (Conservative; member of the House of Lords; role on this date: Shadow Minister (Housing, Communities and Local Government)) — has raised this subject repeatedly (on several separate days) — Written question, Lords written answers — 4 November 2026 — UIN HL4230 — Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-19/HL4230",
+   "record_id": "uk.org.publicwhip/wrans/2026-10-19.HL4230.q0",
+   "debate_path": null,
+   "date": "2026-11-04",
+   "chamber": "Lords written answers",
+   "record_type": "question",
+   "heading": "Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "colnum": null,
+   "uin": "HL4230",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-19/HL4230",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-10-19.HL4230.q0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26299",
+    "date": "2026-11-04",
+    "name": "Lord Jamieson",
+    "house": "lords",
+    "constituency": null,
+    "gss_code": null,
+    "region": null,
+    "nation": null,
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": null,
+    "urban_area": null,
+    "urban_area_pop": null,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Minister (Housing, Communities and Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Minister (Housing, Communities and Local Government)",
+      "title": "Shadow Minister (Housing, Communities and Local Government)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 64,
+    "age_approximate": false,
+    "age_band": "55-69",
+    "party_groups": []
+   },
+   "speaker_name_raw": "Lord Jamieson",
+   "group": "Opposition frontbench",
+   "text": "To ask His Majesty's Government, in light of the final Local Government Finance Settlement 2026-2027 to 2028-2029, whether the actual or expected party political control of the local authority was a material consideration in the decision by ministers to disapply the council tax referendum thresholds from the six specified councils.",
+   "context": null,
+   "replies": [
+    {
+     "record_id": "uk.org.publicwhip/wrans/2026-10-19.HL4230.r0",
+     "date": "2026-11-04",
+     "text": "As we set out in the 2026-27 Local Government Finance Settlement consultation, authorities had to meet all the following criteria for referendum principles to not be applied: a) they are upper tier local authorities; b) 95% of their income is protected through transitional protections; and c) they have council tax levels lower than average. Actual or expected party control was therefore not a criterion in the decision.",
+     "speaker_name_raw": "Baroness Taylor of Stevenage",
+     "speaker": {
+      "person_id": "uk.org.publicwhip/person/26102",
+      "date": "2026-11-04",
+      "name": "Baroness Taylor of Stevenage",
+      "house": "lords",
+      "constituency": null,
+      "gss_code": null,
+      "region": null,
+      "nation": null,
+      "party": "Labour",
+      "party_id": "labour",
+      "settlement": null,
+      "urban_area": null,
+      "urban_area_pop": null,
+      "offices": [
+       {
+        "kind": "gov",
+        "role": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+        "portfolios": [
+         "housing_communities"
+        ],
+        "committee_id": null,
+        "committee_name": null,
+        "display_name": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+        "title": "Parliamentary Under-Secretary (Housing, Communities and Local Government)"
+       }
+      ],
+      "other_names": [],
+      "gender": "F",
+      "age": 70,
+      "age_approximate": false,
+      "age_band": "70-plus",
+      "party_groups": []
+     }
+    }
+   ],
+   "ranking": {
+    "score": 1.0368,
+    "relevance": 0.6972,
+    "keyword": 35.6003,
+    "semantic": 0.7249,
+    "recency": 0.9914,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": 5,
+   "declared": null
+  },
+  {
+   "n": 8,
+   "kind": "record",
+   "title": "Alison McGovern (Labour; MP for Birkenhead, city seat (Birkenhead urban area, 261,000 people), North West; role on this date: Minister of State (Housing, Communities and Local Government)) — Written answer, Commons written answers — 20 July 2026 — UIN 18017 — Ministry of Housing, Communities and Local Government — Council Tax",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-07-13/18017",
+   "record_id": "uk.org.publicwhip/wrans/2026-07-13.18017.r0",
+   "debate_path": null,
+   "date": "2026-07-20",
+   "chamber": "Commons written answers",
+   "record_type": "answer",
+   "heading": "Ministry of Housing, Communities and Local Government — Council Tax",
+   "colnum": null,
+   "uin": "18017",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-07-13/18017",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-07-13.18017.r0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/24897",
+    "date": "2026-07-20",
+    "name": "Alison McGovern",
+    "house": "commons",
+    "constituency": "Birkenhead",
+    "gss_code": "E14001091",
+    "region": "North West",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "city",
+    "urban_area": "Birkenhead",
+    "urban_area_pop": 260588,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "Minister of State (Housing, Communities and Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Minister of State (Housing, Communities and Local Government)",
+      "title": "Minister of State (Housing, Communities and Local Government)"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 45,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2010-05-06",
+    "first_term": false,
+    "majority_then": {
+     "majority": 13798,
+     "pct": 32.0,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "green",
+    "runner_up_then": {
+     "party": "Green Party",
+     "party_id": "green",
+     "votes": 8670,
+     "majority": 13798,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 13798,
+     "pct": 32.0,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Birkenhead"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Alison McGovern",
+   "group": "Government ministers",
+   "text": "As set out in the final Local Government Finance Settlement, the notional council tax level for 2026-27 was £2063. The notional level used in the Fair Funding Allocation is a modelling assumption and not intended to be compared to the authorities published Band D. Information on local authorities' Band D council tax levels is published in the annual Council Tax statistics release which can be found here: Council Tax statistics - GOV.UK.",
+   "context": "To ask the Secretary of State for Housing, Communities and Local Government, pursuant to the answer of 10 June 2026, to Question 5955, on Council Tax, and with reference to the Fair funding share calculator: final, published 9 February 2026, in how many local authorities is the national notional council tax level higher than their Band D equivalent level of council tax in 2026-27, based on the methodology used in the Technical annex on the Resources Adjustment (measure of tax base) of February 2026.",
+   "replies": null,
+   "ranking": {
+    "score": 1.0362,
+    "relevance": 0.7432,
+    "keyword": 42.6146,
+    "semantic": 0.7053,
+    "recency": 0.9295,
+    "authority": 1.5,
+    "authority_reason": "government minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 9,
+   "kind": "record",
+   "title": "Baroness Taylor of Stevenage (Labour; member of the House of Lords; role on this date: Parliamentary Under-Secretary (Housing, Communities and Local Government)) — Written answer, Lords written answers — 4 November 2026 — UIN HL4230 — Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-19/HL4230",
+   "record_id": "uk.org.publicwhip/wrans/2026-10-19.HL4230.r0",
+   "debate_path": null,
+   "date": "2026-11-04",
+   "chamber": "Lords written answers",
+   "record_type": "answer",
+   "heading": "Ministry of Housing, Communities and Local Government — Local Government Finance",
+   "colnum": null,
+   "uin": "HL4230",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-19/HL4230",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-10-19.HL4230.r0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26102",
+    "date": "2026-11-04",
+    "name": "Baroness Taylor of Stevenage",
+    "house": "lords",
+    "constituency": null,
+    "gss_code": null,
+    "region": null,
+    "nation": null,
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": null,
+    "urban_area": null,
+    "urban_area_pop": null,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+      "title": "Parliamentary Under-Secretary (Housing, Communities and Local Government)"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 70,
+    "age_approximate": false,
+    "age_band": "70-plus",
+    "party_groups": []
+   },
+   "speaker_name_raw": "Baroness Taylor of Stevenage",
+   "group": "Government ministers",
+   "text": "As we set out in the 2026-27 Local Government Finance Settlement consultation, authorities had to meet all the following criteria for referendum principles to not be applied: a) they are upper tier local authorities; b) 95% of their income is protected through transitional protections; and c) they have council tax levels lower than average. Actual or expected party control was therefore not a criterion in the decision.",
+   "context": "To ask His Majesty's Government, in light of the final Local Government Finance Settlement 2026-2027 to 2028-2029, whether the actual or expected party political control of the local authority was a material consideration in the decision by ministers to disapply the council tax referendum thresholds from the six specified councils.",
+   "replies": null,
+   "ranking": {
+    "score": 1.0208,
+    "relevance": 0.6864,
+    "keyword": 36.0558,
+    "semantic": 0.714,
+    "recency": 0.9914,
+    "authority": 1.5,
+    "authority_reason": "government minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 10,
+   "kind": "record",
+   "title": "James Cleverly (Conservative; MP for Braintree, town seat (urban area of 53,000), East of England; role on this date: Shadow Secretary of State for Housing, Communities and Local Government) — has raised this subject repeatedly (on several separate days) — Written question, Commons written answers — 28 January 2026 — UIN 107993 — Ministry of Housing, Communities and Local Government — Airports: Business Rates",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-01-23/107993",
+   "record_id": "uk.org.publicwhip/wrans/2026-01-23.107993.q1",
+   "debate_path": null,
+   "date": "2026-01-28",
+   "chamber": "Commons written answers",
+   "record_type": "question",
+   "heading": "Ministry of Housing, Communities and Local Government — Airports: Business Rates",
+   "colnum": null,
+   "uin": "107993",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-01-23/107993",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-01-23.107993.q1",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25376",
+    "date": "2026-01-28",
+    "name": "James Cleverly",
+    "house": "commons",
+    "constituency": "Braintree",
+    "gss_code": "E14001121",
+    "region": "East of England",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "town",
+    "urban_area": "Braintree",
+    "urban_area_pop": 53477,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Secretary of State for Housing, Communities and Local Government",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Secretary of State for Housing, Communities and Local Government",
+      "title": "Shadow Secretary of State for Housing, Communities and Local Government"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 56,
+    "age_approximate": false,
+    "age_band": "55-69",
+    "first_elected": "2015-05-08",
+    "first_term": false,
+    "majority_then": {
+     "majority": 3670,
+     "pct": 7.5,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 13744,
+     "majority": 3670,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 3670,
+     "pct": 7.5,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Braintree"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Sir James Cleverly",
+   "group": "Opposition frontbench",
+   "text": "To ask the Secretary of State for Housing, Communities and Local Government, how does the uplift in Rateable Values in the 2026 business rates revaluation affect the calculation of council funding in the Local Government Finance Settlement for 2026-27; and what estimate his Department has made of the potential impact of council areas with an above-average increase in Rateable Values on their net funding relative to the previous year from business rate revenue.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 1.0058,
+    "relevance": 0.7966,
+    "keyword": 42.1467,
+    "semantic": 0.7461,
+    "recency": 0.8418,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": 26,
+   "declared": null
+  },
+  {
+   "n": 11,
+   "kind": "record",
+   "title": "Zöe Franklin (Liberal Democrat; MP for Guildford, town seat (urban area of 77,000), South East; role on this date: Liberal Democrat Spokesperson (Local Government)) — House of Commons — 2 November 2026 — col. 627 — Budget Resolutions - Income Tax (Charge)",
+   "url": "https://hansard.parliament.uk/Commons/2026-11-02",
+   "record_id": "uk.org.publicwhip/debate/2026-11-02b.627.0",
+   "debate_path": "/debates/2026-11-02/commons/budget-resolutions-income-tax-charge#c627-0",
+   "date": "2026-11-02",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Budget Resolutions - Income Tax (Charge)",
+   "colnum": "627",
+   "uin": null,
+   "time": "18:06",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-11-02",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-11-02b.627.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26555",
+    "date": "2026-11-02",
+    "name": "Zöe Franklin",
+    "house": "commons",
+    "constituency": "Guildford",
+    "gss_code": "E14001258",
+    "region": "South East",
+    "nation": "England",
+    "party": "Liberal Democrat",
+    "party_id": "liberal-democrat",
+    "settlement": "town",
+    "urban_area": "Guildford",
+    "urban_area_pop": 77057,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Liberal Democrat Spokesperson (Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Liberal Democrat Spokesperson (Local Government)",
+      "title": "Liberal Democrat Spokesperson (Local Government)"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 45,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 8429,
+     "pct": 17.5,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 14508,
+     "majority": 8429,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 8429,
+     "pct": 17.5,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Guildford"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Zöe Franklin",
+   "group": "Opposition frontbench",
+   "text": "I think we need to recognise that we are looking forward. Multi-year settlements are a positive step, but there is still ultimately no fix for local government finances, which is causing enormous problems for local councils.\n\nReturning to the issue of SEND, families do not lie awake worrying about governance models. They worry about whether their child will receive the support they need, about delays to assessments and about whether an education, health and care plan will be delivered in time. I welcome the Government’s commitment to cover 90% of eligible historical high needs deficits accrued by March, but uncertainty remains about whether deficits accumulated in subsequent years will also be covered. This Budget also does not provide the scale of additional adult social care funding needed to address rising demand.\n\nFinally on local government finance, I want to address business rates. I welcome the principle that more locally generated revenue should remain in local areas. Giving councils a stronger stake in local economic success is sensible. However, retaining more revenue does not necessarily mean receiving more funding. The reality is that councils only benefit from the share of business rates that they are allowed to retain. If a national policy decision reduces revenues, local government must be appropriately compensated. We must ensure that areas with fewer opportunities for growth are not left behind. Rural communities in particular should not find themselves disadvantaged by a system that increasingly relies on locally generated revenue. On my second test, the jury very much remains out.\n\nMy third test is whether the Budget will deliver tangible improvements to people’s lives. Good growth should mean growth that people can actually see and feel. It means a young family being able to afford a home and people being able to secure a GP appointment. It means reliable public transport and thriving town centres. It means ensuring that infrastructure arrives alongside development, rather than the reality we see, which is that the infrastructure arrives years afterwards.\n\nMy constituency of Guildford is home to a strong local economy, world-leading innovation and enormous potential, but beneath that prosperity, families are struggling with housing costs, children are growing up in poverty, and residents are frustrated by pressures on local services and infrastructure. That experience is not unique; it is being felt across the country.\n\nIf the Government genuinely want growth in every postcode, investment must translate into improvements. That means ensuring that the delivery of infrastructure comes with housing development, because people will support the development if they can see it. It also means growth beyond our major cities. As my hon. Friend the Member for Chippenham (Sarah Gibson) mentioned, it has to include our rural communities. Our high streets, of course, must also be central to that vision of growth.\n\nIn conclusion, the Liberal Democrats believe that genuine devolution must mean more than transferring powers from Whitehall to an equally centralised regional mayor. We want decisions to be taken closer to communities, and we want growth that reaches every community. The Government recognise those things, but there is still so far to go. We want to see tangible change for our residents.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.9662,
+    "relevance": 0.6505,
+    "keyword": 32.5557,
+    "semantic": 0.7147,
+    "recency": 0.9902,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 12,
+   "kind": "record",
+   "title": "Baroness Taylor of Stevenage (Labour; member of the House of Lords; role on this date: Parliamentary Under-Secretary (Housing, Communities and Local Government)) — Written answer, Lords written answers — 14 September 2026 — UIN HL3195 — Ministry of Housing, Communities and Local Government — Local Government Finance: Devolution",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-09-07/HL3195",
+   "record_id": "uk.org.publicwhip/wrans/2026-09-07.HL3195.r0",
+   "debate_path": null,
+   "date": "2026-09-14",
+   "chamber": "Lords written answers",
+   "record_type": "answer",
+   "heading": "Ministry of Housing, Communities and Local Government — Local Government Finance: Devolution",
+   "colnum": null,
+   "uin": "HL3195",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-09-07/HL3195",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-09-07.HL3195.r0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26102",
+    "date": "2026-09-14",
+    "name": "Baroness Taylor of Stevenage",
+    "house": "lords",
+    "constituency": null,
+    "gss_code": null,
+    "region": null,
+    "nation": null,
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": null,
+    "urban_area": null,
+    "urban_area_pop": null,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+      "title": "Parliamentary Under-Secretary (Housing, Communities and Local Government)"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 70,
+    "age_approximate": false,
+    "age_band": "70-plus",
+    "party_groups": []
+   },
+   "speaker_name_raw": "Baroness Taylor of Stevenage",
+   "group": "Government ministers",
+   "text": "The government has committed to replace grants from central government with a share of local income tax for every mayoral strategic authority from April 2028, and for greater retention of the revenue from business rates for local councils and strategic authorities from April 2027. In addition, all strategic authorities will be provided with the ability to introduce an Overnight Visitor Levy, with mayors able to set out their plans from March 2028. Further details will be set out in a Fiscal Devolution Roadmap, to be published alongside autumn budget. Please refer to the ‘Rewiring the State’ Cabinet Statement (and attached) published on 31 July 2026.\n\nRewiring the State Cabinet Statement (pdf, 199.6KB)",
+   "context": "To ask His Majesty's Government what plans they have to implement further fiscal devolution.",
+   "replies": null,
+   "ranking": {
+    "score": 0.9578,
+    "relevance": 0.6643,
+    "keyword": 34.7495,
+    "semantic": 0.7082,
+    "recency": 0.9611,
+    "authority": 1.5,
+    "authority_reason": "government minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 13,
+   "kind": "record",
+   "title": "Lewis Cocking (Conservative; MP for Broxbourne, town seat (urban area of 46,000), East of England; role on this date: Shadow Parliamentary Under Secretary (Housing, Communities and Local Government)) — Written question, Commons written answers — 19 October 2026 — UIN 32140 — Ministry of Housing, Communities and Local Government — Council Tax: Valuation",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/32140",
+   "record_id": "uk.org.publicwhip/wrans/2026-10-09.32140.q0",
+   "debate_path": null,
+   "date": "2026-10-19",
+   "chamber": "Commons written answers",
+   "record_type": "question",
+   "heading": "Ministry of Housing, Communities and Local Government — Council Tax: Valuation",
+   "colnum": null,
+   "uin": "32140",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/32140",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-10-09.32140.q0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26316",
+    "date": "2026-10-19",
+    "name": "Lewis Cocking",
+    "house": "commons",
+    "constituency": "Broxbourne",
+    "gss_code": "E14001139",
+    "region": "East of England",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "town",
+    "urban_area": "Cheshunt",
+    "urban_area_pop": 45832,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Parliamentary Under Secretary (Housing, Communities and Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Parliamentary Under Secretary (Housing, Communities and Local Government)",
+      "title": "Shadow Parliamentary Under Secretary (Housing, Communities and Local Government)"
+     },
+     {
+      "kind": "whip",
+      "role": "Opposition Assistant Whip (Commons)",
+      "portfolios": [],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Opposition Assistant Whip (Commons)",
+      "title": "Opposition Assistant Whip (Commons)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 34,
+    "age_approximate": true,
+    "age_band": "under-40",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 2858,
+     "pct": 6.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 12952,
+     "majority": 2858,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 2858,
+     "pct": 6.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Broxbourne"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Lewis Cocking",
+   "group": "Opposition frontbench",
+   "text": "To ask the Secretary of State for Housing, Communities and Local Government, pursuant to the answer of 4 September 2026, to Question 19147, on Council tax: Valuation, and further to page 85 of the Explanatory Memorandum to the Local Government Finance (Wales) Act 2024, whether the HMRC Valuation Office is forecasting a future appeal rate for the council tax surcharge in England (a) higher, (b) lower or (c) the same, as the average 3.15% rate, (min 2%, max 5%) assumed by the Valuation Office Agency and Valuation Tribunal for Wales for the council tax revaluation in Wales.",
+   "context": null,
+   "replies": [
+    {
+     "record_id": "uk.org.publicwhip/wrans/2026-10-09.32140.r0",
+     "date": "2026-10-19",
+     "text": "The Wales Council Tax Revaluation and the introduction of the High Value Council Tax Surcharge are not directly comparable for the purposes of estimating appeal rates. The valuation to identify properties worth more than £2m will be done in a targeted way, without specific reference to existing council tax bands. The Welsh revaluation applies across all Council Tax bands in Wales.\n\nGovernment recently consulted on the HVCTS challenge and appeal process and will publish its response shortly.",
+     "speaker_name_raw": "Jim McMahon",
+     "speaker": {
+      "person_id": "uk.org.publicwhip/person/25475",
+      "date": "2026-10-19",
+      "name": "Jim McMahon",
+      "house": "commons",
+      "constituency": "Oldham West, Chadderton and Royton",
+      "gss_code": "E14001416",
+      "region": "North West",
+      "nation": "England",
+      "party": "Labour/Co-operative",
+      "party_id": "labourco-operative",
+      "settlement": "city",
+      "urban_area": "Greater Manchester",
+      "urban_area_pop": 2461366,
+      "offices": [
+       {
+        "kind": "gov",
+        "role": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+        "portfolios": [
+         "housing_communities"
+        ],
+        "committee_id": null,
+        "committee_name": null,
+        "display_name": "Parliamentary Under-Secretary (Housing, Communities and Local Government)",
+        "title": "Parliamentary Under-Secretary (Housing, Communities and Local Government)"
+       }
+      ],
+      "other_names": [],
+      "gender": "M",
+      "age": 46,
+      "age_approximate": false,
+      "age_band": "40-54",
+      "first_elected": "2015-12-04",
+      "first_term": false,
+      "majority_then": {
+       "majority": 4976,
+       "pct": 12.9,
+       "band": "middle",
+       "election": "2024 general election",
+       "date": "2024-07-04"
+      },
+      "majority_band": "middle",
+      "runner_up": "independent",
+      "runner_up_then": {
+       "party": "Independent",
+       "party_id": "independent",
+       "votes": 8256,
+       "majority": 4976,
+       "election": "2024 general election",
+       "date": "2024-07-04"
+      },
+      "majority_now": {
+       "majority": 4976,
+       "pct": 12.9,
+       "band": "middle",
+       "election": "2024 general election",
+       "date": "2024-07-04",
+       "constituency": "Oldham West, Chadderton and Royton"
+      },
+      "party_groups": []
+     }
+    }
+   ],
+   "ranking": {
+    "score": 0.9547,
+    "relevance": 0.6483,
+    "keyword": 36.7545,
+    "semantic": 0.6822,
+    "recency": 0.9818,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 14,
+   "kind": "record",
+   "title": "Zöe Franklin (Liberal Democrat; MP for Guildford, town seat (urban area of 77,000), South East; role on this date: Liberal Democrat Spokesperson (Local Government)) — House of Commons — 2 November 2026 — col. 625 — Budget Resolutions - Income Tax (Charge)",
+   "url": "https://hansard.parliament.uk/Commons/2026-11-02",
+   "record_id": "uk.org.publicwhip/debate/2026-11-02b.625.3",
+   "debate_path": "/debates/2026-11-02/commons/budget-resolutions-income-tax-charge#c625-3",
+   "date": "2026-11-02",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Budget Resolutions - Income Tax (Charge)",
+   "colnum": "625",
+   "uin": null,
+   "time": "18:06",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-11-02",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-11-02b.625.3",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26555",
+    "date": "2026-11-02",
+    "name": "Zöe Franklin",
+    "house": "commons",
+    "constituency": "Guildford",
+    "gss_code": "E14001258",
+    "region": "South East",
+    "nation": "England",
+    "party": "Liberal Democrat",
+    "party_id": "liberal-democrat",
+    "settlement": "town",
+    "urban_area": "Guildford",
+    "urban_area_pop": 77057,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Liberal Democrat Spokesperson (Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Liberal Democrat Spokesperson (Local Government)",
+      "title": "Liberal Democrat Spokesperson (Local Government)"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 45,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 8429,
+     "pct": 17.5,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 14508,
+     "majority": 8429,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 8429,
+     "pct": 17.5,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Guildford"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Zöe Franklin",
+   "group": "Opposition frontbench",
+   "text": "My hon. Friend is absolutely right. We need that support to ensure that people can get from where they live in rural constituencies to other areas for work and education.\n\nGrowth is measured not by the number of new governance structures we create, but by whether people can find an affordable home, access GP appointments, travel to work, start a business and build a secure future in the place that they call home. For the Liberal Democrats, this Budget must meet three tests: democratic consent, sustainable local government finances and tangible improvements in everyday lives.\n\nThe first test is democratic consent. Devolution should bring power closer to communities. We should be careful not to mistake devolution for decentralisation. Power removed from Whitehall but concentrated in a single regional office, such as a mayor, is not necessarily power shared with local communities.\n\nIn Surrey, the home of my Guildford constituency, that distinction is becoming increasingly apparent. The Budget confirmed that the Government are in the final stages of agreeing arrangements for a mayoral strategic authority in Surrey, despite Ministers previously assuring the House that no area would be forced into a mayoral model. What has changed? There has been no vote of the councils that will have to operate within this structure, and residents have not been given an opportunity to express a view on what model they want. In fact, the bulk of the discussions appear to have been had with Surrey county council—a council that will be defunct in just six months—rather than the new east and west unitaries. How can the Government claim to be bringing power closer to communities when those same communities have had so little say?\n\nOf course, a mayor is democratically elected, but representing an entire county or region is very different to representing a specific town, village or ward. Local councillors understand the character, challenges and priorities of the communities they serve; they are often the first people residents turn to when problems arise. I ask the Minister what meaningful influence locally elected leaders will retain and how the voices of villages and rural communities will be protected under the new arrangements. Devolution should not be forced on communities; it should happen with them.\n\nMy second test is whether the Budget delivers sustainable local government finances. The Budget contains announcements on strategic authorities, borrowing powers, business rates retention and new fiscal freedoms. Some of those measures may prove beneficial, but we must not confuse devolution with funding reform. Local government’s central challenge is not governance but financial sustainability. While Ministers talk enthusiastically about new structures and powers, councils across England face profound financial pressure. The Local Government Association has warned of a billion-pound funding gap over the coming years. Against that backdrop, many councils are struggling simply to maintain core services.\n\nTo return to my area of Surrey, the six councils coming together to form West Surrey will inherit £4.5 billion of debt while simultaneously facing rising demand for adult social care, children’s services and support for children with special educational needs and disabilities. My concern is about how implementing measures without funding reform solves any of those problems. How does the new governance structure address historical debt? How does it ease pressure on social care budgets? How does it help councils meet rising demand for frontline services?\n\nThe Budget includes a £1.5 billion borrowing facility for the strategic authorities. While borrowing may help investment, it is no substitute for financial stability. We must learn lessons from councils such as Woking, where serious financial failures—failures caused by previous Conservative administrations—have left residents paying the price. Nowhere is the gap between structural reform and real-life outcomes clearer than in special educational needs.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.9514,
+    "relevance": 0.6406,
+    "keyword": 34.8053,
+    "semantic": 0.6912,
+    "recency": 0.9902,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 15,
+   "kind": "record",
+   "title": "James Murray (Labour/Co-operative; MP for Ealing North, city seat (Greater London urban area, 8.1m people), London; role on this date: Financial Secretary to the Treasury and Paymaster General) — Written answer, Commons written answers — 9 September 2026 — UIN 20384 — Treasury — Business Rates: Tax Allowances",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-08-28/20384",
+   "record_id": "uk.org.publicwhip/wrans/2026-08-28.20384.r0",
+   "debate_path": null,
+   "date": "2026-09-09",
+   "chamber": "Commons written answers",
+   "record_type": "answer",
+   "heading": "Treasury — Business Rates: Tax Allowances",
+   "colnum": null,
+   "uin": "20384",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-08-28/20384",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-08-28.20384.r0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25801",
+    "date": "2026-09-09",
+    "name": "James Murray",
+    "house": "commons",
+    "constituency": "Ealing North",
+    "gss_code": "E14001208",
+    "region": "London",
+    "nation": "England",
+    "party": "Labour/Co-operative",
+    "party_id": "labourco-operative",
+    "settlement": "city",
+    "urban_area": "Greater London",
+    "urban_area_pop": 8135667,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "Financial Secretary to the Treasury and Paymaster General",
+      "portfolios": [
+       "cabinet_office",
+       "treasury"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Financial Secretary to the Treasury and Paymaster General",
+      "title": "Financial Secretary to the Treasury and Paymaster General"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 43,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2019-12-13",
+    "first_term": false,
+    "majority_then": {
+     "majority": 12519,
+     "pct": 29.0,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 8144,
+     "majority": 12519,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 12519,
+     "pct": 29.0,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Ealing North"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "James Murray",
+   "group": "Government ministers",
+   "text": "Local authorities are responsible for the administration of the business rates system including decisions on the award of business rates reliefs in line with relief eligibility.\n\nLocal authorities also have discretionary powers to grant business rates relief to ratepayers in their area under Section 47 of the Local Government Finance Act 1988, having regard to the interests of their council taxpayers.",
+   "context": "To ask the Chancellor of the Exchequer, pursuant to the answer of 29 May 2026, to Question 1182, on Business Rates: Canary Wharf, what is his Department's policy on the provision of business rate relief to individual firms.",
+   "replies": null,
+   "ranking": {
+    "score": 0.9431,
+    "relevance": 0.7874,
+    "keyword": 40.9877,
+    "semantic": 0.7482,
+    "recency": 0.9582,
+    "authority": 1.25,
+    "authority_reason": "government minister (other portfolio)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 16,
+   "kind": "record",
+   "title": "Lord Jamieson (Conservative; member of the House of Lords; role on this date: Shadow Minister (Housing, Communities and Local Government)) — has raised this subject repeatedly (on several separate days) — Written question, Lords written answers — 23 April 2026 — UIN HL16235 — Treasury — Business Rates",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-04-13/HL16235",
+   "record_id": "uk.org.publicwhip/wrans/2026-04-13.HL16235.q0",
+   "debate_path": null,
+   "date": "2026-04-23",
+   "chamber": "Lords written answers",
+   "record_type": "question",
+   "heading": "Treasury — Business Rates",
+   "colnum": null,
+   "uin": "HL16235",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-04-13/HL16235",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-04-13.HL16235.q0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26299",
+    "date": "2026-04-23",
+    "name": "Lord Jamieson",
+    "house": "lords",
+    "constituency": null,
+    "gss_code": null,
+    "region": null,
+    "nation": null,
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": null,
+    "urban_area": null,
+    "urban_area_pop": null,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Minister (Housing, Communities and Local Government)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Minister (Housing, Communities and Local Government)",
+      "title": "Shadow Minister (Housing, Communities and Local Government)"
+     },
+     {
+      "kind": "whip",
+      "role": "Opposition Whip (Lords)",
+      "portfolios": [],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Opposition Whip (Lords)",
+      "title": "Opposition Whip (Lords)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 63,
+    "age_approximate": false,
+    "age_band": "55-69",
+    "party_groups": []
+   },
+   "speaker_name_raw": "Lord Jamieson",
+   "group": "Opposition frontbench",
+   "text": "To ask His Majesty's Government, with reference to the Core Spending Power table: final local government finance settlement 2026–27 to 2028–29, published on 9 February, and the associated council tax requirement estimates for each year from 2024–25 to 2028–29 in England, whether they will publish equivalent estimates for the total business rate receipts in England in each of those years.",
+   "context": null,
+   "replies": [
+    {
+     "record_id": "uk.org.publicwhip/wrans/2026-04-13.HL16235.r0",
+     "date": "2026-04-23",
+     "text": "As set out in the Office for Budget Responsibility’s March 2026 Economic and Fiscal Outlook, business rates receipts in England were £32.1 billion in 2024/25 and are forecast to be £33.7 billion, £37.1 billion, £37.9 billion and £38.8 billion in 2025/26, 2026/27, 2027/28 and 2028/29 respectively.",
+     "speaker_name_raw": "Lord Livermore",
+     "speaker": {
+      "person_id": "uk.org.publicwhip/person/25477",
+      "date": "2026-04-23",
+      "name": "Lord Livermore",
+      "house": "lords",
+      "constituency": null,
+      "gss_code": null,
+      "region": null,
+      "nation": null,
+      "party": "Labour",
+      "party_id": "labour",
+      "settlement": null,
+      "urban_area": null,
+      "urban_area_pop": null,
+      "offices": [
+       {
+        "kind": "gov",
+        "role": "The Financial Secretary to the Treasury",
+        "portfolios": [
+         "treasury"
+        ],
+        "committee_id": null,
+        "committee_name": null,
+        "display_name": "The Financial Secretary to the Treasury",
+        "title": "The Financial Secretary to the Treasury"
+       }
+      ],
+      "other_names": [],
+      "gender": "M",
+      "age": 50,
+      "age_approximate": false,
+      "age_band": "40-54",
+      "party_groups": []
+     }
+    }
+   ],
+   "ranking": {
+    "score": 0.9045,
+    "relevance": 0.6829,
+    "keyword": 33.4359,
+    "semantic": 0.7309,
+    "recency": 0.8831,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": 5,
+   "declared": null
+  },
+  {
+   "n": 17,
+   "kind": "record",
+   "title": "Steve Reed (Labour/Co-operative; MP for Streatham and Croydon North, city seat (Greater London urban area, 8.1m people), London; role on this date: The Secretary of State for Housing, Communities and Local Government) — House of Commons — 11 February 2026 — col. 831 — Local Government Finance",
+   "url": "https://hansard.parliament.uk/Commons/2026-02-11",
+   "record_id": "uk.org.publicwhip/debate/2026-02-11c.831.2",
+   "debate_path": "/debates/2026-02-11/commons/local-government-finance#c831-2",
+   "date": "2026-02-11",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Local Government Finance",
+   "colnum": "831",
+   "uin": null,
+   "time": "15:02",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-02-11",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-02-11c.831.2",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25170",
+    "date": "2026-02-11",
+    "name": "Steve Reed",
+    "house": "commons",
+    "constituency": "Streatham and Croydon North",
+    "gss_code": "E14001527",
+    "region": "London",
+    "nation": "England",
+    "party": "Labour/Co-operative",
+    "party_id": "labourco-operative",
+    "settlement": "city",
+    "urban_area": "Greater London",
+    "urban_area_pop": 8135667,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "The Secretary of State for Housing, Communities and Local Government",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "The Secretary of State for Housing, Communities and Local Government",
+      "title": "The Secretary of State for Housing, Communities and Local Government"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 62,
+    "age_approximate": false,
+    "age_band": "55-69",
+    "first_elected": "2012-11-30",
+    "first_term": false,
+    "majority_then": {
+     "majority": 15603,
+     "pct": 35.0,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "green",
+    "runner_up_then": {
+     "party": "Green Party",
+     "party_id": "green",
+     "votes": 7629,
+     "majority": 15603,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 15603,
+     "pct": 35.0,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Streatham and Croydon North"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Steve Reed",
+   "group": "Government ministers",
+   "text": "I agree with the Chair of the Housing, Communities and Local Government Committee that council tax cannot be the only means to fix these problems. That is why we have increased the level of funding overall and reconnected it with the deprivation indices that tell us which areas have the greatest need, and should therefore get a fair share of the available funding.\n\nThe Home Secretary and I have also agreed an additional £3.50 council tax flexibility for six police and crime commissioners in 2026-27, where that was critical to financial sustainability in maintaining law and order. It is for councillors, mayors and police and crime commissioners to set their own council tax, and to take into account the impact on households when making those decisions.\n\nNationally, council tax will not increase by more than it did last year. Six local authorities set council tax bills between £450 and £1,000 lower than the national average because of the high value of homes in their areas. The previous Government made no adjustment in the funding formula for this, creating unfairness. It is not fair that people living in our poorest communities should subsidise rock-bottom bills in some of our wealthiest areas, so I am giving those councils additional flexibility to manage their budgets as we align funding with need, as we should.\n\nFor councils that need some support to balance their budgets this year, we will no longer just sign off borrowing or the sale of assets without a credible approach to reforming services to get back to financial stability. Later this month, I will confirm arrangements for supporting councils in the most difficult positions, but they will be expected to bring forward plans for more effective and sustainable services, built on sustainable budgeting into the future.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.8982,
+    "relevance": 0.7058,
+    "keyword": 38.8045,
+    "semantic": 0.7073,
+    "recency": 0.8483,
+    "authority": 1.5,
+    "authority_reason": "government minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 18,
+   "kind": "record",
+   "title": "Gideon Amos (Liberal Democrat; MP for Taunton and Wellington, town seat (urban area of 65,000), South West; role on this date: Liberal Democrat Spokesperson (Housing and Communities)) — House of Commons — 11 February 2026 — col. 842 — Local Government Finance",
+   "url": "https://hansard.parliament.uk/Commons/2026-02-11",
+   "record_id": "uk.org.publicwhip/debate/2026-02-11c.842.4",
+   "debate_path": "/debates/2026-02-11/commons/local-government-finance#c842-4",
+   "date": "2026-02-11",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Local Government Finance",
+   "colnum": "842",
+   "uin": null,
+   "time": "15:58",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-02-11",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-02-11c.842.4",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26531",
+    "date": "2026-02-11",
+    "name": "Gideon Amos",
+    "house": "commons",
+    "constituency": "Taunton and Wellington",
+    "gss_code": "E14001540",
+    "region": "South West",
+    "nation": "England",
+    "party": "Liberal Democrat",
+    "party_id": "liberal-democrat",
+    "settlement": "town",
+    "urban_area": "Taunton",
+    "urban_area_pop": 64621,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Liberal Democrat Spokesperson (Housing and Communities)",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Liberal Democrat Spokesperson (Housing and Communities)",
+      "title": "Liberal Democrat Spokesperson (Housing and Communities)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 61,
+    "age_approximate": false,
+    "age_band": "55-69",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 11939,
+     "pct": 23.7,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 12392,
+     "majority": 11939,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 11939,
+     "pct": 23.7,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Taunton and Wellington"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Gideon Amos",
+   "group": "Opposition frontbench",
+   "text": "In our manifesto, the Liberal Democrats called for multi-year settlements for local government; for councils to be freed to generate more revenue, including by charging more council tax on second homes and from increased planning fees; and for an extra £2 billion on education, including for special educational needs and disabilities. It is right that funding for local government is rebuilt after the consequences of the 2008 crash and the famous letter left by the outgoing Labour Government that they had spent all the money and there was none left. The moves forward in the areas I have mentioned through this settlement are positive and we welcome them.\n\nThe announcement that 90% of SEND service debts that councils have unavoidably built up will be met by central Government also begins to address the crisis in SEND, but I am afraid it does not finish the job. The promised SEND reforms have again been delayed. Whatever the outcome of those SEND reforms, they must not be a precursor to weakening the protection disabled children rely on and their parents expect.\n\nOur five tests for SEND reform would guarantee that children’s rights to SEND assessments and support are maintained, and that the voices of children and young people with SEND, and those of their families and carers, remain at the centre of the reform process. Secondly, capacity in state special school provision must be increased, alongside improvements to inclusive mainstream settings. Thirdly, national Government must top up funding for each child whose needs exceed local authority provision within a given cap. The Government must get on and introduce a cap on the profits made by private sector SEND companies. Fourthly, early intervention must be improved and waiting must be times cut. Lastly, schools must be incentivised to both accept SEND pupils and train their staff.\n\nThe additional funds for housing and homelessness, while small, are welcome, including those for Somerset council in my constituency. The extra funding through the recovery grant is also welcome, but places such as Kingston upon Hull tell us that it does not go far enough and will not fill the gaping hole in financial stability that persists. It is disappointing that social housing does not get a mention in the settlement. We need a new generation of council and social rented homes. Our plans are for 150,000 per year and Shelter’s are for 90,000 per year. Both would be a good proposition. The Government’s proposal for 18,000 per year just will not meet the level of need out there.\n\nThe additional funding, along with provision for SEND deficits, will help councils like mine in Somerset to keep the council tax rise to the 4.99% norm across the country. In a cost of living crisis, people cannot afford more than the minimum increase. That is something Somerset MPs and the council pushed hard for, and I am grateful to the Local Government Minister for meeting us and engaging with us on that. It is notable that 70 out of the 74 Liberal Democrat-led councils have kept the council tax rise to the norm minimum of 4.99%. The four that are, exceptionally, going above that all inherited from their previous Conservative administrations a social care funding time bomb.\n\nVoters will take note that Reform-led Worcestershire county council is increasing council tax to the highest level allowed in the country. Typically, Reform Members are not here to take part in the debate on local government finance. The message is clear: vote Reform and pay more tax than anyone else in the country.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.8636,
+    "relevance": 0.6786,
+    "keyword": 38.193,
+    "semantic": 0.6928,
+    "recency": 0.8483,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 19,
+   "kind": "record",
+   "title": "Florence Eshalomi (Labour/Co-operative; MP for Vauxhall and Camberwell Green, city seat (Greater London urban area, 8.1m people), London; role on this date: Chair, Housing, Communities and Local Government Committee) — House of Commons — 17 December 2025 — col. 967 — Local Government Finance",
+   "url": "https://hansard.parliament.uk/Commons/2025-12-17",
+   "record_id": "uk.org.publicwhip/debate/2025-12-17b.967.2",
+   "debate_path": "/debates/2025-12-17/commons/local-government-finance#c967-2",
+   "date": "2025-12-17",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Local Government Finance",
+   "colnum": "967",
+   "uin": null,
+   "time": "15:35",
+   "official_url": "https://hansard.parliament.uk/Commons/2025-12-17",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2025-12-17b.967.2",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25759",
+    "date": "2025-12-17",
+    "name": "Florence Eshalomi",
+    "house": "commons",
+    "constituency": "Vauxhall and Camberwell Green",
+    "gss_code": "E14001559",
+    "region": "London",
+    "nation": "England",
+    "party": "Labour/Co-operative",
+    "party_id": "labourco-operative",
+    "settlement": "city",
+    "urban_area": "Greater London",
+    "urban_area_pop": 8135667,
+    "offices": [
+     {
+      "kind": "chair",
+      "role": "Chair",
+      "portfolios": [
+       "housing_communities"
+      ],
+      "committee_id": "housing-communities-and-local-government-committee",
+      "committee_name": "Housing, Communities and Local Government Committee",
+      "display_name": "Chair, Housing, Communities and Local Government Committee",
+      "title": "Chair, Housing, Communities and Local Government Committee"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 45,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2019-12-13",
+    "first_term": false,
+    "majority_then": {
+     "majority": 15112,
+     "pct": 40.3,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "green",
+    "runner_up_then": {
+     "party": "Green Party",
+     "party_id": "green",
+     "votes": 6416,
+     "majority": 15112,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 15112,
+     "pct": 40.3,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Vauxhall and Camberwell Green"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Florence Eshalomi",
+   "group": "Select committee chairs",
+   "text": "I thank the Minister for her statement. I know she has been working really hard on this issue since she took on the role a few months ago. She is aware of the many pressing issues facing councils up and down the country—from SEND to temporary accommodation, housing and adult social care—and 14 years of under-investment will not be reversed by one funding settlement. It is therefore important that we continue to work with councils.\n\nThis is the first multi-year settlement in a decade, which will help our local leaders in planning for the future and, most importantly, planning for their local residents. I welcome the inclusion of local housing costs in the new funding formula, but ultimately it does not take in local housing allowance, which the Minister knows has been frozen for many years and is still causing a lot of pressure for councils.\n\nThe Minister mentioned that the Government will be looking at the council tax freeze in some areas, and at lifting referendum principles. She knows there is growing consensus on wholescale council tax reform instead of us tweaking it. It is the most regressive form of taxation and there is inequality across the country. Will the Minister look at what the Committee’s report says about a wholescale review of council tax banding, so that local leaders can have funding to spend on their local areas, and make sure that other areas see that funding come through?",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.7857,
+    "relevance": 0.6368,
+    "keyword": 37.1716,
+    "semantic": 0.6711,
+    "recency": 0.8226,
+    "authority": 1.5,
+    "authority_reason": "select committee chair (housing_communities)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 20,
+   "kind": "record",
+   "title": "Helen Hayes (Labour; MP for Dulwich and West Norwood, city seat (Greater London urban area, 8.1m people), London; role on this date: Chair, Education Committee) — Westminster Hall — 10 February 2026 — col. 317 — Inner-London Local Authorities: Funding — [Dr Andrew Murrison in the Chair]",
+   "url": "https://hansard.parliament.uk/Commons/2026-02-10",
+   "record_id": "uk.org.publicwhip/westminhall/2026-02-10b.317.2",
+   "debate_path": "/debates/2026-02-10/westminster-hall/inner-london-local-authorities-funding#c317-2",
+   "date": "2026-02-10",
+   "chamber": "Westminster Hall",
+   "record_type": "speech",
+   "heading": "Inner-London Local Authorities: Funding — [Dr Andrew Murrison in the Chair]",
+   "colnum": "317",
+   "uin": null,
+   "time": "14:30",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-02-10",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/whall/?id=2026-02-10b.317.2",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25310",
+    "date": "2026-02-10",
+    "name": "Helen Hayes",
+    "house": "commons",
+    "constituency": "Dulwich and West Norwood",
+    "gss_code": "E14001205",
+    "region": "London",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "city",
+    "urban_area": "Greater London",
+    "urban_area_pop": 8135667,
+    "offices": [
+     {
+      "kind": "chair",
+      "role": "Chair",
+      "portfolios": [
+       "education"
+      ],
+      "committee_id": "education-committee",
+      "committee_name": "Education Committee",
+      "display_name": "Chair, Education Committee",
+      "title": "Chair, Education Committee"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 51,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2015-05-08",
+    "first_term": false,
+    "majority_then": {
+     "majority": 18789,
+     "pct": 41.4,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "green",
+    "runner_up_then": {
+     "party": "Green Party",
+     "party_id": "green",
+     "votes": 8567,
+     "majority": 18789,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 18789,
+     "pct": 41.4,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Dulwich and West Norwood"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Helen Hayes",
+   "group": "Select committee chairs",
+   "text": "My hon. Friend makes the point about the recovery grant very well. I will come on to some practical suggestions for what the Government could do to alleviate that situation in the short term.\n\nCouncil tax equalisation, such that the grant is now based on each area’s share of the national tax base and not actual local tax levels, penalises low tax base, high-needs areas like Lambeth and Southwark. The business rates reset will wipe out historical strong growth in some inner-London boroughs, and falling numbers of children will also have an impact through the children’s formula, even though need is growing and increasingly complex.\n\nThe risk is that our councils are left in an increasingly precarious situation and are forced to make impossibly hard choices about local services in the face of increasing need. Having agreed the final funding settlement—it is welcome that it is for three years, which gives our councils more certainty—there is more for the Government to do to help councils bring down their costs and reduce need, so that service delivery is manageable within the resources that are available.\n\nOn behalf of my councils of Lambeth and Southwark, I have a number of asks of the Minister. Our councils desperately need help with the costs of temporary accommodation. The average cost of temporary accommodation in London has risen by 75% over the last five years, and the number of people seeking help with their housing has also increased dramatically, yet the amount that the Government pay councils to subsidise temporary accommodation has been frozen since 2011. Will the Government work towards increasing the subsidy so that it is closer to the actual housing costs that our councils face?\n\nTemporary accommodation is the least stable form of housing and it has terrible consequences for residents. I have known many constituents to get up at 5 am to travel long distances by bus to keep their children in the same school and give them some stability. Those costs could be saved if more residents could afford to rent privately, yet the freezing of the local housing allowance has made that increasingly impossible. Will the Minister work with her counterparts in the Department for Work and Pensions and the Treasury to increase the rate of local housing allowance to stop private renters from needing temporary accommodation? Some of the £5 million that is spent every day by London local authorities on temporary accommodation would be much better deployed keeping residents in stable homes through the local housing allowance than propping up the most awful situations in temporary accommodation.\n\nWith the application of the £35 million cap, councils in receipt of the recovery grant currently face a cliff edge. For Lambeth council that will mean, as my hon. Friend the Member for Clapham and Brixton Hill (Bell Ribeiro-Addy) said, a loss of £47.5 million over the next three years. If the cap was removed for just next year, it would give the council an additional £11 million to reduce the savings that it is currently having to plan for. Will the Minister consider that?\n\nCouncils have expressed concern to me about the Government’s assumptions about the level of council tax receipts. Will the Minister work with councils to ensure that the assumed level of council tax receipts closely matches actual council tax collections? The social housing crisis requires that new social homes are delivered at pace. In my constituency, we have council and housing association-owned sites with planning permission that are not currently being delivered because the soaring inflation caused by the Liz Truss mini-budget priced them out of viability.\n\nThe Government’s commitment to invest £39 billion in social housing is very welcome, but will the Minister ensure some of that funding is urgently made available to London boroughs that have sites that are ready to build? We urgently need that.\n\nThe overnight accommodation levy is very good news for London but it must be apportioned to where it is most needed. Will the Government mandate that at least 50% of the funds raised by the levy are retained locally by London boroughs to cover the costs incurred by services affected by tourism and to support local growth?",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.7853,
+    "relevance": 0.7409,
+    "keyword": 42.1439,
+    "semantic": 0.7072,
+    "recency": 0.8479,
+    "authority": 1.25,
+    "authority_reason": "select committee chair (other subject)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 21,
+   "kind": "record",
+   "title": "Markus Campbell-Savours (Labour; MP for Penrith and Solway, rural seat, North West; role on this date: backbencher) — Written question, Commons written answers — 19 October 2026 — UIN 32626 — Ministry of Housing, Communities and Local Government — Holiday Accommodation: Business Rates",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/32626",
+   "record_id": "uk.org.publicwhip/wrans/2026-10-09.32626.q2",
+   "debate_path": null,
+   "date": "2026-10-19",
+   "chamber": "Commons written answers",
+   "record_type": "question",
+   "heading": "Ministry of Housing, Communities and Local Government — Holiday Accommodation: Business Rates",
+   "colnum": null,
+   "uin": "32626",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/32626",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-10-09.32626.q2",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26485",
+    "date": "2026-10-19",
+    "name": "Markus Campbell-Savours",
+    "house": "commons",
+    "constituency": "Penrith and Solway",
+    "gss_code": "E14001424",
+    "region": "North West",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "rural",
+    "urban_area": "Penrith",
+    "urban_area_pop": 15181,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": null,
+    "age_approximate": null,
+    "age_band": null,
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 5257,
+     "pct": 10.7,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 14729,
+     "majority": 5257,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 5257,
+     "pct": 10.7,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Penrith and Solway"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Markus Campbell-Savours",
+   "group": "Backbench MPs, rural seats",
+   "text": "To ask the Secretary of State for Housing, Communities and Local Government, what estimate her Department has made of the difference between the (a) council‑tax revenue forgone by Westmorland and Furness Council as a result of properties operating as furnished holiday lets and receiving Small Business Rate Relief and (b) Section 31 grant funding provided to that authority to compensate for that relief; and if she will publish the most recent quantified assessment.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.7561,
+    "relevance": 0.7701,
+    "keyword": 45.4528,
+    "semantic": 0.7032,
+    "recency": 0.9818,
+    "authority": 1.0,
+    "authority_reason": "no ministerial or committee-chair office"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 22,
+   "kind": "record",
+   "title": "Markus Campbell-Savours (Labour; MP for Penrith and Solway, rural seat, North West; role on this date: backbencher) — Written question, Commons written answers — 19 October 2026 — UIN 31440 — Ministry of Housing, Communities and Local Government — Holiday Accommodation: Business Rates",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/31440",
+   "record_id": "uk.org.publicwhip/wrans/2026-10-09.31440.q1",
+   "debate_path": null,
+   "date": "2026-10-19",
+   "chamber": "Commons written answers",
+   "record_type": "question",
+   "heading": "Ministry of Housing, Communities and Local Government — Holiday Accommodation: Business Rates",
+   "colnum": null,
+   "uin": "31440",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-09/31440",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-10-09.31440.q1",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26485",
+    "date": "2026-10-19",
+    "name": "Markus Campbell-Savours",
+    "house": "commons",
+    "constituency": "Penrith and Solway",
+    "gss_code": "E14001424",
+    "region": "North West",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "rural",
+    "urban_area": "Penrith",
+    "urban_area_pop": 15181,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": null,
+    "age_approximate": null,
+    "age_band": null,
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 5257,
+     "pct": 10.7,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 14729,
+     "majority": 5257,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 5257,
+     "pct": 10.7,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Penrith and Solway"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Markus Campbell-Savours",
+   "group": "Backbench MPs, rural seats",
+   "text": "To ask the Secretary of State for Housing, Communities and Local Government, what estimate her Department has made of the difference between the (a) council‑tax revenue forgone by Cumberland Council as a result of properties operating as furnished holiday lets and receiving Small Business Rate Relief and (b) Section 31 grant funding provided to that authority to compensate for that relief; and if she will publish the most recent quantified assessment.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.7526,
+    "relevance": 0.7665,
+    "keyword": 45.6927,
+    "semantic": 0.6989,
+    "recency": 0.9818,
+    "authority": 1.0,
+    "authority_reason": "no ministerial or committee-chair office"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 23,
+   "kind": "edm",
+   "title": "EDM 2338, tabled 20 November 2025 by Jon Trickett (Labour) — Local authority funding (No. 2)",
+   "url": "/edms/64766",
+   "edm_id": 64766,
+   "uin": "2338",
+   "date": "2025-11-20",
+   "edm_title": "Local authority funding (No. 2)",
+   "motion_text": "That this House welcomes the Second Report of the Housing, Communities and Local Government Committee on The Funding and Sustainability of Local Government Finance, published on 23 July 2025, HC 514; notes the strong evidence that local authority funding requires urgent reform, with increases to overall funding and changes to funding processes; expresses deep concerns over the flawed and costly s114 process which has exacerbated the impact of austerity in local communities; and urges the UK Government to fully implement the recommendations, including fully funding adult social care by the end of the current Parliament, and reforming the tax system, including Council Tax.",
+   "chamber": "Early day motions",
+   "sponsor": {
+    "name": "Jon Trickett",
+    "party": "Labour",
+    "number": 10604,
+    "slug": "jon-trickett"
+   },
+   "party_counts": [
+    [
+     "Labour",
+     11
+    ],
+    [
+     "Green",
+     4
+    ],
+    [
+     "DUP",
+     1
+    ],
+    [
+     "Labour/Co-operative",
+     1
+    ]
+   ],
+   "sponsors_count": 17,
+   "text": "EDM 2338: Local authority funding (No. 2). Tabled on 20 November 2025 by Jon Trickett (Labour).\n\nThat this House welcomes the Second Report of the Housing, Communities and Local Government Committee on The Funding and Sustainability of Local Government Finance, published on 23 July 2025, HC 514; notes the strong evidence that local authority funding requires urgent reform, with increases to overall funding and changes to funding processes; expresses deep concerns over the flawed and costly s114 process which has exacerbated the impact of austerity in local communities; and urges the UK Government to fully implement the recommendations, including fully funding adult social care by the end of the current Parliament, and reforming the tax system, including Council Tax.\n\nSigned by 17 members (party on the day they signed): Labour 11; Green 4; DUP 1; Labour/Co-operative 1.\n\nAn early day motion records the view of the MPs who sign it. Few are debated, and ministers, whips and the Speaker do not sign them, so the absence of a signature says nothing about a member's view.",
+   "official_url": "https://edm.parliament.uk/early-day-motion/64766",
+   "group": "Early day motions"
+  },
+  {
+   "n": 24,
+   "kind": "devolved",
+   "title": "Shona Robison (Scottish National Party, Dundee City East) — Scottish Parliament — 19 November 2025 — Portfolio Question Time — Local Authority Funding",
+   "url": "/devolved/scottish-parliament/2025-11-19_16690#s67",
+   "date": "2025-11-19",
+   "chamber": "Scottish Parliament",
+   "legislature": "scottish-parliament",
+   "heading": "Portfolio Question Time — Local Authority Funding",
+   "member": {
+    "name": "Shona Robison",
+    "party": "Scottish National Party",
+    "seat": "Dundee City East",
+    "number": 14085,
+    "slug": "shona-robison"
+   },
+   "text": "Scottish Parliament, 19 November 2025 — Portfolio Question Time — Local Authority Funding. Shona Robison (Scottish National Party, Dundee City East), a member of the Scottish Parliament (not of the UK Parliament):\n\nThe Scottish Government has a long history of working with local authorities and COSLA to ensure that council finances are sustainable. With our partners and local government, in the context of the recently agreed fiscal framework, we will continue to ensure that the budget challenges that are facing both spheres of government are properly understood. Despite a decade of UK Government austerity measures, the total local government finance settlement increased by almost 50 per cent between 2013-14 and 2025-26. The Scottish Government will continue to ensure that the people of Scotland receive the high-quality public services that they expect and deserve.",
+   "group": "Scottish Parliament",
+   "official_url": "https://www.parliament.scot/chamber-and-committees/official-report/search-what-was-said-in-parliament/meeting-of-parliament-19-11-2025?meeting=16690&iob=142512#orscontributions_M1870E432P768C2742381",
+   "speaker_name_raw": "Shona Robison"
+  },
+  {
+   "n": 25,
+   "kind": "devolved",
+   "title": "Ariane Burgess (Green, Highlands and Islands) — Scottish Parliament — 26 February 2026 — Local Government Finance (Scotland) Order 2026",
+   "url": "/devolved/scottish-parliament/2026-02-26_20099#s17",
+   "date": "2026-02-26",
+   "chamber": "Scottish Parliament",
+   "legislature": "scottish-parliament",
+   "heading": "Local Government Finance (Scotland) Order 2026",
+   "member": {
+    "name": "Ariane Burgess",
+    "party": "Green",
+    "seat": "Highlands and Islands",
+    "number": 25987,
+    "slug": "ariane-burgess"
+   },
+   "text": "Scottish Parliament, 26 February 2026 — Local Government Finance (Scotland) Order 2026. Ariane Burgess (Green, Highlands and Islands), a member of the Scottish Parliament (not of the UK Parliament):\n\n: : The order may look technical, but it goes to the heart of whether councils can keep schools open, social care running, bins collected and community facilities functioning. Independent scrutiny has been clear that, even with the £15 billion of support and higher income from council tax and charges, councils face substantial and widening budget gaps. They are increasingly relying on reserves and one-off savings that cannot be repeated. Senior local government figures question whether the current model is sustainable.\n\nThe order provides the legal authority to distribute the general revenue grant and non-domestic rates, and it reflects some welcome progress, a modest real-terms uplift, more baseline funding and slightly less rigid ring fencing. However, it does not resolve the long-term pressures or the structural weaknesses of the system.\n\nTwo principles are central for the Scottish Greens—a genuine real-terms increase in flexible core funding, not managed decline, and far greater fiscal autonomy with a wider range of locally controlled taxes and charges to empower communities and sustain climate and nature spending. We recognise positive steps such as the visitor levy and higher council tax on second and holiday homes, which raise revenue and ease housing pressures from tourism and in rural areas but, taken together, they remain a patchwork of add-ons and not the coherent and modern local tax system that Scotland requires.\n\nThe deeper problem is the heavy dependence on the central block grant. We describe councils as local government but, fiscally, they operate as delivery arms for decisions that are taken elsewhere. Our vision is for councils that raise more of their own income, shape the local economy and environmental outcomes and are clearly accountable to voters for their tax and spending choices.\n\nThat requires confronting the outdated council tax. Based on early 1990s valuations, the tax is widely recognised as being unfair. We need revaluation and a transition to a replacement that better reflects property values and, over time, land values, so that unearned gains feed back into the public services that make communities liveable.\n\nWe also need to have an honest debate about non-domestic rates. Although they are branded as a local tax, they are largely controlled nationally. If councils are to lead on a greener and more resilient economy, they must have the fiscal levers to reward low-carbon investment, deter pollution and support community enterprise.\n\nThese issues are not abstract. Decisions that are made in council chambers mean shorter library hours, reduced leisure and cultural provision, fewer youth workers and more stretched social care, yet all those services tackle inequality and underpin climate and nature action. Councils are told to transform simply to remain viable, but they cannot plan and invest properly on insecure year-to-year settlements.\n\nThe budget offers a small real-terms increase and some extra flexibility, but the warning is clear that, without structural reform, councils will remain under strain and struggle to invest in decarbonising buildings, modernising transport and reorganising and restoring our local environments. Approving the order will keep the system running for another year but will not fix it.\n\nWe will support the measures that protect the core grant, reduce unnecessary ring fencing and expand local revenue powers, but we will continue to press for deeper change, a fairer and greener replacement for council tax, genuine local control over business rates and a fiscal framework that moves Scotland closer to the European norm of empowered, largely self-financing local government.\n\nOur constituents deserve councils that can plan beyond the next budget cycle, invest in prevention and lead on climate and nature, not institutions that are forced to manage decline. What must change is not the fabric of local services but the outdated way in which we fund them.\n\n17:23",
+   "group": "Scottish Parliament",
+   "official_url": "https://www.parliament.scot/chamber-and-committees/official-report/search-what-was-said-in-parliament/meeting-of-parliament-26-02-2026?meeting=20099&iob=209194#orscontributions_M16196E313P802C3030512",
+   "speaker_name_raw": "Ariane Burgess (Highlands and Islands) (Green)"
+  },
+  {
+   "n": 26,
+   "kind": "devolved",
+   "title": "Douglas Ross (Conservative, Highlands and Islands) — Scottish Parliament — 28 January 2026 — Natural Environment (Scotland) Bill: Stage 3",
+   "url": "/devolved/scottish-parliament/2026-01-28_16798#s138",
+   "date": "2026-01-28",
+   "chamber": "Scottish Parliament",
+   "legislature": "scottish-parliament",
+   "heading": "Natural Environment (Scotland) Bill: Stage 3",
+   "member": {
+    "name": "Douglas Ross",
+    "party": "Conservative",
+    "seat": "Highlands and Islands",
+    "number": 25531,
+    "slug": "douglas-ross"
+   },
+   "text": "Scottish Parliament, 28 January 2026 — Natural Environment (Scotland) Bill: Stage 3. Douglas Ross (Conservative, Highlands and Islands), a member of the Scottish Parliament (not of the UK Parliament):\n\nMaybe the minister has accepted the argument. We are making progress at last.\n\nI urge members to vote in favour of amendment 60A—I think that that is the amendment that we will come to first—which simply urges, asks and requests the Government to do a survey of the population of urban and coastal gulls, because we know that, at the moment, NatureScot is taking decisions and determining licence applications without the data and information. If amendment 60A is not successful, amendment 60 will not be worth the paper it is written on. I urge members to vote it down so that we can go back to the stage 2 amendment that was passed by the Rural Affairs and Islands Committee.\n\nI turn to my other amendments in the group, starting with amendment 148 on the gull management fund. The minister said that there is no need to assess how much local authorities are spending on gull management, but I think that there is a big need, because taxpayers’ money is being spent on protecting buildings and people from the menace of gulls.\n\nIf local councils across Scotland are going to hike up council tax—as is very likely, because of the budget settlement that has been proposed by the SNP; indeed, the SNP representative for finance on the Convention of Scottish Local Authorities has said that it is a very bad budget for local government—and if local councils are going to be spending the increased money that they get from local residents on projects to protect buildings, individuals and communities from gulls, we should know how much that is. In my local authority area, Moray Council, it is tens of thousands of pounds. We should know how much is being spent in Perth and Kinross—the minister’s local authority area—and all around Scotland, up to the islands and down to the Borders. We need that important information.\n\nIt is not just local authorities that are affected. I have done a lot of work with the business improvement districts in Inverness and Nairn, and Lucy Harding and Lorraine McBride have explained how much money they have to spend week after week, month after month and year after year on tackling the menace of gulls. That money is a BID levy that businesses pay. It should be used to promote the local economy and the businesses in those BID areas, yet a lot of it has be spent on measures to protect properties and people from gulls. Therefore, amendment 148 is important.\n\nThe minister mentioned the £100,000 funding that the Scottish Government proposed in October at its gulls summit in Inverness, but that is a drop in the ocean compared with what individuals, businesses, BIDs and councils currently spend on gulls. We need to know how much money is being spent in total and where that money could and should be coming from.\n\nAmendments 149, 150 and 151 are all alternative amendments, by which I mean that I am offering three different alternatives for bodies to consider licences to control gulls. That could either be Scottish Government ministers, local authorities or a totally different body that Scottish ministers come up with. Whichever the Parliament chooses will be better than the status quo.\n\nThe minister says that he does not trust NatureScot to make those decisions. I absolutely do not, either. It has been a complete and utter failure. Time after time, NatureScot has come up with ludicrous reasons for refusing licences. I use the word “ludicrous”, in particular, because that is the minister’s assessment—the minister has said on the record that NatureScot’s determination of some licences has been “ludicrous”.\n\nIf the Scottish Government, including the minister in charge—who, as he said, has the ability to revoke that power—thinks that NatureScot is coming up with ludicrous decisions, it should be stripped of that power. It is as clear as day that there is a conflict of interest when NatureScot is, on the one hand, in charge of conserving bird numbers and, on the other hand, the authority that determines whether or not someone gets a licence to control the bird numbers.\n\nI will not go through all the issues that we have previously articulated in the chamber and at committee, but when an organisation is telling people to hire a cherry picker to go up on a roof in order to take a picture of a nest where seagulls have laid their eggs, and to take a photograph with that day’s newspaper to confirm that that is when the nest and the eggs were there, that is ludicrous. When, at a summit hosted at its headquarters, NatureScot is advising people to walk down the street waving their arms—I will not do the actions; I will keep my hands in—or to draw googly eyes on pizza boxes to deter the gulls, that body no longer deserves trust and respect or to enforce and apply those licences.\n\nI know that time is moving on, but I believe that it is important that NatureScot is finally stripped of its power to issue the licences. It is coming up with ludicrous solutions to an important issue, and it does not deserve that power. If we agree to any of amendments 149 to 151, it will be stripped of that power and others will be encouraged to do a far better job.\n\nI move amendment 60A.",
+   "group": "Scottish Parliament",
+   "official_url": "https://www.parliament.scot/chamber-and-committees/official-report/search-what-was-said-in-parliament/meeting-of-parliament-28-01-2026?meeting=16798&iob=143516#orscontributions_M4981E312P801C2764415",
+   "speaker_name_raw": "Douglas Ross"
+  },
+  {
+   "n": 27,
+   "kind": "devolved",
+   "title": "John Swinney (Scottish National Party, Perthshire North) — Scottish Parliament — 2 June 2026 — First Minister’s Question Time — Local Authority Funding",
+   "url": "/devolved/scottish-parliament/2026-06-02_20164#s80",
+   "date": "2026-06-02",
+   "chamber": "Scottish Parliament",
+   "legislature": "scottish-parliament",
+   "heading": "First Minister’s Question Time — Local Authority Funding",
+   "member": {
+    "name": "John Swinney",
+    "party": "Scottish National Party",
+    "seat": "Perthshire North",
+    "number": 10581,
+    "slug": "john-swinney"
+   },
+   "text": "Scottish Parliament, 2 June 2026 — First Minister’s Question Time — Local Authority Funding. John Swinney (Scottish National Party, Perthshire North), a member of the Scottish Parliament (not of the UK Parliament):\n\nI understand the importance of Angela Ross’s point. I visited North Berwick with Mr McLennan during the election campaign; it was very busy on that occasion. From my knowledge of the town, I can see that is a bustling and vibrant community. The concerns that the member raises were spelt out to me directly by a number of local businesses on that occasion, so I recognise the seriousness of those points.\n\nThe decision on parking meters was taken by East Lothian Council and it is up to the council to explain to its constituents exactly why it took that decision. When it comes to funding arrangements, we as a Parliament have to ensure that we provide adequate levels of funding on a sustainable basis to a variety of different public organisations, and the needs of local authorities will be central to that judgment. If Parliament wishes to spend more money on local authority services, we have to be prepared to take the decisions that enable that to be the case.\n\nThe Government has given an increased local authority settlement to local government and that gets translated into funding for individual local authorities. We will engage with Parliament about the composition of the budget bill as the budget process takes its course through Parliament later this year.",
+   "group": "Scottish Parliament",
+   "official_url": "https://www.parliament.scot/chamber-and-committees/official-report/search-what-was-said-in-parliament/meeting-of-parliament-02-06-2026?meeting=20164&iob=222943#orscontributions_M2098E462P868C3057052",
+   "speaker_name_raw": "The First Minister (John Swinney)"
+  },
+  {
+   "n": 28,
+   "kind": "devolved",
+   "title": "Roz McCall (Conservative, Mid Scotland and Fife) — Scottish Parliament — 18 March 2026 — Portfolio Question Time — Demand for Local Authority Services (Budget 2026-27)",
+   "url": "/devolved/scottish-parliament/2026-03-18_20147#s52",
+   "date": "2026-03-18",
+   "chamber": "Scottish Parliament",
+   "legislature": "scottish-parliament",
+   "heading": "Portfolio Question Time — Demand for Local Authority Services (Budget 2026-27)",
+   "member": {
+    "name": "Roz McCall",
+    "party": "Conservative",
+    "seat": "Mid Scotland and Fife",
+    "number": 26091,
+    "slug": "roz-mccall"
+   },
+   "text": "Scottish Parliament, 18 March 2026 — Portfolio Question Time — Demand for Local Authority Services (Budget 2026-27). Roz McCall (Conservative, Mid Scotland and Fife), a member of the Scottish Parliament (not of the UK Parliament):\n\nI am glad that I got to ask the question, because it means that I am the first to wish the cabinet secretary all the best in her future endeavours.\n\nIn large rural local authorities such as Perth and Kinross Council, the cost of delivering services from social care to education and community provision is already significantly higher, and councils need to make increasingly difficult decisions about the services that they can sustain. This year, the Scottish National Party administration in Perth and Kinross has imposed an 8.9 per cent council tax increase, taking the average band D bill to £1,673 a year. That rise was justified locally on the basis of rising demand and what the SNP council described as an insufficient funding settlement from the Scottish Government.\n\nThe cabinet secretary pointed to a record local government settlement in the budget. However, if the amount of funding was truly sufficient, SNP-run councils such as Perth and Kinross Council would not be forced to raise council tax by nearly 9 per cent simply to stand still.\n\nDoes the cabinet secretary accept that the so-called record funding is not keeping pace with rising costs? Does she accept that the reality of the choices that were made in the budget is that there is a gap that is now being filled by higher council tax, which is leaving my constituents paying £130 a year more for less while still facing uncertainty about front-line services?",
+   "group": "Scottish Parliament",
+   "official_url": "https://www.parliament.scot/chamber-and-committees/official-report/search-what-was-said-in-parliament/meeting-of-parliament-18-03-2026?meeting=20147&iob=215947#orscontributions_M16970E358P847C3044739",
+   "speaker_name_raw": "Roz McCall"
+  },
+  {
+   "n": 29,
+   "kind": "devolved",
+   "title": "Jayne Bryant (Labour, Newport West) — Senedd Cymru (Welsh Parliament) — 27 January 2026 — 7. Debate: The Local Government Settlement 2026-27",
+   "url": "/devolved/senedd/senedd2026-01-27#s302",
+   "date": "2026-01-27",
+   "chamber": "Senedd Cymru (Welsh Parliament)",
+   "legislature": "senedd",
+   "heading": "7. Debate: The Local Government Settlement 2026-27",
+   "member": {
+    "name": "Jayne Bryant",
+    "party": "Labour",
+    "seat": "Newport West",
+    "number": 26170,
+    "slug": "jayne-bryant"
+   },
+   "text": "Senedd Cymru (Welsh Parliament), 27 January 2026 — 7. Debate: The Local Government Settlement 2026-27. Jayne Bryant (Labour, Newport West), a member of the Senedd Cymru (Welsh Parliament) (not of the UK Parliament):\n\nDiolch, Llywydd. I'd like to thank all Members for their interest and contributions today. All Members highlighted the importance of local government, the services they provide, and the people who work in local authorities—those elected members and officers.\n\nI think the Tories seem to have forgotten the 14 years of austerity that they inflicted on the UK and the impact that that has. The fact that we've been able to put in almost £410 million of new revenue and capital allocations and extra funding for inflationary and pay pressures is because we have a UK Labour Government.\n\nI really do appreciate that Mike highlighted some of the demands that have been found with local authorities. We know that they're increasing, especially in areas such as social care, school transport and ALN. These are ongoing trends. And that's why it's really important to try and put in preventative measures as well, not necessarily to reduce costs, but to stem that demand. I know local authorities in different places are doing things in different ways, and that's why it's really important that they share those experiences and those good practices.\n\nSo, while the settlement represents a real-terms increase, I do recognise, as I said, that demand for services, alongside those cost pressures, means that authorities will still need to make decisions on services, efficiencies and council tax in setting budgets. But nevertheless, this is a settlement that builds on improved allocations on previous years.\n\nA number of Members mentioned the funding formula. So, the core funding we provide to local government is distributed through a well-established formula that's created and developed with local government and agreed annually with local government through the finance sub-group of the partnership council for Wales. This formula is free from political agenda and driven by data. It balances relative need and relative ability to raise income, so that authorities across Wales are treated fairly and even-handedly. There is an ongoing work programme to maintain and update the formula, including how the formula needs to respond to our work to make council tax fairer in Wales and to other changing policies and circumstances. And this includes work to review and update the data and weightings, such as sparsity and deprivation measures.\n\nCarolyn mentioned the funding floor, and I think Jane did as well. The funding floor is considered in any year that the change in allocation for an individual authority is considered to be unmanageable. Additional funding was added in the 2026-27 provisional local government settlement, and that enabled us a funding floor of 2.3 per cent, which benefited 10 authorities. And that followed on from the basic funding floor the year before in the agreement with Jane Dodds.\n\nBut this budget agreement shows the strength, I believe, of the Senedd parties working together to deliver the progressive shared priorities for the people of Wales. Through this agreement, we've secured the passage of the budget and avoided potentially catastrophic cuts to funding for local government next year.\n\nIt was always our intention to use all our resources to secure a more ambitious final budget. That we've done, and we've done just that. At its heart, this is a Labour budget protecting public services and safeguarding jobs. So, I commend the settlement to the Senedd. It demonstrates our ongoing commitment to strong public services and continues to support local government across Wales. Diolch yn fawr.",
+   "group": "Senedd Cymru (Welsh Parliament)",
+   "official_url": "https://record.senedd.wales/Plenary/15728#C743617",
+   "speaker_name_raw": "Jayne Bryant AC"
+  },
+  {
+   "n": 30,
+   "kind": "devolved",
+   "title": "Mike Hedges (Labour, Swansea East) — Senedd Cymru (Welsh Parliament) — 27 January 2026 — 7. Debate: The Local Government Settlement 2026-27",
+   "url": "/devolved/senedd/senedd2026-01-27#s294",
+   "date": "2026-01-27",
+   "chamber": "Senedd Cymru (Welsh Parliament)",
+   "legislature": "senedd",
+   "heading": "7. Debate: The Local Government Settlement 2026-27",
+   "member": {
+    "name": "Mike Hedges",
+    "party": "Labour",
+    "seat": "Swansea East",
+    "number": 26141,
+    "slug": "mike-hedges"
+   },
+   "text": "Senedd Cymru (Welsh Parliament), 27 January 2026 — 7. Debate: The Local Government Settlement 2026-27. Mike Hedges (Labour, Swansea East), a member of the Senedd Cymru (Welsh Parliament) (not of the UK Parliament):\n\nLocal government provide many of the key services provided by the public sector in Wales. Not just collecting refuse, maintaining roads, education and social services, but trading standards, environmental health, ensuring food providers are working safely, and our parks. We have had 14 years of cuts to local government and this cannot be turned around in just one budget. It will take time for public finances to recover.\n\nI'm proud the Welsh Government has prioritised local government and health, as I requested at an earlier debate on the budget—which I also requested in the Finance Committee. Every authority will see a larger increase than in 2025-26, the core revenue funding for local government will increase by 4.5 per cent on a like-for-like basis, local authorities will receive £6.14 billion from the Welsh Government revenue support grant and non-domestic rates to deliver the key services that we all rely on.\n\nThe final budget agreement includes an additional £8.24 million to secure a funding floor in the settlement to increase the funding available to nine local authorities. The change in budget need is driven almost totally by relative population change. I hope this support floor does not become the norm, as this distorts the settlement based upon a standard spending assessment, which is calculated on how much the local authority should spend on each service.\n\nFrom a simple look at Swansea Council's budget and rolling it forward, I estimate a roll-over of a standstill budget for local government overall needs an increase of about 5 per cent. This means that we will see council tax rises under the budget proposals, but they should be under 5 per cent, because they've got 0.5 per cent to make up.\n\nI welcome the programme for government's commitment to reduce the administrative burden on local government by the consolidation or dehypothecation of grants across a wide range of areas. I also very much welcome that in December, the Minister for Children and Social Care announced that Welsh Ministers had agreed to maintain the maximum charge of £100 a week for social care. The increase in the settlement includes £5 million to support local authorities with the impact of this. Local government in Wales has many financial pressures outside its control. Education is a major area of expenditure and teachers' pay increases need to be met in full. Education is the key to moving children out of poverty.\n\nI'm going to discuss three major financial pressures on local government in detail. The provision of social care is critical to the health and care system operating effectively and plays a key role in achieving positive health outcomes. Investment in social care leads directly to reducing pressure on the NHS, both in terms of keeping people out of hospital and helping people to return home at the appropriate time, reducing delayed transfers. Wales has an ageing population and people are living longer, with complex needs and dementia. This will no doubt continue to increase the pressure on care services. The number of older adults living with severe dementia is predicted to double by 2040.\n\nCouncils in Wales are continuing to deliver support for children and young people with additional learning needs, but rising demand and costs are making it harder to sustain. Figures from the WLGA show that spending on ALN and early years support is expected to rise by 6 per cent in 2026-27, which is about £46 million across Wales. Individual councils predict increases of up to 14 per cent. Over 70 per cent of ALN spending goes directly to support learners, while transport costs make up approximately 13 per cent.\n\nWelsh Government figures show that more than 10,900 people are currently living in temporary accommodation across Wales. A record number of households in Wales are living in temporary accommodation, as rising demand for homelessness support has driven council spending up by more than 600 per cent in the last decade. The amount of money that councils spend on dealing with homelessness has jumped from around £13 million in 2016-17 to £101 million this year, an increase that has far outpaced local government funding and forced councils to divert money from other vital services. These are areas in which local government has very little ability to reduce demand. It's not, 'We're we going to do things better', it's the demand that's there and has to be met.\n\nCouncil tax pays for less than a quarter of total council services, with the rest being mainly funded by the rate support grant and the council's share of business rates, both provided by the Welsh Government. Councils also raise money from fees and charges, but some councils have a greater opportunity to raise this money than others. The percentage increase in Welsh Government help for each local authority is very similar, varying between a 4 per cent floor and Newport at 6.5 per cent. The actual amount per person varies substantially. Why is Newport the highest? Because it's had the biggest increase in population. If you want to have more money in terms of rate support grant, et cetera, increase your population.\n\nWe know Monmouthshire has the largest number of properties in band D and above, whilst Blaenau Gwent has over half its properties in band A. This leads to lower Welsh Government financial support for Monmouthshire and higher financial support for Blaenau Gwent. The budget is just for one year. It is moving in the right direction. Local government will need continuing support in future years as social care, additional learning needs and homelessness costs are likely to continue to rise.",
+   "group": "Senedd Cymru (Welsh Parliament)",
+   "official_url": "https://record.senedd.wales/Plenary/15728#C743606",
+   "speaker_name_raw": "Mike Hedges AC"
+  },
+  {
+   "n": 31,
+   "kind": "devolved",
+   "title": "Russell George (Conservative, Montgomeryshire) — Senedd Cymru (Welsh Parliament) — 28 January 2026 — 1. Questions to the Cabinet Secretary for Housing and Local Government — Local Authority Cabinets",
+   "url": "/devolved/senedd/senedd2026-01-28#s4",
+   "date": "2026-01-28",
+   "chamber": "Senedd Cymru (Welsh Parliament)",
+   "legislature": "senedd",
+   "heading": "1. Questions to the Cabinet Secretary for Housing and Local Government — Local Authority Cabinets",
+   "member": {
+    "name": "Russell George",
+    "party": "Conservative",
+    "seat": "Montgomeryshire",
+    "number": 26147,
+    "slug": "russell-george"
+   },
+   "text": "Senedd Cymru (Welsh Parliament), 28 January 2026 — 1. Questions to the Cabinet Secretary for Housing and Local Government — Local Authority Cabinets. Russell George (Conservative, Montgomeryshire), a member of the Senedd Cymru (Welsh Parliament) (not of the UK Parliament):\n\nThank you for your answer, Cabinet Secretary. Audit Wales's annual audit summary for Powys County Council, published last year, reports that the council hasn't yet adopted a long-term approach to securing its financial sustainability, but it is developing one. I thought that was a bit alarming; I would have thought that all local authorities should be planning long-term for their financial positions. In your assessment, Cabinet Secretary, has the council now made sufficient progress developing their long-term plan, and to what extent do you accept that the current funding formula makes that task harder for rural authorities like Powys?",
+   "group": "Senedd Cymru (Welsh Parliament)",
+   "official_url": "https://record.senedd.wales/Plenary/15729#C744040",
+   "speaker_name_raw": "Russell George AC"
+  },
+  {
+   "n": 32,
+   "kind": "devolved",
+   "title": "Natasha Asghar (Conservative, South Wales East) — Senedd Cymru (Welsh Parliament) — 10 December 2025 — 1. Questions to the Cabinet Secretary for Housing and Local Government — Local Government Settlement",
+   "url": "/devolved/senedd/senedd2025-12-10#s46",
+   "date": "2025-12-10",
+   "chamber": "Senedd Cymru (Welsh Parliament)",
+   "legislature": "senedd",
+   "heading": "1. Questions to the Cabinet Secretary for Housing and Local Government — Local Government Settlement",
+   "member": {
+    "name": "Natasha Asghar",
+    "party": "Conservative",
+    "seat": "South Wales East",
+    "number": 26236,
+    "slug": "natasha-asghar"
+   },
+   "text": "Senedd Cymru (Welsh Parliament), 10 December 2025 — 1. Questions to the Cabinet Secretary for Housing and Local Government — Local Government Settlement. Natasha Asghar (Conservative, South Wales East), a member of the Senedd Cymru (Welsh Parliament) (not of the UK Parliament):\n\nThanks for your response, Cabinet Secretary. Newport City Council is set to receive a bigger uplift in funding than any other local authority in Wales under the Government's draft settlement. The proposed 4.3 per cent rise in funding will provide the city council with an extra £14.3 million, taking the total financial package to some £350 million in total—although, now, that amount is expected to be even higher, with Plaid Cymru yet again jumping into bed with Labour to help pass the budget. We have seen similar rises in funding for Newport over the last few years, yet my constituents are still being hammered with excessive council tax rises. Bills jumped by 6.7 per cent last year and 8.5 per cent the year before, Cabinet Secretary, whilst at the same time services on offer to residents simultaneously decreased. Now, we know Labour politicians, whether that be in the Senedd, or indeed local authorities, have a penchant for wasting taxpayers' money. So, how is the Welsh Government going to ensure that this extra funding is pumped into those areas where it's most needed, like investing in front-line services, and not simply wasted or stashed away in council reserves for a rainy day? And do you, Cabinet Secretary, agree with me and the Welsh Conservatives that, if Newport City Council tries once again to significantly increase council tax, the authority should hold a local referendum to let the public decide, once and for all, what should actually happen? Thank you.",
+   "group": "Senedd Cymru (Welsh Parliament)",
+   "official_url": "https://record.senedd.wales/Plenary/15471#C732925",
+   "speaker_name_raw": "Natasha Asghar AS"
+  },
+  {
+   "n": 33,
+   "kind": "devolved",
+   "title": "Vikki Howells (Labour, Pontypridd Cynon Merthyr) — Senedd Cymru (Welsh Parliament) — 16 September 2026 — 2. Questions to the Cabinet Minister for Finance — Local Government Finance Policy",
+   "url": "/devolved/senedd/senedd2026-09-16#s114",
+   "date": "2026-09-16",
+   "chamber": "Senedd Cymru (Welsh Parliament)",
+   "legislature": "senedd",
+   "heading": "2. Questions to the Cabinet Minister for Finance — Local Government Finance Policy",
+   "member": {
+    "name": "Vikki Howells",
+    "party": "Labour",
+    "seat": "Pontypridd Cynon Merthyr",
+    "number": 26159,
+    "slug": "vikki-howells"
+   },
+   "text": "Senedd Cymru (Welsh Parliament), 16 September 2026 — 2. Questions to the Cabinet Minister for Finance — Local Government Finance Policy. Vikki Howells (Labour, Pontypridd Cynon Merthyr), a member of the Senedd Cymru (Welsh Parliament) (not of the UK Parliament):\n\nThank you for that answer, Cabinet Minister. In the wake of the announcement that the Welsh Government was going to review the local government funding formula, I know that you and the local government Minister received a letter from the leader of Merthyr Tydfil County Borough Council, and this firmly made the case that any review should not have a detrimental impact upon that council or the residents and communities that it serves. So, Cabinet Minister, I'm seeking similar assurances today that any review won't negatively affect either Merthyr Tydfil council or Rhondda Cynon Taf County Borough Council in view of the demographic challenges specifically that they face, and also that all councils will be fully involved in the process as it develops.",
+   "group": "Senedd Cymru (Welsh Parliament)",
+   "official_url": "https://record.senedd.wales/Plenary/16261#C769548",
+   "speaker_name_raw": "Vikki Howells AC"
+  },
+  {
+   "n": 34,
+   "kind": "devolved",
+   "title": "Jemma Dolan (Sinn Féin, Fermanagh and South Tyrone) — Northern Ireland Assembly — 11 May 2026 — Committee Business — Budget 2026-29/2030: Reports",
+   "url": "/devolved/ni-assembly/ni2026-05-11#s68",
+   "date": "2026-05-11",
+   "chamber": "Northern Ireland Assembly",
+   "legislature": "ni-assembly",
+   "heading": "Committee Business — Budget 2026-29/2030: Reports",
+   "member": {
+    "name": "Jemma Dolan",
+    "party": "Sinn Féin",
+    "seat": "Fermanagh and South Tyrone",
+    "number": 25603,
+    "slug": "jemma-dolan"
+   },
+   "text": "Northern Ireland Assembly, 11 May 2026 — Committee Business — Budget 2026-29/2030: Reports. Jemma Dolan (Sinn Féin, Fermanagh and South Tyrone), a member of the Northern Ireland Assembly (not of the UK Parliament):\n\nThe Committee for Finance and Fiscal Council reports on the draft Budget reiterate the challenging position of our public finances and how the current financial settlement with the Treasury does not meet our needs. Decades of underfunding by the British Government have, in recent years, been exacerbated by austerity measures by successive Tory Governments and now the Labour Government. Over 90% of our public finances comes from the block grant, so it is no surprise that, in its evidence to the Committee, the Nevin Economic Research Institute said that local revenue raising cannot fix the funding gap and that the deficit is a result of policy decisions made by politicians in London who are not elected by the people here. NERI also highlighted the fact that, as a region, we are living with the consequences of Budget choices that are beyond our control. Those choices include spending money on militarisation rather than front-line services, leaving us with less money to spend on our hospitals, schools and roads.\n\nAs a local Assembly, we have, in recent years, managed to alleviate some of the harms caused by the British Government that worsened existing poverty levels. For example, we introduced welfare mitigation measures. As the reports make clear, however, the finance available to us locally means that we simply cannot mitigate many of the negative spending decisions taken in London. That has been reinforced in recent months by the inflexibility shown by the Treasury on the structure of the local growth fund. Despite strong and repeated representations from locally elected representatives and from the community and voluntary sector about the need for change and the harm that the new model would do to that sector, the Treasury would not move. That funding is, of course, supposed to be the replacement for what was lost by the community and voluntary sector from the EU following Brexit, and it already falls short of what the sector received then. That is another example of this region having to deal with the impact of a decision that was not voted for by the people who live here.\n\nNERI and the Fiscal Council also point to the current needs assessment of 124% as not taking into account our structural needs or our historical legacy. I therefore commend the current Finance Minister and his predecessor for their efforts to make the case for a new fiscal framework. To date, that has resulted in an additional £1·3 billion for our public services. All Departments have expressed the view that the draft Budget does not meet their financial requirements, and that is reflected in both reports; indeed, the Fiscal Council has stated that we are at high risk of an overspend. That is why it is crucial that we all support the efforts of the Finance Minister and the wider Executive in their request for additional funding to enable a multi-year Budget to be achieved and for a fiscal framework that goes beyond mere per head comparisons of public spending, which NERI has referred to as being a \"blunt instrument\".\n\nLast week's election results in Scotland and Wales have further shown that the current constitutional framework is cracking at the seams, as people realise that those in London govern in the financial and economic interests of a chosen few in England. Ultimately, until we have constitutional change, our public services will continue to suffer as we try to mitigate decisions made in Westminster.",
+   "group": "Northern Ireland Assembly",
+   "official_url": null,
+   "speaker_name_raw": "Jemma Dolan"
+  }
+ ],
+ "candidates": 522,
+ "semantic": true,
+ "evidence": {
+  "records": 22,
+  "speakers": 14,
+  "divisions": 0,
+  "date_from": "2025-12-17",
+  "date_to": "2026-11-04",
+  "groups": {
+   "Opposition frontbench": 10,
+   "Government ministers": 8,
+   "Select committee chairs": 2,
+   "Backbench MPs, rural seats": 2
+  },
+  "parties": {
+   "Conservative": 7,
+   "Labour": 7,
+   "Labour/Co-operative": 5,
+   "Liberal Democrat": 3
+  },
+  "seat_types": {
+   "city": 10,
+   "town": 6,
+   "rural": 2
+  },
+  "genders": {
+   "M": 14,
+   "F": 8
+  },
+  "age_bands": {
+   "40-54": 11,
+   "55-69": 6,
+   "70-plus": 2,
+   "unknown": 2,
+   "under-40": 1
+  },
+  "tenure": {
+   "returning": 12,
+   "first-term": 6
+  },
+  "majority_bands": {
+   "middle": 8,
+   "safe": 7,
+   "marginal": 3
+  },
+  "runner_ups": {
+   "The Conservatives": 6,
+   "Labour": 5,
+   "The Greens": 5,
+   "An independent candidate": 2
+  },
+  "party_groups": {
+   "none": 20,
+   "Conservative Environment Network": 2
+  },
+  "imbalance": null,
+  "raised_most": [
+   {
+    "name": "James Cleverly",
+    "days": 26
+   },
+   {
+    "name": "David Simmonds",
+    "days": 23
+   },
+   {
+    "name": "Lord Jamieson",
+    "days": 5
+   }
+  ],
+  "devolution": [
+   {
+    "subject": "housing",
+    "name": "Housing, planning and local government",
+    "text": "Decisions on housing, planning and local government are devolved. What Westminster decides mostly applies to England; Scotland, Wales and Northern Ireland decide their own policy.",
+    "westminster_for": [
+     "England"
+    ],
+    "devolved_in": [
+     "Scotland",
+     "Wales",
+     "Northern Ireland"
+    ]
+   }
+  ],
+  "edms": 1,
+  "devolved": 11,
+  "committee_evidence": 0
+ },
+ "answer": {
+  "segments": [
+   {
+    "text": "**In brief**\n- Ministers defended the fair funding reforms as an equaliser that aligns grant with need, as when Jim McMahon said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"the fair funding review is not intended to give every council the same central Government grant\"",
+    "sources": [
+     2
+    ],
+    "cited": [
+     {
+      "source": 2,
+      "cited_text": "The Government also have a very important role to play as an equaliser for local government income. During the course of the debate, I heard references to the amount of grant that individual councils get, and one grant total being compared with another. I want to be clear that the fair funding review is not intended to give every council the same central Government grant. That grant is intended to act as an equaliser for the system, so that in the end all councils have the resources to deliver the public service need in their local areas, while recognising that there are wide differences in England in the local tax bases of council tax and business rates."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- Opposition frontbenchers questioned how the new formula treated six low-council-tax authorities, as when Lord Jamieson asked whether ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"party political control of the local authority was a material consideration\"",
+    "sources": [
+     7
+    ],
+    "cited": [
+     {
+      "source": 7,
+      "cited_text": "To ask His Majesty's Government, in light of the final Local Government Finance Settlement 2026-2027 to 2028-2029, whether the actual or expected party political control of the local authority was a material consideration in the decision by ministers to disapply the council tax referendum thresholds from the six specified councils."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": " in disapplying referendum thresholds.\n- Labour and Liberal Democrat backbenchers welcomed multi-year settlements but said the funding gaps remain, as when Zöe Franklin said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"there is still ultimately no fix for local government finances\"",
+    "sources": [
+     11
+    ],
+    "cited": [
+     {
+      "source": 11,
+      "cited_text": "I think we need to recognise that we are looking forward. Multi-year settlements are a positive step, but there is still ultimately no fix for local government finances, which is causing enormous problems for local councils."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "- The Scottish Parliament, the Senedd and the Northern Ireland Assembly (which decide local government funding for their own nations) debated settlements of their own, with sharply different framing.\n",
+    "sources": [],
+    "cited": [],
+    "status": "unsupported",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n**Ministers – defending the reforms**\n\nMinisters said the settlement matches funding to need, as when Steve Reed said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"we have increased the level of funding overall and reconnected it with the deprivation indices\"",
+    "sources": [
+     17
+    ],
+    "cited": [
+     {
+      "source": 17,
+      "cited_text": "I agree with the Chair of the Housing, Communities and Local Government Committee that council tax cannot be the only means to fix these problems. That is why we have increased the level of funding overall and reconnected it with the deprivation indices that tell us which areas have the greatest need, and should therefore get a fair share of the available funding."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- On the six low-tax councils, Reed said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"It is not fair that people living in our poorest communities should subsidise rock-bottom bills in some of our wealthiest areas\"",
+    "sources": [
+     17
+    ],
+    "cited": [
+     {
+      "source": 17,
+      "cited_text": "Nationally, council tax will not increase by more than it did last year. Six local authorities set council tax bills between £450 and £1,000 lower than the national average because of the high value of homes in their areas. The previous Government made no adjustment in the funding formula for this, creating unfairness. It is not fair that people living in our poorest communities should subsidise rock-bottom bills in some of our wealthiest areas, so I am giving those councils additional flexibility to manage their budgets as we align funding with need, as we should."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- Baroness Taylor of Stevenage, answering Lord Jamieson, said the referendum exemption required councils to be upper tier, have 95% of income protected and have below-average council tax, so ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"Actual or expected party control was therefore not a criterion in the decision.\"",
+    "sources": [
+     9
+    ],
+    "cited": [
+     {
+      "source": 9,
+      "cited_text": "As we set out in the 2026-27 Local Government Finance Settlement consultation, authorities had to meet all the following criteria for referendum principles to not be applied: a) they are upper tier local authorities; b) 95% of their income is protected through transitional protections; and c) they have council tax levels lower than average. Actual or expected party control was therefore not a criterion in the decision."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n\n**Conservative frontbench – probing**\n\nConservative frontbenchers pressed for detail on the effects, as when David Simmonds asked ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "whether the department had estimated the effective financial loss for each of the six councils with below-average council tax",
+    "sources": [
+     4
+    ],
+    "cited": [
+     {
+      "source": 4,
+      "cited_text": "To ask the Secretary of State for Housing, Communities and Local Government, pursuant to the answer of 8 September 2026, to Question 20159, on Council Tax, whether her department has made an estimate of the effective financial loss in funding for each of the six councils that have below-average levels of current council tax, specifically as a consequence of the national notional council tax level being applied in the Local Government Finance Settlement."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- James Cleverly asked ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "whether revenue from the High Value Council Tax Surcharge would be ringfenced in the settlement or via a separate grant",
+    "sources": [
+     6
+    ],
+    "cited": [
+     {
+      "source": 6,
+      "cited_text": "To ask the Secretary of State for Housing, Communities and Local Government, with reference to the publication, High Value Council Tax Surcharge, published 19 May 2026, through what mechanism will the revenue raised be used to support funding for local government services, and whether it will be ringfenced in the Local Government Finance Settlement or via a separate grant."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n\n**Backbenchers and committee chairs – welcome, with local concerns**\n\nInner-London Labour MPs said the formula penalised their areas, as when Helen Hayes said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"Council tax equalisation... penalises low tax base, high-needs areas like Lambeth and Southwark.\"",
+    "sources": [
+     20
+    ],
+    "cited": [
+     {
+      "source": 20,
+      "cited_text": "Council tax equalisation, such that the grant is now based on each area’s share of the national tax base and not actual local tax levels, penalises low tax base, high-needs areas like Lambeth and Southwark. The business rates reset will wipe out historical strong growth in some inner-London boroughs, and falling numbers of children will also have an impact through the children’s formula, even though need is growing and increasingly complex."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n- Florence Eshalomi, Chair of the Housing, Communities and Local Government Committee, said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"growing consensus on wholescale council tax reform\"",
+    "sources": [
+     19
+    ],
+    "cited": [
+     {
+      "source": 19,
+      "cited_text": "The Minister mentioned that the Government will be looking at the council tax freeze in some areas, and at lifting referendum principles. She knows there is growing consensus on wholescale council tax reform instead of us tweaking it. It is the most regressive form of taxation and there is inequality across the country. Will the Minister look at what the Committee’s report says about a wholescale review of council tax banding, so that local leaders can have funding to spend on their local areas, and make sure that other areas see that funding come through?"
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": " existed.\n- Liberal Democrat Gideon Amos welcomed the settlement but said of the recovery grant that ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "it \"does not go far enough\"",
+    "sources": [
+     18
+    ],
+    "cited": [
+     {
+      "source": 18,
+      "cited_text": "The additional funds for housing and homelessness, while small, are welcome, including those for Somerset council in my constituency. The extra funding through the recovery grant is also welcome, but places such as Kingston upon Hull tell us that it does not go far enough and will not fill the gaping hole in financial stability that persists. It is disappointing that social housing does not get a mention in the settlement. We need a new generation of council and social rented homes. Our plans are for 150,000 per year and Shelter’s are for 90,000 per year. Both would be a good proposition. The Government’s proposal for 18,000 per year just will not meet the level of need out there."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": " in places such as Hull.\n- Franklin said that ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"retaining more revenue does not necessarily mean receiving more funding\"",
+    "sources": [
+     11
+    ],
+    "cited": [
+     {
+      "source": 11,
+      "cited_text": "Finally on local government finance, I want to address business rates. I welcome the principle that more locally generated revenue should remain in local areas. Giving councils a stronger stake in local economic success is sensible. However, retaining more revenue does not necessarily mean receiving more funding. The reality is that councils only benefit from the share of business rates that they are allowed to retain. If a national policy decision reduces revenues, local government must be appropriately compensated. We must ensure that areas with fewer opportunities for growth are not left behind. Rural communities in particular should not find themselves disadvantaged by a system that increasingly relies on locally generated revenue. On my second test, the jury very much remains out."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": " under business rates retention.\n\n**Early day motion**\n\nJon Trickett's EDM 2338 urged the government ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "to fully implement the committee's recommendations, including fully funding adult social care and reforming Council Tax",
+    "sources": [
+     23
+    ],
+    "cited": [
+     {
+      "source": 23,
+      "cited_text": "That this House welcomes the Second Report of the Housing, Communities and Local Government Committee on The Funding and Sustainability of Local Government Finance, published on 23 July 2025, HC 514; notes the strong evidence that local authority funding requires urgent reform, with increases to overall funding and changes to funding processes; expresses deep concerns over the flawed and costly s114 process which has exacerbated the impact of austerity in local communities; and urges the UK Government to fully implement the recommendations, including fully funding adult social care by the end of the current Parliament, and reforming the tax system, including Council Tax."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "; it was ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "signed by 17 members: Labour 11; Green 4; DUP 1; Labour/Co-operative 1",
+    "sources": [
+     23
+    ],
+    "cited": [
+     {
+      "source": 23,
+      "cited_text": "Signed by 17 members (party on the day they signed): Labour 11; Green 4; DUP 1; Labour/Co-operative 1."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n\n**Devolved parliaments – mixed**\n\n- Scottish Parliament: Green MSP Ariane Burgess said approving the order ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"will keep the system running for another year but will not fix it\"",
+    "sources": [
+     25
+    ],
+    "cited": [
+     {
+      "source": 25,
+      "cited_text": "The budget offers a small real-terms increase and some extra flexibility, but the warning is clear that, without structural reform, councils will remain under strain and struggle to invest in decarbonising buildings, modernising transport and reorganising and restoring our local environments. Approving the order will keep the system running for another year but will not fix it."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ", while Conservative Roz McCall said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"if the amount of funding was truly sufficient\"",
+    "sources": [
+     28
+    ],
+    "cited": [
+     {
+      "source": 28,
+      "cited_text": "The cabinet secretary pointed to a record local government settlement in the budget. However, if the amount of funding was truly sufficient, SNP-run councils such as Perth and Kinross Council would not be forced to raise council tax by nearly 9 per cent simply to stand still."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": " SNP-run councils would not raise council tax by nearly 9 per cent.\n",
+    "sources": [],
+    "cited": [],
+    "status": "unsupported",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "- Senedd: Labour's Jayne Bryant said the settlement ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"represents a real-terms increase\"",
+    "sources": [
+     29
+    ],
+    "cited": [
+     {
+      "source": 29,
+      "cited_text": "So, while the settlement represents a real-terms increase, I do recognise, as I said, that demand for services, alongside those cost pressures, means that authorities will still need to make decisions on services, efficiencies and council tax in setting budgets. But nevertheless, this is a settlement that builds on improved allocations on previous years."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ", and Conservative Natasha Asghar said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "her Newport constituents were \"still being hammered with excessive council tax rises\"",
+    "sources": [
+     32
+    ],
+    "cited": [
+     {
+      "source": 32,
+      "cited_text": "Thanks for your response, Cabinet Secretary. Newport City Council is set to receive a bigger uplift in funding than any other local authority in Wales under the Government's draft settlement. The proposed 4.3 per cent rise in funding will provide the city council with an extra £14.3 million, taking the total financial package to some £350 million in total—although, now, that amount is expected to be even higher, with Plaid Cymru yet again jumping into bed with Labour to help pass the budget. We have seen similar rises in funding for Newport over the last few years, yet my constituents are still being hammered with excessive council tax rises. Bills jumped by 6.7 per cent last year and 8.5 per cent the year before, Cabinet Secretary, whilst at the same time services on offer to residents simultaneously decreased. Now, we know Labour politicians, whether that be in the Senedd, or indeed local authorities, have a penchant for wasting taxpayers' money. So, how is the Welsh Government going to ensure that this extra funding is pumped into those areas where it's most needed, like investing in front-line services, and not simply wasted or stashed away in council reserves for a rainy day? And do you, Cabinet Secretary, agree with me and the Welsh Conservatives that, if Newport City Council tries once again to significantly increase council tax, the authority should hold a local referendum to let the public decide, once and for all, what should actually happen? Thank you."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- Northern Ireland Assembly: Sinn Féin's Jemma Dolan said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "the current financial settlement with the Treasury \"does not meet our needs\"",
+    "sources": [
+     34
+    ],
+    "cited": [
+     {
+      "source": 34,
+      "cited_text": "The Committee for Finance and Fiscal Council reports on the draft Budget reiterate the challenging position of our public finances and how the current financial settlement with the Treasury does not meet our needs. Decades of underfunding by the British Government have, in recent years, been exacerbated by austerity measures by successive Tory Governments and now the Labour Government. Over 90% of our public finances comes from the block grant, so it is no surprise that, in its evidence to the Committee, the Nevin Economic Research Institute said that local revenue raising cannot fix the funding gap and that the deficit is a result of policy decisions made by politicians in London who are not elected by the people here. NERI also highlighted the fact that, as a region, we are living with the consequences of Budget choices that are beyond our control. Those choices include spending money on militarisation rather than front-line services, leaving us with less money to spend on our hospitals, schools and roads."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n\nAbout the evidence: The records are mostly written questions and answers plus a few Commons debates from December 2025 to November 2026. There are no division records. Each group rests on a handful of speakers, and the devolved parliaments decide many of these matters for their own nations.",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   }
+  ],
+  "markdown": "**In brief**\n- Ministers defended the fair funding reforms as an equaliser that aligns grant with need, as when Jim McMahon said \"the fair funding review is not intended to give every council the same central Government grant\" [Source 2].\n- Opposition frontbenchers questioned how the new formula treated six low-council-tax authorities, as when Lord Jamieson asked whether \"party political control of the local authority was a material consideration\" [Source 7] in disapplying referendum thresholds.\n- Labour and Liberal Democrat backbenchers welcomed multi-year settlements but said the funding gaps remain, as when Zöe Franklin said \"there is still ultimately no fix for local government finances\" [Source 11].\n- The Scottish Parliament, the Senedd and the Northern Ireland Assembly (which decide local government funding for their own nations) debated settlements of their own, with sharply different framing.\n\n**Ministers – defending the reforms**\n\nMinisters said the settlement matches funding to need, as when Steve Reed said \"we have increased the level of funding overall and reconnected it with the deprivation indices\" [Source 17].\n- On the six low-tax councils, Reed said \"It is not fair that people living in our poorest communities should subsidise rock-bottom bills in some of our wealthiest areas\" [Source 17].\n- Baroness Taylor of Stevenage, answering Lord Jamieson, said the referendum exemption required councils to be upper tier, have 95% of income protected and have below-average council tax, so \"Actual or expected party control was therefore not a criterion in the decision.\" [Source 9]\n\n**Conservative frontbench – probing**\n\nConservative frontbenchers pressed for detail on the effects, as when David Simmonds asked whether the department had estimated the effective financial loss for each of the six councils with below-average council tax [Source 4].\n- James Cleverly asked whether revenue from the High Value Council Tax Surcharge would be ringfenced in the settlement or via a separate grant [Source 6].\n\n**Backbenchers and committee chairs – welcome, with local concerns**\n\nInner-London Labour MPs said the formula penalised their areas, as when Helen Hayes said \"Council tax equalisation... penalises low tax base, high-needs areas like Lambeth and Southwark.\" [Source 20]\n- Florence Eshalomi, Chair of the Housing, Communities and Local Government Committee, said \"growing consensus on wholescale council tax reform\" [Source 19] existed.\n- Liberal Democrat Gideon Amos welcomed the settlement but said of the recovery grant that it \"does not go far enough\" [Source 18] in places such as Hull.\n- Franklin said that \"retaining more revenue does not necessarily mean receiving more funding\" [Source 11] under business rates retention.\n\n**Early day motion**\n\nJon Trickett's EDM 2338 urged the government to fully implement the committee's recommendations, including fully funding adult social care and reforming Council Tax [Source 23]; it was signed by 17 members: Labour 11; Green 4; DUP 1; Labour/Co-operative 1 [Source 23].\n\n**Devolved parliaments – mixed**\n\n- Scottish Parliament: Green MSP Ariane Burgess said approving the order \"will keep the system running for another year but will not fix it\" [Source 25], while Conservative Roz McCall said \"if the amount of funding was truly sufficient\" [Source 28] SNP-run councils would not raise council tax by nearly 9 per cent.\n- Senedd: Labour's Jayne Bryant said the settlement \"represents a real-terms increase\" [Source 29], and Conservative Natasha Asghar said her Newport constituents were \"still being hammered with excessive council tax rises\" [Source 32].\n- Northern Ireland Assembly: Sinn Féin's Jemma Dolan said the current financial settlement with the Treasury \"does not meet our needs\" [Source 34].\n\nAbout the evidence: The records are mostly written questions and answers plus a few Commons debates from December 2025 to November 2026. There are no division records. Each group rests on a handful of speakers, and the devolved parliaments decide many of these matters for their own nations.",
+  "no_records": false,
+  "citations_total": 19,
+  "citations_invalid": 0,
+  "grounded_ratio": 0.851,
+  "unsupported_segments": 2,
+  "loaded_words": 0,
+  "quotes_total": 15,
+  "quotes_unverified": 0,
+  "rules": 1
+ },
+ "interests": [
+  {
+   "source": 3,
+   "person_id": "uk.org.publicwhip/person/25892",
+   "name": "David Simmonds",
+   "register": "Register of Members' Financial Interests",
+   "link": "/people/25892#h-interests",
+   "items": [
+    {
+     "category": "Miscellaneous",
+     "summary": "An unpaid Vice-President of the Local Government Association (LGA).",
+     "registered": "2020-10-21",
+     "connection": "The register lists an unpaid Vice-President role with the Local Government Association; the contribution concerned local government finance and council funding.",
+     "kind": "register",
+     "register": "Register of Members' Financial Interests",
+     "url": null
+    },
+    {
+     "category": "Miscellaneous",
+     "summary": "Parliamentary Vice-President of London Councils. This is an unpaid role.",
+     "registered": "2025-06-24",
+     "connection": "The register lists an unpaid Parliamentary Vice-President role with London Councils; the contribution concerned council tax and funding for the London councils of Westminster and Wandsworth.",
+     "kind": "register",
+     "register": "Register of Members' Financial Interests",
+     "url": null
+    }
+   ]
+  },
+  {
+   "source": 4,
+   "person_id": "uk.org.publicwhip/person/25892",
+   "name": "David Simmonds",
+   "register": "Register of Members' Financial Interests",
+   "link": "/people/25892#h-interests",
+   "items": [
+    {
+     "category": "Miscellaneous",
+     "summary": "An unpaid Vice-President of the Local Government Association (LGA).",
+     "registered": "2020-10-21",
+     "connection": "The register lists an unpaid Vice-President role with the Local Government Association; the contribution concerned funding for local councils under the national notional council tax level.",
+     "kind": "register",
+     "register": "Register of Members' Financial Interests",
+     "url": null
+    }
+   ]
+  },
+  {
+   "source": 11,
+   "person_id": "uk.org.publicwhip/person/26555",
+   "name": "Zöe Franklin",
+   "register": "Register of Members' Financial Interests",
+   "link": "/people/26555#h-interests",
+   "items": [
+    {
+     "category": "Miscellaneous",
+     "summary": "Vice President of the Local Government Association. This is an unpaid role.",
+     "registered": "2026-09-09",
+     "connection": "The register lists an unpaid Vice-President role with the Local Government Association; the contribution concerned local government finance and council funding.",
+     "kind": "register",
+     "register": "Register of Members' Financial Interests",
+     "url": null
+    }
+   ]
+  },
+  {
+   "source": 14,
+   "person_id": "uk.org.publicwhip/person/26555",
+   "name": "Zöe Franklin",
+   "register": "Register of Members' Financial Interests",
+   "link": "/people/26555#h-interests",
+   "items": [
+    {
+     "category": "Miscellaneous",
+     "summary": "Vice President of the Local Government Association. This is an unpaid role.",
+     "registered": "2026-09-09",
+     "connection": "The register lists an unpaid Vice-President role with the Local Government Association; the contribution concerned local government finances and devolution.",
+     "kind": "register",
+     "register": "Register of Members' Financial Interests",
+     "url": null
+    }
+   ]
+  },
+  {
+   "source": 20,
+   "person_id": "uk.org.publicwhip/person/25310",
+   "name": "Helen Hayes",
+   "register": "Register of Members' Financial Interests",
+   "link": "/people/25310#h-interests",
+   "items": [
+    {
+     "category": "Miscellaneous",
+     "summary": "Vice President of the Local Government Association. This is an unpaid role.",
+     "registered": "2023-03-09",
+     "connection": "The register lists an unpaid Vice-President role with the Local Government Association; the contribution concerned funding for inner-London local authorities.",
+     "kind": "register",
+     "register": "Register of Members' Financial Interests",
+     "url": null
+    }
+   ]
+  }
+ ]
+}
