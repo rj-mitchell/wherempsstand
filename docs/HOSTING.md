@@ -37,6 +37,9 @@ Where MPs Stand's `deploy/` folder, in `/opt/hansardgpt`, is also the front door
 - email from the server (`deploy/mail.sh`) and alerts when any site's job fails (`alert@.service`);
 - the watchdog, which restarts any site that stops answering (`wheretheystand-watchdog.timer`);
 - the hourly disk check and monthly disk report (`wheretheystand-disk.timer`, `wheretheystand-disk-report.timer`);
+- the look every 15 minutes for new readers' reports and statements on any site, emailed as counts only
+  (`wheretheystand-waiting.timer`, `deploy/waiting-alert.sh`). It asks each site's `/api/check` with the family's
+  check token from that site's `.env`, so a site without the token is not looked at;
 - the server-wide update lock, `/var/lock/wheretheystand-update.lock`, which each site's update takes so that two
   never run at once.
 

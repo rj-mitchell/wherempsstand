@@ -67,14 +67,15 @@ for job in $JOBS; do
   fi
 done
 
-echo "==> Refreshing the watchdog and disk timers"
+echo "==> Refreshing the watchdog, disk and waiting timers"
 # these serve every site on this server and run scripts of this folder, not commands of the site's image: a check
-# every two minutes that restarts a site that has stopped answering, an hourly check that emails at 80% full, and
-# a monthly report
+# every two minutes that restarts a site that has stopped answering, an hourly check that emails at 80% full, a
+# monthly report, and a look every 15 minutes for new reports and statements on any site (counts only)
 cp alert@.service \
    wheretheystand-watchdog.service wheretheystand-watchdog.timer \
    wheretheystand-disk.service wheretheystand-disk.timer \
-   wheretheystand-disk-report.service wheretheystand-disk-report.timer "$UNITS_DIR/"
+   wheretheystand-disk-report.service wheretheystand-disk-report.timer \
+   wheretheystand-waiting.service wheretheystand-waiting.timer "$UNITS_DIR/"
 # the watchdog that looked after this site alone, replaced by wheretheystand-watchdog
 if [[ -e "$UNITS_DIR/hansard-watchdog.timer" || -e "$UNITS_DIR/hansard-watchdog.service" ]]; then
   systemctl disable --now hansard-watchdog.timer >/dev/null 2>&1 || true
@@ -82,7 +83,7 @@ if [[ -e "$UNITS_DIR/hansard-watchdog.timer" || -e "$UNITS_DIR/hansard-watchdog.
 fi
 systemctl daemon-reload
 systemctl enable --now wheretheystand-watchdog.timer wheretheystand-disk.timer \
-   wheretheystand-disk-report.timer >/dev/null
+   wheretheystand-disk-report.timer wheretheystand-waiting.timer >/dev/null
 
 if [[ ! -r /etc/wheretheystand/mail.env ]]; then
   echo "    (Alerts aren't emailed yet: set up with bash $DIR/deploy/mail.sh setup, docs/HOSTING.md)"
