@@ -6,6 +6,12 @@ import react from "@vitejs/plugin-react";
 
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
+/** The kit's stylesheets keep fixed names and are cached for an hour, so each page asks for them with the kit's own
+ * hash (public/family/VERSION) in the address: after a kit update, a new page never gets an old stylesheet. */
+const kitHash = readFileSync(here("./public/family/VERSION"), "utf8").match(/sha256 ([0-9a-f]{12})/)?.[1] ?? "";
+const versionKit = (html: string) =>
+  kitHash ? html.replace(/(href=")(\/family\/[\w-]+\.css)(")/g, `$1$2?v=${kitHash}$3`) : html;
+
 /** Static pages share one header and footer: <!--#include header--> pulls in partials/header.html, and
  * <!--#include family/shelf--> the Where They Stand family kit's public/family/shelf.html (copied in by the kit's
  * sync.mjs; see docs/DESIGN.md, "The family kit"). */
@@ -21,6 +27,7 @@ function partials(): Plugin {
             readFileSync(here(family ? `./public/family/${name}.html` : `./partials/${name}.html`), "utf8"),
           );
         }
+        html = versionKit(html);
         // each page's link preview carries its own title and description
         const title = html.match(/<title>([^<]*)<\/title>/)?.[1];
         const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1];
