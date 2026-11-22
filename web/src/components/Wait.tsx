@@ -127,7 +127,7 @@ export const Pile = forwardRef<HTMLDivElement, { sources: SourceCard[]; dealt: n
                   {c.ref && <span>{c.ref}</span>}
                 </div>
                 <div className="wts-card__who">
-                  {c.who}
+                  <span>{c.who}</span>
                   <span className="wts-card__cited"> Cited</span>
                 </div>
                 <div className="wts-card__line">{c.line}</div>
