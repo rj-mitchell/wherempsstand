@@ -527,7 +527,7 @@ function Glance({
             {p.voting.until ? (
               <>
                 {" "}
-                (votes loaded to <span className="nowrap">{fmtDate(p.voting.until)}</span>)
+                (last vote <span className="nowrap">{fmtDate(p.voting.until)}</span>)
               </>
             ) : (
               ""
