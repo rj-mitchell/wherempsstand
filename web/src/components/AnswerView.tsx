@@ -290,9 +290,14 @@ export function AnswerView({ turn, meta = null, onCite }: Props) {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    // the panel beside the briefing, and its passage, scroll on their own: the line follows them too
+    const side = grid.current;
+    const redraw = () => draw();
+    side?.addEventListener("scroll", redraw, { passive: true, capture: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      side?.removeEventListener("scroll", redraw, { capture: true });
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, [wide, settled, draw]);

@@ -781,9 +781,10 @@ legend,
   inline-size: fit-content;
   padding: 0 0.4em;
   border-radius: var(--radius-small);
-  background: var(--warn-subtle);
-  color: var(--ink);
-  font-weight: 600;
+  border: 1px solid var(--wts-warn);
+  background: var(--wts-warn-bg);
+  color: var(--wts-warn);
+  font-weight: 700;
   font-size: 0.85em;
 }
 
@@ -2644,6 +2645,14 @@ main:focus {
   .briefing-side .wts-pile {
     max-block-size: min(62vh, calc(100svh - var(--composer-h) - 6rem));
   }
+
+  /* the whole panel fits above the question box, and scrolls on its own when its slip is longer, so its foot (the
+     source's details) can always be reached: it is sticky, so the page's own scrolling never brings it into view */
+  .briefing-side {
+    max-block-size: calc(100svh - var(--composer-h) - 2 * var(--space-s));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
 }
 
 /* beside the records found, the four stages stay on one line */
@@ -2664,12 +2673,15 @@ main:focus {
   }
 }
 
-/* a chip for a speaker with a registered interest that may relate says so in words (docs/DECISIONS.md, 15) */
+/* a chip for a speaker with a registered interest that may relate says so in words (docs/DECISIONS.md, 15), in amber
+   (the family's colour for a point to check) so that it stands apart from the chip's green */
 .chip-interest {
   font-weight: 700;
-  color: var(--ink);
-  border-inline-start: 1px solid var(--wts-cloth-text);
-  padding-inline-start: 0.4em;
+  color: var(--wts-warn);
+  background: var(--wts-warn-bg);
+  border: 1px solid var(--wts-warn);
+  border-radius: 0.6em;
+  padding-inline: 0.4em;
 }
 
 .slip-interest {
@@ -2679,6 +2691,13 @@ main:focus {
 
 .slip-interest .interest-flag {
   margin-inline-end: 0.35em;
+}
+
+/* the way to the entry itself, beside the note rather than below the passage, in the same amber */
+.slip-interest .slip-interest__more {
+  color: var(--wts-warn);
+  font-weight: 700;
+  font-size: inherit;
 }
 
 .wts-slip__foot .slip-details {
