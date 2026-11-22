@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -814,10 +815,121 @@ def test_the_front_door_compresses_answers_that_tell_cloudflare_not_to_change_th
     caddyfile = (Path(__file__).resolve().parents[1] / "deploy" / "Caddyfile").read_text()
     blocks = re.findall(r"\n\theader \{\n(.*?)\n\t\}", caddyfile, flags=re.S)
     with_no_transform = [b for b in blocks if '+Cache-Control "no-transform"' in b]
-    assert len(with_no_transform) == 2  # this site's, and the other sites'
+    assert len(with_no_transform) == 3  # this site's, and the other sites' (measured or not)
     for block in with_no_transform:
         assert re.search(r"^\t\t(defer|-\w)", block, flags=re.M), block
-    assert caddyfile.count("encode zstd gzip") == 2
+    assert caddyfile.count("encode zstd gzip") == 3
     # the family kit's files carry no fingerprint: kept a while, never for ever
     assert 'header @familyfonts Cache-Control "public, max-age=2592000"' in caddyfile
     assert "immutable" not in caddyfile.split("@familyfonts", 1)[1].split("reverse_proxy", 1)[0]
+
+
+# The front door's policies while a site measures for Google Ad Grants (the charity's family/MEASUREMENT.md and its
+# front-door-measurement.patch; docs/DECISIONS.md, 50). caddy-local.sh is run here as on the server, in a folder of
+# its own, with a stand-in for curl (Cloudflare's addresses are those saved last time) and each site's certificate
+# in place.
+
+OTHER_SITES = "wherecouncilsstand.com=councils-app-1 wherecountriesstand.com=countries-app-1 " \
+              "wherelandlordsstand.com=wherelandlordsstand-app-1"
+
+
+def front_door(tmp_path, env: str) -> str:
+    """sites.caddy, as caddy-local.sh writes it for a deploy/.env holding ``env``."""
+    bash = shutil.which("bash")
+    if bash is None:
+        pytest.skip("no bash here")
+    site, bin_ = tmp_path / "site", tmp_path / "bin"
+    (site / "deploy" / "local" / "sites").mkdir(parents=True)
+    bin_.mkdir()
+    shutil.copy(DEPLOY / "caddy-local.sh", site / "deploy")
+    (site / "deploy" / ".env").write_text(env, encoding="utf-8")
+    (site / "deploy" / "local" / "cloudflare-ranges.txt").write_text("173.245.48.0/20 2400:cb00::/32\n")
+    for pair in OTHER_SITES.split():
+        domain = pair.split("=")[0]
+        for ext in ("pem", "key"):
+            (site / "deploy" / "local" / "sites" / f"{domain}.{ext}").write_text("stand-in\n")
+    (bin_ / "curl").write_text("#!/usr/bin/env bash\nexit 7\n", encoding="utf-8")  # offline: keep the saved list
+    (bin_ / "curl").chmod(0o755)
+    done = subprocess.run([bash, str(site / "deploy" / "caddy-local.sh")], capture_output=True, text=True,
+                          env={**os.environ, "DIR": str(site), "PATH": f"{bin_}{os.pathsep}{os.environ['PATH']}"})
+    assert done.returncode == 0, done.stderr
+    return (site / "deploy" / "local" / "sites.caddy").read_text()
+
+
+def snippet_policy(caddyfile: str, name: str) -> str:
+    block = caddyfile.split(f"({name}) {{", 1)[1].split("\n}\n", 1)[0]
+    return re.search(r'^\t\tContent-Security-Policy "([^"]+)"$', block, flags=re.M)[1]
+
+
+
+def test_with_no_site_measured_the_front_door_serves_every_site_as_before(tmp_path):
+    written = front_door(tmp_path, f'DOMAIN=wherempsstand.com\nSITES="{OTHER_SITES}"\n')
+    assert "other_site_measured" not in written
+    for pair in OTHER_SITES.split():
+        domain, app = pair.split("=")
+        assert f"{domain} {{\n" in written and f"\timport other_site {app}\n" in written
+    # and what is written is what the front door wrote before measurement was built, line for line
+    assert written == BEFORE_MEASUREMENT
+
+
+def test_a_measured_site_gets_the_snippet_with_the_google_tags_hosts_and_the_others_stay_as_they_were(tmp_path):
+    written = front_door(tmp_path, f'SITES="{OTHER_SITES}"\nMEASURED_SITES="wherelandlordsstand.com"\n')
+    assert "\timport other_site_measured wherelandlordsstand-app-1\n" in written
+    assert "\timport other_site councils-app-1\n" in written and "\timport other_site countries-app-1\n" in written
+    assert written.count("other_site_measured") == 1
+    two = front_door(tmp_path / "two", f'SITES="{OTHER_SITES}"\n'
+                                       'MEASURED_SITES="wherecouncilsstand.com wherelandlordsstand.com"\n')
+    assert two.count("import other_site_measured") == 2 and "\timport other_site countries-app-1\n" in two
+    # a site named in MEASURED_SITES but not in SITES is not served for it
+    assert "nosuch" not in front_door(tmp_path / "three", f'SITES="{OTHER_SITES}"\nMEASURED_SITES="nosuch.com"\n')
+
+
+def test_the_measured_snippet_is_the_other_sites_with_exactly_the_kits_hosts_added():
+    from hansard.api.measure import FRONT_DOOR_CSP, policy
+
+    caddyfile = (DEPLOY / "Caddyfile").read_text()
+    plain = snippet_policy(caddyfile, "other_site")
+    assert plain == FRONT_DOOR_CSP
+    kit = REPO_ROOT / "web" / "public" / "family" / "measure-csp.json"
+    assert snippet_policy(caddyfile, "other_site_measured") == policy(kit, plain)
+    # nothing else differs between the two snippets
+    block = {name: caddyfile.split(f"({name}) {{", 1)[1].split("\n}\n", 1)[0]
+             for name in ("other_site", "other_site_measured")}
+    assert block["other_site"].replace(plain, "") == block["other_site_measured"].replace(
+        snippet_policy(caddyfile, "other_site_measured"), "")
+
+
+def test_this_sites_own_policy_is_the_front_doors_unless_the_site_sends_its_own():
+    """Where MPs Stand's own block sets its policy only when the site sent none (Caddy's "?"), and the site sends one
+    only while its own switch is on (tests/test_measure.py): one switch for this site, in its own settings."""
+    caddyfile = (DEPLOY / "Caddyfile").read_text()
+    own = caddyfile.split("{$DOMAIN} {", 1)[1].split("\n}\n", 1)[0]
+    lines = [line.strip() for line in own.splitlines() if "Content-Security-Policy" in line and "#" not in line]
+    assert lines == ["?Content-Security-Policy \"" + snippet_policy(caddyfile, "other_site") + "\""]
+
+
+# sites.caddy as caddy-local.sh wrote it before the measurement snippet existed (deploy/caddy-local.sh at 229a6c2),
+# for the three other sites with their certificates in place
+BEFORE_MEASUREMENT = """# The charity's other sites on this server (SITES in deploy/.env); written by deploy/caddy-local.sh
+wherecouncilsstand.com {
+\t# Cloudflare's origin certificate for this domain; connections that do not come through Cloudflare are closed
+\ttls /etc/caddy/local/sites/wherecouncilsstand.com.pem /etc/caddy/local/sites/wherecouncilsstand.com.key
+\t@direct not remote_ip 173.245.48.0/20 2400:cb00::/32
+\tabort @direct
+\timport other_site councils-app-1
+}
+wherecountriesstand.com {
+\t# Cloudflare's origin certificate for this domain; connections that do not come through Cloudflare are closed
+\ttls /etc/caddy/local/sites/wherecountriesstand.com.pem /etc/caddy/local/sites/wherecountriesstand.com.key
+\t@direct not remote_ip 173.245.48.0/20 2400:cb00::/32
+\tabort @direct
+\timport other_site countries-app-1
+}
+wherelandlordsstand.com {
+\t# Cloudflare's origin certificate for this domain; connections that do not come through Cloudflare are closed
+\ttls /etc/caddy/local/sites/wherelandlordsstand.com.pem /etc/caddy/local/sites/wherelandlordsstand.com.key
+\t@direct not remote_ip 173.245.48.0/20 2400:cb00::/32
+\tabort @direct
+\timport other_site wherelandlordsstand-app-1
+}
+"""

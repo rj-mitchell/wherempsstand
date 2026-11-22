@@ -52,6 +52,8 @@ export default defineConfig({
         glossary: here("./glossary.html"),
         about: here("./about.html"),
         privacy: here("./privacy.html"),
+        // the privacy notice while measurement is on, served at /privacy then only (hansard/api/measure.py)
+        privacyMeasurement: here("./privacy-measurement.html"),
         terms: here("./terms.html"),
         person: here("./person.html"),
         people: here("./people.html"),

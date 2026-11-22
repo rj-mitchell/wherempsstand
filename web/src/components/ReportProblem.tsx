@@ -1,5 +1,6 @@
 import { useId, useState } from "react";
 import { api, ApiError, type ReportInput } from "../api";
+import { reportSent } from "../measure";
 
 // the routes of the charity's impartiality policy, section 7.1, by their names in the family glossary
 const KINDS: { value: ReportInput["kind"]; label: string }[] = [
@@ -44,6 +45,7 @@ export function ReportProblem({ briefingId }: { briefingId?: string }) {
     setState("sending");
     try {
       await api.report({ kind, message, briefing_id: briefingId ?? null, contact: contact || null, website });
+      reportSent();
       setState("sent");
     } catch (err) {
       setState("idle");

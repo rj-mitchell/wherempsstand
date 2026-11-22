@@ -750,12 +750,16 @@ def check_settings_cmd():
     newly built version before the site is restarted on it. Ends with status 1 if the site would refuse to start."""
     from wts_core.settings import SettingsError
 
+    from hansard.api.measure import check as check_measurement
+    from hansard.config import REPO_ROOT
     from hansard.startup import check_settings, models_named
     from hansard.store.wts import written_since_the_move
 
     try:
         settings = _settings()
         check_settings(settings)
+        # with measurement on, the built site's measurement notice must be finished (hansard/api/measure.py)
+        check_measurement(settings, Path(settings.section("paths").get("web_dist", REPO_ROOT / "web" / "dist")))
     except SettingsError as exc:
         typer.echo(f"The site would not start with these settings: {exc}", err=True)
         raise typer.Exit(1) from None

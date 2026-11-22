@@ -76,7 +76,11 @@ export function Slip({
       )}
       <div className="wts-slip__foot">
         <span className="wts-slip__found">{found ? "✓ Highlighted words found word for word" : ""}</span>
-        {v.href && <a href={v.href}>{v.label}</a>}
+        {v.href && (
+          <a href={v.href} data-wts-conversion="source_opened">
+            {v.label}
+          </a>
+        )}
         {onDetails && (
           <button type="button" className="link slip-details" onClick={onDetails}>
             {source.interest ? "The registered interest and all the details" : "All the details of this source"}

@@ -35,7 +35,14 @@ export function SupportReminder({ count, donateUrl, onClose }: { count: number; 
         explains where they go until the charity, which is applying to register, has a bank account of its own.
       </p>
       <div className="support-actions">
-        <a className="donate-link" href={donateUrl} target="_blank" rel="noopener" onClick={donated}>
+        <a
+          className="donate-link"
+          href={donateUrl}
+          target="_blank"
+          rel="noopener"
+          data-wts-conversion="donate_click"
+          onClick={donated}
+        >
           Go to the Donate page
         </a>
         <button type="button" className="secondary" ref={later} onClick={() => ref.current?.close()}>

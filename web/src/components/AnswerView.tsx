@@ -437,7 +437,12 @@ export function AnswerView({ turn, meta = null, onCite }: Props) {
           {answer && (
             <>
               <CheckDetails id={`${prefix}details`} answer={answer} records={sources.length} />
-              <p className="ai-note">
+              {/* the end of a finished briefing (data-wts-conversion, inert unless measuring: web/src/measure.ts) */}
+              <p
+                className="ai-note"
+                data-wts-conversion="briefing_read"
+                {...(briefingId ? { "data-wts-briefing": briefingId } : {})}
+              >
                 Written by AI (Claude) from the cited Hansard records only. Check the sources before relying on it.
                 {preparedAt &&
                   ` Prepared ${fmtDate(preparedAt.slice(0, 10))}${recordsUpTo ? ` from records up to ${fmtDate(recordsUpTo)}` : ""}.`}
@@ -455,11 +460,12 @@ export function AnswerView({ turn, meta = null, onCite }: Props) {
                     <button
                       type="button"
                       className="secondary"
+                      data-wts-conversion="download"
                       onClick={() => downloadWord(question, answer, sources, link ?? window.location.href)}
                     >
                       Download Word
                     </button>
-                    <button type="button" className="secondary" onClick={() => window.print()}>
+                    <button type="button" className="secondary" data-wts-conversion="download" onClick={() => window.print()}>
                       Print or save as PDF
                     </button>
                     {link && <CopyButton label="Copy embed code" text={() => embedCode(link)} />}

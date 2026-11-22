@@ -15,7 +15,7 @@ describe("answer rendering", () => {
     const html = renderAnswer(segmentsToMarkdown([seg("Ministers cited costs", "cited", [1, 3]), seg(".", "connective")]), {
       chip: (n) => (n === 3 ? "Emma Reynolds, Commons, 3 November 2026" : null),
     });
-    expect(html).toContain('<button type="button" class="wts-chip" data-source="1" data-seg="0">');
+    expect(html).toContain('<button type="button" class="wts-chip" data-source="1" data-seg="0" data-wts-conversion="source_opened">');
     expect(html).toContain('<span class="wts-chip__n"><span class="wts-vh">Source</span> 3</span> <span>Emma Reynolds, Commons, 3 November 2026</span>');
     expect(html).not.toContain("aria-label");
     expect(html).not.toContain("⟦");

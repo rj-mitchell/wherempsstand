@@ -273,6 +273,14 @@ site's visitors to its container over a shared Docker network called `sites`.
 `SITES` in `deploy/.env` lists them as `domain=container` pairs (see `deploy/.env.example`). A site is served once
 its Cloudflare origin certificate is added; until then Caddy leaves its domain alone.
 
+Caddy sets each other site's security headers itself, in place of the site's own, so a site that turns on
+measurement for Google Ad Grants (the charity's `family/MEASUREMENT.md`) needs its domain added to `MEASURED_SITES`
+in `/opt/hansardgpt/deploy/.env` (space-separated), then `bash /opt/hansardgpt/deploy/update.sh`, which writes the
+per-site blocks again (`deploy/caddy-local.sh`) and reloads Caddy. A domain in `MEASURED_SITES` is served with the
+snippet `other_site_measured`, whose content security policy adds the Google tag's hosts from the family kit's
+`measure-csp.json`; the others are served exactly as before. Where MPs Stand itself needs no entry: its own switch
+sets its policy ([OPERATIONS.md](OPERATIONS.md#measurement)). Take a site out when its measurement is turned off.
+
 To add a site (its own `docs/DEPLOY.md` has its details, such as the first data load):
 
 1. In Cloudflare, for the site's domain: the settings in step 3 of [Cloudflare

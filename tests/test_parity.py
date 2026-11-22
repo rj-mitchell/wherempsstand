@@ -261,6 +261,11 @@ def test_settings_resolve_as_before(tmp_path):
     assert [c["name"] for c in now] == [c["name"] for c in golden["cases"]]
     for was, case in zip(golden["cases"], now, strict=True):
         gives = dict(case["gives"])
+        # The measurement switch for Google Ad Grants, [ads], added on 22 November 2026 (docs/DECISIONS.md, 50): off
+        # with no tag in the real file, and an empty table in a file without it (deploy/.env can set it there too)
+        raw = dict(gives["raw"])
+        assert raw.pop("ads") == ({} if "sample" in case["name"] else {"measurement": False, "tag": ""}), case["name"]
+        gives["raw"] = raw
         if "sample" not in case["name"]:  # the sample files are their own: nothing was added to them
             real = load_settings()
             assert real.answer["cache_instructions"] == "short" and real.usage["models"]["claude-opus-5-5"] == \

@@ -11,6 +11,8 @@
 #                  "deploy/cloudflare.sh redirects on" has handed the redirects to Cloudflare.
 #   sites.caddy    The charity's other sites on this server (SITES in deploy/.env), each served once its Cloudflare
 #                  origin certificate is in deploy/local/sites/ ("deploy/cloudflare.sh site DOMAIN" puts it there).
+#                  A domain also in MEASURED_SITES (deploy/.env) gets the snippet other_site_measured, whose content
+#                  security policy allows the Google tag (the charity's family/MEASUREMENT.md).
 set -euo pipefail
 DIR="${DIR:-/opt/hansardgpt}"
 LOCAL="$DIR/deploy/local"
@@ -63,10 +65,13 @@ fi
 
 # The other sites: "domain=container" pairs, the container being the site's app on the shared "sites" network
 sites="$(grep -E '^SITES=' "$DIR/deploy/.env" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' || true)"
+measured="$(grep -E '^MEASURED_SITES=' "$DIR/deploy/.env" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' || true)"
 {
   echo "# The charity's other sites on this server (SITES in deploy/.env); written by deploy/caddy-local.sh"
   for pair in $sites; do
     domain="${pair%%=*}"; app="${pair#*=}"
+    snippet=other_site
+    if [[ " $measured " == *" $domain "* ]]; then snippet=other_site_measured; fi
     if [[ -f "$LOCAL/sites/$domain.pem" && -f "$LOCAL/sites/$domain.key" && -n "$saved" ]]; then
       cat <<CADDY
 $domain {
@@ -74,7 +79,7 @@ $domain {
 	tls /etc/caddy/local/sites/$domain.pem /etc/caddy/local/sites/$domain.key
 	@direct not remote_ip $saved
 	abort @direct
-	import other_site $app
+	import $snippet $app
 }
 CADDY
     else

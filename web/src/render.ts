@@ -118,7 +118,7 @@ export function chipHtml(n: number, seg: number, words: BriefingWords): string {
   const label = words.chip?.(n) ?? null;
   const interest = words.interest?.(n) ?? false;
   return (
-    `<button type="button" class="wts-chip" data-source="${n}" data-seg="${seg}">` +
+    `<button type="button" class="wts-chip" data-source="${n}" data-seg="${seg}" data-wts-conversion="source_opened">` +
     `<span class="wts-chip__in"><span class="wts-chip__n"><span class="wts-vh">Source</span> ${n}</span>` +
     (label ? ` <span>${esc(label)}</span>` : "") +
     (interest ? `<span class="chip-interest">Registered interest<span class="wts-vh"> that may relate</span></span>` : "") +

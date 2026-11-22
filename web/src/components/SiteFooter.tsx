@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { BRAND } from "../brand";
+import { measuring } from "../measure";
 import { FOOTER } from "../nav";
 import { FamilyShelf } from "./Family";
 
@@ -31,6 +32,15 @@ export function SiteFooter({ children }: { children?: ReactNode }) {
         <a href="https://www.theyworkforyou.com/">TheyWorkForYou</a>: Hansard data and member records via TheyWorkForYou
         and ParlParse, with thanks to <a href="https://www.mysociety.org/">mySociety</a>.
       </p>
+      {/* While measuring (hansard/api/measure.py), a control that opens the family kit's banner again: not one of the
+          six footer links, so a line of its own; the server adds the same line to the static pages' footer */}
+      {measuring() && (
+        <p className="measure-choices">
+          <a href="/privacy#measurement" data-wts-measure-open="">
+            Measurement choices
+          </a>
+        </p>
+      )}
       {children}
     </footer>
   );
