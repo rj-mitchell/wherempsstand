@@ -205,6 +205,23 @@ export default function App() {
     void api.hit(window.location.pathname, document.referrer); // cookie-free page count
   }, [refresh]);
 
+  // The question box pinned under a briefing grows with its settings and their choices, so its real height is kept in
+  // --composer-h: the record beside the briefing fits above it, and its foot can always be reached.
+  const docked = turns.length > 0;
+  useEffect(() => {
+    const dock = document.querySelector<HTMLElement>(".composer-dock");
+    if (!dock || typeof ResizeObserver === "undefined") return;
+    const root = document.documentElement;
+    const set = () => root.style.setProperty("--composer-h", `${dock.offsetHeight}px`);
+    set();
+    const watch = new ResizeObserver(set);
+    watch.observe(dock);
+    return () => {
+      watch.disconnect();
+      root.style.removeProperty("--composer-h");
+    };
+  }, [docked]);
+
   // a topic address (/topics/<slug>) opens that topic's current briefing
   useEffect(() => {
     const m = window.location.pathname.match(TOPIC);

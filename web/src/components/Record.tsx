@@ -59,6 +59,14 @@ export function Slip({
         <p className="slip-interest">
           <span className="interest-flag">Registered interest</span> The speaker had an entry in the register made before
           they spoke that may relate to this. Matched by AI: a link to check, not a finding of wrongdoing.
+          {onDetails && (
+            <>
+              {" "}
+              <button type="button" className="link slip-interest__more" onClick={onDetails}>
+                See the entry in the register
+              </button>
+            </>
+          )}
         </p>
       )}
       {text && (
@@ -83,7 +91,7 @@ export function Slip({
         )}
         {onDetails && (
           <button type="button" className="link slip-details" onClick={onDetails}>
-            {source.interest ? "The registered interest and all the details" : "All the details of this source"}
+            All the details of this source
           </button>
         )}
       </div>
