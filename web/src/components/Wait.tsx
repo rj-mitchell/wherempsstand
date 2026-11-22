@@ -80,7 +80,9 @@ export function Found({ sources, dealt, writing }: { sources: SourceCard[]; deal
       {writing && (
         <>
           {" "}
-          Writing from these {sources.length} records only. The AI may use these and nothing else.
+          {sources.length === 1
+            ? "Writing from this one record only. The AI may use it and nothing else."
+            : `Writing from these ${sources.length} records only. The AI may use these and nothing else.`}
         </>
       )}
     </p>
