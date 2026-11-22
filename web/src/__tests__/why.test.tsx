@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { WhyChatbot } from "../components/WhyChatbot";
+import { Proof } from "../components/WhyChatbot";
 
 // The family's wording (family/GLOSSARY.md in the charity's repository, "AI briefings").
 const LINE = "Briefings are written by AI from the official record only, and every citation is checked.";
@@ -18,19 +18,22 @@ const POINTS = [
 const page = (name: string) => readFileSync(resolve(__dirname, "../..", name), "utf8").replace(/\s+/g, " ");
 
 describe("How the briefings are checked", () => {
-  it("is one line and a plain fold-out under the question box, with the first five points and no bold lead-ins", () => {
-    const { container } = render(<WhyChatbot />);
+  it("is one line and a plain fold-out in the proof under the question box, with the first five points and no bold lead-ins", () => {
+    const { container } = render(<Proof />);
     expect(screen.getByText(LINE)).toBeTruthy();
     const details = container.querySelector("details");
     expect(details?.open).toBe(false); // closed until the reader opens it, so it takes two lines of the page
     expect(details?.querySelector("summary")?.textContent).toBe(SUMMARY);
-    const items = [...container.querySelectorAll("li")].map((li) => li.textContent?.replace(/\s+/g, " ") ?? "");
+    const items = [...(details?.querySelectorAll("li") ?? [])].map((li) => li.textContent?.replace(/\s+/g, " ") ?? "");
     expect(items).toHaveLength(5);
     POINTS.forEach((p, i) => expect(items[i].startsWith(p), p).toBe(true));
     expect(container.querySelector("li strong")).toBeNull();
-    expect(screen.getByRole("link", { name: "methodology", hidden: true }).getAttribute("href")).toBe(
-      "/methodology#ai-briefings",
-    );
+    expect(
+      screen.getByRole("link", { name: "How every briefing is checked, in the methodology" }).getAttribute("href"),
+    ).toBe("/methodology#ai-briefings");
+    // said once: the line is the proof's own, not a line straight above a block that says the same
+    expect(container.querySelector(".wts-proof .proof__line")?.textContent).toBe(LINE);
+    expect(page("index.html").split(LINE).length).toBe(1);
   });
 
   it("is said at more length on the About and methodology pages, under the heading AI briefings", () => {

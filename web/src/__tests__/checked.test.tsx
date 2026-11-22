@@ -218,7 +218,9 @@ describe("the wait", () => {
     expect(announcement({ ...base, status: "answering" })).toBe(
       `Found ${foundSummary(b.sources)}. Writing the briefing from these records only.`,
     );
-    expect(announcement({ ...base, status: "verifying" })).toBe("Checking every citation and quotation.");
+    expect(announcement({ ...base, status: "verifying" })).toBe(
+      "Checking every citation and quotation against Hansard. The briefing is finished when this is done.",
+    );
     expect(announcement(turnOf(b))).toBe(
       "Briefing ready. Checked against Hansard: 19 of 19 citations matched to the record, 19 of 19 quotations found " +
         "word for word, 0 sentences without a source.",
@@ -245,6 +247,25 @@ describe("the wait", () => {
     expect(three.querySelector(".wts-card__who")?.textContent).toBe("Emma Reynolds Cited");
     expect(screen.getByText(/Writing from these 34 records only. The AI may use these and nothing else./)).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "Preparing the briefing" })).toBeInTheDocument();
+  });
+
+  it("shows the checks under way from the server's word until the final event, with nothing still saying Writing", () => {
+    const checking = turnOf(b, { answer: undefined, status: "verifying", streamText: "Ministers said", cited: [3], live: true });
+    const { container } = render(<AnswerView turn={checking} onCite={vi.fn()} />);
+    const line = container.querySelector(".wts-checking");
+    expect(line?.textContent).toBe(
+      "Checking every citation and quotation against Hansard. The briefing is finished when this is done.",
+    );
+    expect(line?.querySelector(".wts-checking__bar")).not.toBeNull();
+    // under the text, not above it
+    const body = container.querySelector(".answer-body")!;
+    expect(body.compareDocumentPosition(line!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(container.querySelector(".wts-cursor")).toBeNull();
+    const found = container.querySelector(".wts-found")?.textContent ?? "";
+    expect(found).not.toMatch(/Writing/);
+    expect(found).toMatch(/Written from these 34 records only\.$/);
+    const now = container.querySelector('.wts-stage[data-state="now"]');
+    expect(now?.textContent).toBe("NowChecking every citation and quotation");
   });
 
   it("runs the strip's counts up through the real results when the briefing ends, then settles", () => {

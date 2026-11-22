@@ -2,7 +2,10 @@
  * The wait for a briefing (the family's BRIEFINGS.md, "The wait"): the stages drawn from the stream's real events, in
  * order. Before the first event, the family's spines; on the plan event, the question as read; on the sources event,
  * each record found as a card in the record's own form, into a pile; as the text is written, each source it cites is
- * marked "Cited"; on the final event, the checks' results. Nothing is invented and nothing waits for an animation.
+ * marked "Cited"; from the server's word that the checks have begun (a progress event, step "checking"), the
+ * checking line under the text; on the final event, the checks' results. Nothing is invented and nothing waits for an
+ * animation. Something always moves while the site is working: the books before the first event, the dot beside
+ * "Now" (kit 2.3.0, CSS only), and the checking line's bar.
  */
 import { forwardRef } from "react";
 import { cardOf, countsInWords, checkCounts, foundSummary, planWords } from "../checked";
@@ -64,8 +67,14 @@ export function QuestionAsRead({ plan, meta }: { plan: NonNullable<Turn["plan"]>
   );
 }
 
-/** The running count of records found, then the summary; once writing begins, what the AI may use. */
-export function Found({ sources, dealt, writing }: { sources: SourceCard[]; dealt: number; writing: boolean }) {
+/** The running count of records found, then the summary; once writing begins, what the AI may use; once the text is
+ * written and the checks run, what it was written from (never still "Writing" while the checks run). */
+export function Found({ sources, dealt, writing, checking = false }: {
+  sources: SourceCard[];
+  dealt: number;
+  writing: boolean;
+  checking?: boolean;
+}) {
   if (dealt < sources.length) {
     return (
       <p className="wts-found" aria-hidden="true">
@@ -77,7 +86,15 @@ export function Found({ sources, dealt, writing }: { sources: SourceCard[]; deal
   return (
     <p className="wts-found">
       <strong>{count}</strong> {rest.join(" ")}.
-      {writing && (
+      {writing && checking && (
+        <>
+          {" "}
+          {sources.length === 1
+            ? "Written from this one record only."
+            : `Written from these ${sources.length} records only.`}
+        </>
+      )}
+      {writing && !checking && (
         <>
           {" "}
           {sources.length === 1
@@ -123,6 +140,20 @@ export const Pile = forwardRef<HTMLDivElement, { sources: SourceCard[]; dealt: n
   },
 );
 
+/** What the checking line and the status region say while the checks run. */
+export const CHECKING = "Checking every citation and quotation against Hansard. The briefing is finished when this is done.";
+
+/** Under the text, from the moment the server says the checks have begun until the final event: the words, and a bar
+ * that moves while they run (still, with reduced motion). The status region says the same words once. */
+export function Checking() {
+  return (
+    <div className="wts-checking">
+      <span>{CHECKING}</span>
+      <div className="wts-checking__bar" />
+    </div>
+  );
+}
+
 /** What the one status region says for a turn: each stage once, as it begins, and at the end the result in words
  * (the moving counts are hidden from screen readers). */
 export function announcement(t: Turn): string {
@@ -138,7 +169,7 @@ export function announcement(t: Turn): string {
         ? `Found ${foundSummary(t.sources)}.`
         : `Found ${foundSummary(t.sources)}. Writing the briefing from these records only.`;
     case "verifying":
-      return "Checking every citation and quotation.";
+      return CHECKING;
     case "done":
       if (t.answer?.no_records) return "No records found.";
       if (t.answer) return `Briefing ready. Checked against Hansard: ${countsInWords(checkCounts(t.answer))}.`;

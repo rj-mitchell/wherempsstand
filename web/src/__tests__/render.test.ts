@@ -27,6 +27,15 @@ describe("answer rendering", () => {
     expect(html).toContain('<span class="wts-nosource" id="nosource-1">Another one.<span class="wts-vh"> (no source)</span></span>');
   });
 
+  it("keeps the space after a passage with no source outside its mark, so the tag never touches the next word", () => {
+    const html = renderAnswer(
+      segmentsToMarkdown([seg("The motion fell to a veto ", "unsupported"), seg("in November", "cited", [2]), seg(".", "connective")]),
+    );
+    expect(html).toContain('<span class="wts-vh"> (no source)</span></span> in November');
+    const tabbed = renderAnswer(segmentsToMarkdown([seg("Said nothing\t", "unsupported"), seg("then spoke.", "connective")]));
+    expect(tabbed).toMatch(/\(no source\)<\/span><\/span>\s+then spoke/);
+  });
+
   it("marks a sentence whose citations all failed the check as it marks an unsupported one, saying why", () => {
     const html = renderAnswer(segmentsToMarkdown([seg("A claim its source did not bear out.", "invalid")]));
     expect(html).toContain('<span class="wts-nosource" id="nosource-0">A claim its source did not bear out.');

@@ -134,7 +134,7 @@ function Compare() {
         kind === "person" ? (
           <MemberPicker key={`${kind}-${i}`} id={`pick-${i}`} label={i === 2 ? "Third (optional)" : i === 0 ? "First" : "Second"} value={picks[i]} onChange={(o) => set(i, o)} />
         ) : (
-          <div key={`${kind}-${i}`}>
+          <div key={`${kind}-${i}`} className="compare-pick">
             <label htmlFor={`pick-${i}`}>{i === 2 ? "Third (optional)" : i === 0 ? "First" : "Second"}</label>
             <select id={`pick-${i}`} value={picks[i]?.id ?? ""} onChange={(e) => set(i, options.find((o) => o.id === e.target.value) ?? null)}>
               <option value="">{i === 2 ? "None" : "Choose"}</option>

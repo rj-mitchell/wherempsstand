@@ -17,7 +17,7 @@ import { fmtDate } from "./render";
 import { FamilyEndorsement } from "./components/Family";
 import { SameQuestion } from "./components/SameQuestion";
 import { SiteFooter } from "./components/SiteFooter";
-import { Proof, WhyChatbot } from "./components/WhyChatbot";
+import { Proof } from "./components/WhyChatbot";
 import { followUpsFor, historyFor } from "./followups";
 import { Failed, NOT_UPDATED, serverText } from "./serverText";
 import { briefingGone } from "./gone";
@@ -714,7 +714,6 @@ export default function App() {
               point cited to Hansard, or the most relevant records on their own, without AI.
             </p>
             {composer("composer composer-inline")}
-            <WhyChatbot />
             <Proof />
             <div className="home-grid">
               <div className="home-try">
