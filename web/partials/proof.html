@@ -1,31 +1,57 @@
-<!-- The home page's proof of the checking (the family kit's .wts-proof; the charity's family/BRIEFINGS.md, "The home
-     page"), the same in the page's HTML for readers and search engines without scripts and in the app
-     (src/components/Proof.tsx). The example is real: a sentence of the topic briefing on the cost of living,
-     q3k4u3vqh8, prepared 17 November 2026 (a fixed copy, tests/fixtures/briefings/q3k4u3vqh8-2026-11-21.json), and
-     the passage of source 3 it quotes, Emma Reynolds in the Commons on 3 November 2026, column 825. -->
+<!-- The home page's proof of the checking (the family kit's .wts-proof, kit 2.3.0; the charity's family/BRIEFINGS.md,
+     "The home page"), the same in the page's HTML for readers and search engines without scripts and in the app
+     (Proof in src/components/WhyChatbot.tsx). It holds the family's line on AI briefings and the fold-out "How the
+     briefings are checked" (family/GLOSSARY.md, "AI briefings"), so the two are said once, not in a line straight
+     above a block that says the same. The example is real: a sentence of the topic briefing on the cost of living,
+     q3k4u3vqh8, prepared 17 November 2026 (a fixed copy, web/src/__tests__/fixtures/briefings/q3k4u3vqh8-2026-11-21.json),
+     and the passage of source 3 it quotes, Emma Reynolds in the Commons on 3 November 2026, column 825. -->
 <section class="proof wts-proof wts-cloth--mps" aria-labelledby="proof-head">
-  <h3 id="proof-head">Checked against Hansard</h3>
+  <div class="proof__head">
+    <h3 id="proof-head">Checked against Hansard</h3>
+    <p class="proof__line">Briefings are written by AI from the official record only, and every citation is checked.</p>
+  </div>
   <ol class="wts-proof__steps">
     <li>Searches only the official record</li>
     <li>AI writes only from what was found</li>
     <li>Every citation and quotation is checked before you see it</li>
   </ol>
   <div class="wts-proof__pair">
-    <div>
-      <p class="proof__from">From the topic briefing on the cost of living, prepared 17 November 2026</p>
-      <p class="wts-proof__said">Ministers pointed to specific measures and external causes, as when Chief Secretary
-        Emma Reynolds said <span class="wts-quote wts-quote--checked">“Those are the global headwinds we are
-        facing.”<span class="wts-quote__tick" aria-hidden="true">✓ word for word</span><span class="wts-vh"> (quotation,
-        found word for word in Hansard)</span></span><span class="wts-chip"><span class="wts-chip__in"><span class="wts-chip__n"><span class="wts-vh">Source</span> 3</span> <span>Emma Reynolds, Commons, 3 November 2026</span></span></span></p>
+    <div class="wts-proof__side">
+      <p class="wts-proof__label">In a briefing written by AI</p>
+      <div class="wts-proof__card">
+        <p class="wts-proof__said">Ministers pointed to specific measures and external causes, as when Chief Secretary
+          Emma Reynolds said <span class="wts-quote wts-quote--checked">“Those are the global headwinds we are
+          facing.”<span class="wts-quote__tick" aria-hidden="true">✓ word for word</span><span class="wts-vh"> (quotation,
+          found word for word in Hansard)</span></span><span class="wts-chip"><span class="wts-chip__in"><span class="wts-chip__n"><span class="wts-vh">Source</span> 3</span> <span>Emma Reynolds, Commons, 3 November 2026</span></span></span></p>
+        <p class="wts-proof__from">From the topic briefing on the cost of living, prepared 17 November 2026</p>
+      </div>
     </div>
-    <div class="wts-slip">
-      <div class="wts-slip__top"><b>House of Commons</b><span>3 November 2026, column 825</span></div>
-      <div class="wts-slip__who"><strong>Emma Reynolds</strong> (Labour, Wycombe)</div>
-      <div class="wts-slip__heading">Budget Resolutions: Income Tax (Charge)</div>
-      <p class="wts-passage">… “which pushes up on inflation and lowers real household disposable incomes.”
-        <mark>Those are the global headwinds we are facing</mark>.</p>
-      <div class="wts-slip__foot"><span class="wts-slip__found">✓ Highlighted words found word for word</span><a href="https://hansard.parliament.uk/Commons/2026-11-03">Read it in Hansard</a></div>
+    <div class="wts-proof__side">
+      <p class="wts-proof__label">In the record it cites</p>
+      <div class="wts-slip">
+        <div class="wts-slip__top"><b>House of Commons</b><span>3 November 2026, column 825</span></div>
+        <div class="wts-slip__who"><strong>Emma Reynolds</strong> (Labour, Wycombe)</div>
+        <div class="wts-slip__heading">Budget Resolutions: Income Tax (Charge)</div>
+        <p class="wts-passage">… “which pushes up on inflation and lowers real household disposable incomes.”
+          <mark>Those are the global headwinds we are facing</mark>.</p>
+        <div class="wts-slip__foot"><span class="wts-slip__found">✓ Highlighted words found word for word</span><a href="https://hansard.parliament.uk/Commons/2026-11-03">Read it in Hansard</a></div>
+      </div>
     </div>
   </div>
-  <p class="proof__more"><a href="/methodology#ai-briefings">How every briefing is checked, in the methodology</a></p>
+  <div class="proof__foot">
+    <details class="why-chatbot">
+      <summary>How the briefings are checked</summary>
+      <ul>
+        <li>The AI is given only the Hansard and other parliamentary records found for your question, and may use
+          nothing else. Early day motions, committee evidence and the devolved parliaments' reports are given too,
+          when they bear on the question.</li>
+        <li>Each point links to its source. Citations are checked against the source text, quotations are checked
+          word for word, and sentences that no source supports are flagged.</li>
+        <li>Hansard is read in twice a day.</li>
+        <li>If the record holds nothing relevant, the site says “No records found”.</li>
+        <li>Evidence is drawn from across ministers, the opposition and backbenchers.</li>
+      </ul>
+    </details>
+    <p class="proof__more"><a href="/methodology#ai-briefings">How every briefing is checked, in the methodology</a></p>
+  </div>
 </section>

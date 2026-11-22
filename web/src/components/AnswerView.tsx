@@ -9,7 +9,7 @@ import type { Answer, Highlight, Meta, Segment, SourceCard, Turn } from "../type
 import { CheckStrip, type RunningUp } from "./CheckStrip";
 import { RecordPanel, SourceSheet } from "./Record";
 import { ReportProblem } from "./ReportProblem";
-import { Found, Pile, QuestionAsRead, Spines, Stages } from "./Wait";
+import { Checking, Found, Pile, QuestionAsRead, Spines, Stages } from "./Wait";
 
 interface Props {
   turn: Turn;
@@ -119,8 +119,10 @@ export function AnswerView({ turn, meta = null, onCite }: Props) {
         id: prefix,
       });
     }
-    return headHtml + withCursor(renderPlain(streamText.slice(head.length)));
-  }, [answer, streamText, bySource, flagged, prefix, head, headHtml]);
+    // the cursor goes once the text is written: the checking line under it says what happens next
+    const tail = renderPlain(streamText.slice(head.length));
+    return headHtml + (turn.status === "verifying" ? tail : withCursor(tail));
+  }, [answer, streamText, bySource, flagged, prefix, head, headHtml, turn.status]);
 
   const counts = useMemo(() => (answer ? checkCounts(answer) : null), [answer]);
   const { runs, bySeg } = useMemo(() => quotedRuns(answer?.segments ?? []), [answer]);
@@ -374,7 +376,12 @@ export function AnswerView({ turn, meta = null, onCite }: Props) {
             </p>
           )}
           {sources.length > 0 && (
-            <Found sources={sources} dealt={dealt} writing={!turn.sourcesOnly && dealt >= sources.length} />
+            <Found
+              sources={sources}
+              dealt={dealt}
+              writing={!turn.sourcesOnly && dealt >= sources.length}
+              checking={turn.status === "verifying"}
+            />
           )}
           {turn.sourcesOnly && sources.length > 0 && (
             <Pile sources={sources} dealt={dealt} cited={cited} ref={pile} />
@@ -434,6 +441,7 @@ export function AnswerView({ turn, meta = null, onCite }: Props) {
               dangerouslySetInnerHTML={{ __html: html }}
             />
           )}
+          {turn.status === "verifying" && !answer && <Checking />}
           {answer && (
             <>
               <CheckDetails id={`${prefix}details`} answer={answer} records={sources.length} />

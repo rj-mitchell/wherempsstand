@@ -130,7 +130,9 @@ def test_ask_streams_plan_sources_text_and_verified_answer(api):
     types = [e["type"] for e in evs]
     assert evs[0]["type"] == "progress" and evs[0]["step"] == "reading"  # sent before the question is read
     assert types[1] == "plan" and types[2] == "sources" and "text" in types and types[-1] == "final"
-    assert types[-2] == "progress"  # checking the citations, after the writing
+    # the checks begin after the last of the text (the page shows its checking line from here to the final event)
+    assert evs[-2] == {"type": "progress", "step": "checking"}
+    assert max(i for i, t in enumerate(types) if t == "text") < len(types) - 2
     final = evs[-1]["answer"]
     assert "[Source 1]" in final["markdown"] and final["citations_invalid"] == 0
     assert answers_recorded(state) == 1

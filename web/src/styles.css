@@ -2334,6 +2334,22 @@ legend,
   padding-inline-start: 1.3em;
 }
 
+/* a page drawn by script (its root in the page, the <article> of a member, bill, debate or week in it, and a plain
+   section of either) spaces its parts as the static pages do (.prose's gap), so a heading has room under it and a
+   summary, a search box or a list never touches what follows */
+.prose > [id$="-root"],
+.prose > [id$="-root"] > article,
+.prose > [id$="-root"] section:not([class]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+/* the line naming where a page belongs ("House of Commons", "Bills, Commons") stays with the heading under it */
+.prose > [id$="-root"] > article > .page-context + h1 {
+  margin-block-start: calc(var(--space-2xs) - var(--space-s));
+}
+
 .intro-text {
   font-size: var(--step-1);
   line-height: 1.45;
@@ -2572,14 +2588,26 @@ main:focus {
   min-block-size: var(--wts-target-min);
 }
 
-/* on a narrow line a chip's parts wrap whole, the interest mark under the name, rather than squeezing each other */
+/* a chip that folds onto two lines keeps its name beside its number, read from the left (a button centres its text);
+   on a narrow line a chip with an interest mark puts the mark under the name, rather than squeezing the two */
 .answer-body .wts-chip__in {
-  flex-wrap: wrap;
-  row-gap: 0;
+  text-align: start;
 }
 
 .answer-body .wts-chip__in:has(.chip-interest) {
+  flex-wrap: wrap;
+  row-gap: 0;
   border-radius: 0.9em;
+}
+
+/* the name stays beside the number and takes the room left; the mark goes under it when the line is short */
+.answer-body .wts-chip__in:has(.chip-interest) > span:not([class]) {
+  flex: 1 1 8rem;
+  min-inline-size: 0;
+}
+
+.answer-body .wts-chip__in > .chip-interest {
+  margin-inline-start: 0.3em;
 }
 
 /* a chip's number and its interest mark never break inside (a two-figure number would otherwise stack on a phone) */
@@ -2634,10 +2662,6 @@ main:focus {
   .wait .wts-stage {
     font-size: var(--step--1);
   }
-}
-
-.proof .wts-proof__pair {
-  --wts-join: 4.6rem;
 }
 
 /* a chip for a speaker with a registered interest that may relate says so in words (docs/DECISIONS.md, 15) */
@@ -2719,30 +2743,45 @@ main:focus {
   outline: none;
 }
 
-/* the home page: the checking, shown (the kit's .wts-proof) */
+/* the home page: the checking, shown (the kit's .wts-proof, kit 2.3.0), on a panel under the question box: the
+   heading with the family's line on AI briefings, the three steps, the two cards (the page's own white, the kit's
+   default), and the fold-out and the methodology link at its foot */
 .proof {
-  display: grid;
-  gap: var(--space-s);
   padding: var(--space-m);
   background: var(--panel);
 }
 
-.proof > h3,
-.wts-headings .proof > h3 {
+/* the steps sit level with each other in the page for readers without scripts too (.prose spaces list items apart) */
+.prose .wts-proof__steps li + li {
+  margin-block-start: 0;
+}
+
+.proof__head {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.proof__head > h3,
+.wts-headings .proof__head > h3 {
   margin: 0;
   font-size: var(--step-1);
 }
 
-.proof__from {
-  margin: 0 0 var(--space-2xs);
+.proof__line {
+  margin: 0;
+  max-inline-size: var(--measure);
   font-family: var(--sans);
   font-size: var(--step--1);
-  color: var(--ink-soft);
+}
+
+.proof__foot {
+  display: grid;
+  gap: var(--space-xs);
+  font-family: var(--sans);
 }
 
 .proof__more {
   margin: 0;
-  font-family: var(--sans);
 }
 
 @media print {
@@ -3175,6 +3214,13 @@ main:focus {
   color: var(--ink-soft);
 }
 
+/* each side's label sits above its choice, as the topic's and a member's do, so the choices share a left edge */
+.compare-pick {
+  display: grid;
+  gap: var(--space-2xs);
+  justify-items: start;
+}
+
 .compare-form select,
 .compare-form input:not([type="radio"]) {
   font: inherit;
@@ -3290,10 +3336,23 @@ main:focus {
   margin-block-start: var(--space-l);
 }
 
+/* a choice beside the box (the devolved parliaments' search) keeps its words ("All three") rather than being
+   squeezed to its arrow; on a phone the box takes the first line and the choice and the button share the second */
 .ask-row select {
-  flex: 1;
-  min-inline-size: 0;
+  flex: 0 1 auto;
+  inline-size: auto;
+  min-inline-size: 8rem;
   margin-block-end: 0;
+}
+
+@media (width < 40rem) {
+  .ask-row:has(select) input {
+    flex-basis: 100%;
+  }
+
+  .ask-row select {
+    flex: 1 1 8rem;
+  }
 }
 
 .drawer-ask {
@@ -3563,24 +3622,18 @@ main:focus {
   padding-inline-start: 1.3em; /* the indent of a plain list in running text (.prose ul) */
 }
 
-/* under the home page's question box: the line saying briefings are written by AI, and how they are checked
-   (WhyChatbot.tsx). It sits under the box, so opening it never moves the box */
-/* just under the question box: the family's line on how briefings are written, and its fold-out */
-.why {
+/* at the foot of the home page's proof: the fold-out "How the briefings are checked" (web/partials/proof.html) */
+.why-chatbot {
   max-inline-size: var(--measure);
   font-size: var(--step--1);
   color: var(--ink);
-}
-
-.why-line {
-  margin: 0;
 }
 
 .why-chatbot > summary {
   display: flex;
   align-items: center;
   inline-size: fit-content;
-  margin-block-start: var(--space-2xs);
+  min-block-size: var(--wts-target-min);
   color: var(--accent);
   font-weight: 600;
 }
