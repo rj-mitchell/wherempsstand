@@ -4,7 +4,8 @@
 The loader reads config/settings.toml (or the file named by ``HANSARD_CONFIG``), then ``settings.local.toml`` in
 the data folder if there is one (laid over it two levels deep: a key replaces a key, and a table inside a section,
 such as one model's prices under ``[usage.models]``, is added beside the others; written by ``hansard bootstrap``
-and ``hansard reindex-vectors``, or by hand on a server), then any overrides given by name
+and ``hansard reindex-vectors``, or by hand on a server), then the measurement switch from deploy/.env
+(``HANSARD_ADS_MEASUREMENT`` and ``HANSARD_ADS_TAG``), then any overrides given by name
 (``**{"usage.daily_spend_cap_usd": 1.0}``). The data folder is ``HANSARD_DATA_DIR``, else ``[paths] data_dir``.
 """
 
@@ -38,6 +39,12 @@ SITE = core.Site(
     hosts=("wherempsstand.com", "www.wherempsstand.com"),
     state_file="state.sqlite",  # SQLite, shared safely by the web app and the update (a write-ahead log)
     version=_version(),
+    # The measurement switch for Google Ad Grants (docs/DECISIONS.md, 50), which the server keeps in deploy/.env:
+    # HANSARD_ADS_MEASUREMENT ("1", "true" or "yes") sets [ads] measurement, and HANSARD_ADS_TAG [ads] tag.
+    env_settings=(
+        core.EnvSetting("ADS_MEASUREMENT", "ads", "measurement", "flag"),
+        core.EnvSetting("ADS_TAG", "ads", "tag"),
+    ),
 )
 
 

@@ -39,7 +39,11 @@
 		X-Content-Type-Options "nosniff"
 		X-Frame-Options "DENY"
 		Referrer-Policy "strict-origin-when-cross-origin"
-		Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'"
+		# This site's policy, unless the site sends one of its own, which it does only while its measurement switch is
+		# on ([ads] measurement, or HANSARD_ADS_MEASUREMENT in .env; docs/DECISIONS.md, 50): then it is this policy
+		# with the hosts the Google tag needs added, from the family kit's measure-csp.json (src/hansard/api/measure.py).
+		# So the site's one switch changes its policy too. The other sites' policies are set below, whatever they send.
+		?Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'"
 		# Cloudflare must pass pages on as they are: this stops it adding its own analytics script (Web Analytics
 		# can be switched on for a site by default), which the privacy notice says this site does not use
 		+Cache-Control "no-transform"
@@ -66,6 +70,30 @@
 		X-Frame-Options "DENY"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'"
+		+Cache-Control "no-transform"
+		-Server
+	}
+}
+# The same for a site whose measurement switch is on ([ads] measurement = true; the charity's family/MEASUREMENT.md):
+# its policy also allows the hosts the Google tag needs, from the family kit's measure-csp.json, and nothing else.
+# deploy/caddy-local.sh uses it for each domain in MEASURED_SITES in deploy/.env.
+(other_site_measured) {
+	encode zstd gzip
+	request_body {
+		max_size 1MB
+	}
+	@fingerprinted path /assets/*
+	header @fingerprinted Cache-Control "public, max-age=31536000, immutable"
+	reverse_proxy {args[0]}:8000 {
+		flush_interval -1
+		header_up X-Forwarded-For {client_ip}
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Content-Security-Policy "default-src 'self'; img-src 'self' data: https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://www.google.co.uk; style-src 'self' 'unsafe-inline'; connect-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://www.google.co.uk https://ad.doubleclick.net; frame-ancestors 'none'; script-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://www.google.com; frame-src 'self' https://www.googletagmanager.com"
 		+Cache-Control "no-transform"
 		-Server
 	}

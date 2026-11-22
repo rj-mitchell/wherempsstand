@@ -35,6 +35,7 @@ from wts_core.ports import SYSTEM_CLOCK, SYSTEM_RANDOM, BriefingConfig, Clock, R
 from wts_core.replies import NotDone, Refused, Replies
 from wts_core.usage import RateLimiter, cache_key, network_of
 
+from hansard.api import measure
 from hansard.api import usage as use
 from hansard.api.auth import (
     COOKIE,
@@ -2463,6 +2464,15 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     def sync_log(user=Depends(admin_user)):
         return {"runs": state.runs(30)}
 
+    # Measurement for Google Ad Grants, off as the site ships (hansard/api/measure.py; docs/DECISIONS.md, 50). On,
+    # every page loads the family kit's measure.js, the footer gains "Measurement choices", /privacy is the
+    # measurement notice, and every answer carries the policy with the Google tag's hosts. Added before the HEAD
+    # handling below, so a HEAD answer has the headers of the page as changed.
+    measuring = measure.measure_tag(settings)
+    if measuring:
+        measure.check(settings, dist)
+        app.add_middleware(measure.Measure, tag=measuring, csp=measure.policy(dist / "family" / "measure-csp.json"))
+
     # web app
     @app.middleware("http")
     async def head_requests(request: Request, call_next):
@@ -2494,9 +2504,13 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         def spa(path: str):
             if path.startswith("api/"):
                 return JSONResponse({"detail": "Not found"}, status_code=404)
-            if path.strip("/").removesuffix(".html") in TEMPLATES:  # a page's frame, empty without its address
+            name = path.strip("/").removesuffix(".html")
+            # a page's frame, empty without its address; and the measurement privacy notice, never at its own
+            if name in TEMPLATES or name == measure.NOTICE.removesuffix(".html"):
                 missing = dist / "404.html"
                 return FileResponse(missing if missing.is_file() else dist / "index.html", status_code=404)
+            if measuring and name == "privacy":  # while measuring, the privacy notice is the measurement version
+                return FileResponse(dist / measure.NOTICE)
             f = (dist / path).resolve()
             if path and f.is_file() and f.is_relative_to(dist.resolve()):  # never serve outside the build
                 return FileResponse(f)

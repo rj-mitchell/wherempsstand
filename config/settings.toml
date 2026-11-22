@@ -191,6 +191,18 @@ times = ["07:15", "19:15"]
 # account). Empty: neither is shown. HANSARD_DONATE_URL in the server's .env overrides this.
 donate_url = "https://wheretheystand.uk/donate"
 
+[ads]
+# Measurement for Google Ad Grants (docs/DECISIONS.md, 50; the charity's family/MEASUREMENT.md). Off, as it ships: the
+# pages are the built files as they are, with no script, no banner and nothing from Google. Turned on (with the
+# Google tag's ID from the charity's Google Ads account, "AW-" and its number) only once the charity is registered
+# and its Ad Grants account is set up: then every page loads the family kit's measure.js, which asks the reader first
+# and loads the Google tag only if they accept; the footer gains "Measurement choices"; /privacy is the measurement
+# notice (web/privacy-measurement.html, which the site refuses while it is a draft); and the content security policy
+# adds the Google tag's hosts (web/public/family/measure-csp.json). On the server, HANSARD_ADS_MEASUREMENT and
+# HANSARD_ADS_TAG in deploy/.env set these (docs/OPERATIONS.md, "Measurement").
+measurement = false
+tag = ""
+
 [topics]
 # Topic briefings (/topics): standing questions listed in config/topics.toml, refreshed by the sync.
 enabled = true

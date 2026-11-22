@@ -21,8 +21,9 @@ earlier](#names-kept-from-earlier) explains the older names.
 8. [The state database](#the-state-database)
 9. [New code](#new-code)
 10. [If search by meaning is off](#if-search-by-meaning-is-off)
-11. [Moving onto wts-core](#moving-onto-wts-core)
-12. [Names kept from earlier](#names-kept-from-earlier)
+11. [Measurement](#measurement)
+12. [Moving onto wts-core](#moving-onto-wts-core)
+13. [Names kept from earlier](#names-kept-from-earlier)
 
 ## Running the full site locally
 
@@ -332,6 +333,41 @@ told.
    cd /opt/hansardgpt/deploy
    nohup flock --verbose /var/lock/wheretheystand-update.lock docker compose run --rm -T app hansard embed --start-again < /dev/null > /root/embed-again.log 2>&1 &
    ```
+
+## Measurement
+
+Measurement for Google Ad Grants ([DECISIONS.md](DECISIONS.md), 50; the charity's `family/MEASUREMENT.md`) is off:
+`[ads] measurement = false` and `tag = ""` in `config/settings.toml`. Off, the site loads nothing from Google and
+shows no banner, and the front door sends the site's policy as before. Turn it on only once the charity is registered
+and its Google Ads account has the conversions set up, following the charity's [Ad Grants
+checklist](https://github.com/rj-mitchell/wheretheystand-charity/blob/main/plans/2026-11-21-ad-grants-checklist.md)
+("On the day the charity is registered"), in this order:
+
+1. In the Google Ads account, create the conversion actions this site has (`briefing_read`, `source_opened`,
+   `download`, `donate_click`, `report_sent`) from the Google tag's events, and note the tag's ID (`AW-…`).
+2. Finish the measurement notice, `web/privacy-measurement.html`: the charity number for `NNNNNNN`, and the date in
+   "Last updated" in place of the draft's. Check the Google entity the account's terms name. Merge it. Until then the
+   site refuses to start with measurement on, and `update.sh` stops before anything is restarted
+   (`hansard check-settings` says why).
+3. Add to `/opt/hansardgpt/deploy/.env`:
+
+   ```bash
+   HANSARD_ADS_MEASUREMENT=true
+   HANSARD_ADS_TAG=AW-…
+   ```
+
+   and run `cd /opt/hansardgpt/deploy && bash update.sh`. That is the only switch for this site: while it is on the
+   site sends its own content security policy (the front door's, with the Google tag's hosts), and the front door
+   passes it on (`deploy/Caddyfile`). `MEASURED_SITES` in the same file is for the other sites on the server
+   ([HOSTING.md](HOSTING.md#other-sites-on-this-server)), not this one.
+4. Check in a private window: the banner shows at the top of the page; "Reject" leaves no request to Google (the
+   browser's network panel); "Accept" loads the tag and Google Ads' tag diagnostics see a conversion (finish reading
+   a briefing, or open a source); "Measurement choices" at the foot of a page opens the banner again; `/privacy` is the
+   measurement notice; and `curl -sI https://wherempsstand.com/ | grep -i content-security-policy` names
+   `https://www.googletagmanager.com`.
+
+To turn it off, remove the two lines from `.env` and run `update.sh` again: the pages and the policy are as they were,
+and readers' stored choices do nothing.
 
 ## Moving onto wts-core
 

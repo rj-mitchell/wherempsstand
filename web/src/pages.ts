@@ -3,6 +3,7 @@ import "@fontsource-variable/source-serif-4/opsz.css";
 import "@fontsource-variable/source-serif-4/opsz-italic.css";
 import "./styles.css";
 import { api } from "./api";
+import { reportSent } from "./measure";
 import { setUpNavMore } from "./navMore";
 import { fmtDate } from "./render";
 import { KIND_ALIASES, MAX_WORDS, NAMED_PAGE, showStatementsForPage, statementProblem, wordCount } from "./statements";
@@ -201,6 +202,7 @@ reportForm?.addEventListener("submit", async (e) => {
     }
     reportForm.hidden = true;
     document.getElementById("report-sent")!.hidden = false;
+    reportSent();
   } catch (err) {
     errorEl.textContent =
       err instanceof Error && err.message !== "failed"
@@ -262,6 +264,7 @@ if (statementForm) {
         throw new Error(typeof detail === "string" ? detail : "failed");
       }
       statementForm.hidden = true;
+      reportSent();
       const sent = document.getElementById("statement-sent")!;
       sent.hidden = false;
       sent.focus();

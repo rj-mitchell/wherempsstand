@@ -84,6 +84,7 @@ function SourceItem({ source: s, onOpen }: { source: SourceCard; onOpen: (h: Hig
       type="button"
       className={s.interest ? "source-card has-interest" : "source-card"}
       data-house={houseOf(s)}
+      data-wts-conversion="source_opened"
       onClick={() => onOpen({ source: s.n, quotes: [] })}
     >
       <span className="source-number">{s.n}</span>
@@ -322,11 +323,11 @@ export function SourceDrawer({
           <dd className="links">
             {source.debate_path && <a href={source.debate_path}>The whole debate on this site</a>}
             {source.official_url && (
-              <a href={source.official_url} target="_blank" rel="noreferrer">
+              <a href={source.official_url} target="_blank" rel="noreferrer" data-wts-conversion="source_opened">
                 {source.url_kind === "sitting" ? "Official Hansard (sitting day)" : "Official Parliament record"}
               </a>
             )}
-            <a href={source.twfy_url} target="_blank" rel="noreferrer">
+            <a href={source.twfy_url} target="_blank" rel="noreferrer" data-wts-conversion="source_opened">
               TheyWorkForYou (exact record)
             </a>
           </dd>
@@ -543,7 +544,7 @@ function EdmDetail({ source, quotes }: { source: SourceCard; quotes: string[] })
         <dd className="links">
           <a href={source.url}>Who signed, on this site</a>
           {source.official_url && (
-            <a href={source.official_url} target="_blank" rel="noreferrer">
+            <a href={source.official_url} target="_blank" rel="noreferrer" data-wts-conversion="source_opened">
               Parliament's early day motions site
             </a>
           )}
@@ -585,7 +586,7 @@ function DevolvedDetail({ source, quotes }: { source: SourceCard; quotes: string
         <dd className="links">
           <a href={source.url}>The whole sitting on this site</a>
           {source.official_url && (
-            <a href={source.official_url} target="_blank" rel="noreferrer">
+            <a href={source.official_url} target="_blank" rel="noreferrer" data-wts-conversion="source_opened">
               The official report
             </a>
           )}
@@ -632,7 +633,7 @@ function EvidenceDetail({ source, quotes }: { source: SourceCard; quotes: string
         <dd className="links">
           <a href={source.url}>The whole transcript on this site</a>
           {source.official_url && (
-            <a href={source.official_url} target="_blank" rel="noreferrer">
+            <a href={source.official_url} target="_blank" rel="noreferrer" data-wts-conversion="source_opened">
               The session on Parliament's website
             </a>
           )}

@@ -72,6 +72,15 @@ copied into `web/public/family/` by the kit's `sync.mjs`:
   Every page without an image of its own shares the kit's link card (`/family/card.png`); a saved briefing and each
   topic page have their own ("Share cards", below);
 - the kit's tokens, fonts and focus ring, and Source Serif 4 for headings through `class="wts-headings"` on `<body>`.
+- the kit's consent banner and Google tag loader, `measure.js`, and the hosts the content security policy adds for
+  it, `measure-csp.json`, both unused while measurement for Google Ad Grants is off, as it ships (decision 50). On,
+  the server adds `measure.js` to every page's head as it sends it, with "Measurement choices" after the footer's
+  notices (`src/hansard/api/measure.py`; the React footer draws the same line when the page loads the script), and
+  serves `web/privacy-measurement.html` at `/privacy`. The banner's styles are the kit's (`.wts-measure` in
+  `family.css`). The pages mark each conversion with the kit's inert `data-wts-conversion` attributes: the end of a
+  finished briefing (`p.ai-note`, with `data-wts-briefing`), each chip, source card and link to the record, the Word
+  download and "Print or save as PDF", and the Donate links; a report or statement sent is said by the forms'
+  scripts (`web/src/measure.ts`).
 
 The kit's files are used as they are and never edited here. The static pages include them at build time
 (`<!--#include family/shelf-->` in the partials, `web/vite.config.ts`), and the React pages read the same files
