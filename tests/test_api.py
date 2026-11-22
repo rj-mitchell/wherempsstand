@@ -422,8 +422,11 @@ def test_every_briefing_gets_a_permanent_shareable_address(indexed_settings, tmp
     when = fmt_date(final["prepared_at"])
     assert f"<title>Briefing from Hansard, {when} | Where MPs Stand</title>" in page.text
     assert f'<meta property="og:title" content="Briefing from Hansard, {when} | Where MPs Stand" />' in page.text
-    # shared links show the site's family card; the briefing's own card is still there for embedding
-    assert '/family/card.png" />' in page.text and 'content="noindex"' in page.text
+    # shared links show the briefing's own card: its neutral title and the check strip's counts, in words
+    assert f'<meta property="og:image" content="http://testserver/b/{bid}/card.png" />' in page.text
+    assert (f'<meta property="og:image:alt" content="Where MPs Stand: Briefing from Hansard, {when}. Briefing '
+            'written by AI, checked against Hansard: 1 of 1 citations matched to the record') in page.text
+    assert 'content="noindex"' in page.text
     assert page.text.count("<title>") == 1 and page.text.count('property="og:image"') == 1  # site-wide tags replaced
 
     card = client.get(f"/b/{bid}/card.png")
@@ -898,6 +901,8 @@ HOSTILE = "What has been said about trial by jury, and why are ministers liars a
 
 
 def test_a_saved_briefing_is_headed_in_the_sites_words_not_the_readers(indexed_settings, tmp_path, monkeypatch):
+    from io import BytesIO
+
     from PIL import Image
 
     import hansard.api.cards as cards
@@ -920,14 +925,21 @@ def test_a_saved_briefing_is_headed_in_the_sites_words_not_the_readers(indexed_s
     assert text.startswith(f"<h1>Briefing from Hansard, {when}</h1>")
     assert f"<p>Question asked by a reader: <em>{html.escape(HOSTILE)}</em></p>" in text
 
-    # the card's headline is the neutral title; a card drawn before (with the question) is deleted, not served
+    # the card's headline is the neutral title, drawn once and kept; cards drawn before (one with the question, one
+    # without the checks) are deleted, not served
     drawn = []
-    monkeypatch.setattr(cards, "render_card", lambda headline, *a: drawn.append(headline) or Image.new("RGB", (9, 9)))
-    old = indexed_settings.data_dir / "cards" / f"{bid}.png"
-    old.parent.mkdir(parents=True, exist_ok=True)
-    old.write_bytes(b"old card with the question")
-    assert client.get(f"/b/{bid}/card.png").status_code == 200
-    assert drawn == [f"Briefing from Hansard, {when}"] and not old.exists()
+    real = cards.briefing_card
+    monkeypatch.setattr(cards, "briefing_card", lambda style, **k: drawn.append(k) or real(style, **k))
+    folder = indexed_settings.data_dir / "cards"
+    folder.mkdir(parents=True, exist_ok=True)
+    olds = [folder / f"{bid}.png", folder / f"{bid}.v2.png"]
+    for old in olds:
+        old.write_bytes(b"old card")
+    card = client.get(f"/b/{bid}/card.png")
+    assert card.status_code == 200 and Image.open(BytesIO(card.content)).size == (1200, 630)
+    assert [d["title"] for d in drawn] == [f"Briefing from Hansard, {when}"] and not any(o.exists() for o in olds)
+    assert drawn[0]["prepared"] == when and drawn[0]["counts"].citations_total == view["answer"]["citations_total"]
+    assert client.get(f"/b/{bid}/card.png").content == card.content and len(drawn) == 1  # kept, not drawn again
 
 
 def test_a_follow_up_cannot_plant_an_earlier_briefing(public):

@@ -1,0 +1,2943 @@
+{
+ "id": "sw3c524d23",
+ "question": "What positions have MPs and peers taken on immigration and asylum, including small boat crossings, over the past twelve months?",
+ "created_at": "2026-11-19T08:03:28+00:00",
+ "records_up_to": "2026-11-18",
+ "settings": {
+  "mode": "summary",
+  "topic": "immigration-and-asylum"
+ },
+ "plan": {
+  "question": "What positions have MPs and peers taken on immigration and asylum, including small boat crossings, over the past twelve months?",
+  "search_text": "immigration, asylum, small boat crossings, illegal migration, channel crossings, asylum seekers",
+  "filters": {
+   "date_from": "2025-11-19",
+   "date_to": null,
+   "houses": [],
+   "regions": [],
+   "parties": [],
+   "person_ids": [],
+   "offices": [],
+   "record_types": [],
+   "genders": [],
+   "age_bands": [],
+   "tenure": [],
+   "majority_bands": [],
+   "runner_up_parties": [],
+   "groups": [],
+   "seat_types": []
+  },
+  "portfolios": [
+   "home_office"
+  ],
+  "wants_votes": false,
+  "speakers": [],
+  "unresolved_speakers": [],
+  "interpretation": "Searching Hansard from 19 November 2025 to 19 November 2026 for statements by MPs and peers on immigration and asylum, including small boat crossings, with no filters on party, role or seat.",
+  "parser": "model",
+  "group_by": "role",
+  "compare": []
+ },
+ "sources": [
+  {
+   "n": 1,
+   "kind": "record",
+   "title": "Will Forster (Liberal Democrat; MP for Woking, town seat (urban area of 105,000), South East; role on this date: Liberal Democrat Spokesperson (Immigration and Asylum)) — has raised this subject repeatedly (on several separate days) — Westminster Hall — 13 July 2026 — col. 262 — Illegal Immigrants: Offshore Detention and Deportation — [Derek Twigg in the Chair]",
+   "url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "record_id": "uk.org.publicwhip/westminhall/2026-07-13a.262.0",
+   "debate_path": "/debates/2026-07-13/westminster-hall/illegal-immigrants-offshore-detention-and-deportation#c262-0",
+   "date": "2026-07-13",
+   "chamber": "Westminster Hall",
+   "record_type": "speech",
+   "heading": "Illegal Immigrants: Offshore Detention and Deportation — [Derek Twigg in the Chair]",
+   "colnum": "262",
+   "uin": null,
+   "time": "17:22",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/whall/?id=2026-07-13a.262.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26560",
+    "date": "2026-07-13",
+    "name": "Will Forster",
+    "house": "commons",
+    "constituency": "Woking",
+    "gss_code": "E14001592",
+    "region": "South East",
+    "nation": "England",
+    "party": "Liberal Democrat",
+    "party_id": "liberal-democrat",
+    "settlement": "town",
+    "urban_area": "Woking",
+    "urban_area_pop": 105367,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Liberal Democrat Spokesperson (Immigration and Asylum)",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Liberal Democrat Spokesperson (Immigration and Asylum)",
+      "title": "Liberal Democrat Spokesperson (Immigration and Asylum)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": null,
+    "age_approximate": null,
+    "age_band": null,
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 11246,
+     "pct": 23.4,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 12773,
+     "majority": 11246,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 11246,
+     "pct": 23.4,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Woking"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Will Forster",
+   "group": "Opposition frontbench",
+   "text": "It is a pleasure to serve under your chairship, Mr Twigg.\n\nThe Liberal Democrats believe in a fair and controlled approach to immigration and asylum and a system that treats people with fairness and compassion. My constituency of Woking has a proud and long history of supporting those fleeing persecution. It was home to the Ockenden Venture, a trailblazing charity founded in the 1950s that helped to resettle refugees from post-war Europe, Vietnam and beyond. Humfrey Malins, the former Conservative MP for Woking, even set up a national immigration service. More recently, Woking has seen how life-changing a functioning immigration system can be. Since 2015, my town has welcomed hundreds of refugees from Afghanistan, Syria and Ukraine. Those people arrived fleeing conflict and persecution. They have been welcomed by my town and added to our economy and cultural vitality. I am pleased that we have helped them to rebuild their lives in Surrey.\n\nIn 2026, it is right that we uphold Britain’s humanitarian traditions while having control of our borders. That starts by bringing an end to asylum hotels, stopping unsafe channel crossings and ensuring that criminal gangs cannot profit and that they face justice. We need safe and legal routes for asylum seekers and refugees. Ukrainians did not cross the channel in dangerous small boats, because this Government provided a safe and legal route for them. We know that safe and legal routes work. We need more of them, not fewer, yet safe and legal routes are not in the Immigration and Asylum Bill that will be debated in the House later today. Arrivals via safe and legal routes are at their lowest level since 2023 as a result.\n\nBefore the Brexit referendum, there were almost no recorded small boat crossings, but since we left the European Union, more than 190,000 people have come here in small boats. The fact that we are not in the EU has been a pull factor causing that crisis. People who have arrived on small boats have literally said the word “Dublin”. They are playing the system against us. Asylum seekers are coming to the UK, having failed the first time in Europe.\n\nBy not being in the EU or working with neighbouring countries, we are creating more work at great expense to the British taxpayer. Following Brexit, the Conservatives implemented disastrous immigration policies that have led to a huge rise in net migration. Past Governments have introduced five immigration Acts since 2020. We need a watertight arrangement with the EU that would mean everyone arriving by small boat is at risk of being returned. That is how we ensure that the gangs do not have a viable business model, and that there is a proper deterrent to stop people making money in the first place.\n\nA key requirement for tackling this issue is ensuring that the Home Office improves. At the moment, it makes slow and bad decisions. We need to process claims quickly. We need to open Nightingale-style processing centres and double the number of asylum caseworkers to clear the backlog. The Refugee Council estimates that, because of bad decisions made by the Home Office, we are spending at least £974 million—maybe up to £1.2 billion—supporting people currently in the appeals backlog who will have their initial refusal overturned. Is the Minister looking into that in order to improve decision making?\n\nI believe that the people who signed the petition would welcome a swift and humane return for anyone with no right to be here, but would want us to welcome genuine refugees. The Liberal Democrats have consistently set out changes required to restore control and compassion to the immigration and asylum system. We did that during the passage of the Border Security, Asylum and Immigration Act 2025 with the previous Ministers, we are doing it with the current Ministers, and we will continue to do it as the Government change next week.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 1.1958,
+    "relevance": 0.8617,
+    "keyword": 58.6476,
+    "semantic": 0.7532,
+    "recency": 0.9251,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (home_office)"
+   },
+   "occasions": 4,
+   "declared": null
+  },
+  {
+   "n": 2,
+   "kind": "record",
+   "title": "Chris Philp (Conservative; MP for Croydon South, city seat (Greater London urban area, 8.1m people), London; role on this date: Shadow Home Secretary) — has raised this subject repeatedly (on several separate days) — House of Commons — 13 July 2026 — col. 681 — Immigration and Asylum Bill",
+   "url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "record_id": "uk.org.publicwhip/debate/2026-07-13c.681.1",
+   "debate_path": "/debates/2026-07-13/commons/immigration-and-asylum-bill#c681-1",
+   "date": "2026-07-13",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill",
+   "colnum": "681",
+   "uin": null,
+   "time": "19:28",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-07-13c.681.1",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25377",
+    "date": "2026-07-13",
+    "name": "Chris Philp",
+    "house": "commons",
+    "constituency": "Croydon South",
+    "gss_code": "E14001187",
+    "region": "London",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "city",
+    "urban_area": "Greater London",
+    "urban_area_pop": 8135667,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Home Secretary",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Home Secretary",
+      "title": "Shadow Home Secretary"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 50,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2015-05-08",
+    "first_term": false,
+    "majority_then": {
+     "majority": 2313,
+     "pct": 4.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 17444,
+     "majority": 2313,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 2313,
+     "pct": 4.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Croydon South"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Chris Philp",
+   "group": "Opposition frontbench",
+   "text": "The hon. Gentleman is absolutely right. For many nationalities that cross the English channel by small boat—Afghan, Iranian, Iraqi, Eritrean and Sudanese, to name just six or seven—the asylum grant rate is well over 90%. In some cases, it is very close to 100%, which means that crossing by small boat is tantamount to an automatic right to stay here, even though those illegal immigrants—and they are illegal immigrants—are leaving a safe country. They are not fleeing danger; they were in France already. I agree that that creates a massive pull factor.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 1.1838,
+    "relevance": 0.8531,
+    "keyword": 57.3539,
+    "semantic": 0.7549,
+    "recency": 0.9251,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (home_office)"
+   },
+   "occasions": 9,
+   "declared": null
+  },
+  {
+   "n": 3,
+   "kind": "record",
+   "title": "Max Wilkinson (Liberal Democrat; MP for Cheltenham, town seat (urban area of 116,000), South West; role on this date: Liberal Democrat Spokesperson (Home Affairs)) — has raised this subject repeatedly (on several separate days) — House of Commons — 17 November 2026 — col. 795 — Immigration and Asylum Bill — New Clause 9 - Investigation of the IIAA by the Parliamentary Commissioner",
+   "url": "https://hansard.parliament.uk/Commons/2026-11-17",
+   "record_id": "uk.org.publicwhip/debate/2026-11-17b.795.7",
+   "debate_path": "/debates/2026-11-17/commons/immigration-and-asylum-bill#c795-7",
+   "date": "2026-11-17",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill — New Clause 9 - Investigation of the IIAA by the Parliamentary Commissioner",
+   "colnum": "795",
+   "uin": null,
+   "time": "15:45",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-11-17",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-11-17b.795.7",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26344",
+    "date": "2026-11-17",
+    "name": "Max Wilkinson",
+    "house": "commons",
+    "constituency": "Cheltenham",
+    "gss_code": "E14001161",
+    "region": "South West",
+    "nation": "England",
+    "party": "Liberal Democrat",
+    "party_id": "liberal-democrat",
+    "settlement": "town",
+    "urban_area": "Cheltenham",
+    "urban_area_pop": 116447,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Liberal Democrat Spokesperson (Home Affairs)",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Liberal Democrat Spokesperson (Home Affairs)",
+      "title": "Liberal Democrat Spokesperson (Home Affairs)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 42,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 7210,
+     "pct": 14.6,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 17866,
+     "majority": 7210,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 7210,
+     "pct": 14.6,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Cheltenham"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Max Wilkinson",
+   "group": "Opposition frontbench",
+   "text": "I speak first to new clause 18 in my name. Britain has a long and proud history of responding with compassion to those fleeing unimaginable horrors. That must continue, but in a system that is controlled and fair and which works with our international partners in the EU. Alas, while the Prime Minister tells us that he is starting a big discussion about our relationship with Europe, the Home Office does not appear to be 100% on board and the splits could not be more obvious.\n\nThe Prime Minister is right to say that Brexit is like the emperor’s new clothes, but his position on Brexit, and that of the Government, could not be more like the emperor’s new clothes. His policy on Europe has not moved a single inch since the days of his predecessor and that is most obvious in the area of migration and asylum. I wonder whether that is because he knows that his Home Secretary, who used to be pro-European, is now a born-again blue Labour hard Brexiteer.\n\nThe asylum system was left in total disarray by the previous Conservative Government, and it is still in a mess. They told us that borders would be controlled after their Brexit plan, but the opposite happened, and they are in denial about the problems that they have caused—we heard that again today. Their main policy on immigration is to team up with the Reform party to give us Brexit 2.0 and to follow Russia and leave the European convention on human rights. That would not only further isolate this country on the international stage, but it would trash the Brexit deal they negotiated and which they insist must be sacrosanct for ever. Do Conservative Members truly understand the consequences of the policy that they keep voting for and telling this House is the one thing that will solve this country’s asylum problems? They have clearly learned nothing from the last decade.\n\nEvery undecided case fails the taxpayer, and asylum seekers too. Faster decisions mean we would not need large asylum accommodation sites, as referenced in the amendments in the name of my hon. Friend the Member for Bicester and Woodstock (Calum Miller). People who need protection must be given it; they must be supported in their integration and allowed to work so they can pay their way. Those who have no right to stay must be returned and the same logic applies to appeals. However, the appeals backlog has doubled under this Government.\n\nThe Bill will not fix any of those problems. Instead, it will create a new bureaucracy that will continue to fail us all, and asylum seekers too. New clause 18 seeks to address that. Before the 2016 referendum, there were very few small boat crossings, but since the Conservative party’s Brexit, delivered in cahoots with the hon. Member for Clacton (Nigel Farage), more than 200,000 people have crossed the channel in small boats. Time and again they point at the mess that they have created.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 1.1422,
+    "relevance": 0.7624,
+    "keyword": 54.3176,
+    "semantic": 0.7095,
+    "recency": 0.9988,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (home_office)"
+   },
+   "occasions": 7,
+   "declared": null
+  },
+  {
+   "n": 4,
+   "kind": "record",
+   "title": "Shabana Mahmood (Labour; MP for Birmingham Ladywood, city seat (West Midlands urban area, 2.4m people), West Midlands; role on this date: The Secretary of State for the Home Department) — House of Commons — 26 October 2026 — col. 1 — Home Department — Small Boat Crossings: Removal of Arrivals",
+   "url": "https://hansard.parliament.uk/Commons/2026-10-26",
+   "record_id": "uk.org.publicwhip/debate/2026-10-26b.1.5",
+   "debate_path": "/debates/2026-10-26/commons/home-department#c1-5",
+   "date": "2026-10-26",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Home Department — Small Boat Crossings: Removal of Arrivals",
+   "colnum": "1",
+   "uin": null,
+   "time": null,
+   "official_url": "https://hansard.parliament.uk/Commons/2026-10-26",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-10-26b.1.5",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/24788",
+    "date": "2026-10-26",
+    "name": "Shabana Mahmood",
+    "house": "commons",
+    "constituency": "Birmingham Ladywood",
+    "gss_code": "E14001096",
+    "region": "West Midlands",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "city",
+    "urban_area": "West Midlands",
+    "urban_area_pop": 2395268,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "The Secretary of State for the Home Department",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "The Secretary of State for the Home Department",
+      "title": "The Secretary of State for the Home Department"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 46,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2010-05-06",
+    "first_term": false,
+    "majority_then": {
+     "majority": 3421,
+     "pct": 9.4,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "independent",
+    "runner_up_then": {
+     "party": "Independent",
+     "party_id": "independent",
+     "votes": 12137,
+     "majority": 3421,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 3421,
+     "pct": 9.4,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Birmingham Ladywood"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Shabana Mahmood",
+   "group": "Government ministers",
+   "text": "Small boat returns under this Government are at a record high, and our Immigration and Asylum Bill will help us to remove people faster than ever before. This Government are dealing with the small boats crisis left by the previous Government. Small boat crossings are down, and removals are at record highs.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 1.0995,
+    "relevance": 0.7439,
+    "keyword": 46.7475,
+    "semantic": 0.7417,
+    "recency": 0.9854,
+    "authority": 1.5,
+    "authority_reason": "government minister (home_office)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 5,
+   "kind": "record",
+   "title": "Anna Turley (Labour/Co-operative; MP for Redcar, city seat (Teesside urban area, 377,000 people), North East; role on this date: The Minister of State, Home Department) — Written answer, Commons written answers — 22 October 2026 — UIN 34818 — Home Office — Undocumented Migrants: English Channel",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-14/34818",
+   "record_id": "uk.org.publicwhip/wrans/2026-10-14.34818.r0",
+   "debate_path": null,
+   "date": "2026-10-22",
+   "chamber": "Commons written answers",
+   "record_type": "answer",
+   "heading": "Home Office — Undocumented Migrants: English Channel",
+   "colnum": null,
+   "uin": "34818",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-10-14/34818",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-10-14.34818.r0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25313",
+    "date": "2026-10-22",
+    "name": "Anna Turley",
+    "house": "commons",
+    "constituency": "Redcar",
+    "gss_code": "E14001440",
+    "region": "North East",
+    "nation": "England",
+    "party": "Labour/Co-operative",
+    "party_id": "labourco-operative",
+    "settlement": "city",
+    "urban_area": "Teesside",
+    "urban_area_pop": 376663,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "The Minister of State, Home Department",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "The Minister of State, Home Department",
+      "title": "The Minister of State, Home Department"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 48,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2015-05-08",
+    "first_term": false,
+    "majority_then": {
+     "majority": 3323,
+     "pct": 8.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 12340,
+     "majority": 3323,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 3323,
+     "pct": 8.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Redcar"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Anna Turley",
+   "group": "Government ministers",
+   "text": "The Government is working with European partners to strengthen collective efforts to deter illegal migration and prevent dangerous Channel crossings, most notably with France. The UK maintains regular engagement with the French Government at all levels on illegal migration and border security.",
+   "context": "To ask the Secretary of State for the Home Department, what recent discussions she has had with her European counterparts about strengthening cooperation to prevent small boat crossings in the English Channel.",
+   "replies": null,
+   "ranking": {
+    "score": 1.0408,
+    "relevance": 0.7059,
+    "keyword": 46.186,
+    "semantic": 0.7185,
+    "recency": 0.983,
+    "authority": 1.5,
+    "authority_reason": "government minister (home_office)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 6,
+   "kind": "record",
+   "title": "Alex Norris (Labour/Co-operative; MP for Nottingham North and Kimberley, city seat (Nottingham urban area, 730,000 people), East Midlands; role on this date: The Minister of State, Home Department) — Written answer, Commons written answers — 29 April 2026 — Home Office — Undocumented Migrants: English Channel",
+   "url": "https://www.theyworkforyou.com/wrans/?id=2026-04-24.129748.r0",
+   "record_id": "uk.org.publicwhip/wrans/2026-04-24.129748.r0",
+   "debate_path": null,
+   "date": "2026-04-29",
+   "chamber": "Commons written answers",
+   "record_type": "answer",
+   "heading": "Home Office — Undocumented Migrants: English Channel",
+   "colnum": null,
+   "uin": null,
+   "time": null,
+   "official_url": null,
+   "url_kind": "none",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-04-24.129748.r0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25687",
+    "date": "2026-04-29",
+    "name": "Alex Norris",
+    "house": "commons",
+    "constituency": "Nottingham North and Kimberley",
+    "gss_code": "E14001411",
+    "region": "East Midlands",
+    "nation": "England",
+    "party": "Labour/Co-operative",
+    "party_id": "labourco-operative",
+    "settlement": "city",
+    "urban_area": "Nottingham",
+    "urban_area_pop": 729977,
+    "offices": [
+     {
+      "kind": "gov",
+      "role": "The Minister of State, Home Department",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "The Minister of State, Home Department",
+      "title": "The Minister of State, Home Department"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 42,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2017-06-09",
+    "first_term": false,
+    "majority_then": {
+     "majority": 9427,
+     "pct": 26.9,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "reform",
+    "runner_up_then": {
+     "party": "Reform UK",
+     "party_id": "reform",
+     "votes": 7053,
+     "majority": 9427,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 9427,
+     "pct": 26.9,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Nottingham North and Kimberley"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Alex Norris",
+   "group": "Government ministers",
+   "text": "Illegal small boat crossings are driven by organised criminal gangs and have cost lives. The result is a severe strain on both our asylum system and our wider social contract. Since 2021, over 400,000 people have claimed asylum in the UK. At its peak in 2023, there were 400 asylum hotels across the country, at a daily cost of £9 million, paid for by the taxpayer. This Government’s determination to crack down on small boats is clear. No one should be making dangerous journeys, undermining our border security and putting lives at risk. We must restore order and control to our borders. That means bearing down on these dangerous crossings and bringing people smugglers to justice. The United Kingdom and France have signed an agreement to strengthen operations to combat illegal migration in northern France to prevent crossings to the UK with a significant increase in dedicated law enforcement, technological and intelligence resources.\n\nThe new multi-year partnership with France represents a necessary step-change. French beaches will see a surge in law enforcement, intelligence and military officers to track down illegal migrants and stop them boarding boats in Northern France. For the first time ever, the funding uplift will be conditional on results and reducing illegal migration. Of the total £662 million that compose the new funding arrangement, the UK has committed to a foundation fund of £501m over three years and a new flexible fund of £50m in year 1 and £110m in years 2 and 3. If the new tactics are not successful, funding will stop after one year.\n\nThe new agreement reflects sustained ministerial and operational engagement, including the UK-France Leaders Declaration and close working between the Border Security Command, the NCA, and French law enforcement and maritime authorities. Our close engagement with France since the general election has led to improvement of the law enforcement response in northern France, such as the introduction of specialist, dedicated police units. It has also led to an improved understanding of what delivers the most impact.\n\nJoint action is already delivering results. Over 42,000 crossing attempts have been prevented since the election. Joint law enforcement operations have also seen 480 migrant traffickers arrested in 2025 alone. However, despite these successes, we must not be complacent. I acknowledge that there is no silver bullet in tackling this crisis. We must go further and faster to tackle this issue together with France, which is why this deal is so important.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 1.0341,
+    "relevance": 0.7785,
+    "keyword": 51.2477,
+    "semantic": 0.7391,
+    "recency": 0.8856,
+    "authority": 1.5,
+    "authority_reason": "government minister (home_office)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 7,
+   "kind": "record",
+   "title": "Chris Philp (Conservative; MP for Croydon South, city seat (Greater London urban area, 8.1m people), London; role on this date: Shadow Home Secretary) — has raised this subject repeatedly (on several separate days) — House of Commons — 13 July 2026 — col. 679 — Immigration and Asylum Bill",
+   "url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "record_id": "uk.org.publicwhip/debate/2026-07-13c.679.1",
+   "debate_path": "/debates/2026-07-13/commons/immigration-and-asylum-bill#c679-1",
+   "date": "2026-07-13",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill",
+   "colnum": "679",
+   "uin": null,
+   "time": "19:28",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-07-13c.679.1",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25377",
+    "date": "2026-07-13",
+    "name": "Chris Philp",
+    "house": "commons",
+    "constituency": "Croydon South",
+    "gss_code": "E14001187",
+    "region": "London",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "city",
+    "urban_area": "Greater London",
+    "urban_area_pop": 8135667,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Home Secretary",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Home Secretary",
+      "title": "Shadow Home Secretary"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 50,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2015-05-08",
+    "first_term": false,
+    "majority_then": {
+     "majority": 2313,
+     "pct": 4.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 17444,
+     "majority": 2313,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 2313,
+     "pct": 4.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Croydon South"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Chris Philp",
+   "group": "Opposition frontbench",
+   "text": "I beg to move an amendment, to leave out from “That” to the end of the Question and add:\n\n“this House declines to give a Second Reading to the Immigration and Asylum Bill, while welcoming some of its provisions, because the Bill does not ensure all foreign criminals and illegal immigrants will be deported; does not end asylum for illegal immigrants; does not stop modern slavery claims suspending removal; does not stop illegal immigrants getting citizenship; does not make the changes the Government promised to reduce the numbers of people eligible for Indefinite Leave to Remain; because the Bill will allow sponsor human rights claims, which will enable people outside the UK to enter under human rights grounds; because measures in the Bill such as narrowing the ability to make Article 8 and modern slavery claims will not be effective while the UK remains in the European Convention on Human Rights and the Human Rights Act 1998 remains in force; and because the provisions in the Bill are not capable of eliminating illegal immigration.”\n\nThe reasoned amendment, which stands in the names of the Leader of the Opposition, myself and my right hon. and hon. Friends, is to decline to give a Second Reading to the Bill on the grounds that it does not go far enough to combat illegal immigration or to ensure that all foreign criminals are deported.\n\nFirst, I cannot help but notice the absence of the hon. Member for Dover and Deal (Mike Tapp), the immigration Minister, whom I was expecting to see in his place. Perhaps the Home Secretary has not yet forgiven him for openly defying her a few weeks ago, leading to her rather extraordinary public campaign to get him fired. No wonder she has so much trouble deporting illegal immigrants—she cannot even deport her own junior Minister from Marsham Street. [Interruption.] Does the Home Secretary deny that she tried to get him fired a couple of weeks ago, unsuccessfully? I notice that she makes no such denial.\n\nAt the beginning of her speech, the Home Secretary made a number of claims about statistics, one or two of which I would like to gently take issue with. She referred to small boat crossings. Since the election, 76,000 people have dangerously and illegally crossed the channel by small boat. That is more than under any other Prime Minister. Let us keep in mind that those crossings were undertaken mainly by young men, all of whom were leaving a safe country, France. Nobody needs to flee danger in France.\n\nThe Home Secretary also referred to removal numbers. Some 85% of those removals are voluntary, and only a tiny fraction are of people who arrived by small boat. In fact, since the election, removals of people illegally entering by small boat have amounted to only about 5% to 7% of small boat arrivals. Given that someone entering this country by small boat has a 95% chance of staying, and gets put up in taxpayer-funded accommodation, it is no wonder that crossings have occurred in record numbers. The only way of deterring these crossings is if almost everybody arriving gets deported when they arrive.\n\nI observe that of the 80,000 people whose asylum claims were rejected at first instance in 2025, only 12,000 left or were removed. It is true that FNO removals are somewhat up, which I welcome, but if we look at the breakdown by nationality, it tells a rather different story. The numbers of foreign criminals deported to countries such as Albania, Romania, Lithuania and Poland are high when we compare them against the offender population. When we look at countries outside of Europe, the numbers are much lower. For example, Jamaica, Iraq, Nigeria and Somalia together have 1,150 offenders in prison—and many more out in the community—yet last year, only 110, or less than 10%, were removed. Yes, the removal of FNOs to countries in eastern Europe is going well, and I commend the Government on that, but when it comes to removing foreign criminals to countries outside Europe, such as Jamaica, Iraq, Nigeria and Somalia, the figures are very low. The reasons for that are some of the ones that the Home Secretary touched on earlier.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 1.0242,
+    "relevance": 0.7381,
+    "keyword": 46.1456,
+    "semantic": 0.7413,
+    "recency": 0.9251,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (home_office)"
+   },
+   "occasions": 9,
+   "declared": null
+  },
+  {
+   "n": 8,
+   "kind": "record",
+   "title": "Matt Vickers (Conservative; MP for Stockton West, city seat (Teesside urban area, 377,000 people), North East; role on this date: Shadow Minister (Crime, Policing and Fire)) — has raised this subject repeatedly (on several separate days) — Public Bill Committee — 3 November 2026 — col. 566 — Immigration and Asylum Bill — Public Bill Committee — New Clause 42 - Duty to remove persons who have entered the United Kingdom without leave",
+   "url": "https://hansard.parliament.uk/Commons/2026-11-03",
+   "record_id": "uk.org.publicwhip/standing/standing5709_IMMIGRATION_15-0_2026-11-03b.566.0",
+   "debate_path": "/debates/2026-11-03/public-bill-committee/immigration-and-asylum-bill#c566-0",
+   "date": "2026-11-03",
+   "chamber": "Public Bill Committee",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill — Public Bill Committee — New Clause 42 - Duty to remove persons who have entered the United Kingdom without leave",
+   "colnum": "566",
+   "uin": null,
+   "time": "10:30",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-11-03",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/pbc/2026-27/Immigration_and_Asylum_Bill/15-0_2026-11-03b.566.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25853",
+    "date": "2026-11-03",
+    "name": "Matt Vickers",
+    "house": "commons",
+    "constituency": "Stockton West",
+    "gss_code": "E14001519",
+    "region": "North East",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "city",
+    "urban_area": "Teesside",
+    "urban_area_pop": 376663,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Minister (Crime, Policing and Fire)",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Minister (Crime, Policing and Fire)",
+      "title": "Shadow Minister (Crime, Policing and Fire)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 43,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2019-12-13",
+    "first_term": false,
+    "majority_then": {
+     "majority": 2139,
+     "pct": 4.4,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 18233,
+     "majority": 2139,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 2139,
+     "pct": 4.4,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Stockton West"
+    },
+    "party_groups": [
+     {
+      "id": "conservative-environment-network",
+      "name": "Conservative Environment Network",
+      "evidence": [
+       {
+        "kind": "members",
+        "date": "2026-11-12",
+        "parliament": "2024–",
+        "label": "Listed by the Conservative Environment Network (its website, accessed 12 November 2026)",
+        "url": "https://www.cen.uk.com/our-caucus",
+        "archive_url": null,
+        "publisher": "Conservative Environment Network (its own website)",
+        "role": null,
+        "document": null,
+        "note": "The page is undated: what it said on the day it was accessed. To be checked again from time to time."
+       }
+      ]
+     }
+    ]
+   },
+   "speaker_name_raw": "Matt Vickers",
+   "group": "Opposition frontbench",
+   "text": "Together, these four clauses would mean that people who come here illegally are removed, cannot block that removal with last-minute claims, can never come back lawfully, and can never become British citizens. Take a man who lands on a beach in Kent on 1 December 2026, having paid a smuggling gang with no visa and no permission, and having come from France, a safe country. Under new clause 42, he meets all three conditions. He needed leave and did not have it; he entered without permission; and he arrived after 30 June 2026, the day this Bill was introduced. The Home Secretary had to remove him to his own country or a safe third country. He claimed asylum; under new clause 43, that claim would be inadmissible, there would be no appeal and a modern slavery claim or judicial review would not stop the duty either. If he later applied for a visa, new clause 55 would say never, and new clause 56 would say that he could never become a British citizen. The message to the next person on the beach in northern France would change from, “Get across, and you will probably stay,” to, “Get across, and you will be sent back for good.”\n\nLabour Members will recognise these provisions, because they voted to scrap them. The Illegal Migration Act 2023 placed a duty on the Home Secretary to remove people who came here illegally; it also made their asylum claims inadmissible and barred them from ever getting leave or citizenship. The citizenship ban was enforced from the day that that Act received Royal Assent. In the Border Security, Asylum and Immigration Act 2025, this Government repealed that duty to remove, the inadmissibility provision, the Safety of Rwanda (Asylum and Immigration) Act 2024 and the ban on illegal entrants becoming British citizens.\n\nI sat on the Public Bill Committee for the Border Security, Asylum and Immigration Act. We warned that some of its changes would weaken rather than strengthen our ability to deal with illegal migration. Where are those people who arrived illegally and were due to go to Rwanda now? New clauses 42, 43, 55 and 56 would put back what the Government took away. More than 200,000 people have crossed the channel in small boats since 2018. Last year alone, there were 41,472 crossings. They are down this year, and I welcome that, but remember the trajectory: under the previous Conservative Government, crossings fell by a third in 2023 from 45,774 to under 30,000; after the election, they went back up to last year’s 41,472. A fall this year from that higher level is welcome, but it is a recovery, not a record.\n\nIn the year to July 2026, just 3,427 small boat arrivals were returned by any route—fewer than one in 10 of last year’s arrivals. Any smuggler can do the maths. We know that certainty of removal works. When we agreed a returns agreement with Albania in late 2022, Albanian small boat arrivals fell from 12,658 in 2022 to 927 in 2023—a fall of 93%. When people know that they will be sent back, they stop coming.\n\nWe know what failure looks like. Let me start close to home: in October 2023, Ahmed Alid tried to murder his housemate in Hartlepool, then went out into the street and stabbed to death Terence Carney, a 70-year-old man out for an early morning walk. Alid was sentenced just up the road from my constituency at Teesside Crown court. He came to this country without permission in 2020, having already tried and failed to get asylum in several other European countries. He was arrested, and only then did he claim asylum. His claim was refused, but three years later he was still here in Home Office accommodation. Under new clause 42, he would have been subject to a duty to remove, and under new clause 43, the claim he made after arrest could not have stopped that.\n\nNew clause 43 also deals with claims that stall removal. The Home Office’s own analysis found that among small boat arrivals detained for return, the proportion referred to the modern slavery system rose from 52% in 2020 to 73% in 2021. Figures in this area have been contested for foreign offenders, but the pattern is plain, and the “bad faith” power that this House gave Ministers was used to disqualify just six people in the whole of 2025.\n\nNew clauses 55 and 56 would make the consequence permanent. Today, someone could come here illegally, be removed and later apply through a legal route as if nothing had happened or stay, sit out the backlog and eventually get status and citizenship. Settlement grants hit 199,628 in the year to June 2026—the highest for 16 years. The Government took the statutory citizenship ban out of the law in the Border Security, Asylum and Immigration Act and put a weaker version in guidance instead. Since February 2025, Home Office guidance has said that people who came here illegally will “normally” be refused citizenship, but guidance can be changed with a written statement on a Thursday afternoon, and “normally” leaves the door ajar.\n\nAbdul Ezedi came here illegally in a lorry, was refused twice and was convicted of sexual offences, but was granted asylum on his third attempt, before attacking a mother and her two girls in Clapham. When the system is being that generous at every stage, we should not be prepared to leave citizenship to a word such as “normally”.\n\nWe need to be clear about our motivation, because it is not cruelty, and anyone who says so has not been listening; it is the opposite. Every crossing is a dangerous journey in an overloaded dinghy, organised by criminal gangs who treat human beings as cargo. People have died in the Channel; children have died in the Channel. The single most compassionate thing that this House can do is to end the incentive that puts them in those boats. The only thing that ends that incentive is certainty, the certainty that anyone who comes that way will not be allowed to stay.\n\nThis is also about fairness to those who play by the rules—the nurse who came on the right visa, the family who waited for years for a resettlement place or the refugee who came through a safe and legal route. Every time someone jumps the queue by paying a smuggler, it is those people who are let down. A system that rewards breaking the rules is unfair to everyone who keeps them. This is also about the capacity of the country—every hotel room and every pound spent on support for someone with no right to be here is a room and a pound not available to those we have chosen to help.\n\nControl is not the enemy of compassion; control is what makes compassion sustainable. I ask the Minister: if not this, what is her plan to ensure that people who come here illegally do not stay? I commend the new clauses to the Committee.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 1.0039,
+    "relevance": 0.6759,
+    "keyword": 50.4203,
+    "semantic": 0.6722,
+    "recency": 0.9902,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (home_office)"
+   },
+   "occasions": 6,
+   "declared": null
+  },
+  {
+   "n": 9,
+   "kind": "record",
+   "title": "Matt Vickers (Conservative; MP for Stockton West, city seat (Teesside urban area, 377,000 people), North East; role on this date: Shadow Minister (Crime, Policing and Fire)) — has raised this subject repeatedly (on several separate days) — Public Bill Committee — 15 September 2026 — col. 48 — Immigration and Asylum Bill — Public Bill Committee — Examination of Witness",
+   "url": "https://hansard.parliament.uk/Commons/2026-09-15",
+   "record_id": "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.48.2",
+   "debate_path": "/debates/2026-09-15/public-bill-committee/immigration-and-asylum-bill#c48-2",
+   "date": "2026-09-15",
+   "chamber": "Public Bill Committee",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill — Public Bill Committee — Examination of Witness",
+   "colnum": "48",
+   "uin": null,
+   "time": "14:46",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-09-15",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/pbc/2026-27/Immigration_and_Asylum_Bill/02-0_2026-09-15b.48.2",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25853",
+    "date": "2026-09-15",
+    "name": "Matt Vickers",
+    "house": "commons",
+    "constituency": "Stockton West",
+    "gss_code": "E14001519",
+    "region": "North East",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "city",
+    "urban_area": "Teesside",
+    "urban_area_pop": 376663,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Minister (Crime, Policing and Fire)",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Minister (Crime, Policing and Fire)",
+      "title": "Shadow Minister (Crime, Policing and Fire)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": 42,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2019-12-13",
+    "first_term": false,
+    "majority_then": {
+     "majority": 2139,
+     "pct": 4.4,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 18233,
+     "majority": 2139,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 2139,
+     "pct": 4.4,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Stockton West"
+    },
+    "party_groups": [
+     {
+      "id": "conservative-environment-network",
+      "name": "Conservative Environment Network",
+      "evidence": [
+       {
+        "kind": "members",
+        "date": "2026-11-12",
+        "parliament": "2024–",
+        "label": "Listed by the Conservative Environment Network (its website, accessed 12 November 2026)",
+        "url": "https://www.cen.uk.com/our-caucus",
+        "archive_url": null,
+        "publisher": "Conservative Environment Network (its own website)",
+        "role": null,
+        "document": null,
+        "note": "The page is undated: what it said on the day it was accessed. To be checked again from time to time."
+       }
+      ]
+     }
+    ]
+   },
+   "speaker_name_raw": "Matt Vickers",
+   "group": "Opposition frontbench",
+   "text": "Q Is there any evidence that expanding safe and legal routes would reduce the number of small boat crossings, rather than simply increase the overall number of people coming to the UK?",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.991,
+    "relevance": 0.6874,
+    "keyword": 40.2842,
+    "semantic": 0.7407,
+    "recency": 0.9611,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (home_office)"
+   },
+   "occasions": 6,
+   "declared": null
+  },
+  {
+   "n": 10,
+   "kind": "record",
+   "title": "Blake Stephenson (Conservative; MP for Mid Bedfordshire, rural seat, East of England; role on this date: Shadow Parliamentary Under Secretary (Home Office)) — Public Bill Committee — 29 October 2026 — col. 486 — Immigration and Asylum Bill — (Morning) — New Clause 10 - Removal of restrictions on asylum seekers engaging in employment",
+   "url": "https://hansard.parliament.uk/Commons/2026-10-29",
+   "record_id": "uk.org.publicwhip/standing/standing5709_IMMIGRATION_13-0_2026-10-29b.486.0",
+   "debate_path": "/debates/2026-10-29/public-bill-committee/immigration-and-asylum-bill#c486-0",
+   "date": "2026-10-29",
+   "chamber": "Public Bill Committee",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill — (Morning) — New Clause 10 - Removal of restrictions on asylum seekers engaging in employment",
+   "colnum": "486",
+   "uin": null,
+   "time": "12:30",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-10-29",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/pbc/2026-27/Immigration_and_Asylum_Bill/13-0_2026-10-29b.486.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26355",
+    "date": "2026-10-29",
+    "name": "Blake Stephenson",
+    "house": "commons",
+    "constituency": "Mid Bedfordshire",
+    "gss_code": "E14001359",
+    "region": "East of England",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "rural",
+    "urban_area": "Ampthill",
+    "urban_area_pop": 20026,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Shadow Parliamentary Under Secretary (Home Office)",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Shadow Parliamentary Under Secretary (Home Office)",
+      "title": "Shadow Parliamentary Under Secretary (Home Office)"
+     },
+     {
+      "kind": "whip",
+      "role": "Opposition Assistant Whip (Commons)",
+      "portfolios": [],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Opposition Assistant Whip (Commons)",
+      "title": "Opposition Assistant Whip (Commons)"
+     }
+    ],
+    "other_names": [],
+    "gender": "M",
+    "age": null,
+    "age_approximate": null,
+    "age_band": null,
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 1321,
+     "pct": 2.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 15591,
+     "majority": 1321,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 1321,
+     "pct": 2.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Mid Bedfordshire"
+    },
+    "party_groups": [
+     {
+      "id": "conservative-environment-network",
+      "name": "Conservative Environment Network",
+      "evidence": [
+       {
+        "kind": "members",
+        "date": "2026-11-12",
+        "parliament": "2024–",
+        "label": "Listed by the Conservative Environment Network (its website, accessed 12 November 2026)",
+        "url": "https://www.cen.uk.com/our-caucus",
+        "archive_url": null,
+        "publisher": "Conservative Environment Network (its own website)",
+        "role": null,
+        "document": null,
+        "note": "The page is undated: what it said on the day it was accessed. To be checked again from time to time."
+       }
+      ]
+     }
+    ]
+   },
+   "speaker_name_raw": "Blake Stephenson",
+   "group": "Opposition frontbench",
+   "text": "The Liberal Democrats’ new clause 10 would give asylum seekers the right to work after three months, and the Green party’s new clause 24 would give them an automatic, unrestricted right after six months that lasts through every appeal. We oppose both new clauses.\n\nPeople who enter the UK illegally should not be able to claim asylum here at all. The new clauses go in the opposite direction. They would make the UK a more attractive destination for people deciding whether to pay a smuggler to cross the channel. Everybody wants to reduce pull factors so that we can reduce dangerous crossings, and I am afraid that the new clauses would introduce additional pull factors.\n\nI will keep my remarks brief and just ask the Minister a question. How many asylum seekers currently have permission to work, and what assessment have the Government made of the effect that earlier work rights would have on the number of claims?",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.8914,
+    "relevance": 0.602,
+    "keyword": 43.1412,
+    "semantic": 0.6639,
+    "recency": 0.9872,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (home_office)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 11,
+   "kind": "record",
+   "title": "Siân Berry (Green; MP for Brighton Pavilion, city seat (Brighton and Hove urban area, 474,000 people), South East; role on this date: Green Spokesperson (Democratic Standards); Green Spokesperson (Home); Green Spokesperson (Justice); Green Spokesperson (Transport); Green Spokesperson (Work and Pensions)) — has raised this subject repeatedly (on several separate days) — Public Bill Committee — 15 October 2026 — col. 225 — Immigration and Asylum Bill — Public Bill Committee — Clause 18 - Family life",
+   "url": "https://hansard.parliament.uk/Commons/2026-10-15",
+   "record_id": "uk.org.publicwhip/standing/standing5709_IMMIGRATION_06-0_2026-10-15b.225.5",
+   "debate_path": "/debates/2026-10-15/public-bill-committee/immigration-and-asylum-bill#c225-5",
+   "date": "2026-10-15",
+   "chamber": "Public Bill Committee",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill — Public Bill Committee — Clause 18 - Family life",
+   "colnum": "225",
+   "uin": null,
+   "time": "14:45",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-10-15",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/pbc/2026-27/Immigration_and_Asylum_Bill/06-0_2026-10-15b.225.5",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25752",
+    "date": "2026-10-15",
+    "name": "Siân Berry",
+    "house": "commons",
+    "constituency": "Brighton Pavilion",
+    "gss_code": "E14001130",
+    "region": "South East",
+    "nation": "England",
+    "party": "Green",
+    "party_id": "green",
+    "settlement": "city",
+    "urban_area": "Brighton and Hove",
+    "urban_area_pop": 474485,
+    "offices": [
+     {
+      "kind": "shadow",
+      "role": "Green Spokesperson (Democratic Standards)",
+      "portfolios": [
+       "cabinet_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Green Spokesperson (Democratic Standards)",
+      "title": "Green Spokesperson (Democratic Standards)"
+     },
+     {
+      "kind": "shadow",
+      "role": "Green Spokesperson (Home)",
+      "portfolios": [
+       "home_office"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Green Spokesperson (Home)",
+      "title": "Green Spokesperson (Home)"
+     },
+     {
+      "kind": "shadow",
+      "role": "Green Spokesperson (Justice)",
+      "portfolios": [
+       "justice"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Green Spokesperson (Justice)",
+      "title": "Green Spokesperson (Justice)"
+     },
+     {
+      "kind": "shadow",
+      "role": "Green Spokesperson (Transport)",
+      "portfolios": [
+       "transport"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Green Spokesperson (Transport)",
+      "title": "Green Spokesperson (Transport)"
+     },
+     {
+      "kind": "shadow",
+      "role": "Green Spokesperson (Work and Pensions)",
+      "portfolios": [
+       "work_pensions"
+      ],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Green Spokesperson (Work and Pensions)",
+      "title": "Green Spokesperson (Work and Pensions)"
+     },
+     {
+      "kind": "whip",
+      "role": "Green Party Chief Whip",
+      "portfolios": [],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Green Party Chief Whip",
+      "title": "Green Party Chief Whip"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 52,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 14290,
+     "pct": 27.3,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 14519,
+     "majority": 14290,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 14290,
+     "pct": 27.3,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Brighton Pavilion"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Siân Berry",
+   "group": "Opposition frontbench",
+   "text": "I will finish my point. In an evidence session, we challenged the National Crime Agency on the roots of the organised crime that the hon. Member for Great Grimsby and Cleethorpes mentions, which is doing huge harm. I will not argue that the small boats system is the best way to bring people to this country. Small boat numbers started to grow the moment safe routes were closed. We need safe routes, and that is the approach the Government could take to reduce small boat crossings. The law that protects our rights does not need to be undermined. I would absolutely argue that.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.8779,
+    "relevance": 0.598,
+    "keyword": 36.5919,
+    "semantic": 0.7002,
+    "recency": 0.9788,
+    "authority": 1.5,
+    "authority_reason": "shadow minister (home_office)"
+   },
+   "occasions": 6,
+   "declared": null
+  },
+  {
+   "n": 12,
+   "kind": "record",
+   "title": "Jonathan Brash (Labour; MP for Hartlepool, town seat (urban area of 89,000), North East; role on this date: backbencher) — House of Commons — 17 November 2026 — col. 808 — Immigration and Asylum Bill — New Clause 9 - Investigation of the IIAA by the Parliamentary Commissioner",
+   "url": "https://hansard.parliament.uk/Commons/2026-11-17",
+   "record_id": "uk.org.publicwhip/debate/2026-11-17b.808.0",
+   "debate_path": "/debates/2026-11-17/commons/immigration-and-asylum-bill#c808-0",
+   "date": "2026-11-17",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill — New Clause 9 - Investigation of the IIAA by the Parliamentary Commissioner",
+   "colnum": "808",
+   "uin": null,
+   "time": "16:30",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-11-17",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-11-17b.808.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26339",
+    "date": "2026-11-17",
+    "name": "Jonathan Brash",
+    "house": "commons",
+    "constituency": "Hartlepool",
+    "gss_code": "E14001272",
+    "region": "North East",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "town",
+    "urban_area": "Hartlepool",
+    "urban_area_pop": 88855,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": null,
+    "age_approximate": null,
+    "age_band": null,
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 7698,
+     "pct": 21.7,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "reform",
+    "runner_up_then": {
+     "party": "Reform UK",
+     "party_id": "reform",
+     "votes": 8716,
+     "majority": 7698,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 7698,
+     "pct": 21.7,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Hartlepool"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Jonathan Brash",
+   "group": "Backbench MPs, town seats",
+   "text": "I support this legislation as someone who represents a proud working-class coastal town—a town that understands the importance of secure borders, fair rules, properly controlled immigration and a functioning asylum system, and also a town founded on compassion, decency and tolerance. No matter how hard some politicians try, those two things must never be considered contradictory. We can be a welcoming country and a country that controls its borders. We can uphold our international obligations while insisting that those who have no right to remain here leave. We can treat people humanely while being uncompromising about those who abuse our immigration system.\n\nLet me be absolutely clear that illegal immigration is unacceptable. People smugglers are criminals who exploit human misery for profit. Small boat crossings in the channel are not an acceptable immigration route, and I welcome the 40% fall that we have seen this year. No matter how many times politicians try to spin it, that 40% reduction is in individuals, not in boats. It is not about bigger boats; it is about the number of people coming across the channel. Our borders must be secure, our rules must be enforced, and those with no legal right to remain must be removed. The public are entitled to expect nothing less.\n\nWe also need an asylum system that makes decisions quickly, prevents endless appeals and repeated claims that frustrate removal, and stops leaving people languishing in hotels at enormous expense to the taxpayer. That is why this Bill matters. It establishes an independent immigration appeals authority, tackles abuse of late and repeated claims, reforms the application of article 8 and the modern slavery framework, simplifies the protection system and introduces a mechanism for those with the financial means to contribute towards the cost of their support. These are important reforms to restore order, fairness and confidence, because compassion without control is not a sustainable immigration policy, but neither is control without compassion. We need to do both.\n\nThere is a wider point, because whenever immigration is debated, particularly by some politicians on the right, we hear an increasingly familiar argument that immigration is responsible for everything that has gone wrong in our country. We must challenge that narrative, not because concerns about immigration are illegitimate—they are not—and not because population pressures have no consequences for housing, schools, healthcare and local services, because they absolutely do; we must challenge it because there is a fundamental dishonesty in blaming immigration for problems created or made considerably worse by political decisions and, may I say, the 40 years of neoliberalism that this country has experienced.\n\nNowhere is it more important to challenge that narrative than in towns like mine. Immigration did not close our shipyards. It did not close our steelworks or dismantle the industries that once provided generations of Hartlepool families with skilled, secure, well paid employment. It did not cause the financial crash. It did not introduce austerity or make decisions to cut local government budgets or leave councils struggling to maintain essential services. Immigration did not sell off public housing, undermine our high streets or cause the decline of our public services. Those are the consequences of economic choices, inadequate investment and political neglect.\n\nMany of the politicians who are arguing today that immigration is the cause of all our problems are the same politicians who made the decisions to rip the heart out of towns such as mine. They presided over austerity, they oversaw deindustrialisation, they failed to invest in communities like mine, and now they want to tell working people that their problems can be explained by immigration. It is wrong, and it is an insult to the intelligence of working people. The people of Hartlepool know the difference between someone who is identifying and trying to fix a problem and someone who is exploiting it for their own political ends.\n\nI want an immigration system that works in the interests of this country. I want to fix the system that we have. It must be faster, fairer and more effective. It must deter illegal entry, disrupt criminal gangs, tackle abuse, and ensure that those with no right to remain are removed, and it must restore public confidence. But we must have this debate with the facts and honesty at its heart, and that is why I am supporting the Bill today.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.7582,
+    "relevance": 0.6602,
+    "keyword": 42.3286,
+    "semantic": 0.7095,
+    "recency": 0.9988,
+    "authority": 1.15,
+    "authority_reason": "select committee member (home_office)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 13,
+   "kind": "record",
+   "title": "Zubir Ahmed (Labour; MP for Glasgow South West, city seat (Greater Glasgow urban area, 1.0m people), Scotland; role on this date: backbencher) — Public Bill Committee — 15 September 2026 — col. 41 — Immigration and Asylum Bill — Public Bill Committee — Examination of Witnesses",
+   "url": "https://hansard.parliament.uk/Commons/2026-09-15",
+   "record_id": "uk.org.publicwhip/standing/standing5709_IMMIGRATION_02-0_2026-09-15b.41.2",
+   "debate_path": "/debates/2026-09-15/public-bill-committee/immigration-and-asylum-bill#c41-2",
+   "date": "2026-09-15",
+   "chamber": "Public Bill Committee",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill — Public Bill Committee — Examination of Witnesses",
+   "colnum": "41",
+   "uin": null,
+   "time": "14:01",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-09-15",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/pbc/2026-27/Immigration_and_Asylum_Bill/02-0_2026-09-15b.41.2",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26483",
+    "date": "2026-09-15",
+    "name": "Zubir Ahmed",
+    "house": "commons",
+    "constituency": "Glasgow South West",
+    "gss_code": "S14000088",
+    "region": "Scotland",
+    "nation": "Scotland",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "city",
+    "urban_area": "Greater Glasgow",
+    "urban_area_pop": 1024026,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": 45,
+    "age_approximate": true,
+    "age_band": "40-54",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 3285,
+     "pct": 9.2,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "scottish-national-party",
+    "runner_up_then": {
+     "party": "Scottish National Party",
+     "party_id": "scottish-national-party",
+     "votes": 12267,
+     "majority": 3285,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 3285,
+     "pct": 9.2,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Glasgow South West"
+    },
+    "party_groups": [
+     {
+      "id": "labour-growth-group",
+      "name": "Labour Growth Group",
+      "evidence": [
+       {
+        "kind": "signatories",
+        "date": "2024-07-30",
+        "parliament": "2024–",
+        "label": "Signed the Labour Growth Group's letter of 30 July 2024 (its website)",
+        "url": "https://labourlist.org/2024/07/labour-growth-group-faction-planning-reform-housebuilding",
+        "archive_url": null,
+        "publisher": "LabourList (reproducing the list of signatories of the group's letter)",
+        "role": null,
+        "document": "letter"
+       }
+      ]
+     }
+    ]
+   },
+   "speaker_name_raw": "Zubir Ahmed",
+   "group": "Backbench MPs, city seats",
+   "text": "Mr Mehmet, you made some initial commentary about welcoming the Bill but suggested that it is not sufficient to reduce the small boat crossings. Why, then, are small boat crossings already down 41% even before the Bill has been enacted? Where does this legislation intersect with the need for further law enforcement across borders? Does it intersect with the fact that small boat crossings rose after we left the European Union and we have had less of an armoury and less flexibility to deal with them? You highlighted the American experience of reducing Q immigration and returns, but presumably you are not advocating a model with the level of aggressive behaviour of ICE agents. American citizens are being shot dead in the streets.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.7391,
+    "relevance": 0.6687,
+    "keyword": 41.671,
+    "semantic": 0.7194,
+    "recency": 0.9611,
+    "authority": 1.15,
+    "authority_reason": "select committee member (home_office)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 14,
+   "kind": "record",
+   "title": "Olivia Bailey (Labour; MP for Reading West and Mid Berkshire, city seat (Reading urban area, 318,000 people), South East; role on this date: Chair, Women and Equalities Committee) — House of Commons — 17 November 2026 — col. 805 — Immigration and Asylum Bill — New Clause 9 - Investigation of the IIAA by the Parliamentary Commissioner",
+   "url": "https://hansard.parliament.uk/Commons/2026-11-17",
+   "record_id": "uk.org.publicwhip/debate/2026-11-17b.805.2",
+   "debate_path": "/debates/2026-11-17/commons/immigration-and-asylum-bill#c805-2",
+   "date": "2026-11-17",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill — New Clause 9 - Investigation of the IIAA by the Parliamentary Commissioner",
+   "colnum": "805",
+   "uin": null,
+   "time": "16:15",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-11-17",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-11-17b.805.2",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26609",
+    "date": "2026-11-17",
+    "name": "Olivia Bailey",
+    "house": "commons",
+    "constituency": "Reading West and Mid Berkshire",
+    "gss_code": "E14001439",
+    "region": "South East",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "city",
+    "urban_area": "Reading",
+    "urban_area_pop": 318014,
+    "offices": [
+     {
+      "kind": "chair",
+      "role": "Chair",
+      "portfolios": [
+       "equalities"
+      ],
+      "committee_id": "women-and-equalities-committee",
+      "committee_name": "Women and Equalities Committee",
+      "display_name": "Chair, Women and Equalities Committee",
+      "title": "Chair, Women and Equalities Committee"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 40,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 1361,
+     "pct": 2.9,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 14912,
+     "majority": 1361,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 1361,
+     "pct": 2.9,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Reading West and Mid Berkshire"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Olivia Bailey",
+   "group": "Select committee chairs",
+   "text": "Today, across our country, hundreds of thousands of children were sitting in classrooms, eager to learn, laughing with their friends and planning for their futures. Those children are not strangers or a threat; they are simply children, and they deserve the opportunity and protection that our great nation offers. I will today speak to my amendments, which are designed to help ensure that is the case.\n\nLet me turn to my new clause 71. This Government have important ambitions to drive down child poverty and give every child in this country the best start in life. My new clause asks them to demonstrate how they will protect those commitments. The Women and Equalities Committee heard compelling evidence earlier this month about the impact of longer routes to settlement on children, and I have written to the Home Secretary from the Committee asking for greater clarity on pathways for children. In addition to commenting on the substance of my amendments, will the Minister provide that clarity and set out how this Government will protect the rights of children with these reforms?\n\nLet me turn to my amendment 76. Clause 41 of the Bill requires well-known indicators of child abuse to be damaging to a child’s credibility when determining whether they are a victim of modern slavery. The independent inquiry into child sexual abuse found that children frequently delay disclosing abuse because of fear, shame, threats and a lack of trust in adults. The Home Office’s own guidance explicitly recognises that conflicting accounts from children can be a common indicator of trafficking. Child victims often do not recognise themselves as victims and cannot consent to their own exploitation. I urge Ministers to amend the clause to ensure that recognised signs of child abuse are not used as reasons to fail to protect a victim of modern slavery. Amendment 77 would also extend protections for vulnerable young people who are at risk of exploitation by extending the child trafficking guardian measures to the age of 25 for looked-after children.\n\nLet me turn to my new clause 70. There is no more important responsibility than looking after children in care, providing those children who have already experienced significant trauma and pain with stability and opportunity, and helping those children to resolve their immigration status, but our current system is not working for children in care. Coram shared with me the story of Aisha, who lived in the UK from the age of six and was taken into care when she had just turned 13 years old. Aisha did not know that she had been brought to the UK on a temporary visa as a child. No one in children’s services knew how to resolve that, and no action was taken. Aisha still had no immigration status when she turned 18, which meant that she could not work, get a student loan or claim benefits, and she was barred in every practical way from leading an independent life. By that time, it was too late for any of the simpler and quicker routes to immigration status or citizenship that had been available to Aisha as a looked-after child.\n\nCoram’s research shows that at the end of 2021 there were 19,000 children and care leavers with an immigration or citizenship issue in England. For all those children, the lack of status or citizenship has a huge impact on their mental health, sense of belonging and ability to plan. As such, I welcome the Government’s commitment in their May 2025 White Paper to solve that problem—to establish a clear pathway to settlement for children in care who reach adulthood without having secured their immigration status, and to ensure that children who turn 18 and discover they do not have status are supported and able quickly to regularise their status and settle. That commitment was repeated in the November 2025 earned settlement consultation, but in the Government’s response to that consultation earlier this month, it seems to have changed. Will the Minister tell the House today whether the Government remain committed to developing a clear pathway to settlement for children in care, and to supporting any care leaver without status to resolve it fast?\n\nIt is right that we seek to restore fairness to our immigration and asylum system. It is right that we drive down the small boat crossings, which risk lives, and I welcome much of what the Home Secretary proposes. However, in a debate defined by loud voices, it behoves all of us in this Chamber to focus on the quieter and smaller voices—those who cannot advocate for themselves; who find their lives defined not by their own choices, but by somebody else’s; and who deserve greater protections than these proposals offer.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.7301,
+    "relevance": 0.5848,
+    "keyword": 38.1325,
+    "semantic": 0.6818,
+    "recency": 0.9988,
+    "authority": 1.25,
+    "authority_reason": "select committee chair (other subject)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 15,
+   "kind": "record",
+   "title": "Jonathan Brash (Labour; MP for Hartlepool, town seat (urban area of 89,000), North East; role on this date: backbencher) — Westminster Hall — 13 July 2026 — col. 252 — Illegal Immigrants: Offshore Detention and Deportation — [Derek Twigg in the Chair]",
+   "url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "record_id": "uk.org.publicwhip/westminhall/2026-07-13a.252.0",
+   "debate_path": "/debates/2026-07-13/westminster-hall/illegal-immigrants-offshore-detention-and-deportation#c252-0",
+   "date": "2026-07-13",
+   "chamber": "Westminster Hall",
+   "record_type": "speech",
+   "heading": "Illegal Immigrants: Offshore Detention and Deportation — [Derek Twigg in the Chair]",
+   "colnum": "252",
+   "uin": null,
+   "time": "16:41",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/whall/?id=2026-07-13a.252.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26339",
+    "date": "2026-07-13",
+    "name": "Jonathan Brash",
+    "house": "commons",
+    "constituency": "Hartlepool",
+    "gss_code": "E14001272",
+    "region": "North East",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "town",
+    "urban_area": "Hartlepool",
+    "urban_area_pop": 88855,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": null,
+    "age_approximate": null,
+    "age_band": null,
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 7698,
+     "pct": 21.7,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "reform",
+    "runner_up_then": {
+     "party": "Reform UK",
+     "party_id": "reform",
+     "votes": 8716,
+     "majority": 7698,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 7698,
+     "pct": 21.7,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Hartlepool"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Jonathan Brash",
+   "group": "Backbench MPs, town seats",
+   "text": "It is a pleasure to serve under your chairmanship, Mr Twigg. I am grateful for the opportunity to contribute to the debate, and I am grateful to the 1,744 people in Hartlepool who signed the petition. That is a significant number of my constituents, and their concerns deserve to be heard and taken seriously.\n\nLet me begin by saying something very clearly. The people of Hartlepool are entitled to be angry about immigration. They are entitled to expect secure borders. They are entitled to expect that those with no right to be in this country are removed. They are entitled to expect fairness in the asylum system and fairness for the communities that feel they have carried more than their fair share, and I share in those expectations. I have supported the Home Secretary’s measures to reduce illegal immigration, strengthen border security and increase returns, and I will continue to support this Home Secretary, including on the measures that will be laid before the House later today, which I hope this House will pass in full.\n\nThe truth is that progress is being made. Net migration has fallen dramatically from the peak under the previous Government’s Boris wave: it is down 82%, delivering the reduction that was promised for years but never achieved. Indeed, the figures are now entering the tens of thousands that Conservative Administrations promised for so long. Small boat crossings are down 41% this year, while deportations of those arriving by small boat are up 16%. In Hartlepool, the number of asylum seekers living in dispersed accommodation has fallen by 14% since the general election.\n\nThe new immigration and asylum legislation will further strengthen the powers available to remove those with no right to be here and deter those attempting to enter illegally. That is the serious work of Government. It requires law enforcement, international co-operation, proper returns agreements, faster decisions and a system that can distinguish between genuine asylum claimants and those who have no right to remain.\n\nI fully understand why people sign a petition like this. They see boat crossings in the channel. They see asylum accommodation in their communities. They see the pressure on housing, schools, public services and community cohesion. They feel that for far too long the broken system —broken by the Conservative party—has not worked, and they want action. They are right to expect it, but we also have a responsibility in this place to be honest. Offshore detention is something that I support in principle, but it is not a magic answer. It is expensive, it is legally complex and it does not remove the need for returns agreements, effective administration and tackling the criminal gangs who profit from human misery—but I reiterate that if we can make it work, in principle I support it.\n\nMore importantly, the language we use matters. It affects how people view their neighbours, it affects how communities feel and it affects people’s lives. That brings me to a point that I want to make very clearly.\n\nA constituent, Jasvir Singh, came to see me a couple of weeks ago after experiencing repeated racial abuse in the community where he has lived and served for almost 30 years. He owns a local business and has paid his taxes; he has contributed to Hartlepool and built a life there. He has done exactly what we say we value, yet he came to see me because the rhetoric around immigration has made his life harder. Jasvir is not an illegal immigrant, and he is not a criminal; he has every right to be here and he is part of our community, yet a small minority accuse him of being an illegal immigrant, of having arrived on a small boat and of having no right to be here, and they do so for one reason alone: the colour of his skin.\n\nWhen politicians blur the line between voicing legitimate concern about illegal immigration and using language that encourages suspicion of people because of their background or their skin colour, it is people like Jasvir who pay the price. That is why the rhetoric we use matters. There is a line between wanting secure borders and stirring up hostility; there is a line between removing those with no right to remain and portraying whole communities as a threat; there is a line between legitimate concern and racist dog-whistle politics, and it is my view that that line has been crossed repeatedly by the hon. Member for Great Yarmouth (Rupert Lowe).\n\nWhen that happens, the consequences are not confined to Westminster Hall. They are felt by people like Jasvir. They are felt by families in Hartlepool. They are felt by children who hear abuse on their way to school. Words spoken in this place do not stay here. They travel into communities and workplaces and on to social media. That does not mean that we should avoid the issue—quite the opposite. We must continue to reduce illegal immigration, we must continue to strengthen our borders, we must remove those with no right to remain and we must dismantle criminal gangs and restore public confidence, but we must do so in a way that is serious, lawful and above all decent.\n\nHartlepool understands the pressure that the issue creates. One of my first actions on being elected as MP for Hartlepool was to meet Mears, the company responsible for asylum accommodation locally, because Hartlepool carries more than its fair share compared with neighbouring areas. I made clear that the system had to be fair, that responsibility could not simply fall on communities already facing significant challenges, and that local people deserved answers. Following those conversations, new asylum accommodation in Hartlepool was halted and numbers fell.\n\nI will continue to raise this issue with Ministers because fairness matters. Hartlepool is a proud and welcoming town that believes in fairness. Fairness means secure borders and removing those who have no right to be here, but it also means standing up for the people who belong here and ensuring they are not made to feel like strangers because of the colour of their skin or the sound of their name. That is the balance we need: strong borders, faster removals, proper enforcement, serious government and politics that does not make innocent people pay the price for failures in the immigration system.\n\nThe people who signed this petition deserve answers, and my answer is this: I will continue to support firm action to reduce illegal immigration, I will support strengthening our borders and I will support practical measures that work, but I will not support rhetoric that puts my constituents at risk, I will not support language that turns legitimate concern into racial hostility, and I will not stay silent when people who have lived in, worked in and contributed to Hartlepool for decades are made to feel that they no longer belong.\n\nWe can have secure borders without losing that most fundamental of British values: common decency. We can have firm immigration controls without attacking decent people based on their skin colour, and we can tell the truth about illegal immigration without turning on our neighbours. We will not import Trumpian politics into our country. That is not the British way.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.7008,
+    "relevance": 0.7575,
+    "keyword": 52.4138,
+    "semantic": 0.7175,
+    "recency": 0.9251,
+    "authority": 1.0,
+    "authority_reason": "no ministerial or committee-chair office"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 16,
+   "kind": "record",
+   "title": "Bell Ribeiro-Addy (Labour; MP for Clapham and Brixton Hill, city seat (Greater London urban area, 8.1m people), London; role on this date: backbencher) — Westminster Hall — 25 November 2025 — col. 59 — Immigration Reforms: Humanitarian Visa Routes — [Sir Edward Leigh in the Chair]",
+   "url": "https://hansard.parliament.uk/Commons/2025-11-25",
+   "record_id": "uk.org.publicwhip/westminhall/2025-11-25a.59.0",
+   "debate_path": "/debates/2025-11-25/westminster-hall/immigration-reforms-humanitarian-visa-routes#c59-0",
+   "date": "2025-11-25",
+   "chamber": "Westminster Hall",
+   "record_type": "speech",
+   "heading": "Immigration Reforms: Humanitarian Visa Routes — [Sir Edward Leigh in the Chair]",
+   "colnum": "59",
+   "uin": null,
+   "time": "10:28",
+   "official_url": "https://hansard.parliament.uk/Commons/2025-11-25",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/whall/?id=2025-11-25a.59.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25856",
+    "date": "2025-11-25",
+    "name": "Bell Ribeiro-Addy",
+    "house": "commons",
+    "constituency": "Clapham and Brixton Hill",
+    "gss_code": "E14001175",
+    "region": "London",
+    "nation": "England",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "city",
+    "urban_area": "Greater London",
+    "urban_area_pop": 8135667,
+    "offices": [],
+    "other_names": [],
+    "gender": "F",
+    "age": 40,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2019-12-13",
+    "first_term": false,
+    "majority_then": {
+     "majority": 18005,
+     "pct": 42.1,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "safe",
+    "runner_up": "liberal-democrat",
+    "runner_up_then": {
+     "party": "Liberal Democrat",
+     "party_id": "liberal-democrat",
+     "votes": 6161,
+     "majority": 18005,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 18005,
+     "pct": 42.1,
+     "band": "safe",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Clapham and Brixton Hill"
+    },
+    "party_groups": [
+     {
+      "id": "socialist-parliamentary-research-group",
+      "name": "Socialist Parliamentary Research Group",
+      "evidence": [
+       {
+        "kind": "ipsa",
+        "date": "2026-11-12",
+        "parliament": "2024–",
+        "label": "Paid for the Socialist Parliamentary Research Group's research service (IPSA records, 2024–2025)",
+        "url": "https://www.theipsa.org.uk/mp-staffing-business-costs/annual-publications",
+        "archive_url": null,
+        "publisher": "Independent Parliamentary Standards Authority (IPSA)",
+        "role": null,
+        "document": null
+       }
+      ]
+     }
+    ]
+   },
+   "speaker_name_raw": "Bell Ribeiro-Addy",
+   "group": "Backbench MPs, city seats",
+   "text": "My understanding was that the Government’s immigration plans were geared towards tackling so-called illegal immigration, such as channel crossings—although I would argue that they are in fact irregular, not illegal, because it is not illegal to seek asylum.\n\nThe measures we are discussing today are about retrospectively making regularised migration rules more stringent. As such, they will not have any impact on channel crossings, but will instead cause fear and uncertainty for many settled, tax-paying families. This is not just about Hongkongers; there are people from all over the world who are equally deserving of our compassion and integrity. Does my hon. Friend agree that to tackle channel crossings—",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.7006,
+    "relevance": 0.75,
+    "keyword": 48.8862,
+    "semantic": 0.7332,
+    "recency": 0.8124,
+    "authority": 1.15,
+    "authority_reason": "select committee member (home_office)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 17,
+   "kind": "record",
+   "title": "Alec Shelbrooke (Conservative; MP for Wetherby and Easingwold, rural seat, Yorkshire and The Humber; role on this date: backbencher) — House of Commons — 17 November 2026 — col. 796 — Immigration and Asylum Bill — New Clause 9 - Investigation of the IIAA by the Parliamentary Commissioner",
+   "url": "https://hansard.parliament.uk/Commons/2026-11-17",
+   "record_id": "uk.org.publicwhip/debate/2026-11-17b.796.0",
+   "debate_path": "/debates/2026-11-17/commons/immigration-and-asylum-bill#c796-0",
+   "date": "2026-11-17",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill — New Clause 9 - Investigation of the IIAA by the Parliamentary Commissioner",
+   "colnum": "796",
+   "uin": null,
+   "time": "15:45",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-11-17",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-11-17b.796.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/24893",
+    "date": "2026-11-17",
+    "name": "Alec Shelbrooke",
+    "house": "commons",
+    "constituency": "Wetherby and Easingwold",
+    "gss_code": "E14001582",
+    "region": "Yorkshire and The Humber",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "rural",
+    "urban_area": "Wetherby",
+    "urban_area_pop": 13572,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": 50,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2010-05-06",
+    "first_term": false,
+    "majority_then": {
+     "majority": 4846,
+     "pct": 9.3,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 15751,
+     "majority": 4846,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 4846,
+     "pct": 9.3,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Wetherby and Easingwold"
+    },
+    "party_groups": [
+     {
+      "id": "conservative-environment-network",
+      "name": "Conservative Environment Network",
+      "evidence": [
+       {
+        "kind": "members",
+        "date": "2026-11-12",
+        "parliament": "2024–",
+        "label": "Listed by the Conservative Environment Network (its website, accessed 12 November 2026)",
+        "url": "https://www.cen.uk.com/our-caucus",
+        "archive_url": null,
+        "publisher": "Conservative Environment Network (its own website)",
+        "role": null,
+        "document": null,
+        "note": "The page is undated: what it said on the day it was accessed. To be checked again from time to time."
+       }
+      ]
+     }
+    ]
+   },
+   "speaker_name_raw": "Alec Shelbrooke",
+   "group": "Backbench MPs, rural seats",
+   "text": "The hon. Gentleman just said that we have the boat crossings because of Brexit. Does he have the figures to hand on the number of crossings in lorries through the channel tunnel back in 2002, when we were full members of the European Union?",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.6727,
+    "relevance": 0.6735,
+    "keyword": 44.5534,
+    "semantic": 0.7056,
+    "recency": 0.9988,
+    "authority": 1.0,
+    "authority_reason": "no ministerial or committee-chair office"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 18,
+   "kind": "record",
+   "title": "Chris Murray (Labour; MP for Edinburgh East and Musselburgh, city seat (Edinburgh urban area, 521,000 people), Scotland; role on this date: backbencher) — House of Commons — 13 July 2026 — col. 666 — Immigration and Asylum Bill",
+   "url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "record_id": "uk.org.publicwhip/debate/2026-07-13c.666.3",
+   "debate_path": "/debates/2026-07-13/commons/immigration-and-asylum-bill#c666-3",
+   "date": "2026-07-13",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill",
+   "colnum": "666",
+   "uin": null,
+   "time": "18:43",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-07-13c.666.3",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26611",
+    "date": "2026-07-13",
+    "name": "Chris Murray",
+    "house": "commons",
+    "constituency": "Edinburgh East and Musselburgh",
+    "gss_code": "S14000078",
+    "region": "Scotland",
+    "nation": "Scotland",
+    "party": "Labour",
+    "party_id": "labour",
+    "settlement": "city",
+    "urban_area": "Edinburgh",
+    "urban_area_pop": 520804,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": 39,
+    "age_approximate": true,
+    "age_band": "under-40",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 3715,
+     "pct": 8.2,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "scottish-national-party",
+    "runner_up_then": {
+     "party": "Scottish National Party",
+     "party_id": "scottish-national-party",
+     "votes": 15075,
+     "majority": 3715,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 3715,
+     "pct": 8.2,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Edinburgh East and Musselburgh"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Chris Murray",
+   "group": "Backbench MPs, city seats",
+   "text": "We always forget that people lose their lives in the channel—including last year, tragically, a young girl of four and a young man of 16 who had just tried to phone his parents. Does the Home Secretary agree that anyone with any humanitarian beliefs at all should be doing everything they can to stop cross-channel boats, and that it is incumbent on everyone that we do everything we can about that?",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.6608,
+    "relevance": 0.6211,
+    "keyword": 41.4063,
+    "semantic": 0.6876,
+    "recency": 0.9251,
+    "authority": 1.15,
+    "authority_reason": "select committee member (home_office)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 19,
+   "kind": "record",
+   "title": "Lord Empey (UUP; member of the House of Lords; role on this date: backbencher) — Written question, Lords written answers — 29 September 2026 — UIN HL3535 — Home Office — Undocumented Migrants: English Channel",
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2026-09-15/HL3535",
+   "record_id": "uk.org.publicwhip/wrans/2026-09-15.HL3535.q0",
+   "debate_path": null,
+   "date": "2026-09-29",
+   "chamber": "Lords written answers",
+   "record_type": "question",
+   "heading": "Home Office — Undocumented Migrants: English Channel",
+   "colnum": null,
+   "uin": "HL3535",
+   "time": null,
+   "official_url": "https://questions-statements.parliament.uk/written-questions/detail/2026-09-15/HL3535",
+   "url_kind": "record",
+   "twfy_url": "https://www.theyworkforyou.com/wrans/?id=2026-09-15.HL3535.q0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25042",
+    "date": "2026-09-29",
+    "name": "Lord Empey",
+    "house": "lords",
+    "constituency": null,
+    "gss_code": null,
+    "region": null,
+    "nation": null,
+    "party": "UUP",
+    "party_id": "uup",
+    "settlement": null,
+    "urban_area": null,
+    "urban_area_pop": null,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": 78,
+    "age_approximate": false,
+    "age_band": "70-plus",
+    "party_groups": []
+   },
+   "speaker_name_raw": "Lord Empey",
+   "group": "Backbench peers",
+   "text": "To ask His Majesty's Government what assessment they have made of reports that French police assist migrants seeking to cross the Channel to the UK in small boats.",
+   "context": null,
+   "replies": [
+    {
+     "record_id": "uk.org.publicwhip/wrans/2026-09-15.HL3535.r0",
+     "date": "2026-09-29",
+     "text": "The UK works closely with the French Government and French law enforcement partners to prevent dangerous small boat crossings and tackle the criminal gangs that facilitate them.\n\nSince the election, joint work with France has prevented more than 48,000 attempted crossings and resulted in the seizure of over 1,100 boats and engines. Operational decisions in French territorial waters remain a matter for the French authorities but reports of them assisting migrant journeys is a mischaracterisation of their activity.\n\nThrough the Home Secretary's latest deal we have strengthened this cooperation through increased French law enforcement deployments, specialist policing units, enhanced surveillance and intelligence sharing. France has also reviewed its maritime approach and authorised new interventions at sea to intercept taxi boats and prevent dangerous crossings.",
+     "speaker_name_raw": "Lord Hanson of Flint",
+     "speaker": {
+      "person_id": "uk.org.publicwhip/person/10259",
+      "date": "2026-09-29",
+      "name": "Lord Hanson of Flint",
+      "house": "lords",
+      "constituency": null,
+      "gss_code": null,
+      "region": null,
+      "nation": null,
+      "party": "Labour",
+      "party_id": "labour",
+      "settlement": null,
+      "urban_area": null,
+      "urban_area_pop": null,
+      "offices": [
+       {
+        "kind": "gov",
+        "role": "The Minister of State, Home Department",
+        "portfolios": [
+         "home_office"
+        ],
+        "committee_id": null,
+        "committee_name": null,
+        "display_name": "The Minister of State, Home Department",
+        "title": "The Minister of State, Home Department"
+       }
+      ],
+      "other_names": [
+       "David Hanson"
+      ],
+      "gender": "M",
+      "age": 69,
+      "age_approximate": false,
+      "age_band": "55-69",
+      "party_groups": []
+     }
+    }
+   ],
+   "ranking": {
+    "score": 0.6548,
+    "relevance": 0.5874,
+    "keyword": 33.8006,
+    "semantic": 0.7095,
+    "recency": 0.9693,
+    "authority": 1.15,
+    "authority_reason": "select committee member (home_office)"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 20,
+   "kind": "record",
+   "title": "Lewis Cocking (Conservative; MP for Broxbourne, town seat (urban area of 46,000), East of England; role on this date: backbencher) — House of Commons — 13 July 2026 — col. 704 — Immigration and Asylum Bill",
+   "url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "record_id": "uk.org.publicwhip/debate/2026-07-13c.704.1",
+   "debate_path": "/debates/2026-07-13/commons/immigration-and-asylum-bill#c704-1",
+   "date": "2026-07-13",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Immigration and Asylum Bill",
+   "colnum": "704",
+   "uin": null,
+   "time": "20:57",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-07-13",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-07-13c.704.1",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26316",
+    "date": "2026-07-13",
+    "name": "Lewis Cocking",
+    "house": "commons",
+    "constituency": "Broxbourne",
+    "gss_code": "E14001139",
+    "region": "East of England",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "town",
+    "urban_area": "Cheshunt",
+    "urban_area_pop": 45832,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": 34,
+    "age_approximate": true,
+    "age_band": "under-40",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 2858,
+     "pct": 6.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "marginal",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 12952,
+     "majority": 2858,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 2858,
+     "pct": 6.7,
+     "band": "marginal",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Broxbourne"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Lewis Cocking",
+   "group": "Backbench MPs, town seats",
+   "text": "We must reduce immigration to this country and get a grip of our asylum system. Unlike the MPs behind her, I do think the Home Secretary is starting to move in the right direction. But, as she will know, small boat crossings are on the rise since Labour came to power, with an average of 105 illegal migrants crossing the channel every single day for the last two years. Almost 100,000 people are being housed in asylum accommodation, with the numbers in houses in multiple occupation up 11% under this Labour Government.\n\nThe case for urgent action is now overwhelming, but the measures in the Bill before us fail to meet the gravity of the situation. I will therefore be supporting the reasoned amendment in the name of the Leader of the Opposition. Just look at the tinkering to the application of article 8 of the European convention on human rights. We all know that the protection to family life has been abused and twisted far from its original purpose. The public rightly expect foreign nationals who have broken our laws to be deported. The rights of the British people should always outweigh the interests of foreign criminals—no ifs, no buts.\n\nIn 2023, a Nigerian man used article 8 to stay in this country despite a two-year prison sentence, but the tribunal ruled that deportation would breach his article 8 rights. Horrifically, he then went on to violently rape a teenage girl—whose rights were being protected then? Will these sorts of cases be a thing of the past as a result of the modest changes within this Bill? I am not convinced. The Government are allowing vague and ambiguous exceptional circumstances to be used by criminals to avoid deportation. The phrasing in the Bill leaves far too much room for legal argument, appeals and delays. No ifs, no buts—every illegal immigrant should be deported.\n\nBy making changes to article 8, the Government have conceded that membership of the European convention on human rights places significant limits on the UK’s ability to maintain and control our borders. There is only one logical conclusion: the only way that we will truly end illegal immigration into the United Kingdom, deport all foreign criminals, and create a system that is genuinely fair and robust, is to leave the European convention on human rights in its entirety, and repeal the Human Rights Act.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.6196,
+    "relevance": 0.6698,
+    "keyword": 42.3466,
+    "semantic": 0.7161,
+    "recency": 0.9251,
+    "authority": 1.0,
+    "authority_reason": "no ministerial or committee-chair office"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 21,
+   "kind": "record",
+   "title": "Lord Murray of Blidworth (Conservative; member of the House of Lords; role on this date: backbencher) — House of Lords — 18 May 2026 — col. 239 — King’s Speech - Debate (3rd Day)",
+   "url": "https://hansard.parliament.uk/Lords/2026-05-18",
+   "record_id": "uk.org.publicwhip/lords/2026-05-18a.239.0",
+   "debate_path": "/debates/2026-05-18/lords/king-s-speech-debate-3rd-day#c239-0",
+   "date": "2026-05-18",
+   "chamber": "House of Lords",
+   "record_type": "speech",
+   "heading": "King’s Speech - Debate (3rd Day)",
+   "colnum": "239",
+   "uin": null,
+   "time": "20:26",
+   "official_url": "https://hansard.parliament.uk/Lords/2026-05-18",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/lords/?id=2026-05-18a.239.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26095",
+    "date": "2026-05-18",
+    "name": "Lord Murray of Blidworth",
+    "house": "lords",
+    "constituency": null,
+    "gss_code": null,
+    "region": null,
+    "nation": null,
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": null,
+    "urban_area": null,
+    "urban_area_pop": null,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": 51,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "party_groups": []
+   },
+   "speaker_name_raw": "Lord Murray of Blidworth",
+   "group": "Backbench peers",
+   "text": "My Lords, in the gracious Speech His Majesty said only this about the thorny topic of immigration and asylum:\n\n“Legislation will be introduced to increase confidence in the security of the immigration and asylum systems”—\n\nnothing else. That is perhaps unsurprising, given the likely choppy reception that the trailed proposals will have from the government Back Benches in the other place and indeed, if the recent SIs that we have just passed are anything to go by, from the government Back Benches in your Lordships’ House.\n\nThe proposed Bill is a start. I welcome it and I look forward to continuing to support the Minister, but the present proposals do not go far enough. It is doubtful that the new Bill will achieve its objective to increase confidence in the security of the immigration and asylum systems. The noble Baroness, Lady Levitt, said of the Government’s policy in her opening today:\n\n“We will not hesitate to remove those with no right to be here”.\n\nAs we will see, that resounding rhetoric does not seem to match the facts. Time permits consideration only of one issue that demonstrates these conclusions. The Times reported on 26 April and 6 May this year that FoI requests had revealed the following:\n\n“Britain returned a total of 11,629 rejected asylum seekers last year. Over the same period a total of 80,264 asylum seekers were refused asylum”.\n\nThe figures\n\n“revealed that migrants from countries most likely to cross the Channel in small boats were among the least likely to be returned home”.\n\nFor Eritreans, the most common nationality among small boat migrants last year, the proportion of failed asylum seekers returned was just 5%; 1,269 asylum seekers presented in the UK and were refused asylum but just 64 were returned. In relation to Afghanistan, 7,330 Afghans were refused asylum last year but just 115 were returned. From Ethiopia 876 were rejected but only 15 individuals returned, giving a return rate of 1.7%. The figure for Iran was similar, only 1.8%, and for Somalis it was 1.5%. Even for Sierra Leone the figure was less than one in 100, while for Cameroon 1.5% of failed asylum seekers were returned. Even Rwanda, designated as a safe country by statute in the last Parliament, saw a return rate of failed asylum seekers of just 2.6%.\n\nThe largest cohort of failed asylum seekers in the UK are from Pakistan. Last year 10,853 people from Pakistan were refused asylum, but only 445 Pakistanis were returned to Islamabad in the same period. This is so notwithstanding that the UK and Pakistan agreed an asylum returns deal in 2022. Indeed, it is of note that nearly 200 failed Pakistani asylum seekers were living in taxpayer-funded accommodation as of December 2025.\n\nThe central point is that, if failed asylum seekers can stay here anyway, then it renders largely useless our very expensive and time-consuming asylum application and appeals process. Further, this state of affairs plainly creates a very significant pull factor for migrants to enter illegally, by small boat or otherwise, because they know, as is abundantly clear from the statistics, they are unlikely to be removed even if their asylum claims are rejected.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.5887,
+    "relevance": 0.6575,
+    "keyword": 43.7253,
+    "semantic": 0.6993,
+    "recency": 0.8954,
+    "authority": 1.0,
+    "authority_reason": "no ministerial or committee-chair office"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 22,
+   "kind": "record",
+   "title": "Lord Faulks (Non-affiliated; member of the House of Lords; role on this date: backbencher) — House of Lords — 11 December 2025 — col. 389 — The UK’s Demographic Future - Motion to Take Note",
+   "url": "https://hansard.parliament.uk/Lords/2025-12-11",
+   "record_id": "uk.org.publicwhip/lords/2025-12-11a.389.0",
+   "debate_path": "/debates/2025-12-11/lords/the-uk-s-demographic-future-motion-to-take-note#c389-0",
+   "date": "2025-12-11",
+   "chamber": "House of Lords",
+   "record_type": "speech",
+   "heading": "The UK’s Demographic Future - Motion to Take Note",
+   "colnum": "389",
+   "uin": null,
+   "time": "14:25",
+   "official_url": "https://hansard.parliament.uk/Lords/2025-12-11",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/lords/?id=2025-12-11a.389.0",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/25008",
+    "date": "2025-12-11",
+    "name": "Lord Faulks",
+    "house": "lords",
+    "constituency": null,
+    "gss_code": null,
+    "region": null,
+    "nation": null,
+    "party": "Non-affiliated",
+    "party_id": "non-affiliated",
+    "settlement": null,
+    "urban_area": null,
+    "urban_area_pop": null,
+    "offices": [],
+    "other_names": [],
+    "gender": "M",
+    "age": 75,
+    "age_approximate": false,
+    "age_band": "70-plus",
+    "party_groups": []
+   },
+   "speaker_name_raw": "Lord Faulks",
+   "group": "Backbench peers",
+   "text": "My Lords, I am delighted to take part in this valedictory debate initiated by the noble Lord, Lord Hodgson of Astley Abbotts. He was one of my supporters when I was introduced into your Lordships’ House in 2010, and I have had the privilege of sharing a room with him ever since—although “sharing” may not be a totally accurate word. The accumulation of paper and the general air of industry in the room is attributable, I am afraid, to him rather than to me.\n\nThe noble Lord has been an exemplary member of your Lordships’ House, whether on the Opposition Front Bench or, as we have heard, as chair of committees, or as a Back-Bencher prepared to take on difficult subjects. Some may remember the debate over the Albert Hall, to which he brought such expertise and common sense. He kindly assisted me in our attempts to establish a register of beneficial ownership for the foreign owners of property in this country. Of particular relevance today, he has regularly drawn attention to the difficult and highly contentious topic of immigration. We will miss him very much as a popular Member of the House and as a voice respected on all sides of it.\n\nThis report, if that is the right word, is typical of the noble Lord. It provides reliable facts and statistics, and includes essays from a number of different perspectives. As the Library summary says, demographic changes and population growth due to migration could bring\n\n“very special challenges for the UK”,\n\nincluding “extreme” political parties. But the noble Lord does not make crude political points: rather, his report focuses on matters including the environmental impact of population growth, and provides, as he has told us, useful international comparisons.\n\nMy own view is that, as a country, we have been afraid to ask the fundamental question: are we entitled to decide who does or does not come here? We have certainly failed to answer that question. There is much to be gained, of course, by refreshing the country with new arrivals; there is also an economic case to be made. We have an excellent history of accepting refugees. What is more, the expression of any view that appears to oppose immigration can so easily attract allegations of racism. No wonder centre parties tend to duck these difficult questions.\n\nWill our country be happier for the vast increase in population in recent years, almost entirely due to immigration? We have an economy that stubbornly refuses to grow, and a widespread sense that we simply cannot afford the additional cost of immigration. It is by no means the only cause of the problems we have, but it has contributed to a general malaise that reminds me of the late 1970s, when I was starting my career. Jim Callaghan announced that, if he were a young man, he would think of leaving the country. I was tempted. I may be wrong, but I think the majority of the population thinks that we should be able to control migration. The Brexit vote was very much influenced by the sense that, with freedom of movement, we were unable to determine who was allowed to come quite legally to live in our country. Since Brexit, we have had a different sort of migration, much of it in response to particular crises. But the emphasis politically has been on illegal migration. Legal migration, at least in theory, is something that a country should be capable of controlling, although there are huge practical challenges in doing so.\n\nI accept that illegal migration is an imprecise term, in that many asylum applications succeed, and thus the asylum seeker can become a legal migrant. However, asylum seekers, with the departure of those seeking more friendly economic pastures, are now increasing in both absolute numbers and as a proportion of immigration as a whole. This Government and the last simply cannot escape the images of boats crossing the channel and our inability to stop them.\n\nThe failure to reduce numbers is significantly attributable to international law and our approach to it. We have a dualist system in this country, whereby international law is not binding on us at a domestic level unless we specifically incorporate it into our law. We generally do not do that, with the exception of the European Convention on Human Rights, which was incorporated in the Human Rights Act 1998. The debate about asylum seekers has focused very much on our international obligations, whether they emanate from the ECHR or the refugee convention, or even the rather elusive concept of customary international law.\n\nThe Home Secretary has recently made some quite pugnacious remarks about tackling illegal migration and ruled nothing off the table. How well this is going down with the Prime Minister and that human rights zealot the Attorney-General I do not know, but in my view, unless she tackles the primacy of our national law, as opposed to what are often international obligations fashioned in an entirely different context, she will never get control of illegal migration. The recent efforts to engage with the European Court of Human Rights are unlikely, I fear, to produce significant change—certainly not in the near future.\n\nI return to my fundamental question: is Parliament sovereign? Can Governments say no? This report is a pertinent and sophisticated analysis of the consequences of mass migration, but I fear that much of the population may take the view that they are looking for rather less sophistication and that the next election will be characterised by some ugly exchanges. This will largely be the fault of centre parties for ignoring the reasonable concerns of the population. If that scenario eventuates, the noble Lord, Lord Hodgson, in what I hope will be a long and happy retirement, could be forgiven for saying to himself ruefully, “I told you so”.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.563,
+    "relevance": 0.687,
+    "keyword": 49.8631,
+    "semantic": 0.6833,
+    "recency": 0.8194,
+    "authority": 1.0,
+    "authority_reason": "no ministerial or committee-chair office"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 23,
+   "kind": "record",
+   "title": "Katie Lam (Conservative; MP for Weald of Kent, rural seat, South East; role on this date: backbencher) — House of Commons — 29 June 2026 — col. 639 — Asylum Accommodation",
+   "url": "https://hansard.parliament.uk/Commons/2026-06-29",
+   "record_id": "uk.org.publicwhip/debate/2026-06-29a.639.1",
+   "debate_path": "/debates/2026-06-29/commons/asylum-accommodation#c639-1",
+   "date": "2026-06-29",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Asylum Accommodation",
+   "colnum": "639",
+   "uin": null,
+   "time": "16:26",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-06-29",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-06-29a.639.1",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26588",
+    "date": "2026-06-29",
+    "name": "Katie Lam",
+    "house": "commons",
+    "constituency": "Weald of Kent",
+    "gss_code": "E14001570",
+    "region": "South East",
+    "nation": "England",
+    "party": "Conservative",
+    "party_id": "conservative",
+    "settlement": "rural",
+    "urban_area": "Maidstone",
+    "urban_area_pop": 107627,
+    "offices": [
+     {
+      "kind": "whip",
+      "role": "Opposition Assistant Whip (Commons)",
+      "portfolios": [],
+      "committee_id": null,
+      "committee_name": null,
+      "display_name": "Opposition Assistant Whip (Commons)",
+      "title": "Opposition Assistant Whip (Commons)"
+     }
+    ],
+    "other_names": [],
+    "gender": "F",
+    "age": 34,
+    "age_approximate": false,
+    "age_band": "under-40",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 8422,
+     "pct": 16.6,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "labour",
+    "runner_up_then": {
+     "party": "Labour",
+     "party_id": "labour",
+     "votes": 11780,
+     "majority": 8422,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 8422,
+     "pct": 16.6,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Weald of Kent"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Katie Lam",
+   "group": "Backbench MPs, rural seats",
+   "text": "I thank the Minister for advance sight of his statement, which confirms what we have suspected since last week: this Government are planning to put more illegal migrants into sites across the country.\n\nSome of those sites are due to host illegal migrants until 2030, yet the Government did not think that it was worth alerting the hon. Members who represent those communities and live nearby ahead of the announcement in the press. Rather than subjecting the plans to proper scrutiny here in Parliament, the Government tried to sneak the news out quietly before the weekend, without discussion here in this place by those people’s democratically elected representatives. That is exactly the same playbook that the Government have tried to use in places like Inverness where, thanks to the work of the Conservative group on the Highland council, the Home Office’s plans to house illegal migrants at Cameron barracks were blocked.\n\nWe have seen in far too many cases the risk that illegal migrants, most of them young men, pose to the public, particularly to women and children. If the Government are planning to force communities to live alongside people who have shown complete contempt for our laws and norms by the very act of coming here illegally, the least that they can do is to allow those plans to be subject to proper scrutiny.\n\nNow that we finally have an opportunity to scrutinise the plans, we can perhaps see why the Government were so keen to hide them. For all the talk of smashing the gangs, they reveal that this Government do not have any faith in their own ability to fix the problem. If they are so sure that they are ending illegal channel crossings, why are the Government making plans to host illegal migrants in this country until 2030? What does that tell us about their confidence in their own approach?\n\nThe truth is that this Government have no intention of fixing the problem: they care only about managing people’s perceptions of it. While they talk up the reduction in illegal migrants living in hotels, they conveniently leave out the fact that thousands more migrants are being housed in so-called dispersal accommodation: homes in the middle of our towns and cities where illegal migrants pose an even greater risk to the public.\n\nSince the last election, 75,000 people have crossed the channel. In the past few weeks alone, 3,000 have made the crossing. For all the Government’s talk of removals, nearly all of them—some 93%—are being allowed to stay. The Minister boasts about a reduction in outstanding decisions, but they have achieved that reduction by granting asylum to thousands upon thousands of illegal migrants.\n\nThe Minister said in his statement that to stop the use of asylum hotels for good\n\n“we must go further, and that means scaling up our use of larger, more basic facilities.”\n\nHe is right that the Government must go further to stop the use of asylum hotels for good, but he is utterly wrong that the problem is solved by instead spending huge resources to create other places to live for those who arrive here illegally.\n\nAs Conversative Members have made clear time and again, the only real solution to the crisis at our border is to remove illegal migrants as soon as they arrive. People must know that if they try to break our laws, they cannot stay. For it to be possible to remove people as soon as they arrive, we must leave the jurisdiction of the European Court of Human Rights that prevents us from doing so, but the Government refuse to recognise that. They are in hock to activist lawyers in this country and unaccountable judges in Strasbourg, and keeping those people happy takes precedence over keeping the British people safe and delivering on their democratic will.\n\nThe plans before us are another sorry example of that. More illegal migrants will enter the endless cycle of appeals and legal challenges, allowing them to stay here for years at the taxpayer’s expense. More people will be put at risk because of these plans and because of the Government’s unwillingness truly to solve this problem for good.",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.5619,
+    "relevance": 0.6124,
+    "keyword": 36.2892,
+    "semantic": 0.7121,
+    "recency": 0.9175,
+    "authority": 1.0,
+    "authority_reason": "no ministerial or committee-chair office"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 24,
+   "kind": "record",
+   "title": "Manuela Perteghella (Liberal Democrat; MP for Stratford-on-Avon, rural seat, West Midlands; role on this date: backbencher) — House of Commons — 9 March 2026 — col. 37 — Immigration Policy",
+   "url": "https://hansard.parliament.uk/Commons/2026-03-09",
+   "record_id": "uk.org.publicwhip/debate/2026-03-09d.37.4",
+   "debate_path": "/debates/2026-03-09/commons/immigration-policy#c37-4",
+   "date": "2026-03-09",
+   "chamber": "House of Commons",
+   "record_type": "speech",
+   "heading": "Immigration Policy",
+   "colnum": "37",
+   "uin": null,
+   "time": "15:41",
+   "official_url": "https://hansard.parliament.uk/Commons/2026-03-09",
+   "url_kind": "sitting",
+   "twfy_url": "https://www.theyworkforyou.com/debates/?id=2026-03-09d.37.4",
+   "speaker": {
+    "person_id": "uk.org.publicwhip/person/26569",
+    "date": "2026-03-09",
+    "name": "Manuela Perteghella",
+    "house": "commons",
+    "constituency": "Stratford-on-Avon",
+    "gss_code": "E14001526",
+    "region": "West Midlands",
+    "nation": "England",
+    "party": "Liberal Democrat",
+    "party_id": "liberal-democrat",
+    "settlement": "rural",
+    "urban_area": "Stratford-upon-Avon",
+    "urban_area_pop": 27830,
+    "offices": [],
+    "other_names": [],
+    "gender": "F",
+    "age": 52,
+    "age_approximate": false,
+    "age_band": "40-54",
+    "first_elected": "2024-07-05",
+    "first_term": true,
+    "majority_then": {
+     "majority": 7122,
+     "pct": 13.4,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_band": "middle",
+    "runner_up": "conservative",
+    "runner_up_then": {
+     "party": "Conservative",
+     "party_id": "conservative",
+     "votes": 16328,
+     "majority": 7122,
+     "election": "2024 general election",
+     "date": "2024-07-04"
+    },
+    "majority_now": {
+     "majority": 7122,
+     "pct": 13.4,
+     "band": "middle",
+     "election": "2024 general election",
+     "date": "2024-07-04",
+     "constituency": "Stratford-on-Avon"
+    },
+    "party_groups": []
+   },
+   "speaker_name_raw": "Manuela Perteghella",
+   "group": "Backbench MPs, rural seats",
+   "text": "If the Government are serious about stopping dangerous small boats crossings and smashing the gangs, there must be safe routes for those fleeing war and persecution. I remind the House that bombs are falling right now in the Gulf and in the middle east. What progress has the Home Secretary made in establishing safe and legal routes for refugees, so that people do not risk their lives crossing the channel?",
+   "context": null,
+   "replies": null,
+   "ranking": {
+    "score": 0.5608,
+    "relevance": 0.6519,
+    "keyword": 35.8339,
+    "semantic": 0.7424,
+    "recency": 0.8603,
+    "authority": 1.0,
+    "authority_reason": "no ministerial or committee-chair office"
+   },
+   "occasions": null,
+   "declared": null
+  },
+  {
+   "n": 25,
+   "kind": "evidence",
+   "title": "Rt Hon Shabana Mahmood MP (Secretary of State, Home Office) — Oral evidence to the Home Affairs Committee — 4 February 2026 — The work of the Home Office",
+   "url": "/evidence/17143#t97",
+   "date": "2026-02-04",
+   "chamber": "Committee evidence",
+   "committee": "Home Affairs Committee",
+   "inquiry": "The work of the Home Office",
+   "inquiry_id": 8741,
+   "session_id": 17143,
+   "witness": {
+    "name": "Rt Hon Shabana Mahmood MP",
+    "organisation": "Home Office",
+    "role": "Secretary of State"
+   },
+   "text": "Oral evidence to the Home Affairs Committee, 4 February 2026, inquiry: The work of the Home Office. Rt Hon Shabana Mahmood MP (Secretary of State, Home Office), a witness answering the committee's questions (evidence to a committee, not a view of Parliament):\n\nAsked by Chris Murray: You have announced the creation of new safe routes, which many people have called for over a very period. Can you tell us what kind of number of people you would like to see coming through on safe routes? What impact, if any at all, will that have on the small boat crossings?\n\nThe witness answered:\n\nWe are very committed to opening up new safe and legal routes. We have obviously set out proposals for specific routes for workers and students, and the third part of that is a new community sponsorship model to be able to bring refugees into the country. We are designing and consulting with people as we speak, and we will work closely with local authorities and other community groups in the policy design.\n\nAs I have already said in the House, I would anticipate that in the beginning the numbers will be relatively small, because we will want to prove concept with the model, and make sure that the methodology that we have adopted for assessing community impact and a community’s ability to absorb people are all correct, and that we are not loading too much pressure into the system.\n\nI envisage the routes becoming more generous over time, but I think that is linked to the ability to deal with the problem of the boats and the wider abuses in the asylum system more generally. I think that public support for safe and legal routes to be more generous will be there as long as people feel that the rest of the system has been brought into balance and under control. I think those two things go hand in hand.\n\nSo both to win the argument and to ensure that the policy design works, the numbers will be smaller to begin with. I would hope that as the other reforms are rolled out, we will be able to grow these routes and they will become more generous over time.\n\nAs to the question of whether the creation of safe and legal routes, in and of itself, deals with the issue of the small boats, I think that is less clear. Organised immigration crime is a real thing. Unfortunately, these people are very smart, very entrepreneurial and they don’t struggle to find people to put in a boat, and people seem to find the money to pay them to get on a boat.\n\nWill the creation of the safe and legal routes on its own help to deal with the boat crossings? No. Is it part of the picture that is the wider solution to these problems? Yes.",
+   "group": "Committee evidence",
+   "official_url": "https://committees.parliament.uk/oralevidence/17143/html/",
+   "speaker_name_raw": "Shabana Mahmood"
+  },
+  {
+   "n": 26,
+   "kind": "evidence",
+   "title": "Dr Madeleine Sumption MBE (Director, Migration Observatory) — Oral evidence to the Justice and Home Affairs Committee — 27 January 2026 — Settlement, Citizenship and Integration",
+   "url": "/evidence/17151#t33",
+   "date": "2026-01-27",
+   "chamber": "Committee evidence",
+   "committee": "Justice and Home Affairs Committee",
+   "inquiry": "Settlement, Citizenship and Integration",
+   "inquiry_id": 9453,
+   "session_id": 17151,
+   "witness": {
+    "name": "Dr Madeleine Sumption MBE",
+    "role": "Director",
+    "organisation": "Migration Observatory"
+   },
+   "text": "Oral evidence to the Justice and Home Affairs Committee, 27 January 2026, inquiry: Settlement, Citizenship and Integration. Dr Madeleine Sumption MBE (Director, Migration Observatory), a witness answering the committee's questions (evidence to a committee, not a view of Parliament):\n\nAsked by Lord Tope: How do asylum seekers get here, principally?\n\nThe witness answered:\n\nThey come through various means, which fluctuate a little over time. The most recent figures show that currently just under 40% of people arrive on small boats. A similar number come on visas and either claim asylum while they are on the visa or after having overstayed. Others come through miscellaneous other routes, through the common travel area, on lorries, and so forth.",
+   "group": "Committee evidence",
+   "official_url": "https://committees.parliament.uk/oralevidence/17151/html/",
+   "speaker_name_raw": "Dr Madeleine Sumption"
+  },
+  {
+   "n": 27,
+   "kind": "evidence",
+   "title": "Dr Mihnea Cuibus (Researcher, Oxford Migration Observatory) — Oral evidence to the Home Affairs Committee — 16 December 2025 — Asylum and Returns Policy",
+   "url": "/evidence/16932#t49",
+   "date": "2025-12-16",
+   "chamber": "Committee evidence",
+   "committee": "Home Affairs Committee",
+   "inquiry": "Asylum and Returns Policy",
+   "inquiry_id": 9499,
+   "session_id": 16932,
+   "witness": {
+    "name": "Dr Mihnea Cuibus",
+    "organisation": "Oxford Migration Observatory",
+    "role": "Researcher"
+   },
+   "text": "Oral evidence to the Home Affairs Committee, 16 December 2025, inquiry: Asylum and Returns Policy. Dr Mihnea Cuibus (Researcher, Oxford Migration Observatory), a witness answering the committee's questions (evidence to a committee, not a view of Parliament):\n\nAsked by Margaret Mullane: Could I ask you a question as the non-politicians in the room? One of you mentioned that the public are obviously not happy with the boats. That is rolling on, and they are all a bit baffled. Do you think the decision to consider this policy is a result of the boats, and do you think it would be successful?\n\nThe witness answered:\n\nWhen we look at the whole package of measures and its intent, it is important to remember that small boats account for only a minority of all asylum applications. Looking over the last five years, it is about 30% to 40% of all asylum applications here in the UK. A big part of the story, and a big part of the reason we have so much pressure on the UK’s asylum system, is people coming in legally, where a completely different set of considerations are in place.\n\nWe have seen record numbers of asylum applications from Pakistani and Bangladeshi citizens coming in on work, study or visitor visas, and it might seem likely that the Government are trying to address both sides of this debate, and it is not just a conversation about enforcement and small boats by itself.",
+   "group": "Committee evidence",
+   "official_url": "https://committees.parliament.uk/oralevidence/16932/html/",
+   "speaker_name_raw": "Dr Cuibus"
+  }
+ ],
+ "candidates": 419,
+ "semantic": true,
+ "evidence": {
+  "records": 24,
+  "speakers": 21,
+  "divisions": 0,
+  "date_from": "2025-11-25",
+  "date_to": "2026-11-17",
+  "groups": {
+   "Opposition frontbench": 8,
+   "Government ministers": 3,
+   "Backbench MPs, town seats": 3,
+   "Backbench MPs, city seats": 3,
+   "Backbench MPs, rural seats": 3,
+   "Backbench peers": 3,
+   "Select committee chairs": 1
+  },
+  "parties": {
+   "Conservative": 9,
+   "Labour": 7,
+   "Liberal Democrat": 3,
+   "Labour/Co-operative": 2,
+   "Green": 1,
+   "UUP": 1,
+   "Non-affiliated": 1
+  },
+  "seat_types": {
+   "city": 12,
+   "town": 5,
+   "rural": 4
+  },
+  "genders": {
+   "M": 17,
+   "F": 7
+  },
+  "age_bands": {
+   "40-54": 15,
+   "unknown": 4,
+   "under-40": 3,
+   "70-plus": 2
+  },
+  "tenure": {
+   "first-term": 12,
+   "returning": 9
+  },
+  "majority_bands": {
+   "marginal": 12,
+   "safe": 6,
+   "middle": 3
+  },
+  "runner_ups": {
+   "Labour": 9,
+   "The Conservatives": 5,
+   "Reform UK (formerly the Brexit Party)": 3,
+   "The SNP": 2,
+   "An independent candidate": 1,
+   "The Liberal Democrats": 1
+  },
+  "party_groups": {
+   "none": 18,
+   "Conservative Environment Network": 4,
+   "Labour Growth Group": 1,
+   "Socialist Parliamentary Research Group": 1
+  },
+  "imbalance": null,
+  "raised_most": [
+   {
+    "name": "Chris Philp",
+    "days": 9
+   },
+   {
+    "name": "Max Wilkinson",
+    "days": 7
+   },
+   {
+    "name": "Matt Vickers",
+    "days": 6
+   },
+   {
+    "name": "Siân Berry",
+    "days": 6
+   },
+   {
+    "name": "Will Forster",
+    "days": 4
+   }
+  ],
+  "devolution": [],
+  "edms": 0,
+  "devolved": 0,
+  "committee_evidence": 3
+ },
+ "answer": {
+  "segments": [
+   {
+    "text": "**In brief**\n- Government ministers and Labour backbenchers backed the Immigration and Asylum Bill as a way to restore control, as when Jonathan Brash said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"compassion without control is not a sustainable immigration policy, but neither is control without compassion\"",
+    "sources": [
+     12
+    ],
+    "cited": [
+     {
+      "source": 12,
+      "cited_text": "We also need an asylum system that makes decisions quickly, prevents endless appeals and repeated claims that frustrate removal, and stops leaving people languishing in hotels at enormous expense to the taxpayer. That is why this Bill matters. It establishes an independent immigration appeals authority, tackles abuse of late and repeated claims, reforms the application of article 8 and the modern slavery framework, simplifies the protection system and introduces a mechanism for those with the financial means to contribute towards the cost of their support. These are important reforms to restore order, fairness and confidence, because compassion without control is not a sustainable immigration policy, but neither is control without compassion. We need to do both."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- Conservatives said the Bill does not go far enough and called for leaving the European Convention on Human Rights, as when Lewis Cocking said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "the only way to end illegal immigration is \"to leave the European convention on human rights in its entirety, and repeal the Human Rights Act\"",
+    "sources": [
+     20
+    ],
+    "cited": [
+     {
+      "source": 20,
+      "cited_text": "By making changes to article 8, the Government have conceded that membership of the European convention on human rights places significant limits on the UK’s ability to maintain and control our borders. There is only one logical conclusion: the only way that we will truly end illegal immigration into the United Kingdom, deport all foreign criminals, and create a system that is genuinely fair and robust, is to leave the European convention on human rights in its entirety, and repeal the Human Rights Act."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- Liberal Democrats and Greens argued for safe routes and an EU returns arrangement, as when Siân Berry said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"Small boat numbers started to grow the moment safe routes were closed\"",
+    "sources": [
+     11
+    ],
+    "cited": [
+     {
+      "source": 11,
+      "cited_text": "I will finish my point. In an evidence session, we challenged the National Crime Agency on the roots of the organised crime that the hon. Member for Great Grimsby and Cleethorpes mentions, which is doing huge harm. I will not argue that the small boats system is the best way to bring people to this country. Small boat numbers started to grow the moment safe routes were closed. We need safe routes, and that is the approach the Government could take to reduce small boat crossings. The law that protects our rights does not need to be undermined. I would absolutely argue that."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- A witness told a committee that safe routes alone would not stop boat crossings, as when Shabana Mahmood told the Home Affairs Committee ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"Will the creation of the safe and legal routes on its own help to deal with the boat crossings? No.\"",
+    "sources": [
+     25
+    ],
+    "cited": [
+     {
+      "source": 25,
+      "cited_text": "Will the creation of the safe and legal routes on its own help to deal with the boat crossings? No. Is it part of the picture that is the wider solution to these problems? Yes."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n\n**Government and Labour – supportive, with some caveats**\nHome Secretary Shabana Mahmood told the Commons ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"Small boat returns under this Government are at a record high, and our Immigration and Asylum Bill will help us to remove people faster than ever before.\"",
+    "sources": [
+     4
+    ],
+    "cited": [
+     {
+      "source": 4,
+      "cited_text": "Small boat returns under this Government are at a record high, and our Immigration and Asylum Bill will help us to remove people faster than ever before. This Government are dealing with the small boats crisis left by the previous Government. Small boat crossings are down, and removals are at record highs."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n- Minister Alex Norris described a UK–France deal in which ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"the funding uplift will be conditional on results and reducing illegal immigration.\"",
+    "sources": [
+     6
+    ],
+    "cited": [
+     {
+      "source": 6,
+      "cited_text": "The new multi-year partnership with France represents a necessary step-change. French beaches will see a surge in law enforcement, intelligence and military officers to track down illegal migrants and stop them boarding boats in Northern France. For the first time ever, the funding uplift will be conditional on results and reducing illegal migration. Of the total £662 million that compose the new funding arrangement, the UK has committed to a foundation fund of £501m over three years and a new flexible fund of £50m in year 1 and £110m in years 2 and 3. If the new tactics are not successful, funding will stop after one year."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": [
+     {
+      "start": 0,
+      "end": 85,
+      "text": "the funding uplift will be conditional on results and reducing illegal immigration."
+     }
+    ]
+   },
+   {
+    "text": "\n- Labour backbencher Olivia Bailey welcomed efforts to cut crossings but argued that ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "those who \"cannot advocate for themselves\" \"deserve greater protections than these proposals offer.\"",
+    "sources": [
+     14
+    ],
+    "cited": [
+     {
+      "source": 14,
+      "cited_text": "It is right that we seek to restore fairness to our immigration and asylum system. It is right that we drive down the small boat crossings, which risk lives, and I welcome much of what the Home Secretary proposes. However, in a debate defined by loud voices, it behoves all of us in this Chamber to focus on the quieter and smaller voices—those who cannot advocate for themselves; who find their lives defined not by their own choices, but by somebody else’s; and who deserve greater protections than these proposals offer."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n- Bell Ribeiro-Addy, a Labour backbencher, argued on 25 November 2025 that the measures under discussion ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"will not have any impact on channel crossings.\"",
+    "sources": [
+     16
+    ],
+    "cited": [
+     {
+      "source": 16,
+      "cited_text": "The measures we are discussing today are about retrospectively making regularised migration rules more stringent. As such, they will not have any impact on channel crossings, but will instead cause fear and uncertainty for many settled, tax-paying families. This is not just about Hongkongers; there are people from all over the world who are equally deserving of our compassion and integrity. Does my hon. Friend agree that to tackle channel crossings—"
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n\n**Conservatives – critical, arguing the Bill is too weak**\nShadow Home Secretary Chris Philp moved to decline the Bill a second reading because it ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"does not ensure all foreign criminals and illegal immigrants will be deported\"",
+    "sources": [
+     7
+    ],
+    "cited": [
+     {
+      "source": 7,
+      "cited_text": "“this House declines to give a Second Reading to the Immigration and Asylum Bill, while welcoming some of its provisions, because the Bill does not ensure all foreign criminals and illegal immigrants will be deported; does not end asylum for illegal immigrants; does not stop modern slavery claims suspending removal; does not stop illegal immigrants getting citizenship; does not make the changes the Government promised to reduce the numbers of people eligible for Indefinite Leave to Remain; because the Bill will allow sponsor human rights claims, which will enable people outside the UK to enter under human rights grounds; because measures in the Bill such as narrowing the ability to make Article 8 and modern slavery claims will not be effective while the UK remains in the European Convention on Human Rights and the Human Rights Act 1998 remains in force; and because the provisions in the Bill are not capable of eliminating illegal immigration.”"
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- Philp argued that ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"The only way of deterring these crossings is if almost everybody arriving gets deported when they arrive.\"",
+    "sources": [
+     7
+    ],
+    "cited": [
+     {
+      "source": 7,
+      "cited_text": "The Home Secretary also referred to removal numbers. Some 85% of those removals are voluntary, and only a tiny fraction are of people who arrived by small boat. In fact, since the election, removals of people illegally entering by small boat have amounted to only about 5% to 7% of small boat arrivals. Given that someone entering this country by small boat has a 95% chance of staying, and gets put up in taxpayer-funded accommodation, it is no wonder that crossings have occurred in record numbers. The only way of deterring these crossings is if almost everybody arriving gets deported when they arrive."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n- Shadow minister Matt Vickers said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"The single most compassionate thing that this House can do is to end the incentive that puts them in those boats.\"",
+    "sources": [
+     8
+    ],
+    "cited": [
+     {
+      "source": 8,
+      "cited_text": "We need to be clear about our motivation, because it is not cruelty, and anyone who says so has not been listening; it is the opposite. Every crossing is a dangerous journey in an overloaded dinghy, organised by criminal gangs who treat human beings as cargo. People have died in the Channel; children have died in the Channel. The single most compassionate thing that this House can do is to end the incentive that puts them in those boats. The only thing that ends that incentive is certainty, the certainty that anyone who comes that way will not be allowed to stay."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n- In the Lords, Lord Murray of Blidworth said low return rates ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"create a very significant pull factor for migrants to enter illegally\"",
+    "sources": [
+     21
+    ],
+    "cited": [
+     {
+      "source": 21,
+      "cited_text": "The central point is that, if failed asylum seekers can stay here anyway, then it renders largely useless our very expensive and time-consuming asylum application and appeals process. Further, this state of affairs plainly creates a very significant pull factor for migrants to enter illegally, by small boat or otherwise, because they know, as is abundantly clear from the statistics, they are unlikely to be removed even if their asylum claims are rejected."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": [
+     {
+      "start": 0,
+      "end": 71,
+      "text": "create a very significant pull factor for migrants to enter illegally"
+     }
+    ]
+   },
+   {
+    "text": ".\n\n**Liberal Democrats and Greens – safe routes and EU cooperation**\nWill Forster said ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"We need more of them, not fewer\"",
+    "sources": [
+     1
+    ],
+    "cited": [
+     {
+      "source": 1,
+      "cited_text": "In 2026, it is right that we uphold Britain’s humanitarian traditions while having control of our borders. That starts by bringing an end to asylum hotels, stopping unsafe channel crossings and ensuring that criminal gangs cannot profit and that they face justice. We need safe and legal routes for asylum seekers and refugees. Ukrainians did not cross the channel in dangerous small boats, because this Government provided a safe and legal route for them. We know that safe and legal routes work. We need more of them, not fewer, yet safe and legal routes are not in the Immigration and Asylum Bill that will be debated in the House later today. Arrivals via safe and legal routes are at their lowest level since 2023 as a result."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": " of safe and legal routes.\n- Forster also called for ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"a watertight arrangement with the EU that would mean everyone arriving by small boat is at risk of being returned.\"",
+    "sources": [
+     1
+    ],
+    "cited": [
+     {
+      "source": 1,
+      "cited_text": "By not being in the EU or working with neighbouring countries, we are creating more work at great expense to the British taxpayer. Following Brexit, the Conservatives implemented disastrous immigration policies that have led to a huge rise in net migration. Past Governments have introduced five immigration Acts since 2020. We need a watertight arrangement with the EU that would mean everyone arriving by small boat is at risk of being returned. That is how we ensure that the gangs do not have a viable business model, and that there is a proper deterrent to stop people making money in the first place."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n- Max Wilkinson argued that ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\"Faster decisions mean we would not need large asylum accommodation sites.\"",
+    "sources": [
+     3
+    ],
+    "cited": [
+     {
+      "source": 3,
+      "cited_text": "Every undecided case fails the taxpayer, and asylum seekers too. Faster decisions mean we would not need large asylum accommodation sites, as referenced in the amendments in the name of my hon. Friend the Member for Bicester and Woodstock (Calum Miller). People who need protection must be given it; they must be supported in their integration and allowed to work so they can pay their way. Those who have no right to stay must be returned and the same logic applies to appeals. However, the appeals backlog has doubled under this Government."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n\n**Committee witnesses – boats are a minority of asylum claims**\nDr Mihnea Cuibus of the Oxford Migration Observatory told the Home Affairs Committee that ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "small boats account for \"about 30% to 40% of all asylum applications\"",
+    "sources": [
+     27
+    ],
+    "cited": [
+     {
+      "source": 27,
+      "cited_text": "When we look at the whole package of measures and its intent, it is important to remember that small boats account for only a minority of all asylum applications. Looking over the last five years, it is about 30% to 40% of all asylum applications here in the UK. A big part of the story, and a big part of the reason we have so much pressure on the UK’s asylum system, is people coming in legally, where a completely different set of considerations are in place."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": ".\n- Mahmood told the same committee that ",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "public support for more generous safe routes \"will be there as long as people feel that the rest of the system has been brought into balance and under control.\"",
+    "sources": [
+     25
+    ],
+    "cited": [
+     {
+      "source": 25,
+      "cited_text": "I envisage the routes becoming more generous over time, but I think that is linked to the ability to deal with the problem of the boats and the wider abuses in the asylum system more generally. I think that public support for safe and legal routes to be more generous will be there as long as people feel that the rest of the system has been brought into balance and under control. I think those two things go hand in hand."
+     }
+    ],
+    "status": "cited",
+    "loaded": [],
+    "misquotes": []
+   },
+   {
+    "text": "\n\nAbout the evidence: The records are mostly Commons debates and Public Bill Committee sittings from July to November 2026, with a few Lords and written items, and no division records. Several speakers hold views not captured here, and each group rests on only a few speakers. Committee witnesses speak for themselves, not for Parliament.",
+    "sources": [],
+    "cited": [],
+    "status": "connective",
+    "loaded": [],
+    "misquotes": []
+   }
+  ],
+  "markdown": "**In brief**\n- Government ministers and Labour backbenchers backed the Immigration and Asylum Bill as a way to restore control, as when Jonathan Brash said \"compassion without control is not a sustainable immigration policy, but neither is control without compassion\" [Source 12].\n- Conservatives said the Bill does not go far enough and called for leaving the European Convention on Human Rights, as when Lewis Cocking said the only way to end illegal immigration is \"to leave the European convention on human rights in its entirety, and repeal the Human Rights Act\" [Source 20].\n- Liberal Democrats and Greens argued for safe routes and an EU returns arrangement, as when Siân Berry said \"Small boat numbers started to grow the moment safe routes were closed\" [Source 11].\n- A witness told a committee that safe routes alone would not stop boat crossings, as when Shabana Mahmood told the Home Affairs Committee \"Will the creation of the safe and legal routes on its own help to deal with the boat crossings? No.\" [Source 25]\n\n**Government and Labour – supportive, with some caveats**\nHome Secretary Shabana Mahmood told the Commons \"Small boat returns under this Government are at a record high, and our Immigration and Asylum Bill will help us to remove people faster than ever before.\" [Source 4]\n- Minister Alex Norris described a UK–France deal in which \"the funding uplift will be conditional on results and reducing illegal immigration.\" [Source 6]\n- Labour backbencher Olivia Bailey welcomed efforts to cut crossings but argued that those who \"cannot advocate for themselves\" \"deserve greater protections than these proposals offer.\" [Source 14]\n- Bell Ribeiro-Addy, a Labour backbencher, argued on 25 November 2025 that the measures under discussion \"will not have any impact on channel crossings.\" [Source 16]\n\n**Conservatives – critical, arguing the Bill is too weak**\nShadow Home Secretary Chris Philp moved to decline the Bill a second reading because it \"does not ensure all foreign criminals and illegal immigrants will be deported\" [Source 7].\n- Philp argued that \"The only way of deterring these crossings is if almost everybody arriving gets deported when they arrive.\" [Source 7]\n- Shadow minister Matt Vickers said \"The single most compassionate thing that this House can do is to end the incentive that puts them in those boats.\" [Source 8]\n- In the Lords, Lord Murray of Blidworth said low return rates \"create a very significant pull factor for migrants to enter illegally\" [Source 21].\n\n**Liberal Democrats and Greens – safe routes and EU cooperation**\nWill Forster said \"We need more of them, not fewer\" [Source 1] of safe and legal routes.\n- Forster also called for \"a watertight arrangement with the EU that would mean everyone arriving by small boat is at risk of being returned.\" [Source 1]\n- Max Wilkinson argued that \"Faster decisions mean we would not need large asylum accommodation sites.\" [Source 3]\n\n**Committee witnesses – boats are a minority of asylum claims**\nDr Mihnea Cuibus of the Oxford Migration Observatory told the Home Affairs Committee that small boats account for \"about 30% to 40% of all asylum applications\" [Source 27].\n- Mahmood told the same committee that public support for more generous safe routes \"will be there as long as people feel that the rest of the system has been brought into balance and under control.\" [Source 25]\n\nAbout the evidence: The records are mostly Commons debates and Public Bill Committee sittings from July to November 2026, with a few Lords and written items, and no division records. Several speakers hold views not captured here, and each group rests on only a few speakers. Committee witnesses speak for themselves, not for Parliament.",
+  "no_records": false,
+  "citations_total": 17,
+  "citations_invalid": 0,
+  "grounded_ratio": 1.0,
+  "unsupported_segments": 0,
+  "loaded_words": 0,
+  "quotes_total": 18,
+  "quotes_unverified": 2,
+  "rules": 1
+ },
+ "interests": [
+  {
+   "source": 18,
+   "person_id": "uk.org.publicwhip/person/26611",
+   "name": "Chris Murray",
+   "register": "Register of Members' Financial Interests",
+   "link": "/people/26611#h-interests",
+   "items": [
+    {
+     "category": "Donations and other support (including loans) for activities as an MP",
+     "summary": "Refugee, Asylum and Migration Policy Project (RAMP) - £13,000.00",
+     "registered": "2025-09-18",
+     "connection": "The register lists policy adviser services from a refugee, asylum and migration policy project; the contribution concerned cross-channel small boat crossings and humanitarian responses to them.",
+     "kind": "register",
+     "register": "Register of Members' Financial Interests",
+     "url": "https://search.electoralcommission.org.uk/English/Donations/NC0833227"
+    },
+    {
+     "category": "Donations and other support (including loans) for activities as an MP",
+     "summary": "Refugee, Asylum and Migration Policy Project (RAMP) - £6,500.00",
+     "registered": "2026-01-06",
+     "connection": "The register lists policy adviser services from a refugee, asylum and migration policy project; the contribution concerned cross-channel small boat crossings and humanitarian responses to them.",
+     "kind": "register",
+     "register": "Register of Members' Financial Interests",
+     "url": "https://search.electoralcommission.org.uk/English/Donations/NC0835720"
+    },
+    {
+     "category": "Visits outside the UK",
+     "summary": "International visit to France on 12 June 2025",
+     "registered": "2025-07-09",
+     "connection": "The register lists a visit to Calais to learn about UK/French cooperation on Channel crossings; the contribution concerned cross-channel small boat crossings.",
+     "kind": "register",
+     "register": "Register of Members' Financial Interests",
+     "url": null
+    }
+   ]
+  }
+ ]
+}

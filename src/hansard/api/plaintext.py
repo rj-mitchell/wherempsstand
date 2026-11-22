@@ -8,7 +8,10 @@ import re
 from html import escape as e
 from typing import Any
 
+from wts_core.adapters.cards import card_count_lines
+
 from hansard.api.briefings import ASKED_BY_READER, briefing_title, fmt_date
+from hansard.api.cards import counts_of
 from hansard.sisters import COUNCILS_NAME, spine
 
 # the page's placeholder ("Fetching the debate."), with any attributes it carries (role="status" in web/*.html)
@@ -86,6 +89,12 @@ def markdown_text(md: str) -> str:
     return "".join(out)
 
 
+def check_line(answer: dict[str, Any]) -> str:
+    """The check strip's three counts as one sentence, for the readable copy (the app draws the strip itself)."""
+    said = ", ".join(f"{number} {words}" for number, words, _ in card_count_lines(counts_of(answer)))
+    return f"Checked against Hansard: {said}."
+
+
 def briefing_text(view: dict[str, Any], heading: str | None = None) -> str:
     answer = view.get("answer") or {}
     """A briefing as plain HTML. A topic briefing is headed by the topic's title and its standing question; any other
@@ -99,6 +108,8 @@ def briefing_text(view: dict[str, Any], heading: str | None = None) -> str:
                  f"{e(fmt_date(view['created_at'][:10]))}"
                  + (f" from records up to {e(fmt_date(view['records_up_to']))}" if view.get("records_up_to") else "")
                  + ". Check the sources before relying on it.</p>")
+    if answer.get("segments") and not answer.get("no_records"):
+        parts.append(f"<p>{e(check_line(answer))}</p>")
     if answer.get("markdown"):
         parts.append(markdown_text(answer["markdown"]))
     sources = view.get("sources") or []

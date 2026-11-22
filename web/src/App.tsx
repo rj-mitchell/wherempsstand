@@ -4,7 +4,7 @@ import { AnswerView } from "./components/AnswerView";
 import { Controls } from "./components/Controls";
 import { Login } from "./components/Login";
 import { PlanChips } from "./components/PlanChips";
-import { Progress } from "./components/Progress";
+import { announcement } from "./components/Wait";
 import { ElsewhereForSearch } from "./elsewhere";
 import { EvidenceBar } from "./components/Evidence";
 import { SourceDrawer, SourceList } from "./components/Sources";
@@ -17,7 +17,7 @@ import { fmtDate } from "./render";
 import { FamilyEndorsement } from "./components/Family";
 import { SameQuestion } from "./components/SameQuestion";
 import { SiteFooter } from "./components/SiteFooter";
-import { WhyChatbot } from "./components/WhyChatbot";
+import { Proof, WhyChatbot } from "./components/WhyChatbot";
 import { followUpsFor, historyFor } from "./followups";
 import { Failed, NOT_UPDATED, serverText } from "./serverText";
 import { briefingGone } from "./gone";
@@ -379,11 +379,8 @@ export default function App() {
       status: "planning",
       plan,
       follows: previous,
-      stages: { start: Date.now() },
+      sourcesOnly,
     };
-    const stage = (key: "plan" | "sources" | "text" | "check") => (t: Turn) => ({
-      stages: { ...(t.stages ?? { start: Date.now() }), [key]: t.stages?.[key] ?? Date.now() },
-    });
     if (!replaceId && turns.length) scrollToTurn.current = id; // a follow-up: show where its answer is written
     setTurns((ts) => (replaceId ? ts.map((t) => (t.id === id ? turn : t)) : [...ts, turn]));
     const earlier = turns.filter((t) => t.id !== id && t.status === "done");
@@ -399,26 +396,48 @@ export default function App() {
         setCompare([]); // the comparison applies to the question it came with
         update(id, { comparing: compareLabels.length === sides.length ? compareLabels : [] });
       }
+      // The text arrives a few words at a time: it is drawn at most every 80 milliseconds, so a phone keeps up, and
+      // never held back past the next event of another kind.
+      let pending = "";
+      let timer = 0;
+      const flush = () => {
+        window.clearTimeout(timer);
+        timer = 0;
+        if (!pending) return;
+        const more = pending;
+        pending = "";
+        update(id, (t) => ({ streamText: t.streamText + more }));
+      };
       for await (const ev of askStream(askBody(q, settings, plan, history, sourcesOnly, sides, follows), ctrl.signal)) {
+        if (ev.type === "text") {
+          pending += ev.text as string;
+          if (!timer) timer = window.setTimeout(flush, 80);
+          continue;
+        }
+        flush();
         if (ev.type === "interests")
           update(id, (t) => ({ sources: withInterests(t.sources, ev.interests as InterestFlag[]) }));
         else if (ev.type === "progress") {
           if (typeof ev.passages === "number") update(id, { passages: ev.passages });
-          if (ev.step === "checking") update(id, stage("check"));
-        } else if (ev.type === "plan") update(id, (t) => ({ plan: ev.plan as Plan, status: "searching", ...stage("plan")(t) }));
+          if (ev.step === "checking") update(id, { status: "verifying" });
+        } else if (ev.type === "plan") update(id, { plan: ev.plan as Plan, status: "searching" });
         else if (ev.type === "sources")
-          update(id, (t) => ({
-            ...stage("sources")(t),
+          update(id, {
             sources: ev.sources as SourceCard[],
             candidates: ev.candidates as number,
             semantic: ev.semantic as boolean,
             evidence: ev.evidence as Evidence,
             status: "answering",
-          }));
-        else if (ev.type === "text")
-          update(id, (t) => ({ ...stage("text")(t), streamText: t.streamText + (ev.text as string) }));
+          });
+        else if (ev.type === "citation")
+          // the model has cited a record: its card in the pile is marked "Cited"
+          update(id, (t) => {
+            const n = t.sources[ev.search_result_index as number]?.n;
+            return n === undefined || t.cited?.includes(n) ? {} : { cited: [...(t.cited ?? []), n] };
+          });
         else if (ev.type === "final")
           update(id, (t) => ({
+            live: true,
             sources: withInterests(t.sources, ev.interests as InterestFlag[] | undefined),
             answer: (ev.answer as Answer | null) ?? null,
             briefingKey: (ev.briefing_key as string | undefined) ?? undefined,
@@ -695,6 +714,8 @@ export default function App() {
               point cited to Hansard, or the most relevant records on their own, without AI.
             </p>
             {composer("composer composer-inline")}
+            <WhyChatbot />
+            <Proof />
             <div className="home-grid">
               <div className="home-try">
                 <h3 className="examples-head">Example questions</h3>
@@ -720,7 +741,6 @@ export default function App() {
                 </p>
               </div>
               <div className="home-side">
-                <WhyChatbot />
                 <p className="and-more">
                   As well as MPs, the record covers peers, select committees and their witnesses, and the Scottish
                   Parliament, the Senedd and the Northern Ireland Assembly.
@@ -777,26 +797,12 @@ export default function App() {
                 </button>
               </p>
             )}
-            <Progress turn={t} />
-            {!answerFirst(t) && howFound(t)}
-            {t.status === "done" && (
-              <p className="visually-hidden" role="status">
-                {t.answer ? "Briefing ready." : "Sources ready."}
-              </p>
-            )}
-            {(t.streamText || t.answer) && (
-              <AnswerView
-                question={t.question}
-                answer={t.answer}
-                streamText={t.streamText}
-                sources={t.sources}
-                briefingKey={t.briefingKey}
-                briefingId={t.briefingId}
-                preparedAt={t.preparedAt}
-                recordsUpTo={t.recordsUpTo}
-                onCite={(h) => setDrawer({ turn: t.id, h })}
-              />
-            )}
+            {/* one region announces each stage once, and the result in words at the end */}
+            <p className="visually-hidden" role="status">
+              {announcement(t)}
+            </p>
+            <AnswerView turn={t} meta={meta} onCite={(h) => setDrawer({ turn: t.id, h })} />
+            {["done", "error"].includes(t.status) && !answerFirst(t) && howFound(t)}
             {t.briefingId && t.status === "done" && <BriefingStatements paths={statementPaths(t)} sources={t.sources} />}
             {t.note && <p className="muted small">{t.note}</p>}
             {answerFirst(t) && (
@@ -822,13 +828,16 @@ export default function App() {
                 {t.error}
               </p>
             )}
+            {/* while a briefing is prepared, the records found are the pile beside it (AnswerView) */}
+            {["done", "error"].includes(t.status) && (
             <SourcesWithStatements
               paths={t.briefingId && t.status === "done" ? statementPaths(t) : null}
               sources={t.sources}
               onOpen={(h) => setDrawer({ turn: t.id, h })}
-              open={t.status === "answering" || (!t.answer && t.status === "done")}
-              writing={t.status === "answering"}
+              open={!t.answer && t.status === "done"}
+              writing={t.status === "answering" && !t.sourcesOnly}
             />
+            )}
             {t.status === "done" && <SameQuestion question={t.question} plan={t.plan} />}
             {t.status === "done" && t.plan && (
               <ElsewhereForSearch

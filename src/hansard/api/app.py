@@ -63,7 +63,7 @@ from hansard.api.briefings import (
     trusted_history,
     unfeature,
 )
-from hansard.api.cards import card_paths, card_png
+from hansard.api.cards import card_alt, card_paths, card_png, counts_of, topic_card_png
 from hansard.api.feeds import FEED_TYPE, rss
 from hansard.api.plaintext import (
     bill_text,
@@ -109,6 +109,7 @@ from hansard.config import REPO_ROOT, SITE, Settings, load_settings
 from hansard.devolution import notes_for
 from hansard.engine import Engine, Scope
 from hansard.rag import prompts
+from hansard.rag.checks import as_shown
 from hansard.rag.interests import without_public_office
 from hansard.rag.pipeline import AskRequest, Pipeline
 from hansard.rag.query_parse import ITL1_REGIONS, QueryPlan, parse_model
@@ -381,6 +382,30 @@ def start_logging(settings: Settings, clock: Clock = SYSTEM_CLOCK) -> logging.Ha
     lines.setLevel(logging.INFO)
     lines.propagate = False
     return handler
+
+
+class AsShown:
+    """The events of a briefing as the reader is sent them, a new one or one played from the cache: the final
+    event's answer as it is shown (the display rule for quotations, ``rag/checks.py``). The saved and cached copies
+    keep the verifier's own answer, which the desk has stored before the event reaches here. Closing this closes the
+    desk's stream, begun or not, so a reader who leaves still stops the model and leaves the question's record."""
+
+    def __init__(self, events: Iterator[dict[str, Any]]) -> None:
+        self._events = events
+
+    def __iter__(self) -> AsShown:
+        return self
+
+    def __next__(self) -> dict[str, Any]:
+        event = next(self._events)
+        if event.get("type") == "final" and event.get("answer"):
+            return {**event, "answer": as_shown(event["answer"])}
+        return event
+
+    def close(self) -> None:
+        close = getattr(self._events, "close", None)
+        if close is not None:
+            close()
 
 
 class SiteHooks(Hooks):
@@ -695,7 +720,8 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             options=body.model_dump(exclude={"question", "history"}))  # saved with the briefing
         # a saved briefing here is the plan, the sources and the final event: a permanent, shareable address
         asked.save = lambda final, kept, text: keep_briefing(body, kept, final)
-        return StreamingResponse(sse(desk.handle(asked)), media_type="text/event-stream", headers=STREAM_HEADERS)
+        return StreamingResponse(sse(AsShown(desk.handle(asked))), media_type="text/event-stream",
+                                 headers=STREAM_HEADERS)
 
     def retrieve(body: AskBody, read_with_model: bool = False, uid: int | None = None,
                  visitor: str | None = None) -> dict[str, Any]:
@@ -774,10 +800,10 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
 
     @app.get("/b/{bid}/card.png", include_in_schema=False)
     def briefing_card(bid: str):
+        """A saved briefing's share card, its neutral title and the check strip's counts (api/cards.py)."""
         b = _briefing_or_error(bid)
-        view = public_view(b)
         path = card_png(settings.data_dir / "cards", bid, briefing_title(b["created_at"]), fmt_date(b["created_at"]),
-                        fmt_date(b["records_up_to"]), view["evidence"])
+                        public_view(b)["answer"])
         return FileResponse(path, media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
 
     @app.get("/b/{bid}", include_in_schema=False)
@@ -806,8 +832,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         title = (featured_title(state, bid) if featured else None) or briefing_title(b["created_at"])
         description = ((summary_text(view["answer"]) if featured else "")
                        or briefing_description(b["created_at"], b["records_up_to"]))
+        # the link preview is the briefing's own card: its neutral title and the check strip's counts
+        card = card_alt(briefing_title(b["created_at"]), counts_of(view["answer"]))
         html_page = page_with_meta(
             page, title=f"{title} | Where MPs Stand", description=description, url=f"{base}/b/{bid}",
+            image=f"{base}/b/{bid}/card.png", image_alt=card,
             noindex=not featured)  # featured briefings are for search engines to find
         return Response(with_text(html_page, readable(lambda: briefing_text(view))), media_type="text/html")
 
@@ -853,6 +882,21 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                           "description": t.description, "refresh_days": t.refresh_days},
                 "briefing": public_view(b) if b else None, "versions": vs}
 
+    @app.get("/topics/{slug}/card.png", include_in_schema=False)
+    def topic_card(slug: str):
+        """A topic's share card: the topic's own title, which is never a reader's question, and the check strip's
+        counts for its current briefing (api/cards.py)."""
+        from hansard.topics import current
+
+        t = _topic(slug)
+        cur = current(state, shown(), slug)
+        b = get_briefing(parts.archive, cur["briefing_id"]) if cur else None
+        if b is None or b["withdrawn_at"]:
+            raise HTTPException(404, "This topic briefing has not been written yet.")
+        path = topic_card_png(settings.data_dir / "cards", slug, b["id"], t.title, fmt_date(b["created_at"]),
+                              public_view(b)["answer"])
+        return FileResponse(path, media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
+
     @app.get("/topics/{slug}", include_in_schema=False)
     def topic_page(slug: str, request: Request):
         """The app, showing the topic's current briefing, with its title and preview card in the page head."""
@@ -864,11 +908,15 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         base = str(request.base_url).rstrip("/")
         cur = current(state, shown(), slug)
         b = get_briefing(parts.archive, cur["briefing_id"]) if cur else None
-        description = (summary_text(public_view(b)["answer"]) if b else "") or t.description or t.question
+        view = public_view(b) if b else None
+        description = (summary_text(view["answer"]) if view else "") or t.description or t.question
+        # the topic's own card, once it has a briefing: the topic's title and its briefing's check strip
+        image = f"{base}/topics/{slug}/card.png" if view else None
+        alt = card_alt(t.title, counts_of(view["answer"])) if view else ""
         html_page = page_with_meta(
             page, title=f"{t.title}: where MPs and peers stand | Where MPs Stand", description=description,
-            url=f"{base}/topics/{slug}", noindex=False)
-        text = readable(lambda: briefing_text(public_view(b), heading=t.title)) if b else None
+            url=f"{base}/topics/{slug}", image=image, image_alt=alt, noindex=False)
+        text = readable(lambda: briefing_text(view, heading=t.title)) if view else None
         return Response(with_text(html_page, text), media_type="text/html")
 
     @app.get("/sitemap-briefings.xml", include_in_schema=False)

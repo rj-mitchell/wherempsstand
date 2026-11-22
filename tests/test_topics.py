@@ -109,6 +109,17 @@ def test_topic_is_written_then_not_rewritten_until_due_and_changed(site):
     page = client.get("/topics/trial-by-jury")
     assert page.status_code == 200 and "Trial by jury: where MPs and peers stand" in page.text
     assert 'name="robots"' not in page.text  # topic pages are for search engines to find
+    # the topic's own share card: its title, never a reader's question, and its current briefing's checks
+    assert '<meta property="og:image" content="http://testserver/topics/trial-by-jury/card.png" />' in page.text
+    assert '<meta property="og:image:alt" content="Where MPs Stand: Trial by jury. Briefing written by AI' in page.text
+    card = client.get("/topics/trial-by-jury/card.png")
+    assert card.status_code == 200 and card.headers["content-type"] == "image/png"
+    folder = s.data_dir / "cards"
+    assert [p.name for p in folder.glob("topic-*")] == [f"topic-trial-by-jury-{vs[0]['briefing_id']}.v3.png"]
+    stale = folder / f"topic-trial-by-jury-{vs[1]['briefing_id']}.v3.png"
+    stale.write_bytes(b"the card of last week's briefing")
+    assert client.get("/topics/trial-by-jury/card.png").content == card.content and not stale.exists()
+    assert client.get("/topics/no-such-topic/card.png").status_code == 404
     assert client.get("/topics/no-such-topic").status_code == 404
     listing = client.get("/api/topics").json()
     assert listing["topics"][0]["current"]["briefing_id"] == vs[0]["briefing_id"]

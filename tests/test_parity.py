@@ -89,6 +89,28 @@ def without_research_rule(value: Any) -> Any:
     return strings(value, lambda text: text.replace(rule, ""))
 
 
+def citation_rule() -> str:
+    """The words the instructions for a briefing were given since, in grounding rule 2: attach each citation to the
+    claim and its quotation, not to a date beside them (the charity's review plan, B1, 21 November 2026; the
+    instructions' version changed with them, so every cached answer is written afresh)."""
+    from hansard.rag.prompts import ANSWER_SYSTEM
+
+    start = ANSWER_SYSTEM.index("\n   Attach each citation to the claim and its quotation together")
+    return ANSWER_SYSTEM[start:ANSWER_SYSTEM.index("\n3. Attribute statements")]
+
+
+def without_citation_rule(value: Any) -> Any:
+    """What was sent, without the rule the instructions for a briefing were given since."""
+    rule = citation_rule()
+    return strings(value, lambda text: text.replace(rule, ""))
+
+
+def test_the_instructions_tell_the_model_to_cite_the_claim_and_its_quotation_not_a_date_beside_them():
+    rule = citation_rule()
+    assert "never to a date, a place or other words beside them alone" in " ".join(rule.split())
+    assert rule.count("\n") == 3  # three lines of rule 2, nothing else
+
+
 def parse_effort_then(value: Any) -> Any:
     """What was sent, with the question reader asked at the low effort it was then (CHANGED_SETTINGS: medium now).
     Every reading of a question is checked to be at medium, and only those are changed back."""
@@ -491,8 +513,9 @@ def without_rules(value: Any) -> Any:
 @pytest.mark.parametrize("name", list(shared.REAL))
 def test_the_real_pipeline_sends_and_writes_what_it_did(name, indexed_settings, tmp_path, monkeypatch):
     """The whole of each answer through the site's real search, ranking, instructions and checks, with a faked
-    Anthropic SDK; and the requests the model was sent, whole. Three differences, on purpose: each answer the
-    checks wrote carries ``rules``, the version of the checking rules, in what is sent,
+    Anthropic SDK; and the requests the model was sent, whole, but for the rules given since to the question
+    reader (``without_research_rule``) and to the briefing (``without_citation_rule``). Three differences, on
+    purpose: each answer the checks wrote carries ``rules``, the version of the checking rules, in what is sent,
     saved and cached, and a saved briefing with the stamp is shown as it was saved; under version 2 of the rules
     the faked model's uncited sentence is a point to check (``CLAIMS_NOW``), wherever the answer is; and a
     briefing that ends without an answer is charged (``UNFINISHED``)."""
@@ -504,7 +527,7 @@ def test_the_real_pipeline_sends_and_writes_what_it_did(name, indexed_settings, 
         lambda sdk, **usage: real_side(indexed_settings, tmp_path / f"real-{next(n)}", sdk, monkeypatch, **usage),
         only=name), tmp=tmp_path)[name]
     was = REAL[name]
-    now = without_unfinished(parse_effort_then(without_research_rule(now)), name)
+    now = without_unfinished(parse_effort_then(without_citation_rule(without_research_rule(now))), name)
     moved: list[str] = []
     now = claims_then(now, moved)
     if name in FOLLOW_UPS:

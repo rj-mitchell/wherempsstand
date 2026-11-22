@@ -15,9 +15,9 @@ styles are in `web/src/styles.css`; the kit's shared tokens, fonts, endorsement 
   grids and lists of sources use the full column.
 - Nearly square corners: panels have none (`--radius` is 0), and buttons, fields, tags and citation numbers have a
   small radius (`--radius-small`, 3px).
-- On the home page the example questions sit beside the panel on how briefings are checked; on a narrow screen they
-  stack, with the panel first, just under the question box. Under a briefing the question box is pinned to the foot
-  of the screen.
+- On the home page the family's line on how briefings are written and its fold-out sit just under the question box,
+  then the block that shows the checking (below), then the example questions beside other ways in. Under a briefing
+  the question box is pinned to the foot of the screen.
 - One marker for every fold-out (`<details>`): a triangle in the accent colour that turns down when it is open (the
   turn is animated only for people who have not asked for reduced motion). The header's menus and the Export menu
   keep their ▾.
@@ -35,7 +35,7 @@ the right, under a magnifying glass. It is drawn in `web/public/icon.svg`, `web/
 | `--band`, `--cloth-commons` | The header band, Commons source numbers | The kit's Commons green, `#1D4535` (`#2F7056` in dark mode) |
 | `--commons` (also `--accent`) | The Commons, links, focus rings, primary buttons | The kit's Commons green text colour, `#1D4535` (`#93C9AC` in dark mode) |
 | `--lords`, `--cloth-lords` | The Lords | Lords red, `oklch(43% 0.13 24)` light, `oklch(75% 0.11 22)` dark |
-| `--warn`, `--danger` | Warnings (statements not tied to a source), errors | Amber and red, always with words |
+| `--warn`, `--danger` | Warnings, errors | Amber and red, always with words (a briefing's marks use the kit's `--wts-warn`) |
 
 The House decides the colour: green for the Commons and red for the Lords, as on the bound volumes and the benches.
 These describe the Houses, not a side in any vote. Each source's number is set on its House's colour.
@@ -69,8 +69,8 @@ copied into `web/public/family/` by the kit's `sync.mjs`:
 - the favicon, theme colour and link card: the site's open-book mark on its Commons green tile, and the theme
   colour `#1D4535`. The kit's `head.html` replaces the site's own icon links and theme colour, so there is one set;
   the web manifest points at the same icons, and `/favicon.ico` and `/apple-touch-icon.png` are copies of the kit's.
-  Every page without an image of its own shares the kit's link card (`/family/card.png`); a briefing also has its
-  own card for embedding (`/b/<id>/card.png`, drawn by `src/hansard/api/cards.py`);
+  Every page without an image of its own shares the kit's link card (`/family/card.png`); a saved briefing and each
+  topic page have their own ("Share cards", below);
 - the kit's tokens, fonts and focus ring, and Source Serif 4 for headings through `class="wts-headings"` on `<body>`.
 
 The kit's files are used as they are and never edited here. The static pages include them at build time
@@ -85,6 +85,51 @@ cp web/public/family/favicon.ico web/public/family/apple-touch-icon.png web/publ
 ```
 
 Then raise the version in the `kit` job of `.github/workflows/ci.yml` in the same change.
+
+## The briefing
+
+A briefing looks and behaves as on the family's other briefing sites, in Commons green: the kit's `briefing.css`
+(linked by the pages that show briefings or their marks: the app's page and the methodology) and the markup and words
+of the charity's `family/BRIEFINGS.md`. The site adds only the layout around the kit's parts (`styles.css`, "A checked
+briefing"). The parts are drawn in `web/src/components/AnswerView.tsx`, `CheckStrip.tsx`, `Record.tsx` and
+`Wait.tsx`, and the text by `render.ts`, from the rules in `checked.ts` (decisions 45 to 47).
+
+- The check strip at the top: "Checked against Hansard" and three counts in words (citations matched, quotations
+  found word for word, sentences without a source), from the answer as shown. The counts are wts-core's
+  `check_counts`; the web app counts the same way, and `web/src/__tests__/fixtures/briefings/counts.json` holds the two to the
+  same answers. A count with something to check says "To check" and links to the first one. The full note, "How this
+  briefing was checked", is at the end with the verifier's own counts.
+- The text: the record's own words in the record's typeface on its highlight, with "✓ word for word"; a quotation not
+  found word for word underlined and saying so; chips naming who said it, where and when after each cited passage;
+  text with no source underlined in dots, the first tagged "No source". Every mark has words for screen readers, and
+  each chip is named by its own words.
+- The record: beside the text on wide screens (64rem and over), a sticky panel open on the first source cited,
+  following the reader, with a line from the chosen chip to its passage; on narrower screens a bottom sheet. Either
+  links to the official report and to the source panel with every detail of the source.
+- Printing keeps the chips' numbers and the list of sources; the Word download puts the check summary first.
+
+## The wait
+
+While a briefing is prepared, the page shows its stages from the stream's events: the family's spines, the question
+as read in large chips, the records found dealt as cards in the form of a Hansard column into a pile (down the side
+on wide screens, along a shelf on phones), each marked "Cited" as the text cites it, and, when the briefing ends, the
+strip's counts running up through the real results before the pile settles into the record panel. With reduced
+motion the stages are the same, without movement. Nothing waits for an animation (decision 47).
+
+## The home page
+
+Under the question box, the kit's proof block (`wts-proof`): the three steps, a real sentence of the topic briefing on
+the cost of living with its record quotation and chip, and the Hansard column it came from with the same words
+highlighted. It is plain HTML in the page (`web/partials/proof.html`, included in `index.html` for readers without
+scripts and shown by the app from the same file).
+
+## Share cards
+
+A saved briefing's link preview is its own card (`/b/<id>/card.png`), and each topic page has one
+(`/topics/<slug>/card.png`): wts-core's `briefing_card`, drawn once with Pillow in Commons green with Source Serif 4
+and Source Sans 3 from `data_static/fonts/` and the site's mark, and kept in the data folder's `cards/`
+(`src/hansard/api/cards.py`; raise `CARD_VERSION` when what a card shows changes). A briefing's card has its neutral
+title, a topic's the topic's own title, never a reader's question (decision 36), and the check strip's counts.
 
 ## Links to sister sites
 
@@ -109,5 +154,6 @@ scripts (`src/hansard/api/plaintext.py`); the briefing's line is drawn by the ap
 ## Accessibility
 
 The target is WCAG 2.2 AA. CI runs axe (`scripts/a11y.mjs`) on the main pages, light and dark, at desktop and phone
-widths, against the built site on sample data. The site's accessibility statement is at
+widths, against the built site on sample data, and on three real saved briefings with every kind of mark (from
+`web/src/__tests__/fixtures/briefings/`, with the bottom sheet open on a phone) and on the wait part-way through. The site's accessibility statement is at
 [/accessibility](https://wherempsstand.com/accessibility).

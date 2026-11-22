@@ -669,10 +669,6 @@ legend,
     display: contents;
   }
 
-  .home-grid .why {
-    order: -2;
-  }
-
   .home-grid .and-more {
     order: -1;
   }
@@ -798,110 +794,8 @@ legend,
   background: var(--warn-subtle);
 }
 
-/* a citation bubble or source card whose speaker had a registered interest that may relate: amber, not green */
-.cite.interest {
-  border-color: var(--warn);
-  background: var(--warn);
-  color: var(--paper);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .cite.interest:hover {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: var(--paper);
-  }
-}
-
-.source-card.has-interest {
-  background: var(--warn-subtle);
-}
-
-.interest-box {
-  margin-block-end: var(--space-m);
-  padding: var(--space-s);
-  background: var(--warn-subtle);
-}
-
-.interest-box h3 {
-  margin: 0 0 var(--space-xs);
-  font-size: var(--step-0, 1rem);
-}
-
-.interest-box ul {
-  margin: 0 0 var(--space-xs);
-  padding-inline-start: 1.1em;
-}
-
 .interest-box li + li {
   margin-block-start: var(--space-xs);
-}
-
-/* the steps of preparing a briefing, ticked off as they finish */
-.progress {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--space-2xs);
-  color: var(--ink-soft);
-  font-size: var(--step--1, 0.9rem);
-}
-
-.progress li {
-  display: grid;
-  grid-template-columns: 1.1em 1fr auto;
-  column-gap: 0.5em;
-  align-items: baseline;
-}
-
-.progress li::before {
-  content: "○" / "";
-  color: var(--ink-faint);
-  grid-row: 1;
-}
-
-.progress li.done::before {
-  content: "✓" / "";
-  color: var(--ok, var(--accent));
-}
-
-.progress li.active::before {
-  content: "" / "";
-  inline-size: 0.45em;
-  block-size: 0.45em;
-  align-self: center;
-  justify-self: center;
-  background: var(--accent);
-}
-
-.progress li.active .progress-label {
-  color: var(--ink);
-}
-
-.progress li.pending {
-  color: var(--ink-faint);
-}
-
-.progress-time {
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-faint);
-}
-
-.progress-detail {
-  grid-column: 2 / -1;
-  color: var(--ink-faint);
-  overflow-wrap: anywhere;
-}
-
-.progress.compact {
-  margin-block-end: var(--space-xs);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .progress li.active::before {
-    animation: pulse 1.2s var(--ease-in-out) infinite alternate;
-  }
 }
 
 .error {
@@ -1134,23 +1028,6 @@ legend,
   color: var(--ink-faint);
 }
 
-.check-badge {
-  font-weight: 600;
-  text-decoration: none;
-  padding: 0.15em 0.6em;
-  border-radius: var(--radius-small);
-  border: 1px solid currentcolor;
-}
-
-.check-badge.ok {
-  color: var(--accent);
-}
-
-.check-badge.warn {
-  color: var(--warn);
-  background: var(--warn-subtle);
-}
-
 /* "Where they stand": the briefing's sections at a glance */
 .stances {
   margin-block-end: var(--space-m);
@@ -1318,56 +1195,6 @@ legend,
   color: var(--ink-soft);
 }
 
-/* a citation is a small numbered reference that opens the speech */
-.cite {
-  display: inline-block;
-  min-inline-size: 1.55em;
-  margin-inline-start: 0.15em;
-  padding-block: 0.05em;
-  padding-inline: 0.35em;
-  border: 1px solid color-mix(in oklch, var(--accent) 35%, transparent);
-  border-radius: var(--radius-small);
-  background: var(--accent-subtle);
-  color: var(--accent);
-  font-family: var(--sans);
-  font-size: 0.68em;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.3;
-  vertical-align: 0.35em;
-  text-align: center;
-}
-
-.cite + .cite {
-  margin-inline-start: 0.1em;
-}
-
-/* on a touch screen the small number keeps its look but takes a taller tap area (about 28px), reaching into the
-   space between the lines rather than over the words beside it */
-@media (pointer: coarse) {
-  .cite {
-    position: relative;
-  }
-
-  .cite::after {
-    content: "";
-    position: absolute;
-    inset-block: -0.55em;
-    inset-inline: -0.1em;
-  }
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .cite:hover {
-    background: var(--accent);
-    color: var(--on-accent);
-  }
-}
-
-.cite:active {
-  transform: scale(0.95);
-}
-
 .shared-note {
   font-size: var(--step--1);
   color: var(--ink-soft);
@@ -1379,14 +1206,6 @@ legend,
   text-decoration-thickness: 0.06em;
   text-underline-offset: 0.22em;
   text-decoration-skip-ink: none;
-}
-
-/* a quotation the server could not find word for word in its cited source */
-.misquote {
-  background: var(--warn-subtle);
-  text-decoration: underline dashed var(--warn);
-  text-decoration-thickness: 0.06em;
-  text-underline-offset: 0.22em;
 }
 
 .ai-note {
@@ -1737,13 +1556,6 @@ legend,
   font-weight: 650;
 }
 
-/* statements without a citation are only marked when the reader asks to see them */
-.show-uncited .unsupported {
-  background: var(--warn-subtle);
-  text-decoration: underline dotted var(--warn);
-  text-underline-offset: 0.2em;
-}
-
 .grounding {
   margin-block-start: var(--space-s);
   padding-block-start: var(--space-xs);
@@ -1751,18 +1563,6 @@ legend,
   font-family: var(--sans);
   font-size: var(--step--2);
   color: var(--ink-soft);
-}
-
-.grounding::before {
-  content: "✓" / "";
-  margin-inline-end: 0.5em;
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.grounding.warn::before {
-  content: "!" / "";
-  color: var(--warn);
 }
 
 .grounding.neutral::before {
@@ -2706,6 +2506,245 @@ main:focus {
   display: none;
 }
 
+/* A checked briefing, in the family's markup and the kit's briefing.css (public/family/briefing.css, never edited
+   here; docs/DESIGN.md, "The briefing"). The site adds only the layout around the kit's parts and their states. */
+
+.answer .wts-check {
+  margin-block-end: var(--space-m);
+}
+
+/* the briefing beside the record on wide screens; on narrower ones one column, the records found first */
+.briefing-grid {
+  position: relative;
+  display: grid;
+  gap: var(--space-m);
+}
+
+@media (min-width: 64rem) {
+  .briefing-grid.has-side {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
+    column-gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .briefing-side {
+    position: sticky;
+    top: var(--space-s);
+    align-self: start;
+  }
+
+  .briefing-side .wts-record {
+    position: static;
+  }
+}
+
+@media (width < 64rem) {
+  /* once the text is coming, the shelf of records found sits above it, under what was found */
+  .has-text > .briefing-side {
+    order: -1;
+  }
+
+  .wts-connector {
+    display: none;
+  }
+}
+
+.briefing-main {
+  min-inline-size: 0;
+}
+
+.briefing-side {
+  min-inline-size: 0;
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+/* while a new briefing's checks run up, each quotation takes the record's highlight in its turn */
+.answer-body.is-checking .wts-quote--checked:not(.is-checked) {
+  background: transparent;
+}
+
+.answer-body.is-checking .wts-quote--checked:not(.is-checked) .wts-quote__tick {
+  visibility: hidden;
+}
+
+.answer-body .wts-chip {
+  min-block-size: var(--wts-target-min);
+}
+
+/* on a narrow line a chip's parts wrap whole, the interest mark under the name, rather than squeezing each other */
+.answer-body .wts-chip__in {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+.answer-body .wts-chip__in:has(.chip-interest) {
+  border-radius: 0.9em;
+}
+
+/* a chip's number and its interest mark never break inside (a two-figure number would otherwise stack on a phone) */
+.wts-chip__n,
+.chip-interest {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* the record's own words are never hyphenated, and a passage keeps the record's paragraphs */
+.answer-body .wts-quote,
+.wts-passage {
+  hyphens: manual;
+}
+
+.answer .wts-passage,
+.wts-sheet .wts-passage {
+  white-space: pre-line;
+}
+
+/* a card's place and date give way to its column, rather than running under it */
+.wts-card__top > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the passage beside the briefing stays clear of the question box pinned to the foot of the screen */
+@media (min-width: 64rem) {
+  .briefing-side .wts-passage {
+    max-block-size: min(20rem, calc(100svh - var(--composer-h) - 24rem));
+    min-block-size: 8rem;
+  }
+
+  .briefing-side .wts-pile {
+    max-block-size: min(62vh, calc(100svh - var(--composer-h) - 6rem));
+  }
+}
+
+/* beside the records found, the four stages stay on one line */
+@media (width >= 40rem) {
+  .wait .wts-stages {
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  }
+}
+
+/* on a phone the stages sit two by two, so the records found and the text stay near the top of the screen */
+@media (width < 40rem) {
+  .wait .wts-stages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wait .wts-stage {
+    font-size: var(--step--1);
+  }
+}
+
+.proof .wts-proof__pair {
+  --wts-join: 4.6rem;
+}
+
+/* a chip for a speaker with a registered interest that may relate says so in words (docs/DECISIONS.md, 15) */
+.chip-interest {
+  font-weight: 700;
+  color: var(--ink);
+  border-inline-start: 1px solid var(--wts-cloth-text);
+  padding-inline-start: 0.4em;
+}
+
+.slip-interest {
+  margin: 0;
+  font-size: var(--step--1);
+}
+
+.slip-interest .interest-flag {
+  margin-inline-end: 0.35em;
+}
+
+.wts-slip__foot .slip-details {
+  font-size: inherit;
+}
+
+/* the wait: the stages, the question as read, what has been found */
+.wait {
+  display: grid;
+  gap: var(--space-s);
+  margin-block-end: var(--space-m);
+  font-family: var(--sans);
+}
+
+.wait-plan {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.wait-interp,
+.wait-line {
+  margin: 0;
+  max-inline-size: var(--measure);
+  color: var(--ink-soft);
+  font-size: var(--step--1);
+}
+
+.wts-found {
+  max-inline-size: var(--measure);
+}
+
+.briefing-side > .wts-record__title {
+  margin: 0;
+}
+
+/* the full note at the end of a briefing, linked from the strip */
+.check-details {
+  margin-block-start: var(--space-m);
+  padding-block-start: var(--space-s);
+  border-block-start: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: var(--step--1);
+  max-inline-size: var(--measure);
+}
+
+.check-details h3,
+.wts-headings .check-details h3 {
+  font-size: var(--step-0);
+  margin-block: 0 var(--space-2xs);
+}
+
+.check-details ul {
+  margin: 0;
+  padding-inline-start: 1.2em;
+}
+
+.check-details li + li {
+  margin-block-start: 0.3em;
+}
+
+.check-details:focus {
+  outline: none;
+}
+
+/* the home page: the checking, shown (the kit's .wts-proof) */
+.proof {
+  display: grid;
+  gap: var(--space-s);
+  padding: var(--space-m);
+  background: var(--panel);
+}
+
+.proof > h3,
+.wts-headings .proof > h3 {
+  margin: 0;
+  font-size: var(--step-1);
+}
+
+.proof__from {
+  margin: 0 0 var(--space-2xs);
+  font-family: var(--sans);
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+.proof__more {
+  margin: 0;
+  font-family: var(--sans);
+}
+
 @media print {
   :root {
     color-scheme: light;
@@ -2762,20 +2801,15 @@ main:focus {
     break-before: page;
   }
 
-  .cite {
-    border: 0;
-    background: none;
-    padding: 0;
-    vertical-align: super;
-    font-size: 0.65em;
+  /* the kit prints chips as their numbers and leaves the record panel, the sheet and the wait off the page */
+  .briefing-grid {
+    display: block;
   }
 
-  .cite::before {
-    content: "[";
-  }
-
-  .cite::after {
-    content: "]";
+  .briefing-side,
+  .wait,
+  .slip-details {
+    display: none !important;
   }
 
   .source-card {
@@ -2796,8 +2830,7 @@ main:focus {
 }
 
 @media (forced-colors: active) {
-  .source-number,
-  .cite {
+  .source-number {
     border: 1px solid;
   }
 
@@ -3532,9 +3565,9 @@ main:focus {
 
 /* under the home page's question box: the line saying briefings are written by AI, and how they are checked
    (WhyChatbot.tsx). It sits under the box, so opening it never moves the box */
+/* just under the question box: the family's line on how briefings are written, and its fold-out */
 .why {
-  padding: var(--space-s) var(--space-m);
-  background: var(--panel);
+  max-inline-size: var(--measure);
   font-size: var(--step--1);
   color: var(--ink);
 }

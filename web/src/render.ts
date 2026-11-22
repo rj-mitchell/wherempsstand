@@ -1,44 +1,86 @@
 import DOMPurify from "dompurify";
 import { marked } from "marked";
+import { isNoSource, quotations, type Quotation } from "./checked";
 import type { Segment } from "./types";
 
 marked.setOptions({ gfm: true, breaks: false });
 
-const CITE = (nums: number[]) => `⁣⟦S:${nums.join(",")}⟧⁣`;
-const U_OPEN = "⁣⟦U⟧⁣";
-const U_CLOSE = "⁣⟦/U⟧⁣";
-const L_OPEN = "⁣⟦L⟧⁣";
-const L_CLOSE = "⁣⟦/L⟧⁣";
+// Placeholders for the marks, set between invisible separators so that markdown passes them through untouched, then
+// replaced by the family's markup once the markdown is HTML (the charity's family/BRIEFINGS.md).
+const T = (body: string) => `\u2063\u27e6${body}\u27e7\u2063`;
+const TOKEN = /\u2063\u27e6([^\u27e7]*)\u27e7\u2063/g;
 
-const Q_OPEN = "⁣⟦Q⟧⁣";
-const Q_CLOSE = "⁣⟦/Q⟧⁣";
+interface Mark {
+  start: number;
+  end: number;
+  open: string;
+  close: string;
+}
 
-/** Mark judgemental words in the briefing's own voice, and quotations not found in their sources (offsets into
- * the segment text, from the server). Loaded words are only flagged outside quotations, so the two never nest. */
-function markLoaded(s: Segment): string {
+/** The marks inside one passage: judgemental words in the briefing's own voice, quotations not found word for word
+ * in their sources (offsets from the server), and the record's own words, found word for word. Loaded words are only
+ * flagged outside quotations, so the marks never nest. */
+function marked_(s: Segment, i: number, quotes: Quotation[]): string {
+  const marks: Mark[] = [];
+  for (const q of quotes) {
+    if (q.seg !== i) continue;
+    const src = q.sources.join(",");
+    if (q.found) marks.push({ start: q.start, end: q.end, open: T(`R:${i}:${src}`), close: T(`/R:${src}`) });
+  }
+  for (const f of s.misquotes ?? []) {
+    const src = s.sources.join(",");
+    marks.push({ start: f.start, end: f.end, open: T(`M:${i}:${src}`), close: T(`/M:${src}`) });
+  }
+  for (const f of s.loaded ?? []) {
+    if (marks.some((m) => f.start < m.end && m.start < f.end)) continue;
+    marks.push({ start: f.start, end: f.end, open: T("L"), close: T("/L") });
+  }
   let text = s.text;
-  const marks = [
-    ...(s.loaded ?? []).map((f) => ({ ...f, open: L_OPEN, close: L_CLOSE })),
-    ...(s.misquotes ?? []).map((f) => ({ ...f, open: Q_OPEN, close: Q_CLOSE })),
-  ].sort((a, b) => b.start - a.start);
-  for (const f of marks) {
+  for (const f of marks.sort((a, b) => b.start - a.start)) {
     text = text.slice(0, f.start) + f.open + text.slice(f.start, f.end) + f.close + text.slice(f.end);
   }
   return text;
 }
 
-/** Markdown for a verified answer, with placeholders for citations and unsupported spans. */
+/** Each line of a passage with no source wrapped in its mark, keeping a list's or a heading's marker outside it so
+ * that the markdown around it survives. */
+function noSource(text: string, i: number, why: string, first: { done: boolean }): string {
+  let anchored = false; // the passage's first line carries its anchor, for the strip's "Show the first"
+  return text
+    .split("\n")
+    .map((line) => {
+      const m = line.match(/^(\s*(?:[-*+]\s+|\d+\.\s+|#{1,6}\s+)?)([\s\S]*?)(\s*)$/);
+      if (!m || !m[2]) return line;
+      const tag = first.done ? "" : "first";
+      const anchor = anchored ? "" : "id";
+      first.done = anchored = true;
+      return `${m[1]}${T(`N:${i}:${why}:${tag}:${anchor}`)}${m[2]}${T(`/N:${why}:${tag}`)}${m[3]}`;
+    })
+    .join("\n");
+}
+
+/** Markdown for a verified answer, with placeholders for the chips, the quotations and the passages with no
+ * source. Two runs next to each other from the same source show one chip: a quotation shown beside its citation
+ * (wts-core's display rule) carries the chip, and the words after it, cited to the same source, do not repeat it. */
 export function segmentsToMarkdown(segments: Segment[]): string {
+  const quotes = quotations(segments);
+  const first = { done: false };
+  let previous: Segment | undefined;
   return segments
-    .map((s) => {
-      const text = markLoaded(s);
-      if (s.status === "cited") return text + CITE(s.sources);
-      if (s.status === "unsupported" || s.status === "invalid") {
-        // keep leading/trailing whitespace outside the marker so markdown structure survives
-        const m = text.match(/^(\s*)([\s\S]*?)(\s*)$/);
-        return m && m[2] ? `${m[1]}${U_OPEN}${m[2]}${U_CLOSE}${m[3]}` : text;
+    .map((s, i) => {
+      const text = marked_(s, i, quotes);
+      const lead = text.match(/^\s*/)?.[0] ?? "";
+      const trail = text.slice(lead.length).match(/\s*$/)?.[0] ?? "";
+      const core = text.slice(lead.length, text.length - trail.length);
+      let out = text;
+      if (s.status === "cited") {
+        const repeat = previous?.beside && previous.sources.join() === s.sources.join();
+        out = repeat || !core ? text : `${lead}${core}${T(`C:${i}:${s.sources.join(",")}`)}${trail}`;
+      } else if (isNoSource(s) && core) {
+        out = noSource(text, i, s.status === "invalid" ? "removed" : "none", first);
       }
-      return text;
+      if (s.text.trim()) previous = s;
+      return out;
     })
     .join("");
 }
@@ -54,23 +96,84 @@ export function separateLabels(md: string): string {
   return md.replace(/^([ \t]*\*\*[^*\n]+\*\*:?)[ \t]*\n(?=[ \t]*\S)/gm, "$1\n\n");
 }
 
-/** Render answer markdown to sanitised HTML with clickable [Source n] badges. */
-export function renderAnswer(md: string): string {
-  let html = demoteHeadings(marked.parse(separateLabels(md), { async: false }) as string);
-  html = html.replace(/⁣⟦S:([\d,]+)⟧⁣/g, (_m, nums: string) =>
-    nums
-      .split(",")
-      .map((n) => `<button type="button" class="cite" data-source="${n}" aria-label="Open source ${n}">${n}</button>`)
-      .join(""),
+/** How the chips and marks are worded: each source's chip ("Emma Reynolds, Commons, 3 November 2026"), whether its
+ * speaker had a registered interest that may relate (docs/DECISIONS.md, 15), and the prefix that keeps this
+ * briefing's anchors apart from another's on the same page. */
+export interface BriefingWords {
+  chip?: (n: number) => string | null;
+  interest?: (n: number) => boolean;
+  id?: string;
+}
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const inSources = (src: string) => {
+  const ns = src.split(",").filter(Boolean);
+  return ns.length > 1 ? `sources ${ns.slice(0, -1).join(", ")} and ${ns.at(-1)}` : `source ${ns[0] ?? ""}`;
+};
+
+/** A source chip: who said it, where and when, with the number kept inside for printing and the reference list.
+ * The button is named by its visible words ("Source 3 Emma Reynolds, Commons, 3 November 2026"), so what a
+ * speech-input user says is its name (WCAG 2.5.3); "Source" is there for screen readers only. */
+export function chipHtml(n: number, seg: number, words: BriefingWords): string {
+  const label = words.chip?.(n) ?? null;
+  const interest = words.interest?.(n) ?? false;
+  return (
+    `<button type="button" class="wts-chip" data-source="${n}" data-seg="${seg}">` +
+    `<span class="wts-chip__in"><span class="wts-chip__n"><span class="wts-vh">Source</span> ${n}</span>` +
+    (label ? ` <span>${esc(label)}</span>` : "") +
+    (interest ? `<span class="chip-interest">Registered interest<span class="wts-vh"> that may relate</span></span>` : "") +
+    "</span></button>"
   );
-  html = html
-    .replace(/⁣⟦U⟧⁣/g, '<span class="unsupported" title="Not directly supported by a cited source">')
-    .replace(/⁣⟦\/U⟧⁣/g, "</span>")
-    .replace(/⁣⟦L⟧⁣/g, '<span class="loaded" title="A judgemental word in the briefing\'s own voice, not a quotation">')
-    .replace(/⁣⟦\/L⟧⁣/g, "</span>")
-    .replace(/⁣⟦Q⟧⁣/g, '<span class="misquote" title="These words were not found word for word in the cited source">')
-    .replace(/⁣⟦\/Q⟧⁣/g, "</span>");
-  return typographic(DOMPurify.sanitize(html, { ADD_ATTR: ["data-source", "aria-label"] }));
+}
+
+/** Render answer markdown to sanitised HTML in the family's markup: chips, record quotations, quotations not found
+ * word for word, passages with no source (the first tagged "No source"), and judgemental words. */
+export function renderAnswer(md: string, words: BriefingWords = {}): string {
+  const id = words.id ?? "";
+  let misquote = 0;
+  let html = demoteHeadings(marked.parse(separateLabels(md), { async: false }) as string);
+  html = html.replace(TOKEN, (_m, body: string) => {
+    const [kind, ...rest] = body.split(":");
+    switch (kind) {
+      case "C":
+        return rest[1]
+          .split(",")
+          .map((n) => chipHtml(Number(n), Number(rest[0]), words))
+          .join("");
+      case "R":
+        return `<span class="wts-quote wts-quote--checked" data-seg="${rest[0]}" data-source="${rest[1]}">`;
+      case "/R":
+        return (
+          `<span class="wts-quote__tick" aria-hidden="true">\u2713 word for word</span>` +
+          `<span class="wts-vh"> (quotation, found word for word in ${inSources(rest[0])})</span></span>`
+        );
+      case "M":
+        return `<span class="wts-quote wts-quote--missing" id="${id}misquote-${misquote++}" data-seg="${rest[0]}">`;
+      case "/M":
+        return (
+          `<span class="wts-quote__tick" aria-hidden="true">Not found word for word</span>` +
+          `<span class="wts-vh"> (quotation not found word for word in ${inSources(rest[0])})</span></span>`
+        );
+      case "N":
+        return `<span class="wts-nosource"${rest[3] ? ` id="${id}nosource-${rest[0]}"` : ""}>`;
+      case "/N": {
+        const why = rest[0] === "removed" ? "its citation did not match the source and was removed" : "no source";
+        return `${rest[1] ? '<span class="wts-nosource__tag">No source</span>' : ""}<span class="wts-vh"> (${why})</span></span>`;
+      }
+      case "L":
+        return '<span class="loaded" title="A judgemental word in the briefing\'s own voice, not a quotation">';
+      case "/L":
+        return "</span>";
+      default:
+        return "";
+    }
+  });
+  return typographic(DOMPurify.sanitize(html, { ADD_ATTR: ["data-source", "data-seg", "aria-label", "aria-hidden"] }));
+}
+
+/** A finished briefing as HTML: its segments as the reader is shown them. */
+export function renderBriefing(segments: Segment[], words: BriefingWords = {}): string {
+  return renderAnswer(segmentsToMarkdown(segments), words);
 }
 
 /** Plain streaming text (no citations yet). */
