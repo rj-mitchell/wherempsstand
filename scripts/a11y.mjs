@@ -2,7 +2,7 @@
 // critical WCAG 2.2 AA problem found by axe. Usage: node scripts/a11y.mjs http://localhost:8000 [repository]
 //
 // It also checks checked briefings with every kind of mark (the family's BRIEFINGS.md): fixed copies of real saved
-// briefings from tests/fixtures/briefings/ (a quotation not found word for word and a registered interest in
+// briefings from web/src/__tests__/fixtures/briefings/ (a quotation not found word for word and a registered interest in
 // sw3c524d23; sentences with no source and registered interests in wbhnb95p3u; all found in q3k4u3vqh8), served to
 // the page in place of /api/briefings/<id>, on a computer with the record beside the briefing and on a phone with
 // the bottom sheet open; and the wait, part-way through writing, from the same briefing's events. The fixtures are
@@ -21,7 +21,7 @@ const pages = ["/", "/about", "/methodology", "/glossary", "/developers", "/pres
   "/resources", "/lighter-side", "/no-such-page"];
 
 const repo = process.argv[3] ?? process.env.GITHUB_WORKSPACE ?? join(new URL(".", import.meta.url).pathname, "..");
-const fixtures = join(repo, "tests", "fixtures", "briefings");
+const fixtures = join(repo, "web", "src", "__tests__", "fixtures", "briefings");
 if (!existsSync(fixtures)) {
   console.log(`No briefing fixtures at ${fixtures}: give the repository as the second argument`);
   process.exit(1);

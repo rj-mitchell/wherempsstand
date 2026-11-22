@@ -1,7 +1,7 @@
 """How a checked briefing is shown (the family's BRIEFINGS.md; wts-core 0.4.0): the display rule for quotations on
 every answer a reader is sent, and the check strip's counts.
 
-The fixtures in tests/fixtures/briefings/ are fixed copies of real saved briefings, as their public addresses gave
+The fixtures in web/src/__tests__/fixtures/briefings/ are fixed copies of real saved briefings, as their public addresses gave
 them on 21 November 2026: Where MPs Stand's topic briefings q3k4u3vqh8 (the cost of living, 19 of 19 quotations
 found), sw3c524d23 (immigration and asylum, two quotations not found word for word) and wbhnb95p3u (local government
 funding, two sentences with no source, five registered interests), and the answer of Where Countries Stand's
@@ -22,7 +22,7 @@ from wts_core.checks import check_counts
 from hansard.api.app import AsShown
 from hansard.rag.checks import as_shown, shown_again
 
-FIXTURES = Path(__file__).parent / "fixtures" / "briefings"
+FIXTURES = Path(__file__).parents[1] / "web" / "src" / "__tests__" / "fixtures" / "briefings"
 COUNTS = json.loads((FIXTURES / "counts.json").read_text())
 MPS = {"q3k4u3vqh8": "q3k4u3vqh8-2026-11-21.json", "sw3c524d23": "sw3c524d23-2026-11-21.json",
        "wbhnb95p3u": "wbhnb95p3u-2026-11-21.json"}

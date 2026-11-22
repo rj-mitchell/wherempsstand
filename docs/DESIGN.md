@@ -96,7 +96,7 @@ briefing"). The parts are drawn in `web/src/components/AnswerView.tsx`, `CheckSt
 
 - The check strip at the top: "Checked against Hansard" and three counts in words (citations matched, quotations
   found word for word, sentences without a source), from the answer as shown. The counts are wts-core's
-  `check_counts`; the web app counts the same way, and `tests/fixtures/briefings/counts.json` holds the two to the
+  `check_counts`; the web app counts the same way, and `web/src/__tests__/fixtures/briefings/counts.json` holds the two to the
   same answers. A count with something to check says "To check" and links to the first one. The full note, "How this
   briefing was checked", is at the end with the verifier's own counts.
 - The text: the record's own words in the record's typeface on its highlight, with "✓ word for word"; a quotation not
@@ -155,5 +155,5 @@ scripts (`src/hansard/api/plaintext.py`); the briefing's line is drawn by the ap
 
 The target is WCAG 2.2 AA. CI runs axe (`scripts/a11y.mjs`) on the main pages, light and dark, at desktop and phone
 widths, against the built site on sample data, and on three real saved briefings with every kind of mark (from
-`tests/fixtures/briefings/`, with the bottom sheet open on a phone) and on the wait part-way through. The site's accessibility statement is at
+`web/src/__tests__/fixtures/briefings/`, with the bottom sheet open on a phone) and on the wait part-way through. The site's accessibility statement is at
 [/accessibility](https://wherempsstand.com/accessibility).

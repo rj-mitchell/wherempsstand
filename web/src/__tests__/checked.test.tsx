@@ -1,16 +1,16 @@
 /**
  * A checked briefing as the family shows it (the charity's family/BRIEFINGS.md): the strip's counts, the record's
  * own words, chips, the marks for text with no source, the record beside the briefing and the bottom sheet, and the
- * wait. The briefings are fixed copies of real ones (tests/fixtures/briefings/, taken on 21 November 2026), and the
+ * wait. The briefings are fixed copies of real ones (web/src/__tests__/fixtures/briefings/, taken on 21 November 2026), and the
  * strip's counts are held to the same counts.json as wts-core's check_counts on the server (tests/test_checked.py).
  */
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import counts from "../../../tests/fixtures/briefings/counts.json";
-import veto from "../../../tests/fixtures/briefings/kGfKBI3cRLw-shown-2026-11-21.json";
-import cost from "../../../tests/fixtures/briefings/q3k4u3vqh8-2026-11-21.json";
-import immigration from "../../../tests/fixtures/briefings/sw3c524d23-2026-11-21.json";
-import councils from "../../../tests/fixtures/briefings/wbhnb95p3u-2026-11-21.json";
+import counts from "./fixtures/briefings/counts.json";
+import veto from "./fixtures/briefings/kGfKBI3cRLw-shown-2026-11-21.json";
+import cost from "./fixtures/briefings/q3k4u3vqh8-2026-11-21.json";
+import immigration from "./fixtures/briefings/sw3c524d23-2026-11-21.json";
+import councils from "./fixtures/briefings/wbhnb95p3u-2026-11-21.json";
 import { checkCounts, chipLabel, countsInWords, foundSummary, planWords, quotations } from "../checked";
 import { AnswerView } from "../components/AnswerView";
 import { announcement, Stages } from "../components/Wait";
